@@ -1603,15 +1603,9 @@ async function loadState() {
 }
 
 async function saveModulesToStorage() {
-  try {
-    await DB.saveModules(state.modules);
-    if (DB._ready) {
-      renderModules();
-    }
-  } catch(e) {
-    console.error('saveModules failed:', e);
-    showToast('⚠️ Lagring til sky feilet – lagret lokalt');
-  }
+  await DB.saveModules(state.modules);
+  renderHomeModules();
+  renderTaskModules();
 }
 function saveAnswersToStorage() {
   localStorage.setItem('lh_answers', JSON.stringify(state.studentAnswers));
@@ -3264,7 +3258,10 @@ function getRosterSync() { return _rosterCache; }
 // ════════════════════════════════════════════════════════
 
 const DB_SQL_SCHEMA = `-- OlaSkole – Supabase SQL-skjema
--- Kjør dette i Supabase SQL Editor (én gang)
+-- Kjør dette i Supabase SQL Editor.
+-- Trygt å kjøre flere ganger (bruker IF NOT EXISTS).
+
+-- ── Tabeller ──────────────────────────────────────────────────────
 
 create table if not exists os_modules (
   id           text primary key,
@@ -3276,7 +3273,7 @@ create table if not exists os_modules (
 create table if not exists os_answers (
   answer_key    text primary key,
   student_name  text not null,
-  student_class text default \'\',
+  student_class text default '',
   value         text,
   correct       boolean default false,
   updated_at    timestamptz default now()
@@ -3286,7 +3283,7 @@ create index if not exists os_answers_student on os_answers(student_name);
 create table if not exists os_progress (
   progress_key  text primary key,
   student_name  text not null,
-  student_class text default \'\',
+  student_class text default '',
   value         text,
   updated_at    timestamptz default now()
 );
@@ -3310,31 +3307,6 @@ create table if not exists os_games (
   updated_at timestamptz default now()
 );
 
--- Row Level Security
-alter table os_modules  enable row level security;
-alter table os_answers  enable row level security;
-alter table os_progress enable row level security;
-alter table os_feedback enable row level security;
-alter table os_roster   enable row level security;
-alter table os_games    enable row level security;
-
--- Policies (drop first to avoid conflicts on re-run)
-do $$ begin
-  drop policy if exists "allow_all_modules"  on os_modules;
-  drop policy if exists "allow_all_answers"  on os_answers;
-  drop policy if exists "allow_all_progress" on os_progress;
-  drop policy if exists "allow_all_feedback" on os_feedback;
-  drop policy if exists "allow_all_roster"   on os_roster;
-  drop policy if exists "allow_all_games"    on os_games;
-end $$;
-
-create policy "allow_all_modules"  on os_modules  for all using (true) with check (true);
-create policy "allow_all_answers"  on os_answers  for all using (true) with check (true);
-create policy "allow_all_progress" on os_progress for all using (true) with check (true);
-create policy "allow_all_feedback" on os_feedback for all using (true) with check (true);
-create policy "allow_all_roster"   on os_roster   for all using (true) with check (true);
-create policy "allow_all_games"    on os_games    for all using (true) with check (true);
-
 create table if not exists os_highscores (
   id            text primary key,
   quiz_name     text not null,
@@ -3343,8 +3315,35 @@ create table if not exists os_highscores (
   questions     int default 0,
   played_at     timestamptz default now()
 );
+
+-- ── Row Level Security ────────────────────────────────────────────
+
+alter table os_modules    enable row level security;
+alter table os_answers    enable row level security;
+alter table os_progress   enable row level security;
+alter table os_feedback   enable row level security;
+alter table os_roster     enable row level security;
+alter table os_games      enable row level security;
 alter table os_highscores enable row level security;
-drop policy if exists "allow_all_highscores" on os_highscores;
+
+-- ── Policies (drop + recreate = trygt å kjøre på nytt) ───────────
+
+do $$ begin
+  drop policy if exists "allow_all_modules"    on os_modules;
+  drop policy if exists "allow_all_answers"    on os_answers;
+  drop policy if exists "allow_all_progress"   on os_progress;
+  drop policy if exists "allow_all_feedback"   on os_feedback;
+  drop policy if exists "allow_all_roster"     on os_roster;
+  drop policy if exists "allow_all_games"      on os_games;
+  drop policy if exists "allow_all_highscores" on os_highscores;
+end $$;
+
+create policy "allow_all_modules"    on os_modules    for all using (true) with check (true);
+create policy "allow_all_answers"    on os_answers    for all using (true) with check (true);
+create policy "allow_all_progress"   on os_progress   for all using (true) with check (true);
+create policy "allow_all_feedback"   on os_feedback   for all using (true) with check (true);
+create policy "allow_all_roster"     on os_roster     for all using (true) with check (true);
+create policy "allow_all_games"      on os_games      for all using (true) with check (true);
 create policy "allow_all_highscores" on os_highscores for all using (true) with check (true);
 `;
 
