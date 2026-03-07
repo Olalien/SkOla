@@ -551,14 +551,13 @@
 <div class="progress-top"><div class="progress-fill" id="progressFill"></div></div>
 
 <nav>
-  <div class="logo">Ola<span>Skole</span></div>
+  <div class="logo" onclick="showView('home')" style="cursor:pointer;" title="Tilbake til hjem">Ola<span>Skole</span></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showView('home')">🏠 Hjem</button>
     <button class="nav-tab" onclick="showView('tasks')" id="tasksTab">📚 Oppgaver</button>
     <button class="nav-tab" onclick="showView('join')" id="quizNavBtn" style="background:linear-gradient(135deg,var(--c5),#a855f7);color:white;">🎮 Quiz</button>
     <button class="nav-tab" onclick="arbOpen()" id="arbNavBtn" style="background:linear-gradient(135deg,var(--c3),#22c55e);color:white;">📚 Arbeid</button>
     <button class="nav-tab teacher-tab" onclick="checkTeacher()" style="display:none">🖊️ Lærerrom</button>
-    <button class="nav-tab teacher-tab" onclick="showView('classroom')" style="display:none">🎮 Klasserom</button>
     <button class="nav-tab teacher-tab" onclick="openSettings()" style="display:none;position:relative;">⚙️ Innstillinger<span id="dbNavPill" style="position:absolute;top:4px;right:6px;width:9px;height:9px;border-radius:50%;background:#f59e0b;display:none;font-size:0;border:2px solid white;" title="Database: ikke konfigurert"></span></button>
   </div>
   <div class="nav-right">
@@ -585,9 +584,6 @@
     </button>
     <button class="mob-nav-btn teacher-tab" id="mob-teacher" onclick="checkTeacher()" style="display:none">
       <span class="mob-icon">🖊️</span>Lærer
-    </button>
-    <button class="mob-nav-btn teacher-tab" id="mob-classroom" onclick="showView('classroom')" style="display:none">
-      <span class="mob-icon">🎓</span>Klasse
     </button>
   </div>
 </nav>
@@ -1169,237 +1165,206 @@
 </div>
 
 <!-- CLASSROOM VIEW (Teacher) -->
-<div class="view" id="view-classroom">
-  <div id="crOnlineWarning" style="display:none;background:linear-gradient(135deg,#fff7ed,#ffedd5);border:2px solid #fb923c;border-radius:14px;padding:1rem 1.25rem;margin-bottom:1rem;font-size:0.88rem;line-height:1.7;">
-    <b>⚠️ Ingen database koblet til!</b> Live Quiz virker kun på <b>samme nettleser</b> uten Supabase.<br>
-    For å spille med andre over internett: koble til Supabase under <b>⚙️ Innstillinger → Database</b> og legg til <code>os_games</code>-tabellen via SQL-skjemaet.
-  </div>
-  <!-- Mode selector -->
-  <div style="max-width:900px;margin:0 auto;">
-    <div class="section-title">🎓 Klasserom</div>
-    <div style="display:flex;gap:1rem;margin-bottom:2rem;background:white;border-radius:20px;padding:0.5rem;box-shadow:var(--shadow);max-width:500px;">
-      <button id="crTab-quiz" onclick="crSwitchTab('quiz')" style="flex:1;padding:12px 20px;border-radius:14px;border:none;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;transition:all 0.2s;background:var(--c4);color:white;">🎮 Live Quiz</button>
-      <button id="crTab-hs" onclick="crSwitchTab('hs');loadHighscoreView()" style="flex:1;padding:12px 20px;border-radius:14px;border:none;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;transition:all 0.2s;background:#e0e0e0;color:#555;">🏆 High Scores</button>
-      <button id="crTab-arbeid" onclick="crSwitchTab('arbeid')" style="flex:1;padding:12px 20px;border-radius:14px;border:none;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;transition:all 0.2s;background:transparent;color:#aaa;">📚 Arbeid</button>
-    </div>
-  </div>
-
-  <!-- ===== QUIZ TAB ===== -->
-  <div id="crPane-quiz">
-    <!-- Phase: setup -->
-    <div id="cr-setup">
-      <div style="max-width:700px;margin:0 auto;">
-        <div class="teacher-panel">
-          <h2>🚀 Start en live quizrunde</h2>
-          <p style="color:#666;margin-bottom:1.5rem;font-size:0.95rem;">Velg en quizpakke fra lagrede emner. Elevene skriver inn en spillkode og svarer i sanntid – som Kahoot!</p>
-          <div class="form-row">
-            <label>Velg emne / quizpakke</label>
-            <select id="crModuleSelect" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;outline:none;">
-              <option value="">— Velg emne —</option>
-            </select>
-          </div>
-          <div class="form-row">
-            <label>Tid per spørsmål (sekunder)</label>
-            <select id="crTimeLimit" style="width:160px;padding:12px 14px;border-radius:12px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;outline:none;">
-              <option value="10">10 sek</option>
-              <option value="15">15 sek</option>
-              <option value="20" selected>20 sek</option>
-              <option value="30">30 sek</option>
-              <option value="45">45 sek</option>
-              <option value="60">60 sek</option>
-            </select>
-          </div>
-          <button class="btn-primary" style="font-size:1.1rem;padding:14px 36px;" onclick="crCreateGame()">🎮 Opprett spillrom</button>
-        </div>
-        <div class="teacher-panel" style="background:linear-gradient(135deg,#f0f7ff,#eff6ff);">
-          <h2>ℹ️ Slik fungerer Live Quiz</h2>
-          <ol style="color:#555;font-size:0.92rem;line-height:2;padding-left:1.25rem;">
-            <li>Opprett et spillrom og del den 4-bokstavs koden med klassen</li>
-            <li>Elevene går til <b>🏠 Hjem</b> og klikker <b>🎮 Bli med i quiz</b></li>
-            <li>Elevene skriver inn koden og kobler seg til lobbyen</li>
-            <li>Klikk <b>Start quiz!</b> når alle er inne</li>
-            <li>Poeng baseres på riktig svar + hastighet (maks 1000 p/spørsmål)</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-    <!-- Phase: lobby -->
-    <div id="cr-lobby-view" style="display:none;">
-      <div class="cr-lobby">
-        <div style="font-family:'Fredoka One',cursive;font-size:1rem;color:#888;margin-bottom:0.25rem;">Spillkode</div>
-        <div class="cr-code-display" id="crCodeDisplay">----</div>
-        <div style="font-size:1rem;color:#555;margin-top:0.5rem;">Elevene går til <b>🏠 Hjem</b> og skriver inn koden</div>
-        <div style="margin-top:1.5rem;">
-          <div style="font-weight:800;color:var(--dark);margin-bottom:0.75rem;" id="crPlayerCount">Venter på elever... (0 tilkoblet)</div>
-          <div class="cr-player-grid" id="crPlayerGrid"></div>
-        </div>
-        <div style="margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-          <button class="btn-primary" style="font-size:1.1rem;padding:14px 36px;" onclick="crStartQuiz()">▶️ Start quiz!</button>
-          <button onclick="crCancelGame()" style="background:none;border:2px solid #e0e0e0;border-radius:50px;padding:14px 24px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;color:#888;">✕ Avbryt</button>
-        </div>
-      </div>
-    </div>
-    <!-- Phase: question -->
-    <div id="cr-question-view" style="display:none;">
-      <div style="max-width:900px;margin:0 auto;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-          <div style="font-weight:800;color:#888;" id="crQProgress">Spørsmål 1 av 5</div>
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            <svg class="cr-timer-ring" viewBox="0 0 70 70">
-              <circle cx="35" cy="35" r="30" fill="none" stroke="#e0e0e0" stroke-width="6"/>
-              <circle cx="35" cy="35" r="30" fill="none" stroke="var(--c2)" stroke-width="6" stroke-linecap="round"
-                stroke-dasharray="188.5" stroke-dashoffset="0" id="crTimerCircle" transform="rotate(-90 35 35)"/>
-            </svg>
-            <span style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--dark);" id="crTimerText">20</span>
-          </div>
-        </div>
-        <div class="cr-question-card">
-          <div style="font-size:0.9rem;opacity:0.5;margin-bottom:0.5rem;" id="crQPoints">⭐ Maks 1000 poeng</div>
-          <div class="cr-q-text" id="crQText">Spørsmål...</div>
-        </div>
-        <div class="cr-options" id="crOptions"></div>
-        <div style="margin-top:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
-          <div style="font-size:0.9rem;color:#888;" id="crAnsweredCount">0 av 0 har svart</div>
-          <button onclick="crNextQuestion()" id="crNextBtn" style="display:none;" class="btn-primary">Neste spørsmål →</button>
-          <button onclick="crRevealAnswer()" id="crRevealBtn" class="btn-primary" style="background:var(--c5);">Vis svar</button>
-        </div>
-      </div>
-    </div>
-    <!-- Phase: scoreboard -->
-    <div id="cr-scoreboard-view" style="display:none;">
-      <div style="max-width:600px;margin:0 auto;text-align:center;">
-        <div style="font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--dark);margin-bottom:0.5rem;">🏆 Resultater</div>
-        <div class="cr-scoreboard" id="crScoreboard"></div>
-        <div style="margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-          <button class="btn-primary" style="font-size:1.1rem;padding:14px 36px;" onclick="crPlayAgain()">🔄 Ny runde</button>
-          <button onclick="crEndGame()" style="background:var(--c3);color:white;border:none;padding:14px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">✅ Avslutt</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== HIGHSCORE TAB ===== -->
-  <div id="crPane-hs" style="display:none;">
-    <div style="max-width:700px;margin:0 auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.25rem;">
-        <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--dark);">🏆 High Scores</div>
-        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-          <select id="hsQuizFilter" onchange="loadHighscoreView()" style="padding:8px 12px;border-radius:10px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;outline:none;">
-            <option value="">— Alle quizer —</option>
-          </select>
-          <button onclick="loadHighscoreView()" style="background:var(--c4);color:white;border:none;padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">🔄 Oppdater</button>
-        </div>
-      </div>
-      <div id="hsTableContainer">
-        <div style="text-align:center;padding:3rem;color:#aaa;">
-          <div style="font-size:3rem;margin-bottom:0.5rem;">🏆</div>
-          <div style="font-size:1rem;">Laster high scores...</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== ARBEID TAB (teacher info view) ===== -->
-  <div id="crPane-arbeid" style="display:none;">
-    <div style="max-width:700px;margin:0 auto;">
-      <div class="teacher-panel" style="background:linear-gradient(135deg,#f0fff4,#f0f7ff);">
-        <h2>📚 Arbeidsøkt for elever</h2>
-        <p style="color:#555;margin-bottom:1rem;font-size:0.95rem;">
-          Elevene kan selv velge mellom emnepakkene du har laget, jobbe i sitt eget tempo og lagre svarene sine. Alle emner er tilgjengelig direkte fra hjemskjermen.
-        </p>
-        <div style="background:white;border-radius:14px;padding:1.25rem;border:2px solid #e8eaed;">
-          <div style="font-weight:800;font-size:0.92rem;color:var(--dark);margin-bottom:1rem;">📦 Tilgjengelige emner for elevene:</div>
-          <div id="crArbeidModuleList">
-            <p style="color:#aaa;font-size:0.9rem;">Ingen emner publisert ennå. Lag emner i Lærerrom-fanen.</p>
-          </div>
-        </div>
-        <div style="margin-top:1.25rem;padding:1rem;background:#fffbeb;border-radius:12px;border:2px solid #fcd34d;font-size:0.88rem;color:#555;line-height:1.7;">
-          💡 <b>Tips:</b> Elevene går til <b>🏠 Hjem</b> og klikker <b>📚 Start arbeidsøkt</b> for å velge emne og jobbe selvstendig. Svarene deres lagres automatisk.
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- STUDENT JOIN VIEW -->
 <div class="view" id="view-join">
-  <!-- State: enter code -->
-  <div id="sj-enter" style="max-width:400px;margin:2rem auto;text-align:center;">
-    <div style="font-size:3rem;margin-bottom:0.5rem;">🎮</div>
-    <h2 style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--dark);margin-bottom:0.5rem;">Bli med i quizen!</h2>
-    <p style="color:#888;margin-bottom:1.5rem;">Skriv inn koden du fikk av læreren</p>
-    <div class="cr-join-box">
-      <input type="text" id="sjCodeInput" maxlength="4" placeholder="KODE" oninput="this.value=this.value.toUpperCase()" />
-      <button class="btn-primary" style="width:100%;font-size:1.1rem;padding:14px;" id="sjJoinBtn" onclick="sjJoinGame()">🚀 Bli med!</button>
-      <div id="sjError" style="display:none;color:var(--c1);font-weight:700;margin-top:0.75rem;font-size:0.9rem;"></div>
-    </div>
-  </div>
 
-  <!-- State: waiting in lobby -->
-  <div id="sj-waiting" style="display:none;">
-    <div class="cr-waiting">
-      <div class="cr-waiting-avatar" id="sjAvatar">🦊</div>
-      <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--dark);" id="sjUsername">Brukernavn</div>
-      <div style="color:#888;margin-top:0.5rem;">Venter på at læreren starter...</div>
-      <div style="margin-top:1.5rem;background:var(--card);border-radius:16px;padding:1rem 1.5rem;display:inline-block;box-shadow:var(--shadow);">
-        <div style="font-size:0.85rem;color:#aaa;font-weight:700;">Spillkode</div>
-        <div style="font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--c4);letter-spacing:6px;" id="sjCodeShow"></div>
-      </div>
+  <!-- ══ TEACHER SECTION – only shown when isTeacher=true ══ -->
+  <div id="teacherQuizSection" style="display:none;max-width:900px;margin:0 auto 2rem;">
+    <div id="crOnlineWarning" style="display:none;background:linear-gradient(135deg,#fff7ed,#ffedd5);border:2px solid #fb923c;border-radius:14px;padding:1rem 1.25rem;margin-bottom:1rem;font-size:0.88rem;line-height:1.7;">
+      <b>⚠️ Ingen database koblet til!</b> Live Quiz virker kun på <b>samme nettleser</b> uten Supabase.<br>
+      Koble til Supabase under <b>⚙️ Innstillinger → Database</b>.
     </div>
-  </div>
+    <!-- Tabs -->
+    <div style="display:flex;gap:1rem;margin-bottom:1.5rem;background:white;border-radius:20px;padding:0.5rem;box-shadow:var(--shadow);max-width:420px;">
+      <button id="crTab-quiz" onclick="crSwitchTab('quiz')" style="flex:1;padding:11px 16px;border-radius:14px;border:none;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;transition:all 0.2s;background:var(--c4);color:white;">🎮 Live Quiz</button>
+      <button id="crTab-hs" onclick="crSwitchTab('hs');loadHighscoreView()" style="flex:1;padding:11px 16px;border-radius:14px;border:none;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;transition:all 0.2s;background:#e0e0e0;color:#555;">🏆 High Scores</button>
+    </div>
 
-  <!-- State: answering question -->
-  <div id="sj-question" style="display:none;">
-    <div style="max-width:500px;margin:0 auto;padding:1rem;">
-      <div style="text-align:center;margin-bottom:1rem;">
-        <div style="font-size:0.85rem;color:#888;font-weight:700;" id="sjQNum">Spørsmål 1</div>
-        <div style="width:100%;height:8px;background:#e0e0e0;border-radius:50px;margin-top:0.4rem;">
-          <div id="sjTimerBar" style="height:8px;background:var(--c2);border-radius:50px;transition:width 1s linear;width:100%;"></div>
+    <!-- ── Quiz pane ── -->
+    <div id="crPane-quiz">
+      <!-- Phase: setup -->
+      <div id="cr-setup">
+        <div style="max-width:700px;margin:0 auto;">
+          <div class="teacher-panel">
+            <h2>🚀 Start en live quizrunde</h2>
+            <p style="color:#666;margin-bottom:1.5rem;font-size:0.95rem;">Velg en quizpakke. Elevene skriver inn en spillkode og svarer i sanntid.</p>
+            <div class="form-row">
+              <label>Velg emne / quizpakke</label>
+              <select id="crModuleSelect" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;outline:none;">
+                <option value="">— Velg emne —</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Tid per spørsmål (sekunder)</label>
+              <select id="crTimeLimit" style="width:160px;padding:12px 14px;border-radius:12px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;outline:none;">
+                <option value="10">10 sek</option><option value="15">15 sek</option>
+                <option value="20" selected>20 sek</option><option value="30">30 sek</option>
+                <option value="45">45 sek</option><option value="60">60 sek</option>
+              </select>
+            </div>
+            <button class="btn-primary" style="font-size:1.1rem;padding:14px 36px;" onclick="crCreateGame()">🎮 Opprett spillrom</button>
+          </div>
         </div>
       </div>
-      <div style="background:var(--dark);color:white;border-radius:20px;padding:1.5rem;text-align:center;margin-bottom:1.5rem;min-height:80px;display:flex;align-items:center;justify-content:center;">
-        <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;line-height:1.3;" id="sjQText">Laster spørsmål...</div>
+      <!-- Phase: lobby -->
+      <div id="cr-lobby-view" style="display:none;">
+        <div class="cr-lobby">
+          <div style="font-family:'Fredoka One',cursive;font-size:1rem;color:#888;margin-bottom:0.25rem;">Spillkode</div>
+          <div class="cr-code-display" id="crCodeDisplay">----</div>
+          <div style="color:#666;font-size:0.9rem;margin-bottom:1.5rem;">Del denne koden med elevene</div>
+          <div class="cr-player-list" id="crPlayerList"></div>
+          <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap;justify-content:center;">
+            <button class="btn-primary" style="font-size:1.1rem;padding:14px 36px;" onclick="crStartQuiz()">▶️ Start quiz!</button>
+            <button onclick="crCancelGame()" style="background:#e0e0e0;color:#555;border:none;padding:14px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">❌ Avbryt</button>
+          </div>
+        </div>
       </div>
-      <div class="cr-answer-btns" id="sjAnswerBtns">
-        <button class="cr-answer-btn ans-a" onclick="sjAnswer(0)"><span style="font-size:1.5rem;">🔴</span><br>A</button>
-        <button class="cr-answer-btn ans-b" onclick="sjAnswer(1)"><span style="font-size:1.5rem;">🔵</span><br>B</button>
-        <button class="cr-answer-btn ans-c" onclick="sjAnswer(2)"><span style="font-size:1.5rem;">🟢</span><br>C</button>
-        <button class="cr-answer-btn ans-d" onclick="sjAnswer(3)"><span style="font-size:1.5rem;">🟣</span><br>D</button>
+      <!-- Phase: question -->
+      <div id="cr-question-view" style="display:none;">
+        <div style="max-width:700px;margin:0 auto;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+            <div style="font-family:'Fredoka One',cursive;font-size:1rem;color:#888;" id="crQProgress">Spørsmål 1 av 5</div>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <div id="crAnsweredCount" style="font-size:0.9rem;color:#888;">0 av 0 har svart</div>
+              <div style="position:relative;width:52px;height:52px;">
+                <svg width="52" height="52" viewBox="0 0 60 60">
+                  <circle cx="30" cy="30" r="26" fill="none" stroke="#e0e0e0" stroke-width="5"/>
+                  <circle id="crTimerCircle" cx="30" cy="30" r="26" fill="none" stroke="var(--c3)" stroke-width="5"
+                    stroke-dasharray="188.5" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 30 30)" style="transition:stroke-dashoffset 1s linear;"/>
+                </svg>
+                <div id="crTimerText" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Fredoka One',cursive;font-size:1rem;color:var(--dark);">20</div>
+              </div>
+            </div>
+          </div>
+          <div style="background:var(--dark);color:white;border-radius:20px;padding:1.5rem;text-align:center;margin-bottom:1.5rem;min-height:80px;display:flex;align-items:center;justify-content:center;">
+            <div style="font-family:'Fredoka One',cursive;font-size:1.5rem;line-height:1.3;" id="crQText">Laster spørsmål...</div>
+          </div>
+          <div class="cr-options" id="crOptions"></div>
+          <div style="margin-top:1rem;display:flex;justify-content:flex-end;gap:1rem;">
+            <button onclick="crRevealAnswer()" id="crRevealBtn" class="btn-primary" style="background:var(--c5);">Vis svar</button>
+            <button onclick="crNextQuestion()" id="crNextBtn" style="display:none;" class="btn-primary">Neste →</button>
+          </div>
+        </div>
+      </div>
+      <!-- Phase: scoreboard -->
+      <div id="cr-scoreboard-view" style="display:none;">
+        <div style="max-width:600px;margin:0 auto;text-align:center;">
+          <div style="font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--dark);margin-bottom:0.5rem;">🏆 Resultater</div>
+          <div class="cr-scoreboard" id="crScoreboard"></div>
+          <div style="margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+            <button class="btn-primary" style="font-size:1.1rem;padding:14px 36px;" onclick="crPlayAgain()">🔄 Ny runde</button>
+            <button onclick="crEndGame()" style="background:var(--c3);color:white;border:none;padding:14px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">✅ Avslutt</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /crPane-quiz -->
+
+    <!-- ── High Scores pane ── -->
+    <div id="crPane-hs" style="display:none;">
+      <div style="max-width:700px;margin:0 auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.25rem;">
+          <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--dark);">🏆 High Scores</div>
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+            <select id="hsQuizFilter" onchange="loadHighscoreView()" style="padding:8px 12px;border-radius:10px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;outline:none;">
+              <option value="">— Alle quizer —</option>
+            </select>
+            <button onclick="loadHighscoreView()" style="background:var(--c4);color:white;border:none;padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">🔄 Oppdater</button>
+          </div>
+        </div>
+        <div id="hsTableContainer">
+          <div style="text-align:center;padding:3rem;color:#aaa;"><div style="font-size:3rem;">🏆</div><div>Laster...</div></div>
+        </div>
+      </div>
+    </div><!-- /crPane-hs -->
+
+  </div><!-- /teacherQuizSection -->
+
+  <!-- ══ STUDENT / PUBLIC SECTION ══ -->
+  <div id="studentQuizSection">
+    <!-- State: enter code -->
+    <div id="sj-enter" style="max-width:400px;margin:2rem auto;text-align:center;">
+      <div style="font-size:3rem;margin-bottom:0.5rem;">🎮</div>
+      <h2 style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--dark);margin-bottom:0.5rem;">Bli med i quizen!</h2>
+      <p style="color:#888;margin-bottom:1.5rem;">Skriv inn koden du fikk av læreren</p>
+      <div class="cr-join-box">
+        <input type="text" id="sjCodeInput" maxlength="4" placeholder="KODE" oninput="this.value=this.value.toUpperCase()" />
+        <button class="btn-primary" style="width:100%;font-size:1.1rem;padding:14px;" id="sjJoinBtn" onclick="sjJoinGame()">🚀 Bli med!</button>
+        <div id="sjError" style="display:none;color:var(--c1);font-weight:700;margin-top:0.75rem;font-size:0.9rem;"></div>
+      </div>
+      <!-- Public high scores link -->
+      <div style="margin-top:2rem;">
+        <button onclick="showPublicHighscores()" style="background:none;border:2px solid var(--c2);color:var(--dark);padding:10px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">🏆 Se high scores</button>
       </div>
     </div>
-  </div>
-
-  <!-- State: answered -->
-  <div id="sj-answered" style="display:none;">
-    <div class="cr-answered">
-      <div class="big-icon" id="sjAnsweredIcon">⏳</div>
-      <div style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--dark);margin-top:0.5rem;" id="sjAnsweredMsg">Svaret er registrert!</div>
-      <div style="color:#888;margin-top:0.5rem;">Venter på neste spørsmål...</div>
-      <div style="margin-top:1.5rem;font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--c4);" id="sjCurrentScore">Poeng: 0</div>
+    <!-- State: public highscores (non-teacher) -->
+    <div id="sj-highscores" style="display:none;max-width:700px;margin:0 auto;">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+        <button onclick="sjShow('enter')" style="background:white;border:2px solid #e0e0e0;border-radius:50px;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">← Tilbake</button>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--dark);">🏆 High Scores</div>
+      </div>
+      <div id="publicHsContainer"><div style="text-align:center;padding:2rem;color:#aaa;">⏳ Laster...</div></div>
     </div>
-  </div>
-
-  <!-- State: result after answer revealed -->
-  <div id="sj-result" style="display:none;">
-    <div class="cr-answered">
-      <div class="big-icon" id="sjResultIcon">✅</div>
-      <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;margin-top:0.5rem;" id="sjResultMsg">Riktig!</div>
-      <div style="font-size:1rem;color:var(--c4);font-weight:700;margin-top:0.5rem;" id="sjPointsGained"></div>
-      <div style="margin-top:1rem;font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--dark);" id="sjTotalScore">Totalt: 0 poeng</div>
+    <!-- State: waiting in lobby -->
+    <div id="sj-waiting" style="display:none;">
+      <div class="cr-waiting">
+        <div class="cr-waiting-avatar" id="sjAvatar">🦊</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--dark);" id="sjUsername">Brukernavn</div>
+        <div style="color:#888;margin-top:0.5rem;">Venter på at læreren starter...</div>
+        <div style="margin-top:1.5rem;background:var(--card);border-radius:16px;padding:1rem 1.5rem;display:inline-block;box-shadow:var(--shadow);">
+          <div style="font-size:0.85rem;color:#aaa;font-weight:700;">Spillkode</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--c4);letter-spacing:6px;" id="sjCodeShow"></div>
+        </div>
+      </div>
     </div>
-  </div>
-
-  <!-- State: game over -->
-  <div id="sj-gameover" style="display:none;">
-    <div class="cr-answered" style="text-align:center;padding:2rem;">
-      <div style="font-size:4rem;margin-bottom:0.5rem;">🎊</div>
-      <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--dark);">Spillet er ferdig!</div>
-      <div style="margin-top:1rem;font-size:1.2rem;color:#555;">Din poengsum: <span style="color:var(--c4);font-weight:800;" id="sjFinalScore">0</span></div>
-      <div style="margin-top:0.5rem;font-size:0.95rem;color:#888;" id="sjFinalRank"></div>
-      <button class="btn-primary" style="margin-top:2rem;padding:14px 36px;font-size:1.1rem;" onclick="showView('home')">🏠 Tilbake til hjem</button>
-      <button onclick="showView('classroom');crSwitchTab('hs');loadHighscoreView()" style="margin-top:0.75rem;background:var(--c2);color:var(--dark);border:none;padding:12px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:block;margin-left:auto;margin-right:auto;">🏆 Se high scores</button>
+    <!-- State: answering question -->
+    <div id="sj-question" style="display:none;">
+      <div style="max-width:500px;margin:0 auto;padding:1rem;">
+        <div style="text-align:center;margin-bottom:1rem;">
+          <div style="font-size:0.85rem;color:#888;font-weight:700;" id="sjQNum">Spørsmål 1</div>
+          <div style="width:100%;height:8px;background:#e0e0e0;border-radius:50px;margin-top:0.4rem;">
+            <div id="sjTimerBar" style="height:8px;background:var(--c2);border-radius:50px;transition:width 1s linear;width:100%;"></div>
+          </div>
+        </div>
+        <div style="background:var(--dark);color:white;border-radius:20px;padding:1.5rem;text-align:center;margin-bottom:1.5rem;min-height:80px;display:flex;align-items:center;justify-content:center;">
+          <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;line-height:1.3;" id="sjQText">Laster spørsmål...</div>
+        </div>
+        <div class="cr-answer-btns" id="sjAnswerBtns">
+          <button class="cr-answer-btn ans-a" onclick="sjAnswer(0)"><span style="font-size:1.5rem;">🔴</span><br>A</button>
+          <button class="cr-answer-btn ans-b" onclick="sjAnswer(1)"><span style="font-size:1.5rem;">🔵</span><br>B</button>
+          <button class="cr-answer-btn ans-c" onclick="sjAnswer(2)"><span style="font-size:1.5rem;">🟢</span><br>C</button>
+          <button class="cr-answer-btn ans-d" onclick="sjAnswer(3)"><span style="font-size:1.5rem;">🟣</span><br>D</button>
+        </div>
+      </div>
     </div>
-  </div>
+    <!-- State: answered -->
+    <div id="sj-answered" style="display:none;">
+      <div class="cr-answered">
+        <div class="big-icon" id="sjAnsweredIcon">⏳</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--dark);margin-top:0.5rem;" id="sjAnsweredMsg">Svaret er registrert!</div>
+        <div style="color:#888;margin-top:0.5rem;">Venter på neste spørsmål...</div>
+        <div style="margin-top:1.5rem;font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--c4);" id="sjCurrentScore">Poeng: 0</div>
+      </div>
+    </div>
+    <!-- State: result -->
+    <div id="sj-result" style="display:none;">
+      <div class="cr-answered">
+        <div class="big-icon" id="sjResultIcon">✅</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;margin-top:0.5rem;" id="sjResultMsg">Riktig!</div>
+        <div style="font-size:1rem;color:var(--c4);font-weight:700;margin-top:0.5rem;" id="sjPointsGained"></div>
+        <div style="margin-top:1rem;font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--dark);" id="sjTotalScore">Totalt: 0 poeng</div>
+      </div>
+    </div>
+    <!-- State: game over -->
+    <div id="sj-gameover" style="display:none;">
+      <div class="cr-answered" style="text-align:center;padding:2rem;">
+        <div style="font-size:4rem;margin-bottom:0.5rem;">🎊</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--dark);">Spillet er ferdig!</div>
+        <div style="margin-top:1rem;font-size:1.2rem;color:#555;">Din poengsum: <span style="color:var(--c4);font-weight:800;" id="sjFinalScore">0</span></div>
+        <div style="margin-top:0.5rem;font-size:0.95rem;color:#888;" id="sjFinalRank"></div>
+        <button class="btn-primary" style="margin-top:2rem;padding:14px 36px;font-size:1.1rem;" onclick="showView('home')">🏠 Tilbake til hjem</button>
+        <button onclick="showPublicHighscores()" style="margin-top:0.75rem;background:var(--c2);color:var(--dark);border:none;padding:12px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:block;margin-left:auto;margin-right:auto;">🏆 Se high scores</button>
+      </div>
+    </div>
+  </div><!-- /studentQuizSection -->
 </div>
 
 <!-- STUDENT ARBEID VIEW -->
@@ -1566,12 +1531,12 @@ function showView(name) {
   if (!viewEl) return;
   viewEl.classList.add('active');
   const tabs = document.querySelectorAll('.nav-tab');
-  const idx = ['home','tasks','teacher','classroom'].indexOf(name);
+  const idx = ['home','tasks','teacher'].indexOf(name);
   if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
   if (name === 'home') renderHomeModules();
-  if (name === 'tasks') renderTaskModules();
+  if (name === 'tasks') { DB.loadModules().then(m => { state.modules = m; renderTaskModules(); }).catch(() => renderTaskModules()); }
   if (name === 'teacher') { renderResults(); renderManageModules(); }
-  if (name === 'classroom') crPopulateModules();
+  if (name === 'join' && state.isTeacher) crPopulateModules();
   if (name === 'arbeid') { arbState.moduleIdx = null; arbRenderModuleGrid(); }
   setProgress(name === 'home' ? 20 : name === 'tasks' ? 60 : 90);
   syncMobileNav(name);
@@ -1579,7 +1544,7 @@ function showView(name) {
 
 function syncMobileNav(name) {
   document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
-  const map = {home:'mob-home',tasks:'mob-tasks',arbeid:'mob-arbeid',join:'mob-join',teacher:'mob-teacher',classroom:'mob-classroom'};
+  const map = {home:'mob-home',tasks:'mob-tasks',arbeid:'mob-arbeid',join:'mob-join',teacher:'mob-teacher'};
   const btn = document.getElementById(map[name]);
   if (btn) btn.classList.add('active');
 }
@@ -1612,18 +1577,41 @@ async function loadState() {
   showDbStatus();
   initDark();
   initMsToken();
+  // Load modules - always tries DB first, falls back to localStorage
   state.modules = await DB.loadModules();
+  // If DB is configured but returned empty while localStorage has data,
+  // that means DB connection works but table is empty (new install)
+  // OR DB failed and we got fallback. Either way use what we got.
   const savedStudent = localStorage.getItem('lh_student');
   if (savedStudent) {
-    state.student = JSON.parse(savedStudent);
-    state.studentAnswers = await DB.loadAnswers(state.student.name);
-    _progressCache = await DB.loadProgress(state.student.name);
-    showStudentWelcome();
+    try { state.student = JSON.parse(savedStudent); } catch(e) { localStorage.removeItem('lh_student'); }
+    if (state.student) {
+      state.studentAnswers = await DB.loadAnswers(state.student.name);
+      _progressCache = await DB.loadProgress(state.student.name);
+      showStudentWelcome();
+    }
+  }
+  // Verify DB connection silently in background and warn if broken
+  if (DB._ready) {
+    DB.testConnection().then(r => {
+      if (!r.ok) {
+        console.warn('DB connection issue:', r.msg);
+        DB._ready = false; // mark as not ready so fallback kicks in
+      }
+    }).catch(() => {});
   }
 }
 
 async function saveModulesToStorage() {
-  await DB.saveModules(state.modules);
+  try {
+    await DB.saveModules(state.modules);
+    if (DB._ready) {
+      renderModules();
+    }
+  } catch(e) {
+    console.error('saveModules failed:', e);
+    showToast('⚠️ Lagring til sky feilet – lagret lokalt');
+  }
 }
 function saveAnswersToStorage() {
   localStorage.setItem('lh_answers', JSON.stringify(state.studentAnswers));
@@ -1732,6 +1720,9 @@ function loginTeacher() {
   const correct = window._teacherPassOverride || TEACHER_PASS;
   if (pass === correct) {
     state.isTeacher = true;
+    document.getElementById('teacherQuizSection').style.display = 'block';
+    document.getElementById('studentQuizSection').style.display = 'none';
+    showDbStatus();
     closeTeacherModal();
     document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'inline-flex');
     document.getElementById('teacherLoginBtn').style.display = 'none';
@@ -1756,6 +1747,8 @@ function checkTeacher() {
 }
 function logoutTeacher() {
   state.isTeacher = false;
+  document.getElementById('teacherQuizSection').style.display = 'none';
+  document.getElementById('studentQuizSection').style.display = 'block';
   document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'none');
   document.getElementById('teacherLoginBtn').style.display = 'inline-flex';
   document.getElementById('roleBadge').textContent = '👤 Gjest';
@@ -2093,11 +2086,11 @@ function checkAnswer(qi, isCorrect, explain, optIdx, correctMap) {
     if (correctMap[i]) o.classList.add('correct');
     else if (i===optIdx && !isCorrect) o.classList.add('wrong');
   });
+  if (isCorrect) { SND.correct(); launchConfetti(); } else { SND.wrong(); }
   fb.innerHTML = isCorrect
     ? `<span style="color:var(--c3);font-weight:800;">✅ Riktig!</span>${explain?` <span style="color:#666;font-size:0.88rem;">${escHtml(explain)}</span>`:''}`
     : `<span style="color:var(--c1);font-weight:800;">❌ Feil.</span>${explain?` <span style="color:#666;font-size:0.88rem;">💡 ${escHtml(explain)}</span>`:''}`;
   saveAnswer('quiz_'+qi, isCorrect ? true : false);
-  if (isCorrect) launchConfetti();
 }
 
 function renderDiscHTML(m) {
@@ -3006,14 +2999,13 @@ const DB = {
   _tablesNotReady: false,
 
   init() {
-    // Pre-configured Supabase credentials
+    // Pre-configured Supabase project URL (key must be set by teacher in Settings)
     const DEFAULT_URL = 'https://uzufgmhuihvjxlvvspwy.supabase.co';
-    const DEFAULT_KEY = 'sb_publishable_5vIfJvLloADrDN8cLZU5jg_toNIIDAJ';
     if (!localStorage.getItem('os_sb_url')) localStorage.setItem('os_sb_url', DEFAULT_URL);
-    if (!localStorage.getItem('os_sb_key')) localStorage.setItem('os_sb_key', DEFAULT_KEY);
     this._url   = localStorage.getItem('os_sb_url') || DEFAULT_URL;
-    this._key   = localStorage.getItem('os_sb_key') || DEFAULT_KEY;
-    this._ready = !!(this._url && this._key);
+    this._key   = localStorage.getItem('os_sb_key') || '';
+    // Only ready if key looks like a valid JWT (starts with eyJ)
+    this._ready = !!(this._url && this._key && this._key.startsWith('eyJ'));
     return this._ready;
   },
 
@@ -3059,29 +3051,35 @@ const DB = {
 
   // ── MODULES ────────────────────────────────────────────────
   async loadModules() {
-    if (!this._ready) return JSON.parse(localStorage.getItem('lh_modules') || '[]');
+    const cached = () => JSON.parse(localStorage.getItem('lh_modules') || '[]');
+    if (!this._ready) return cached();
     const rows = await this._req('GET', '/os_modules?order=sort_order.asc,created_at.asc&select=id,data,sort_order');
-    if (!rows) return JSON.parse(localStorage.getItem('lh_modules') || '[]');
-    const mods = rows.map(r => r.data);
+    if (!rows) return cached();  // network error - use cache
+    const mods = rows.map(r => r.data).filter(Boolean);
+    // Always update cache with latest from server
     localStorage.setItem('lh_modules', JSON.stringify(mods));
     return mods;
   },
 
   async saveModules(modules) {
+    // Always assign stable IDs
+    modules.forEach((m, i) => {
+      if (!m._id) m._id = 'mod_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2,6);
+    });
+    // Save to localStorage immediately (fast, always works)
     localStorage.setItem('lh_modules', JSON.stringify(modules));
     if (!this._ready) return;
-    // Assign _id to any module that lacks one
-    modules.forEach((m, i) => { if (!m._id) m._id = 'mod_' + Date.now() + '_' + i; });
-    localStorage.setItem('lh_modules', JSON.stringify(modules));
     const rows = modules.map((m, i) => ({ id: m._id, data: m, sort_order: i }));
-    await this._req('POST', '/os_modules', rows);
-    // Delete modules that no longer exist
-    if (rows.length === 0) {
-      await this._req('DELETE', '/os_modules?sort_order=gte.0');
-    } else {
-      const ids = rows.map(r => r.id).join(',');
-      await this._req('DELETE', `/os_modules?id=not.in.(${ids})`);
+    // Upsert all current modules
+    if (rows.length > 0) {
+      await this._req('POST', '/os_modules', rows);
     }
+    // Delete any modules that no longer exist (by ID)
+    const ids = rows.map(r => `'${r.id}'`).join(',');
+    const deleteFilter = rows.length > 0
+      ? `/os_modules?id=not.in.(${ids})`
+      : '/os_modules?sort_order=gte.0';
+    await this._req('DELETE', deleteFilter);
   },
 
   // ── STUDENT ANSWERS ────────────────────────────────────────
@@ -3682,6 +3680,35 @@ function crPopulateModules() {
 // ════════════════════════════════════════════════════════
 //  HIGHSCORES
 // ════════════════════════════════════════════════════════
+async function showPublicHighscores() {
+  sjShow('highscores');
+  const container = document.getElementById('publicHsContainer');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:2rem;color:#aaa;">⏳ Laster...</div>';
+  const rows = await DB.loadHighscores('');
+  if (!rows.length) {
+    container.innerHTML = '<div style="text-align:center;padding:3rem;color:#aaa;"><div style="font-size:3rem;">🏆</div><div style="margin-top:0.5rem;">Ingen high scores ennå!</div></div>';
+    return;
+  }
+  const byQuiz = {};
+  rows.forEach(r => { if (!byQuiz[r.quiz_name]) byQuiz[r.quiz_name] = []; byQuiz[r.quiz_name].push(r); });
+  const medals = ['🥇','🥈','🥉'];
+  let out = '';
+  for (const [quiz, entries] of Object.entries(byQuiz)) {
+    const top = entries.sort((a,b) => b.score-a.score).slice(0,10);
+    out += `<div style="background:white;border-radius:16px;padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 4px 16px rgba(0,0,0,0.07);">
+      <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--dark);margin-bottom:0.875rem;">🎮 ${quiz}</div>
+      ${top.map((r,i) => `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;border-radius:10px;background:${i<3?['#fff9e6','#f0f4ff','#f0fff4'][i]:'#fafafa'};margin-bottom:0.4rem;">
+        <span style="font-size:1.3rem;min-width:2rem;text-align:center;">${medals[i]||i+1}</span>
+        <span style="font-weight:800;flex:1;">${r.player_name}</span>
+        <span style="font-weight:900;color:var(--c4);">${r.score} pts</span>
+        <span style="font-size:0.78rem;color:#aaa;">${new Date(r.played_at).toLocaleDateString('no')}</span>
+      </div>`).join('')}
+    </div>`;
+  }
+  container.innerHTML = out;
+}
+
 async function loadHighscoreView() {
   const container = document.getElementById('hsTableContainer');
   const filter = document.getElementById('hsQuizFilter');
@@ -3759,15 +3786,21 @@ function crSwitchTab(tab) {
 // ====== ARBEID (Student work mode) ======
 let arbState = { moduleIdx: null, fcIndex: 0, completedTasks: {} };
 
-function arbOpen() {
-  // Check if student is logged in
+async function arbOpen() {
+  showView('arbeid');
+  // Always fetch latest modules from DB so students see teacher's latest content
+  const grid = document.getElementById('arbModuleGrid');
+  if (grid) grid.innerHTML = '<div style="text-align:center;padding:2rem;color:#aaa;"><div style="font-size:2rem;">⏳</div><div style="margin-top:0.5rem;font-weight:700;">Laster emner...</div></div>';
+  try {
+    state.modules = await DB.loadModules();
+  } catch(e) {
+    // If DB fails, we already have localStorage fallback in loadModules
+  }
   if (!state.student) {
-    showView('arbeid');
     document.getElementById('arbLoginPrompt').style.display = 'block';
     arbRenderModuleGrid();
     return;
   }
-  showView('arbeid');
   document.getElementById('arbLoginPrompt').style.display = 'none';
   arbRenderModuleGrid();
 }
@@ -3928,6 +3961,7 @@ function arbCheckAnswer(qi, isCorrect, optIdx, explain, correctMap) {
     if (correctMap[i]) b.classList.add('reveal-correct');
   });
   const chosen = card.querySelectorAll('.arb-opt')[optIdx];
+  if (isCorrect) { SND.correct(); launchConfetti(); } else { SND.wrong(); }
   chosen.classList.add(isCorrect ? 'correct' : 'wrong');
   // Show feedback
   const fb = document.createElement('div');
@@ -4128,7 +4162,7 @@ function crShow(phase) {
 }
 
 function sjShow(phase) {
-  ['sj-enter','sj-waiting','sj-question','sj-answered','sj-result','sj-gameover'].forEach(id => {
+  ['sj-enter','sj-highscores','sj-waiting','sj-question','sj-answered','sj-result','sj-gameover'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -4138,6 +4172,7 @@ function sjShow(phase) {
 
 // ---- Teacher: Create game ----
 async function crCreateGame() {
+  if (!state.isTeacher) { showToast('⛔ Kun lærer kan starte quiz!'); return; }
   const sel = document.getElementById('crModuleSelect');
   if (!sel || !sel.value) { alert('Velg et emne først!'); return; }
   const modIdx = parseInt(sel.value);
@@ -4218,6 +4253,8 @@ async function crStartQuiz() {
     if (!confirm('Ingen elever er tilkoblet ennå. Start likevel?')) return;
   }
   crGame.phase = 'question';
+  SND.start();
+  SND.startBg();
   crNextQuestion();
 }
 
@@ -4254,6 +4291,7 @@ async function crNextQuestion() {
     const offset = circumference * (1 - crGame.timeLeft / crGame.timeLimit);
     document.getElementById('crTimerCircle').style.strokeDashoffset = offset;
     document.getElementById('crTimerCircle').style.stroke = crGame.timeLeft <= 5 ? 'var(--c1)' : crGame.timeLeft <= 10 ? 'var(--c2)' : 'var(--c3)';
+    if (crGame.timeLeft <= 5 && crGame.timeLeft > 0) SND.tick();
     if (crGame.timeLeft <= 0) { clearInterval(crGame.timerInterval); crRevealAnswer(); }
   }, 1000);
 }
@@ -4261,6 +4299,7 @@ async function crNextQuestion() {
 async function crRevealAnswer() {
   if (crGame.revealed) return;
   crGame.revealed = true;
+  SND.stopBg();
   if (crGame.timerInterval) clearInterval(crGame.timerInterval);
   document.getElementById('crRevealBtn').style.display = 'none';
   document.getElementById('crNextBtn').style.display = 'inline-flex';
@@ -4308,6 +4347,8 @@ async function crRevealAnswer() {
 
 async function crShowFinalScoreboard() {
   if (crGame._pollInterval) clearInterval(crGame._pollInterval);
+  SND.stopBg();
+  SND.gameover();
   crShow('scoreboard-view');
   await crBroadcast({ phase:'gameover', players: crGame.players });
 
@@ -4345,7 +4386,7 @@ async function crCancelGame() {
 
 function crEndGame() {
   crCancelGame();
-  showView('classroom');
+  showView('join');
 }
 
 function crPlayAgain() {
@@ -4486,6 +4527,7 @@ function sjShowQuestion(data) {
 async function sjAnswer(idx) {
   if (sjGame.answered) return;
   sjGame.answered = true;
+  SND.click();
   const timeSpent = (Date.now() - (sjGame.questionStart || Date.now())) / 1000;
   if (sjGame._timerBar) clearInterval(sjGame._timerBar);
 
@@ -4530,6 +4572,7 @@ function sjShowResult(data) {
     });
   }
 
+  if (correct) SND.correct(); else if (correct === false) SND.wrong();
   document.getElementById('sjResultIcon').textContent = correct ? '🎉' : '😅';
   document.getElementById('sjResultMsg').textContent = correct ? 'Riktig svar! 🎊' : 'Ikke riktig denne gang';
   document.getElementById('sjPointsGained').textContent = correct ? `+${pts} poeng` : '+0 poeng';
@@ -4571,6 +4614,125 @@ function shuffleArr(arr) {
   }
   return a;
 }
+// ════════════════════════════════════════════════════════════════
+//  SOUND SYSTEM – Web Audio API (no external files needed)
+// ════════════════════════════════════════════════════════════════
+const SND = (() => {
+  let ctx = null;
+  let bgGain = null;
+  let bgSource = null;
+  let bgPlaying = false;
+
+  function getCtx() {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    return ctx;
+  }
+
+  // Play a simple tone burst
+  function tone(freq, dur=0.12, vol=0.18, type='sine', delay=0) {
+    try {
+      const c = getCtx();
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.connect(gain); gain.connect(c.destination);
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, c.currentTime + delay);
+      gain.gain.setValueAtTime(0, c.currentTime + delay);
+      gain.gain.linearRampToValueAtTime(vol, c.currentTime + delay + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + delay + dur);
+      osc.start(c.currentTime + delay);
+      osc.stop(c.currentTime + delay + dur + 0.05);
+    } catch(e) {}
+  }
+
+  // ── Correct answer: ascending jingle ──
+  function correct() {
+    tone(523, 0.1, 0.2, 'triangle');          // C5
+    tone(659, 0.1, 0.2, 'triangle', 0.1);     // E5
+    tone(784, 0.15, 0.25, 'triangle', 0.2);   // G5
+    tone(1047, 0.2, 0.22, 'triangle', 0.32);  // C6
+  }
+
+  // ── Wrong answer: descending thud ──
+  function wrong() {
+    tone(300, 0.08, 0.15, 'sawtooth');
+    tone(220, 0.1, 0.15, 'sawtooth', 0.1);
+    tone(160, 0.18, 0.12, 'sawtooth', 0.2);
+  }
+
+  // ── Answer submitted (neutral click) ──
+  function click() {
+    tone(660, 0.06, 0.1, 'sine');
+  }
+
+  // ── Timer tick ──
+  function tick() {
+    tone(880, 0.04, 0.06, 'square');
+  }
+
+  // ── Quiz start fanfare ──
+  function start() {
+    [0, 0.12, 0.24, 0.38].forEach((d, i) => {
+      const notes = [523, 587, 659, 784];
+      tone(notes[i], 0.14, 0.18, 'triangle', d);
+    });
+  }
+
+  // ── Game over flourish ──
+  function gameover() {
+    const seq = [784, 659, 784, 1047];
+    seq.forEach((f, i) => tone(f, 0.18, 0.2, 'triangle', i * 0.18));
+  }
+
+  // ── Background quiz music (subtle looping) ──
+  function startBg() {
+    if (bgPlaying) return;
+    try {
+      const c = getCtx();
+      bgGain = c.createGain();
+      bgGain.gain.setValueAtTime(0.04, c.currentTime);
+      bgGain.connect(c.destination);
+
+      // Simple pentatonic loop: C D E G A C
+      const scale = [262, 294, 330, 392, 440, 523];
+      const pattern = [0,2,4,3,1,4,2,0, 5,3,1,2,4,0,3,5];
+      let step = 0;
+      const BPM = 108;
+      const beat = 60 / BPM;
+
+      function playBeat() {
+        if (!bgPlaying) return;
+        const noteIdx = pattern[step % pattern.length];
+        const freq = scale[noteIdx];
+        const osc = c.createOscillator();
+        const g = c.createGain();
+        osc.connect(g); g.connect(bgGain);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, c.currentTime);
+        g.gain.setValueAtTime(0.3, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + beat * 0.7);
+        osc.start(c.currentTime);
+        osc.stop(c.currentTime + beat);
+        step++;
+        if (bgPlaying) setTimeout(playBeat, beat * 1000);
+      }
+      bgPlaying = true;
+      playBeat();
+    } catch(e) {}
+  }
+
+  function stopBg() {
+    bgPlaying = false;
+    if (bgGain) {
+      try { bgGain.gain.setValueAtTime(bgGain.gain.value, getCtx().currentTime);
+            bgGain.gain.exponentialRampToValueAtTime(0.001, getCtx().currentTime + 0.5); }
+      catch(e) {}
+    }
+  }
+
+  return { correct, wrong, click, tick, start, gameover, startBg, stopBg };
+})();
+
 </script>
 </body>
 </html>
