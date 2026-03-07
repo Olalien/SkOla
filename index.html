@@ -2924,10 +2924,16 @@ const DB = {
   _url:   null,   // Supabase Project URL
   _key:   null,   // Supabase anon/public key
   _ready: false,
+  _tablesNotReady: false,
 
   init() {
-    this._url   = localStorage.getItem('os_sb_url') || null;
-    this._key   = localStorage.getItem('os_sb_key') || null;
+    // Pre-configured Supabase credentials
+    const DEFAULT_URL = 'https://uzufgmhuihvjxlvvspwy.supabase.co';
+    const DEFAULT_KEY = 'sb_publishable_5vIfJvLloADrDN8cLZU5jg_toNIIDAJ';
+    if (!localStorage.getItem('os_sb_url')) localStorage.setItem('os_sb_url', DEFAULT_URL);
+    if (!localStorage.getItem('os_sb_key')) localStorage.setItem('os_sb_key', DEFAULT_KEY);
+    this._url   = localStorage.getItem('os_sb_url') || DEFAULT_URL;
+    this._key   = localStorage.getItem('os_sb_key') || DEFAULT_KEY;
     this._ready = !!(this._url && this._key);
     return this._ready;
   },
@@ -2952,12 +2958,24 @@ const DB = {
       });
       if (!res.ok) {
         const t = await res.text();
+        let parsed = {};
+        try { parsed = JSON.parse(t); } catch(_) {}
+        // Table doesn't exist yet - silently ignore, user needs to run SQL
+        if (res.status === 404 || parsed.code === '42P01' || (parsed.message||'').includes('does not exist')) {
+          console.warn('Supabase: table not found. Please run the SQL schema in Supabase SQL Editor.');
+          DB._tablesNotReady = true;
+          return null;
+        }
         console.warn('Supabase error', res.status, t);
         return null;
       }
+      DB._tablesNotReady = false;
       const text = await res.text();
       return text ? JSON.parse(text) : [];
-    } catch(e) { console.warn('DB fetch error', e); return null; }
+    } catch(e) {
+      console.warn('DB fetch error', e);
+      return null;
+    }
   },
 
   // ── MODULES ────────────────────────────────────────────────
@@ -3095,9 +3113,25 @@ const DB = {
   // ── CONNECTION TEST ─────────────────────────────────────────
   async testConnection() {
     if (!this._ready) return { ok: false, msg: 'Ikke konfigurert' };
+    // First test basic connectivity with a simple fetch to the REST root
+    try {
+      const ping = await fetch(this._url + '/rest/v1/', {
+        headers: { 'apikey': this._key, 'Authorization': 'Bearer ' + this._key }
+      });
+      if (!ping.ok && ping.status !== 200) {
+        if (ping.status === 401) return { ok: false, msg: '❌ Ugyldig API-nøkkel (401). Kopier «anon public»-nøkkelen fra Supabase → Project Settings → API.' };
+        if (ping.status === 404) return { ok: false, msg: '❌ Feil Project URL. Sjekk at URL slutter på .supabase.co' };
+        return { ok: false, msg: `❌ Tilkoblingsfeil (${ping.status}). Sjekk URL og nøkkel.` };
+      }
+    } catch(e) {
+      return { ok: false, msg: '❌ Nettverksfeil – kunne ikke nå Supabase. Sjekk internett og URL.' };
+    }
+    // Then test if tables exist
     const rows = await this._req('GET', '/os_modules?limit=1&select=id');
-    if (rows === null) return { ok: false, msg: 'Tilkobling feilet – sjekk URL og API-nøkkel' };
-    return { ok: true, msg: `Tilkoblet! ${rows.length} emne(r) i databasen` };
+    if (DB._tablesNotReady || rows === null) {
+      return { ok: false, msg: '⚠️ Tilkoblet, men tabellene mangler! Kjør SQL-skjemaet i Supabase SQL Editor (⚙️ Innstillinger → Database → Kopier SQL-skjema).' };
+    }
+    return { ok: true, msg: `✅ Alt OK! Tilkoblet Supabase med ${rows.length} emne(r) i databasen.` };
   }
 };
 
@@ -3299,7 +3333,11 @@ function showDbStatus() {
   if (url && key) {
     const short = url.replace('https://', '').split('.')[0];
     el.style.background = '#dcfce7'; el.style.color = '#166534';
-    el.textContent = '✅ Tilkoblet: ' + short + '.supabase.co';
+    el.textContent = DB._tablesNotReady
+      ? '⚠️ Tilkoblet, men SQL-skjema ikke kjørt ennå!'
+      : '✅ Tilkoblet: ' + short + '.supabase.co';
+    el.style.background = DB._tablesNotReady ? '#fff7ed' : '#dcfce7';
+    el.style.color = DB._tablesNotReady ? '#92400e' : '#166534';
   } else {
     el.style.background = '#fff7ed'; el.style.color = '#92400e';
     el.textContent = '⚠️ Ikke konfigurert – bruker lokal lagring (data deles ikke mellom enheter)';
