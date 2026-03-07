@@ -4077,6 +4077,8 @@ async function crRevealAnswer() {
 
   const q = crGame.questions[crGame.currentQ];
   const correctIdx = q.options.findIndex(o => o.correct);
+
+  // Highlight correct/wrong on teacher screen
   q.options.forEach((o, i) => {
     const btn = document.getElementById('crOpt' + i);
     if (!btn) return;
@@ -4084,29 +4086,34 @@ async function crRevealAnswer() {
     if (i === correctIdx && q.explain) btn.title = q.explain;
   });
 
-  // Score students
+  // FETCH FRESH data from Supabase to get all player answers
+  const freshData = await GAME.load(crGame.code);
+  if (freshData && freshData.players) {
+    crGame.players = freshData.players;
+    crGame._remote = freshData;
+  }
+
+  // Score all players
   const timeSpent = crGame.timeLimit - crGame.timeLeft;
   const maxScore = 1000;
-  {
-    const data = crGame._remote || {};
-    crGame.players = data.players || crGame.players;
-    Object.values(crGame.players).forEach(p => {
-      const ans = p.answers?.[crGame.currentQ];
-      if (!ans) return;
-      const isCorrect = (ans.idx !== undefined) ? (ans.idx === correctIdx) : false;
-      if (isCorrect) {
-        const timePct = Math.max(0, 1 - (ans.timeSpent || timeSpent) / crGame.timeLimit);
-        const pts = Math.round(maxScore * (0.5 + 0.5 * timePct));
-        p.score = (p.score || 0) + pts;
-        ans.points = pts;
-        ans.correct = true;
-      } else {
-        ans.correct = false;
-        ans.points = 0;
-      }
-    });
-    await crBroadcast({ phase: 'revealed', correctIdx, players: crGame.players, currentQ: crGame.currentQ });
-  }
+  Object.values(crGame.players).forEach(p => {
+    const ans = p.answers?.[crGame.currentQ];
+    if (!ans) return;
+    const isCorrect = (ans.idx !== undefined) ? (ans.idx === correctIdx) : false;
+    if (isCorrect) {
+      const timePct = Math.max(0, 1 - (ans.timeSpent || timeSpent) / crGame.timeLimit);
+      const pts = Math.round(maxScore * (0.5 + 0.5 * timePct));
+      p.score = (p.score || 0) + pts;
+      ans.points = pts;
+      ans.correct = true;
+    } else {
+      ans.correct = false;
+      ans.points = 0;
+    }
+  });
+
+  // Broadcast result with updated scores to all students
+  await crBroadcast({ phase: 'revealed', correctIdx, players: crGame.players, currentQ: crGame.currentQ });
 }
 
 async function crShowFinalScoreboard() {
@@ -4146,9 +4153,16 @@ function crPlayAgain() {
 }
 
 async function crBroadcast(update) {
-  Object.assign(crGame._remote, update);
-  localStorage.setItem('cr_game', JSON.stringify(crGame._remote)); // local backup
-  await GAME.save(crGame.code, crGame._remote);
+  // Always fetch fresh state first to avoid overwriting player answers
+  const fresh = await GAME.load(crGame.code);
+  const base = fresh || crGame._remote || {};
+  const merged = Object.assign({}, base, update);
+  // Never overwrite players with empty if fresh has them
+  if (update.players) merged.players = update.players;
+  else if (fresh && fresh.players) merged.players = fresh.players;
+  crGame._remote = merged;
+  localStorage.setItem('cr_game', JSON.stringify(merged));
+  await GAME.save(crGame.code, merged);
 }
 
 // ---- Student: Join & Play ----
