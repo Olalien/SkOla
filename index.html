@@ -782,10 +782,14 @@
           <textarea id="aiCustomPrompt" placeholder="F.eks: «Fokuser på årsaker», «Bruk eksempler fra dagliglivet»..." style="width:100%;padding:10px 12px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-size:0.9rem;background:#2d2d44;color:white;resize:vertical;min-height:56px;outline:none;line-height:1.5;"></textarea>
         </div>
         <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:1rem;">
-          <label style="display:block;font-weight:800;font-size:0.78rem;opacity:0.7;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px;">📚 Fag og kompetansemål (valgfritt)</label>
+          <label style="display:block;font-weight:800;font-size:0.78rem;opacity:0.7;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px;">📚 Fag / tema (valgfritt)</label>
           <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.75rem;">
-            <select id="aiSubject" onchange="updateCompetenceGoals()" style="flex:1;min-width:140px;padding:9px 11px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;background:#2d2d44;color:white;outline:none;">
-              <option value="">— Velg fag —</option>
+            <input type="text" id="aiSubjectFree" placeholder="F.eks. Naturfag, Norsk, Fotball, Minecraft…"
+              style="flex:1;min-width:180px;padding:9px 11px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;background:#2d2d44;color:white;outline:none;"
+              oninput="syncAiSubjectFree(this.value)" />
+            <select id="aiSubject" onchange="updateCompetenceGoals();syncAiSubjectFromSelect(this.value)"
+              style="flex:1;min-width:140px;padding:9px 11px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;background:#2d2d44;color:white;outline:none;">
+              <option value="">— Eller velg skolefag —</option>
               <option value="norsk">Norsk</option><option value="matematikk">Matematikk</option>
               <option value="engelsk">Engelsk</option><option value="naturfag">Naturfag</option>
               <option value="samfunnsfag">Samfunnsfag</option><option value="krle">KRLE</option>
@@ -793,13 +797,16 @@
               <option value="mat_og_helse">Mat og helse</option><option value="kroppsøving">Kroppsøving</option>
               <option value="utdanningsvalg">Utdanningsvalg</option><option value="programmering">Programmering / IT</option>
             </select>
-            <select id="aiGoalSelect" style="flex:2;min-width:200px;padding:9px 11px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#2d2d44;color:white;outline:none;" disabled>
-              <option value="">— Velg fag først —</option>
+          </div>
+          <div id="aiGoalRow" style="margin-bottom:0.75rem;">
+            <label style="display:block;font-weight:800;font-size:0.78rem;opacity:0.7;margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:0.5px;">🎯 Kompetansemål (valgfritt)</label>
+            <select id="aiGoalSelect" style="width:100%;padding:9px 11px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#2d2d44;color:white;outline:none;" disabled>
+              <option value="">— Velg skolefag over for å se kompetansemål —</option>
             </select>
           </div>
           <div id="selectedGoalBadge" style="display:none;background:rgba(255,255,255,0.1);border-radius:10px;padding:0.5rem 0.875rem;font-size:0.82rem;color:#c7f3d4;font-weight:700;margin-bottom:0.75rem;line-height:1.5;"></div>
           <button onclick="generateFromGoal()" style="display:flex;align-items:center;gap:0.5rem;background:linear-gradient(135deg,#6BCB77,#4D96FF);color:white;border:none;padding:11px 20px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">
-            <span>🎯 Generer fra kompetansemål</span>
+            <span>✨ Generer fra fag/tema</span>
             <div class="ai-spinner" id="goalGenSpinner"></div>
           </button>
           <div id="goalGenResult" style="display:none;margin-top:0.75rem;background:rgba(255,255,255,0.07);border-radius:12px;padding:1rem;border:1px solid rgba(255,255,255,0.15);"></div>
@@ -1161,6 +1168,7 @@
     <div class="section-title">🎓 Klasserom</div>
     <div style="display:flex;gap:1rem;margin-bottom:2rem;background:white;border-radius:20px;padding:0.5rem;box-shadow:var(--shadow);max-width:500px;">
       <button id="crTab-quiz" onclick="crSwitchTab('quiz')" style="flex:1;padding:12px 20px;border-radius:14px;border:none;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;transition:all 0.2s;background:var(--c4);color:white;">🎮 Live Quiz</button>
+      <button id="crTab-hs" onclick="crSwitchTab('hs');loadHighscoreView()" style="flex:1;padding:12px 20px;border-radius:14px;border:none;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;transition:all 0.2s;background:#e0e0e0;color:#555;">🏆 High Scores</button>
       <button id="crTab-arbeid" onclick="crSwitchTab('arbeid')" style="flex:1;padding:12px 20px;border-radius:14px;border:none;font-family:'Fredoka One',cursive;font-size:1.1rem;cursor:pointer;transition:all 0.2s;background:transparent;color:#aaa;">📚 Arbeid</button>
     </div>
   </div>
@@ -1254,6 +1262,27 @@
         <div style="margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
           <button class="btn-primary" style="font-size:1.1rem;padding:14px 36px;" onclick="crPlayAgain()">🔄 Ny runde</button>
           <button onclick="crEndGame()" style="background:var(--c3);color:white;border:none;padding:14px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">✅ Avslutt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HIGHSCORE TAB ===== -->
+  <div id="crPane-hs" style="display:none;">
+    <div style="max-width:700px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.25rem;">
+        <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--dark);">🏆 High Scores</div>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <select id="hsQuizFilter" onchange="loadHighscoreView()" style="padding:8px 12px;border-radius:10px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;outline:none;">
+            <option value="">— Alle quizer —</option>
+          </select>
+          <button onclick="loadHighscoreView()" style="background:var(--c4);color:white;border:none;padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">🔄 Oppdater</button>
+        </div>
+      </div>
+      <div id="hsTableContainer">
+        <div style="text-align:center;padding:3rem;color:#aaa;">
+          <div style="font-size:3rem;margin-bottom:0.5rem;">🏆</div>
+          <div style="font-size:1rem;">Laster high scores...</div>
         </div>
       </div>
     </div>
@@ -1357,6 +1386,7 @@
       <div style="margin-top:1rem;font-size:1.2rem;color:#555;">Din poengsum: <span style="color:var(--c4);font-weight:800;" id="sjFinalScore">0</span></div>
       <div style="margin-top:0.5rem;font-size:0.95rem;color:#888;" id="sjFinalRank"></div>
       <button class="btn-primary" style="margin-top:2rem;padding:14px 36px;font-size:1.1rem;" onclick="showView('home')">🏠 Tilbake til hjem</button>
+      <button onclick="showView('classroom');crSwitchTab('hs');loadHighscoreView()" style="margin-top:0.75rem;background:var(--c2);color:var(--dark);border:none;padding:12px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:block;margin-left:auto;margin-right:auto;">🏆 Se high scores</button>
     </div>
   </div>
 </div>
@@ -2196,6 +2226,10 @@ function saveAnswer(key, val) {
 
 // ====== TEACHER MODULE MANAGEMENT ======
 function getAiSettings() {
+  // Free-text takes priority; fall back to dropdown
+  const fagFree = document.getElementById('aiSubjectFree')?.value.trim() || '';
+  const fagDrop = document.getElementById('aiSubject')?.value || '';
+  const fag = fagFree || fagDrop;
   return {
     klasse: document.getElementById('aiClass')?.value || '9. trinn',
     vanske: document.getElementById('aiDifficulty')?.value || 'middels',
@@ -2204,9 +2238,29 @@ function getAiSettings() {
     discCount: parseInt(document.getElementById('aiDiscCount')?.value||'1'),
     writeTasks: document.getElementById('aiWriteTask')?.value !== 'nei',
     customPrompt: document.getElementById('aiCustomPrompt')?.value.trim()||'',
-    fag: document.getElementById('aiSubject')?.value||'',
+    fag,
     maal: document.getElementById('aiGoalSelect')?.value||''
   };
+}
+
+function syncAiSubjectFree(val) {
+  // When user types in free-text field, clear the dropdown selection
+  if (val.trim()) {
+    const sel = document.getElementById('aiSubject');
+    if (sel) sel.value = '';
+    const goalSel = document.getElementById('aiGoalSelect');
+    if (goalSel) { goalSel.disabled = true; goalSel.innerHTML = '<option value="">— Velg skolefag over for å se kompetansemål —</option>'; }
+    const badge = document.getElementById('selectedGoalBadge');
+    if (badge) badge.style.display = 'none';
+  }
+}
+
+function syncAiSubjectFromSelect(val) {
+  // When user picks from dropdown, clear the free-text field
+  if (val) {
+    const inp = document.getElementById('aiSubjectFree');
+    if (inp) inp.value = '';
+  }
 }
 
 function updateCompetenceGoals() {
@@ -2608,7 +2662,7 @@ function exportAllAnswersTxt(){
 // ====== AI HELPERS ======
 function getApiKey(){return localStorage.getItem('olaskole_apikey')||'';}
 
-async function aiCallJSON(prompt, spinnerId, maxTokens=900) {
+async function aiCallJSON(prompt, spinnerId, maxTokens=2000) {
   const key=getApiKey();
   if(!key){
     const entered=window.prompt('Lim inn din Anthropic API-nøkkel (sk-ant-...).\nEller lagre den permanent under ⚙️ Innstillinger.');
@@ -2621,14 +2675,23 @@ async function aiCallJSON(prompt, spinnerId, maxTokens=900) {
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:maxTokens,messages:[{role:'user',content:prompt}]})
     });
     if(res.status===401){localStorage.removeItem('olaskole_apikey');return{error:'Ugyldig API-nøkkel'};}
     if(!res.ok)return{error:'API-feil ('+res.status+')'};
     const data=await res.json();
     const text=data.content?.[0]?.text||'';
-    const clean=text.replace(/```json|```/g,'').trim();
-    try{return JSON.parse(clean);}catch{return{error:'Ugyldig JSON fra AI: '+text.substring(0,100)};}
+    // Robust JSON extraction: strip markdown fences, find outermost { } or [ ]
+    let t=text.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim();
+    const starts=[t.indexOf('{'),t.indexOf('[')].filter(x=>x!==-1);
+    if(starts.length){
+      const start=Math.min(...starts);
+      const isObj=t[start]==='{';
+      const end=isObj?t.lastIndexOf('}'):t.lastIndexOf(']');
+      if(end>start) t=t.slice(start,end+1);
+    }
+    try{return JSON.parse(t);}
+    catch{return{error:'AI svarte ikke med gyldig JSON. Prøv igjen.'};}
   }catch(e){return{error:e.message};}
   finally{if(spinner)spinner.style.display='none';}
 }
@@ -2640,13 +2703,13 @@ async function generateWithAI() {
   const p=`Du er norsk ungdomsskolelærer. Klassetrinn: ${s.klasse}. Vanskelighetsgrad: ${s.vanske}.${s.fag?' Fag: '+s.fag+'.':''}${s.customPrompt?' Ekstra instruksjon: '+s.customPrompt:''}
 Lag oppgaver basert på denne fagteksten:
 """
-${text.substring(0,3000)}
+${text.substring(0,2500)}
 """
-Svar KUN med JSON (ingen kodeblokker):
-{"quiz":[{"question":"...","a":"riktig","b":"feil","c":"feil","d":"feil","explain":"..."}],"discussion":["Drøftingsspørsmål..."],"write":{"title":"...","desc":"...","minWords":150},"flashcards":[{"front":"Begrep","back":"Definisjon"}]}
-Lag ${s.quizCount} quiz-spørsmål, ${s.discCount} drøftingsspørsmål, ${s.fcCount} flashcards.${s.writeTasks?' Inkluder skriveoppgave.':' Ikke inkluder skriveoppgave (sett write til null).'}
-Alt på norsk bokmål.`;
-  const res=await aiCallJSON(p,'aiSpinner',1800);
+Svar KUN med rå JSON, ingen forklaring, ingen markdown, ingen kodeblokker:
+{"quiz":[{"question":"...","a":"riktig","b":"feil","c":"feil","d":"feil","explain":"..."}],"discussion":["..."],"write":{"title":"...","desc":"...","minWords":150},"flashcards":[{"front":"...","back":"..."}]}
+Lag eksakt: ${s.quizCount} quiz-spørsmål, ${s.discCount} drøftingsspørsmål, ${s.fcCount} flashcards.${s.writeTasks?' Inkluder skriveoppgave.':' Sett write til null.'}
+Alt på norsk bokmål. Kortfattede svar.`;
+  const res=await aiCallJSON(p,'aiSpinner',2000);
   const resultEl=document.getElementById('aiResult');
   if(!resultEl)return;
   if(!res||res.error){resultEl.innerHTML=`<div style="color:var(--c1);font-weight:800;">❌ ${res?.error||'Feil'}</div>`;resultEl.style.display='block';return;}
@@ -2662,14 +2725,19 @@ Alt på norsk bokmål.`;
 }
 
 async function generateFromGoal(){
-  const goal=document.getElementById('aiGoalSelect')?.value;
-  if(!goal){showToast('Velg et kompetansemål først');return;}
   const s=getAiSettings();
-  const p=`Du er norsk ungdomsskolelærer. Klassetrinn: ${s.klasse}. Fag: ${s.fag}. Kompetansemål: "${goal}".${s.customPrompt?' Ekstra: '+s.customPrompt:''}
-Lag ${s.quizCount} quiz-spørsmål, ${s.discCount} drøftingsspørsmål og ${s.fcCount} flashcards som dekker kompetansemålet.
-Svar KUN med JSON: {"quiz":[{"question":"...","a":"...","b":"...","c":"...","d":"...","explain":"..."}],"discussion":["..."],"flashcards":[{"front":"...","back":"..."}]}
-Alt på norsk bokmål.`;
-  const res=await aiCallJSON(p,'goalGenSpinner',1500);
+  const goal=document.getElementById('aiGoalSelect')?.value||'';
+  if(!s.fag && !goal && !s.customPrompt){showToast('Skriv inn et fag, tema eller fritekst-instruks først');return;}
+  const kontekst = goal
+    ? `Fag: ${s.fag}. Kompetansemål: "${goal}".`
+    : s.fag
+      ? `Tema/fag: "${s.fag}".`
+      : '';
+  const p=`Du er lærer. Klassetrinn: ${s.klasse}. Vanskelighetsgrad: ${s.vanske}. ${kontekst}${s.customPrompt?' Ekstra instruksjon: '+s.customPrompt:''}
+Svar KUN med rå JSON, ingen forklaring, ingen markdown, ingen kodeblokker. Formatet er:
+{"quiz":[{"question":"...","a":"riktig svar","b":"feil","c":"feil","d":"feil","explain":"..."}],"discussion":["spørsmål..."],"flashcards":[{"front":"begrep","back":"forklaring"}]}
+Lag eksakt: ${s.quizCount} quiz-spørsmål, ${s.discCount} drøftingsspørsmål, ${s.fcCount} flashcards. Alt på norsk bokmål. Kortfattede svar.`;
+  const res=await aiCallJSON(p,'goalGenSpinner',2000);
   const resultEl=document.getElementById('goalGenResult');
   if(!resultEl)return;
   if(!res||res.error){resultEl.style.display='block';resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
@@ -2757,7 +2825,7 @@ async function aiGenerateVideo(){
   const p=`Du er norsk ungdomsskolelærer (${s.klasse}).${s.fag?' Fag: '+s.fag+'.':''} Foreslå 3 YouTube-videoer om: "${topic}" for norske ungdomsskoleelever.
 Bruk kun kjente kanaler (NRK Skole, Crash Course, Kurzgesagt, Khan Academy osv.). Kun foreslå videoer du er sikker på eksisterer.
 Svar KUN med JSON: {"videos":[{"title":"...","ytId":"11-tegns-ID eller null","searchUrl":"https://www.youtube.com/results?search_query=...","channel":"...","task":"Refleksjonsoppgave...","confident":true}]}`;
-  const res=await aiCallJSON(p,'svSpinner',1400);
+  const res=await aiCallJSON(p,'svSpinner',2000);
   if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
   const vids=res.videos||[];
   if(resultEl)resultEl.innerHTML=`<div style="display:flex;flex-direction:column;gap:0.875rem;">`+
@@ -3110,6 +3178,34 @@ const DB = {
     }
   },
 
+  // ── HIGHSCORES ─────────────────────────────────────────────
+  async saveHighscores(quizName, players, questionCount) {
+    if (!this._ready) return;
+    const rows = Object.values(players).map(p => ({
+      id: quizName.replace(/[^a-z0-9]/gi,'_').substring(0,30) + '_' + (p.username||'').replace(/[^a-z0-9]/gi,'_').substring(0,20) + '_' + Date.now(),
+      quiz_name:   quizName,
+      player_name: p.username || 'Ukjent',
+      score:       p.score || 0,
+      questions:   questionCount || 0,
+      played_at:   new Date().toISOString()
+    }));
+    if (rows.length) await this._req('POST', '/os_highscores', rows);
+  },
+
+  async loadHighscores(quizName) {
+    if (!this._ready) return [];
+    const path = quizName
+      ? `/os_highscores?quiz_name=eq.${encodeURIComponent(quizName)}&order=score.desc&limit=100`
+      : `/os_highscores?order=score.desc&limit=200`;
+    const rows = await this._req('GET', path + '&select=id,quiz_name,player_name,score,questions,played_at');
+    return rows || [];
+  },
+
+  async deleteHighscore(id) {
+    if (!this._ready) return;
+    await this._req('DELETE', `/os_highscores?id=eq.${encodeURIComponent(id)}`);
+  },
+
   // ── CONNECTION TEST ─────────────────────────────────────────
   async testConnection() {
     if (!this._ready) return { ok: false, msg: 'Ikke konfigurert' };
@@ -3229,6 +3325,18 @@ create policy "allow_all_progress" on os_progress for all using (true) with chec
 create policy "allow_all_feedback" on os_feedback for all using (true) with check (true);
 create policy "allow_all_roster"   on os_roster   for all using (true) with check (true);
 create policy "allow_all_games"    on os_games    for all using (true) with check (true);
+
+create table if not exists os_highscores (
+  id            text primary key,
+  quiz_name     text not null,
+  player_name   text not null,
+  score         int not null,
+  questions     int default 0,
+  played_at     timestamptz default now()
+);
+alter table os_highscores enable row level security;
+drop policy if exists "allow_all_highscores" on os_highscores;
+create policy "allow_all_highscores" on os_highscores for all using (true) with check (true);
 `;
 
 function copyDbSchema() {
@@ -3559,13 +3667,81 @@ function crPopulateModules() {
   }
 }
 
+
+// ════════════════════════════════════════════════════════
+//  HIGHSCORES
+// ════════════════════════════════════════════════════════
+async function loadHighscoreView() {
+  const container = document.getElementById('hsTableContainer');
+  const filter = document.getElementById('hsQuizFilter');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center;padding:2rem;color:#aaa;">⏳ Laster...</div>';
+
+  const rows = await DB.loadHighscores('');
+  if (!rows.length) {
+    container.innerHTML = '<div style="text-align:center;padding:3rem;color:#aaa;"><div style="font-size:3rem;">🏆</div><div style="margin-top:0.5rem;">Ingen high scores ennå.<br>Spill en Live Quiz for å komme på listen!</div></div>';
+    return;
+  }
+
+  // Populate quiz filter dropdown
+  if (filter) {
+    const quizNames = [...new Set(rows.map(r => r.quiz_name))].sort();
+    const current = filter.value;
+    filter.innerHTML = '<option value="">— Alle quizer —</option>' +
+      quizNames.map(n => `<option value="${n}" ${n===current?'selected':''}>${n}</option>`).join('');
+  }
+
+  // Filter by selected quiz
+  const selectedQuiz = filter ? filter.value : '';
+  const filtered = selectedQuiz ? rows.filter(r => r.quiz_name === selectedQuiz) : rows;
+
+  // Group by quiz, show top entries
+  const byQuiz = {};
+  filtered.forEach(r => {
+    if (!byQuiz[r.quiz_name]) byQuiz[r.quiz_name] = [];
+    byQuiz[r.quiz_name].push(r);
+  });
+
+  const medals = ['🥇','🥈','🥉'];
+  const isTeacher = state.isTeacher;
+
+  let html = '';
+  for (const [quiz, entries] of Object.entries(byQuiz)) {
+    const top = entries.sort((a,b) => b.score - a.score).slice(0, 20);
+    html += `
+      <div style="background:white;border-radius:16px;padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 4px 16px rgba(0,0,0,0.07);">
+        <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--dark);margin-bottom:0.875rem;">🎮 ${quiz}</div>
+        ${top.map((r, i) => `
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;border-radius:10px;background:${i<3?['#fff9e6','#f0f4ff','#f0fff4'][i]:'#fafafa'};margin-bottom:0.4rem;">
+            <div style="font-size:1.3rem;min-width:2rem;text-align:center;">${medals[i] || (i+1)}</div>
+            <div style="font-weight:800;flex:1;">${r.player_name}</div>
+            <div style="font-weight:900;color:var(--c4);font-size:1.05rem;">${r.score} pts</div>
+            <div style="font-size:0.78rem;color:#aaa;">${new Date(r.played_at).toLocaleDateString('no')}</div>
+            ${isTeacher ? `<button onclick="deleteHighscoreEntry('${r.id}')" title="Fjern fra listen" style="background:none;border:none;cursor:pointer;font-size:1rem;color:#ccc;padding:2px 6px;border-radius:6px;" onmouseover="this.style.color='var(--c1)'" onmouseout="this.style.color='#ccc'">🗑</button>` : ''}
+          </div>`).join('')}
+      </div>`;
+  }
+  container.innerHTML = html;
+}
+
+async function deleteHighscoreEntry(id) {
+  if (!state.isTeacher) return;
+  if (!confirm('Fjerne denne spilleren fra high score-listen?')) return;
+  await DB.deleteHighscore(id);
+  showToast('🗑 Fjernet fra high score-listen');
+  loadHighscoreView();
+}
 function crSwitchTab(tab) {
-  document.getElementById('crPane-quiz').style.display   = tab === 'quiz'   ? 'block' : 'none';
-  document.getElementById('crPane-arbeid').style.display = tab === 'arbeid' ? 'block' : 'none';
-  document.getElementById('crTab-quiz').style.background   = tab === 'quiz'   ? 'var(--c4)' : 'transparent';
-  document.getElementById('crTab-quiz').style.color        = tab === 'quiz'   ? 'white' : '#aaa';
-  document.getElementById('crTab-arbeid').style.background = tab === 'arbeid' ? 'var(--c3)' : 'transparent';
-  document.getElementById('crTab-arbeid').style.color      = tab === 'arbeid' ? 'white' : '#aaa';
+  ['quiz','arbeid','hs'].forEach(t => {
+    const pane = document.getElementById('crPane-' + t);
+    if (pane) pane.style.display = t === tab ? 'block' : 'none';
+    const btn = document.getElementById('crTab-' + t);
+    if (!btn) return;
+    const colors = { quiz:'var(--c4)', arbeid:'var(--c3)', hs:'var(--c2)' };
+    const textColors = { quiz:'white', arbeid:'white', hs:'var(--dark)' };
+    btn.style.background = t === tab ? colors[t] : '#e0e0e0';
+    btn.style.color = t === tab ? textColors[t] : '#555';
+  });
   if (tab === 'arbeid') crPopulateModules();
 }
 
