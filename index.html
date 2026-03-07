@@ -94,6 +94,17 @@
   .quiz-card{background:var(--card);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow);margin-bottom:1.1rem;}
   .quiz-card .q-num{background:var(--c4);color:white;padding:3px 10px;border-radius:50px;font-size:0.76rem;font-weight:800;display:inline-block;margin-bottom:0.6rem;}
   .quiz-card .q-text{font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--dark);}
+  .quiz-q{font-size:1rem;font-weight:800;color:var(--dark);margin-bottom:0.875rem;line-height:1.45;}
+  .quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:0.75rem;}
+  .quiz-opt{padding:0.75rem 1rem;border:2px solid #e0e0e0;border-radius:12px;background:white;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;text-align:left;transition:all 0.18s;color:var(--dark);line-height:1.3;}
+  .quiz-opt:hover:not(:disabled){background:var(--c4);color:white;border-color:var(--c4);transform:translateY(-1px);}
+  .quiz-opt:disabled{cursor:default;}
+  .quiz-opt.correct{background:var(--c3)!important;color:white!important;border-color:var(--c3)!important;}
+  .quiz-opt.wrong{background:var(--c1)!important;color:white!important;border-color:var(--c1)!important;}
+  .quiz-feedback{font-size:0.9rem;min-height:1.2em;padding:0.25rem 0;}
+  body.dark .quiz-opt{background:#1e1e30;border-color:#2e2e50;color:#ddd;}
+  body.dark .quiz-opt:hover:not(:disabled){background:var(--c4);color:white;}
+  @media(max-width:500px){.quiz-opts{grid-template-columns:1fr;}}
   .options{display:grid;gap:0.5rem;}
   .option{padding:11px 13px;border-radius:12px;border:2px solid #e8e8e8;background:var(--bg);cursor:pointer;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:600;transition:all 0.2s;text-align:left;}
   .option.correct{border-color:var(--c3);background:#DCFCE7;color:#166534;}
@@ -4155,6 +4166,9 @@ async function crCreateGame() {
     revealed: false
   };
 
+  // Store quiz name for highscores
+  const _selEl = document.getElementById('crModuleSelect');
+  crGame._quizName = _selEl ? (_selEl.options[_selEl.selectedIndex]?.text || 'Quiz') : 'Quiz';
   const remoteData = { code, phase:'lobby', players:{}, currentQ:-1, timeLimit, questions: crGame.questions };
   crGame._remote = remoteData;
   localStorage.setItem('cr_game', JSON.stringify(remoteData));
@@ -4296,6 +4310,11 @@ async function crShowFinalScoreboard() {
   if (crGame._pollInterval) clearInterval(crGame._pollInterval);
   crShow('scoreboard-view');
   await crBroadcast({ phase:'gameover', players: crGame.players });
+
+  // Save highscores to Supabase
+  const quizName = crGame._quizName || 'Quiz';
+  try { await DB.saveHighscores(quizName, crGame.players, crGame.questions.length); } catch(e) {}
+
   const sorted = Object.values(crGame.players).sort((a,b) => (b.score||0)-(a.score||0));
   const medals = ['🥇','🥈','🥉'];
   document.getElementById('crScoreboard').innerHTML = sorted.map((p,i) => `
@@ -4305,6 +4324,14 @@ async function crShowFinalScoreboard() {
       <div class="cr-name">${p.username}</div>
       <div class="cr-pts">${p.score||0} poeng</div>
     </div>`).join('') || '<p style="color:#aaa;">Ingen spillere</p>';
+
+  // Button to see full highscores
+  const sb = document.getElementById('crScoreboard');
+  if (sb) sb.insertAdjacentHTML('afterend', `
+    <div style="margin-top:1.5rem;padding:1rem;background:#f0f9ff;border-radius:14px;border:2px solid var(--c4);text-align:center;">
+      <div style="font-weight:800;color:var(--c4);margin-bottom:0.5rem;">🏆 Resultater lagret!</div>
+      <button onclick="crSwitchTab('hs');loadHighscoreView();crShow('setup')" style="background:var(--c4);color:white;border:none;padding:9px 20px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">Se alle high scores →</button>
+    </div>`);
 }
 
 async function crCancelGame() {
@@ -4513,9 +4540,26 @@ function sjShowResult(data) {
 function sjShowGameOver(data) {
   const sorted = Object.values(data.players || {}).sort((a,b) => (b.score||0)-(a.score||0));
   const rank = sorted.findIndex(p => p.username === sjGame.username) + 1;
-  document.getElementById('sjFinalScore').textContent = sjGame.score;
-  document.getElementById('sjFinalRank').textContent = rank > 0 ? `Du ble nr. ${rank} av ${sorted.length} 🏆` : '';
-  document.getElementById('sjFinalScore').textContent = data.players?.[sjGame.username]?.score || sjGame.score;
+  const finalScore = data.players?.[sjGame.username]?.score ?? sjGame.score;
+  document.getElementById('sjFinalScore').textContent = finalScore;
+  document.getElementById('sjFinalRank').textContent = rank > 0 ? `Du ble nr. ${rank} av ${sorted.length}` : '';
+
+  // Show mini scoreboard on student gameover screen
+  const medals = ['🥇','🥈','🥉'];
+  const miniBoard = document.createElement('div');
+  miniBoard.style.cssText = 'margin:1.25rem auto;max-width:320px;text-align:left;';
+  miniBoard.innerHTML = `<div style="font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--dark);margin-bottom:0.75rem;text-align:center;">🏆 Resultater</div>` +
+    sorted.slice(0,5).map((p,i) => `
+      <div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.75rem;border-radius:10px;background:${p.username===sjGame.username?'#fff9c4':'#f5f5f5'};margin-bottom:0.35rem;border:${p.username===sjGame.username?'2px solid var(--c2)':'2px solid transparent'}">
+        <span style="font-size:1.2rem;min-width:1.8rem;">${medals[i]||i+1}</span>
+        <span style="font-size:1.1rem;">${p.avatar}</span>
+        <span style="flex:1;font-weight:800;font-size:0.88rem;">${p.username}</span>
+        <span style="font-weight:900;color:var(--c4);">${p.score||0}</span>
+      </div>`).join('');
+
+  const rankEl = document.getElementById('sjFinalRank');
+  if (rankEl) rankEl.insertAdjacentElement('afterend', miniBoard);
+
   sjShow('gameover');
 }
 
