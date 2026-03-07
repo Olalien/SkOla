@@ -4098,15 +4098,15 @@ async function crRevealAnswer() {
   const maxScore = 1000;
   Object.values(crGame.players).forEach(p => {
     const ans = p.answers?.[crGame.currentQ];
-    if (!ans) return;
+      if (!ans) return;
     const isCorrect = (ans.idx !== undefined) ? (ans.idx === correctIdx) : false;
-    if (isCorrect) {
+      if (isCorrect) {
       const timePct = Math.max(0, 1 - (ans.timeSpent || timeSpent) / crGame.timeLimit);
       const pts = Math.round(maxScore * (0.5 + 0.5 * timePct));
       p.score = (p.score || 0) + pts;
       ans.points = pts;
       ans.correct = true;
-    } else {
+        } else {
       ans.correct = false;
       ans.points = 0;
     }
@@ -4280,18 +4280,23 @@ function sjShowQuestion(data) {
   }, 1000);
 }
 
-async function sjAnswer(letter) {
+async function sjAnswer(idx) {
   if (sjGame.answered) return;
   sjGame.answered = true;
   const timeSpent = (Date.now() - (sjGame.questionStart || Date.now())) / 1000;
   if (sjGame._timerBar) clearInterval(sjGame._timerBar);
 
-  // Save answer to cloud
+  // Disable all buttons immediately
+  document.querySelectorAll('.cr-answer-btn').forEach(b => b.disabled = true);
+
+  // Save answer to cloud - store as idx so scoring works
   const gameData = await GAME.load(sjGame.code) || JSON.parse(localStorage.getItem('cr_game') || '{}');
   if (!gameData.players) gameData.players = {};
-  if (!gameData.players[sjGame.username]) gameData.players[sjGame.username] = { username: sjGame.username, avatar: sjGame.avatar, score: 0, answers: {} };
+  if (!gameData.players[sjGame.username]) {
+    gameData.players[sjGame.username] = { username: sjGame.username, avatar: sjGame.avatar, score: 0, answers: {} };
+  }
   if (!gameData.players[sjGame.username].answers) gameData.players[sjGame.username].answers = {};
-  gameData.players[sjGame.username].answers[sjGame.currentQ] = { letter, timeSpent };
+  gameData.players[sjGame.username].answers[sjGame.currentQ] = { idx: idx, timeSpent: timeSpent };
   localStorage.setItem('cr_game', JSON.stringify(gameData));
   await GAME.save(sjGame.code, gameData);
 
