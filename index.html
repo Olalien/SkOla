@@ -1135,7 +1135,8 @@
 
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.875rem;">
         <button onclick="saveDbConfig()" style="background:#059669;color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Koble til</button>
-        <button onclick="testDbConnection()" style="background:var(--c4);color:white;border:none;padding:9px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">🧪 Test</button>
+        <button onclick="testDbConnection()" style="background:var(--c4);color:white;border:none;padding:9px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">🧪 Test tilkobling</button>
+        <button onclick="runDbDiagnose()" style="background:#0f172a;color:#a3e635;border:none;padding:9px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">🔬 Full diagnose</button>
         <button onclick="migrateToDb()" style="background:#7c3aed;color:white;border:none;padding:9px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">📤 Migrer lokale data</button>
         <button onclick="clearDbConfig()" style="background:none;border:2px solid #fca5a5;color:var(--c1);padding:9px 14px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">🗑 Fjern</button>
       </div>
@@ -1151,6 +1152,9 @@
       </div>
 
       <div id="dbFeedback" style="display:none;padding:0.6rem 0.875rem;border-radius:10px;font-size:0.85rem;font-weight:700;margin-bottom:0.875rem;"></div>
+      <div id="dbDiagnosePanel" style="display:none;background:#0f172a;border-radius:12px;padding:1rem;margin-bottom:0.875rem;max-height:300px;overflow-y:auto;">
+        <div style="font-family:monospace;font-size:0.75rem;color:#a3e635;" id="dbDiagnoseLog"></div>
+      </div>
 
       <details>
         <summary style="font-size:0.82rem;font-weight:800;color:#059669;cursor:pointer;">📋 Slik setter du opp Supabase (5 minutter, helt gratis)</summary>
@@ -1614,18 +1618,14 @@ async function loadState() {
 }
 
 async function saveModulesToStorage() {
-  await DB.saveModules(state.modules);
+  const ok = await DB.saveModules(state.modules);
   renderHomeModules();
   renderTaskModules();
   if (DB._ready) {
-    // Verify the save worked by loading back from DB
-    const check = await DB._req('GET', '/os_modules?order=sort_order.asc&select=id');
-    if (check !== null && check.length === state.modules.length) {
-      showToast('✅ Lagret til sky (' + state.modules.length + ' emner)');
-    } else if (check !== null && check.length !== state.modules.length) {
-      showToast('⚠️ Sky har ' + check.length + ' emner, forventet ' + state.modules.length + ' – prøv igjen');
+    if (ok) {
+      showToast('✅ ' + state.modules.length + ' emne(r) lagret til sky');
     } else {
-      showToast('⚠️ Lagret lokalt – sky ikke nådd');
+      showToast('❌ Skylagring feilet – se konsoll (F12) for detaljer');
     }
   }
 }
@@ -3009,137 +3009,121 @@ if(!document.getElementById('confettiStyle')){const s=document.createElement('st
 // ╚══════════════════════════════════════════════════════════════╝
 
 const DB = {
-  _url:   null,   // Supabase Project URL
-  _key:   null,   // Supabase anon/public key
-  _ready: false,
+  _url:   'https://uzufgmhuihvjxlvvspwy.supabase.co',
+  _key:   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6dWZnbWh1aWh2anhsdnZzcHd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODUyMDcsImV4cCI6MjA4ODQ2MTIwN30.V-KC9DMPfwzr94IqLinWqcv_qJ2ofIqFSgLMnQj3Tig',
+  _ready: true,
   _tablesNotReady: false,
 
   init() {
-    // ── Embedded credentials (work on ALL devices without configuration) ──
-    // Replace SUPABASE_ANON_KEY below with your actual anon public key from
-    // Supabase → Project Settings → API → Project API keys → anon public
-    const EMBEDDED_URL = 'https://uzufgmhuihvjxlvvspwy.supabase.co';
-    const EMBEDDED_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6dWZnbWh1aWh2anhsdnZzcHd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODUyMDcsImV4cCI6MjA4ODQ2MTIwN30.V-KC9DMPfwzr94IqLinWqcv_qJ2ofIqFSgLMnQj3Tig';
-
-    // Settings-overrides (from ⚙️ Innstillinger) take priority over embedded values
+    // Allow settings override stored in localStorage
     const storedUrl = localStorage.getItem('os_sb_url');
     const storedKey = localStorage.getItem('os_sb_key');
-
-    this._url = storedUrl || EMBEDDED_URL;
-    this._key = storedKey || EMBEDDED_KEY;
-
-    // Always sync the effective values back to localStorage so settings UI shows them
-    if (this._url) localStorage.setItem('os_sb_url', this._url);
-    if (this._key) localStorage.setItem('os_sb_key', this._key);
-
-    // Ready only if key looks like a valid Supabase JWT (starts with eyJ)
+    if (storedUrl) this._url = storedUrl;
+    if (storedKey && storedKey.startsWith('eyJ')) this._key = storedKey;
     this._ready = !!(this._url && this._key && this._key.startsWith('eyJ'));
+    localStorage.setItem('os_sb_url', this._url);
+    localStorage.setItem('os_sb_key', this._key);
     return this._ready;
   },
 
   isReady() { return this._ready; },
 
-  // ── low-level REST helper ──────────────────────────────────
+  // ── Core fetch wrapper ─────────────────────────────────────
   async _req(method, path, body) {
-    if (!this._ready) { console.warn('[DB] _req skipped – not ready', method, path); return null; }
-    const url = this._url + '/rest/v1' + path;
+    if (!this._ready) return null;
+    const headers = {
+      'apikey': this._key,
+      'Authorization': 'Bearer ' + this._key,
+      'Content-Type': 'application/json'
+    };
+    if (method === 'POST') {
+      headers['Prefer'] = 'resolution=merge-duplicates,return=minimal';
+    } else if (method === 'DELETE') {
+      headers['Prefer'] = 'return=minimal';
+    }
     try {
-      const res = await fetch(url, {
+      const res = await fetch(this._url + '/rest/v1' + path, {
         method,
-        headers: {
-          'apikey':        this._key,
-          'Authorization': 'Bearer ' + this._key,
-          'Content-Type':  'application/json',
-          'Prefer':        method === 'POST'
-            ? 'resolution=merge-duplicates,return=representation'
-            : 'return=representation'
-        },
-        body: body ? JSON.stringify(body) : undefined
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined
       });
-      const t = await res.text();
+      const text = await res.text();
       if (!res.ok) {
-        let parsed = {};
-        try { parsed = JSON.parse(t); } catch(_) {}
-        if (res.status === 404 || parsed.code === '42P01' || (parsed.message||'').includes('does not exist')) {
-          console.error('[DB] Tabell mangler! Kjør SQL-skjemaet i Supabase SQL Editor.', path);
-          DB._tablesNotReady = true;
+        let msg = text;
+        try { msg = JSON.parse(text).message || text; } catch(_) {}
+        if (res.status === 404 || msg.includes('does not exist') || msg.includes('42P01')) {
+          console.error('[DB] TABELL MANGLER:', path.split('?')[0], '– Kjør SQL-skjema i Supabase!');
+          this._tablesNotReady = true;
           return null;
         }
-        console.error('[DB] HTTP', res.status, method, path, '→', t.substring(0, 300));
+        console.error('[DB]', method, path.split('?')[0], res.status, msg.substring(0,200));
         return null;
       }
-      DB._tablesNotReady = false;
-      const result = t ? JSON.parse(t) : [];
-      console.log('[DB]', method, path.split('?')[0], '→', Array.isArray(result) ? result.length + ' rader' : 'OK');
-      return result;
+      this._tablesNotReady = false;
+      if (!text || text === '' || text === 'null') return [];
+      return JSON.parse(text);
     } catch(e) {
-      console.error('[DB] Nettverksfeil', method, path, e.message);
+      console.error('[DB] Fetch-feil:', method, path.split('?')[0], e.message);
       return null;
     }
   },
 
   // ── MODULES ────────────────────────────────────────────────
   async loadModules() {
-    const cached = () => JSON.parse(localStorage.getItem('lh_modules') || '[]');
+    const cached = () => {
+      try { return JSON.parse(localStorage.getItem('lh_modules') || '[]'); } catch(_) { return []; }
+    };
     if (!this._ready) return cached();
     const rows = await this._req('GET', '/os_modules?order=sort_order.asc,created_at.asc&select=id,data,sort_order');
-    if (rows === null) {
-      console.warn('[DB] loadModules feilet – bruker lokal cache');
-      return cached(); // Network/auth error – use cache
-    }
-    // rows can be [] if table is empty – that's valid, don't fall back to cache
+    if (rows === null) return cached();           // error → use cache
     const mods = rows.map(r => r.data).filter(Boolean);
     localStorage.setItem('lh_modules', JSON.stringify(mods));
     return mods;
   },
 
   async saveModules(modules) {
-    // Always assign stable IDs
+    // Assign stable IDs
     modules.forEach((m, i) => {
       if (!m._id) m._id = 'mod_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2,6);
     });
-    // Save to localStorage immediately (fast, always works)
     localStorage.setItem('lh_modules', JSON.stringify(modules));
-    if (!this._ready) return;
+    if (!this._ready) return false;
 
-    const rows = modules.map((m, i) => ({ id: m._id, data: m, sort_order: i }));
-
-    // Upsert all current modules (POST with merge-duplicates)
-    if (rows.length > 0) {
-      const result = await this._req('POST', '/os_modules', rows);
+    // Upsert all rows (one by one to avoid payload issues)
+    for (let i = 0; i < modules.length; i++) {
+      const m = modules[i];
+      const result = await this._req('POST', '/os_modules', [{ id: m._id, data: m, sort_order: i }]);
       if (result === null) {
-        console.error('[DB] saveModules: POST/upsert feilet!');
-        return; // Don't delete if upsert failed
+        console.error('[DB] saveModules: upsert feilet for', m._id);
+        return false;
       }
     }
 
-    // Delete modules that no longer exist
-    // PostgREST requires id=not.in.(val1,val2) WITHOUT quotes around values
-    if (rows.length > 0) {
-      const ids = rows.map(r => r.id).join(',');
-      await this._req('DELETE', `/os_modules?id=not.in.(${ids})`);
+    // Delete rows that are no longer in the list
+    if (modules.length > 0) {
+      const ids = modules.map(m => m._id).join(',');
+      await this._req('DELETE', '/os_modules?id=not.in.(' + ids + ')');
     } else {
-      // No modules left - delete all
-      await this._req('DELETE', `/os_modules?sort_order=gte.0`);
+      await this._req('DELETE', '/os_modules?sort_order=gte.0');
     }
+    return true;
   },
 
   // ── STUDENT ANSWERS ────────────────────────────────────────
   async loadAnswers(studentName) {
-    if (!this._ready) return JSON.parse(localStorage.getItem('lh_answers') || '{}');
-    if (!studentName) return {};
-    const safe = encodeURIComponent(studentName);
-    const rows = await this._req('GET', `/os_answers?student_name=eq.${safe}&select=answer_key,value,correct,updated_at`);
-    if (!rows) return JSON.parse(localStorage.getItem('lh_answers') || '{}');
+    const cached = () => { try { return JSON.parse(localStorage.getItem('lh_answers') || '{}'); } catch(_) { return {}; } };
+    if (!this._ready || !studentName) return cached();
+    const rows = await this._req('GET', '/os_answers?student_name=eq.' + encodeURIComponent(studentName) + '&select=answer_key,value,correct');
+    if (rows === null) return cached();
     const obj = {};
-    rows.forEach(r => { obj[r.answer_key] = { val: r.value, correct: r.correct, time: r.updated_at }; });
+    rows.forEach(r => { obj[r.answer_key] = { val: r.value, correct: r.correct }; });
     localStorage.setItem('lh_answers', JSON.stringify(obj));
     return obj;
   },
 
   async saveAnswer(studentName, studentClass, answerKey, val, correct) {
     const local = JSON.parse(localStorage.getItem('lh_answers') || '{}');
-    local[answerKey] = { val, correct: !!correct, time: new Date().toLocaleString('no') };
+    local[answerKey] = { val, correct: !!correct };
     localStorage.setItem('lh_answers', JSON.stringify(local));
     if (!this._ready || !studentName) return;
     await this._req('POST', '/os_answers', [{
@@ -3154,7 +3138,7 @@ const DB = {
 
   // ── PROGRESS ───────────────────────────────────────────────
   async loadProgress(studentName) {
-    if (!this._ready) {
+    if (!this._ready || !studentName) {
       const prog = {};
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
@@ -3162,13 +3146,10 @@ const DB = {
       }
       return prog;
     }
-    if (!studentName) return {};
-    const safe = encodeURIComponent(studentName);
-    const rows = await this._req('GET', `/os_progress?student_name=eq.${safe}&select=progress_key,value`);
+    const rows = await this._req('GET', '/os_progress?student_name=eq.' + encodeURIComponent(studentName) + '&select=progress_key,value');
     if (!rows) return {};
     const obj = {};
-    rows.forEach(r => { obj[r.progress_key] = r.value; });
-    Object.entries(obj).forEach(([k,v]) => localStorage.setItem(k, v));
+    rows.forEach(r => { obj[r.progress_key] = r.value; localStorage.setItem(r.progress_key, r.value); });
     return obj;
   },
 
@@ -3193,7 +3174,7 @@ const DB = {
 
   async loadFeedback(key) {
     if (!this._ready) return localStorage.getItem('feedback_' + key) || '';
-    const rows = await this._req('GET', `/os_feedback?feedback_key=eq.${encodeURIComponent(key)}&select=text`);
+    const rows = await this._req('GET', '/os_feedback?feedback_key=eq.' + encodeURIComponent(key) + '&select=text');
     if (!rows || !rows.length) return localStorage.getItem('feedback_' + key) || '';
     return rows[0].text || '';
   },
@@ -3201,14 +3182,16 @@ const DB = {
   async deleteFeedback(key) {
     localStorage.removeItem('feedback_' + key);
     if (!this._ready) return;
-    await this._req('DELETE', `/os_feedback?feedback_key=eq.${encodeURIComponent(key)}`);
+    await this._req('DELETE', '/os_feedback?feedback_key=eq.' + encodeURIComponent(key));
   },
 
   // ── ROSTER ─────────────────────────────────────────────────
   async loadRoster() {
-    if (!this._ready) return JSON.parse(localStorage.getItem('olaskole_roster') || '[]');
+    const cached = () => { try { return JSON.parse(localStorage.getItem('olaskole_roster') || '[]'); } catch(_) { return []; } };
+    if (!this._ready) return cached();
     const rows = await this._req('GET', '/os_roster?select=id,data&order=created_at.asc');
-    if (!rows || !rows.length) return JSON.parse(localStorage.getItem('olaskole_roster') || '[]');
+    if (!rows) return cached();
+    if (rows.length === 0) return cached();
     const roster = rows.map(r => r.data);
     localStorage.setItem('olaskole_roster', JSON.stringify(roster));
     return roster;
@@ -3217,12 +3200,11 @@ const DB = {
   async saveRoster(roster) {
     localStorage.setItem('olaskole_roster', JSON.stringify(roster));
     if (!this._ready) return;
-    // Full replace: delete all then insert
-    await this._req('DELETE', '/os_roster?id=neq.PLACEHOLDER');
+    await this._req('DELETE', '/os_roster?id=neq.___placeholder___');
     if (roster.length) {
       const rows = roster.map((s, i) => ({
-        id:         'r_' + i + '_' + (s.name || i).toString().toLowerCase().replace(/[^a-z0-9]/g,'_').substring(0,30),
-        data:       s,
+        id: 'r_' + i + '_' + String(s.name || i).toLowerCase().replace(/[^a-z0-9]/g,'_').substring(0,30),
+        data: s,
         created_at: new Date().toISOString()
       }));
       await this._req('POST', '/os_roster', rows);
@@ -3233,7 +3215,7 @@ const DB = {
   async saveHighscores(quizName, players, questionCount) {
     if (!this._ready) return;
     const rows = Object.values(players).map(p => ({
-      id: quizName.replace(/[^a-z0-9]/gi,'_').substring(0,30) + '_' + (p.username||'').replace(/[^a-z0-9]/gi,'_').substring(0,20) + '_' + Date.now(),
+      id: quizName.replace(/[^a-z0-9]/gi,'_').substring(0,30) + '_' + String(p.username||'').replace(/[^a-z0-9]/gi,'_').substring(0,20) + '_' + Date.now(),
       quiz_name:   quizName,
       player_name: p.username || 'Ukjent',
       score:       p.score || 0,
@@ -3245,40 +3227,33 @@ const DB = {
 
   async loadHighscores(quizName) {
     if (!this._ready) return [];
-    const path = quizName
-      ? `/os_highscores?quiz_name=eq.${encodeURIComponent(quizName)}&order=score.desc&limit=100`
-      : `/os_highscores?order=score.desc&limit=200`;
-    const rows = await this._req('GET', path + '&select=id,quiz_name,player_name,score,questions,played_at');
+    const filter = quizName ? '?quiz_name=eq.' + encodeURIComponent(quizName) + '&order=score.desc&limit=100' : '?order=score.desc&limit=200';
+    const rows = await this._req('GET', '/os_highscores' + filter + '&select=id,quiz_name,player_name,score,questions,played_at');
     return rows || [];
   },
 
   async deleteHighscore(id) {
     if (!this._ready) return;
-    await this._req('DELETE', `/os_highscores?id=eq.${encodeURIComponent(id)}`);
+    await this._req('DELETE', '/os_highscores?id=eq.' + encodeURIComponent(id));
   },
 
-  // ── CONNECTION TEST ─────────────────────────────────────────
+  // ── GAMES (Live Quiz) ──────────────────────────────────────
   async testConnection() {
     if (!this._ready) return { ok: false, msg: 'Ikke konfigurert' };
-    // First test basic connectivity with a simple fetch to the REST root
     try {
       const ping = await fetch(this._url + '/rest/v1/', {
         headers: { 'apikey': this._key, 'Authorization': 'Bearer ' + this._key }
       });
-      if (!ping.ok && ping.status !== 200) {
-        if (ping.status === 401) return { ok: false, msg: '❌ Ugyldig API-nøkkel (401). Kopier «anon public»-nøkkelen fra Supabase → Project Settings → API.' };
-        if (ping.status === 404) return { ok: false, msg: '❌ Feil Project URL. Sjekk at URL slutter på .supabase.co' };
-        return { ok: false, msg: `❌ Tilkoblingsfeil (${ping.status}). Sjekk URL og nøkkel.` };
+      if (!ping.ok) {
+        if (ping.status === 401) return { ok: false, msg: '❌ Ugyldig API-nøkkel (401).' };
+        return { ok: false, msg: '❌ HTTP ' + ping.status };
       }
     } catch(e) {
-      return { ok: false, msg: '❌ Nettverksfeil – kunne ikke nå Supabase. Sjekk internett og URL.' };
+      return { ok: false, msg: '❌ Nettverksfeil: ' + e.message };
     }
-    // Then test if tables exist
     const rows = await this._req('GET', '/os_modules?limit=1&select=id');
-    if (DB._tablesNotReady || rows === null) {
-      return { ok: false, msg: '⚠️ Tilkoblet, men tabellene mangler! Kjør SQL-skjemaet i Supabase SQL Editor (⚙️ Innstillinger → Database → Kopier SQL-skjema).' };
-    }
-    return { ok: true, msg: `✅ Alt OK! Tilkoblet Supabase med ${rows.length} emne(r) i databasen.` };
+    if (rows === null) return { ok: false, msg: '⚠️ Tilkoblet, men tabellene mangler! Kjør SQL-skjemaet.' };
+    return { ok: true, msg: '✅ Alt OK! Supabase tilkoblet, ' + rows.length + ' emne(r) i database.' };
   }
 };
 
@@ -3472,7 +3447,83 @@ async function saveKeyToFile() {
 async function testDbConnection() {
   DB.init();
   const result = await DB.testConnection();
-  showDbFeedback(result.ok ? '✅ ' + result.msg : '❌ ' + result.msg, result.ok);
+  showDbFeedback(result.ok ? '✅ ' + result.msg : result.msg, result.ok);
+}
+
+async function runDbDiagnose() {
+  const panel = document.getElementById('dbDiagnosePanel');
+  const log = document.getElementById('dbDiagnoseLog');
+  if (!panel || !log) return;
+  panel.style.display = 'block';
+  log.innerHTML = '';
+
+  const dlog = (msg, color='#a3e635') => {
+    log.innerHTML += '<div style="color:' + color + ';margin-bottom:2px;">' + msg + '</div>';
+    panel.scrollTop = panel.scrollHeight;
+  };
+
+  dlog('🔬 OlaSkole DB Diagnose', '#FFD93D');
+  dlog('URL: ' + DB._url, '#aaa');
+  dlog('Nøkkel: ' + DB._key.substring(0,20) + '...', '#aaa');
+  dlog('_ready: ' + DB._ready, DB._ready ? '#6BCB77' : '#FF6B6B');
+  dlog('─────────────────────────────');
+
+  // TEST 1: Grunnleggende tilkobling
+  dlog('TEST 1: Tilkobling...', '#FFD93D');
+  try {
+    const r = await fetch(DB._url + '/rest/v1/', {
+      headers: { 'apikey': DB._key, 'Authorization': 'Bearer ' + DB._key }
+    });
+    if (r.ok || r.status === 200) {
+      dlog('TEST 1: ✅ Tilkoblet (HTTP ' + r.status + ')', '#6BCB77');
+    } else {
+      dlog('TEST 1: ❌ HTTP ' + r.status, '#FF6B6B');
+      if (r.status === 401) dlog('  → Ugyldig API-nøkkel. Sjekk anon public key.', '#FF6B6B');
+    }
+  } catch(e) {
+    dlog('TEST 1: ❌ ' + e.message, '#FF6B6B');
+    dlog('  → CORS eller nettverksfeil. Kjør testen fra GitHub Pages, ikke lokal fil.', '#FFD93D');
+    return;
+  }
+
+  // TEST 2: Les moduler
+  dlog('TEST 2: Leser os_modules...', '#FFD93D');
+  const rows = await DB._req('GET', '/os_modules?select=id,sort_order&order=sort_order.asc');
+  if (rows === null) {
+    dlog('TEST 2: ❌ Lesing feilet – tabell mangler eller RLS blokkerer', '#FF6B6B');
+    dlog('  → Kjør SQL-skjemaet i Supabase SQL Editor!', '#FFD93D');
+  } else {
+    dlog('TEST 2: ✅ ' + rows.length + ' emner i databasen', '#6BCB77');
+    rows.forEach((r, i) => dlog('  ' + (i+1) + '. id=' + r.id, '#aaa'));
+  }
+
+  // TEST 3: Skriv en rad
+  dlog('TEST 3: Skriver testrad...', '#FFD93D');
+  const tid = 'diag_' + Date.now();
+  const wr = await DB._req('POST', '/os_modules', [{ id: tid, data: { name: 'DIAGNOSETEST', _id: tid }, sort_order: 9999 }]);
+  if (wr === null) {
+    dlog('TEST 3: ❌ Skriving feilet!', '#FF6B6B');
+    dlog('  → RLS policy mangler (kjør SQL-skjema) eller nøkkel har ikke skrivetilgang', '#FFD93D');
+  } else {
+    dlog('TEST 3: ✅ Skriving OK', '#6BCB77');
+    // Read back
+    const rb = await DB._req('GET', '/os_modules?id=eq.' + tid + '&select=id');
+    dlog('TEST 3b: Les tilbake: ' + (rb && rb.length ? '✅ OK' : '❌ Ikke funnet'), rb && rb.length ? '#6BCB77' : '#FF6B6B');
+    // Cleanup
+    await DB._req('DELETE', '/os_modules?id=eq.' + tid);
+    dlog('TEST 3c: ✅ Opprydding OK', '#6BCB77');
+  }
+
+  // TEST 4: Sjekk alle tabeller
+  dlog('TEST 4: Sjekker alle tabeller...', '#FFD93D');
+  const tables = ['os_modules','os_answers','os_progress','os_feedback','os_roster','os_games','os_highscores'];
+  for (const t of tables) {
+    const r = await DB._req('GET', '/' + t + '?select=*&limit=0');
+    dlog('  ' + t + ': ' + (r !== null ? '✅' : '❌ MANGLER – kjør SQL!'), r !== null ? '#6BCB77' : '#FF6B6B');
+  }
+
+  dlog('─────────────────────────────');
+  dlog('✅ Diagnose ferdig!', '#FFD93D');
 }
 
 async function migrateToDb() {
