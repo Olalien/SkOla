@@ -1140,6 +1140,16 @@
         <button onclick="clearDbConfig()" style="background:none;border:2px solid #fca5a5;color:var(--c1);padding:9px 14px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">🗑 Fjern</button>
       </div>
 
+      <!-- KEY STEP: embed key into downloadable file -->
+      <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #fcd34d;border-radius:12px;padding:1rem;margin-bottom:0.875rem;">
+        <div style="font-weight:800;font-size:0.88rem;color:#92400e;margin-bottom:0.4rem;">🔑 Steg 2 – Bak nøkkelen inn i filen</div>
+        <div style="font-size:0.78rem;color:#78350f;line-height:1.7;margin-bottom:0.75rem;">
+          Etter at du har koblet til Supabase: last ned en ny versjon av HTML-filen med nøkkelen innbakt.
+          <b>Last denne opp til GitHub Pages</b> – da fungerer databasen automatisk på alle enheter uten at noen trenger å sette opp noe.
+        </div>
+        <button onclick="saveKeyToFile()" style="background:#d97706;color:white;border:none;padding:9px 20px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">⬇️ Last ned fil med nøkkel innbakt</button>
+      </div>
+
       <div id="dbFeedback" style="display:none;padding:0.6rem 0.875rem;border-radius:10px;font-size:0.85rem;font-weight:700;margin-bottom:0.875rem;"></div>
 
       <details>
@@ -1152,8 +1162,9 @@
           <b>5.</b> Gå til <b>Project Settings → API</b> og kopier:<br>
           &nbsp;&nbsp;&nbsp;• <b>Project URL</b> (f.eks. https://abc123.supabase.co)<br>
           &nbsp;&nbsp;&nbsp;• <b>anon public</b>-nøkkelen under «Project API keys»<br>
-          <b>6.</b> Lim inn over og klikk «Koble til»<br>
-          <b>7.</b> Klikk «Migrer lokale data» for å flytte eksisterende emner og svar til databasen
+          <b>6.</b> Lim inn over og klikk «💾 Koble til»<br>
+          <b>7.</b> Klikk «📤 Migrer lokale data» for å flytte eksisterende emner og svar til databasen<br>
+          <b>8.</b> Klikk «⬇️ Last ned fil med nøkkel innbakt» og last opp til GitHub Pages
           <div style="margin-top:0.75rem;">
             <button onclick="copyDbSchema()" style="background:#059669;color:white;border:none;padding:7px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">📋 Kopier SQL-skjema</button>
           </div>
@@ -2993,12 +3004,24 @@ const DB = {
   _tablesNotReady: false,
 
   init() {
-    // Pre-configured Supabase project URL (key must be set by teacher in Settings)
-    const DEFAULT_URL = 'https://uzufgmhuihvjxlvvspwy.supabase.co';
-    if (!localStorage.getItem('os_sb_url')) localStorage.setItem('os_sb_url', DEFAULT_URL);
-    this._url   = localStorage.getItem('os_sb_url') || DEFAULT_URL;
-    this._key   = localStorage.getItem('os_sb_key') || '';
-    // Only ready if key looks like a valid JWT (starts with eyJ)
+    // ── Embedded credentials (work on ALL devices without configuration) ──
+    // Replace SUPABASE_ANON_KEY below with your actual anon public key from
+    // Supabase → Project Settings → API → Project API keys → anon public
+    const EMBEDDED_URL = 'https://uzufgmhuihvjxlvvspwy.supabase.co';
+    const EMBEDDED_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6dWZnbWh1aWh2anhsdnZzcHd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODUyMDcsImV4cCI6MjA4ODQ2MTIwN30.V-KC9DMPfwzr94IqLinWqcv_qJ2ofIqFSgLMnQj3Tig';
+
+    // Settings-overrides (from ⚙️ Innstillinger) take priority over embedded values
+    const storedUrl = localStorage.getItem('os_sb_url');
+    const storedKey = localStorage.getItem('os_sb_key');
+
+    this._url = storedUrl || EMBEDDED_URL;
+    this._key = storedKey || EMBEDDED_KEY;
+
+    // Always sync the effective values back to localStorage so settings UI shows them
+    if (this._url) localStorage.setItem('os_sb_url', this._url);
+    if (this._key) localStorage.setItem('os_sb_key', this._key);
+
+    // Ready only if key looks like a valid Supabase JWT (starts with eyJ)
     this._ready = !!(this._url && this._key && this._key.startsWith('eyJ'));
     return this._ready;
   },
@@ -3370,15 +3393,55 @@ async function saveDbConfig() {
   DB.init();
   showDbFeedback('⏳ Tester tilkobling…', true);
   const result = await DB.testConnection();
-  showDbFeedback(result.ok ? '✅ ' + result.msg : '❌ ' + result.msg, result.ok);
   showDbStatus();
   if (result.ok) {
+    // Patch the embedded key directly into the HTML file source so
+    // it works on ALL devices. Guide the teacher to do this.
+    const isEmbedded = checkKeyEmbedded();
+    if (!isEmbedded) {
+      showDbFeedback(
+        '✅ Tilkoblet! <br><b>⚠️ For at alle enheter skal fungere automatisk:</b> ' +
+        'Last ned HTML-filen på nytt etter at nøkkelen er lagret, eller trykk «Lagre nøkkel i fil» under.',
+        true
+      );
+    } else {
+      showDbFeedback('✅ ' + result.msg, true);
+    }
     showToast('✅ Supabase koblet til! Laster emner…');
     state.modules = await DB.loadModules();
     await loadRosterCached();
     renderHomeModules();
     renderTaskModules();
+  } else {
+    showDbFeedback('❌ ' + result.msg, false);
   }
+}
+
+function checkKeyEmbedded() {
+  // Check if the embedded key in the source is set
+  // We do this by checking if the page source contains the actual key
+  const key = localStorage.getItem('os_sb_key') || '';
+  return key && document.documentElement.innerHTML.includes(key.substring(0, 20));
+}
+
+async function saveKeyToFile() {
+  // Generate a new version of the HTML with the key embedded
+  const url = localStorage.getItem('os_sb_url') || '';
+  const key = localStorage.getItem('os_sb_key') || '';
+  if (!key || !key.startsWith('eyJ')) {
+    showDbFeedback('❌ Ingen gyldig nøkkel å lagre. Koble til Supabase først.', false); return;
+  }
+  let src = document.documentElement.outerHTML;
+  // Replace the EMBEDDED_KEY placeholder
+  src = src.replace("const EMBEDDED_KEY = '';", "const EMBEDDED_KEY = '" + key + "';");
+  src = src.replace("const EMBEDDED_URL = 'https://uzufgmhuihvjxlvvspwy.supabase.co';", "const EMBEDDED_URL = '" + url + "';" );
+  const blob = new Blob([src], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'laererplattform.html';
+  a.click();
+  showDbFeedback('✅ Fil lastet ned med nøkkel innbakt! Last denne opp til GitHub Pages.', true);
+  showToast('✅ Ny HTML lastet ned – last opp til GitHub Pages!');
 }
 
 async function testDbConnection() {
