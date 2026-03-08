@@ -3041,35 +3041,29 @@ const DB = {
     if (rows === null) {
       try { return JSON.parse(localStorage.getItem('lh_modules') || '[]'); } catch { return []; }
     }
-    // Dedupliser: behold kun én rad per _id (siste vinner)
+    // Dedupliser på rad-ID (primærnøkkel) – behold siste per unik id
     const seen = new Map();
-    rows.forEach(r => {
-      if (r.data && r.data._id) {
-        seen.set(r.data._id, r);
-      } else if (r.data) {
-        seen.set(r.id, r); // fallback til rad-id
-      }
-    });
-    const mods = Array.from(seen.values()).map(r => r.data).filter(Boolean);
-    localStorage.setItem('lh_modules', JSON.stringify(mods));
-    // Slett eventuelle duplikat-rader fra Supabase stille i bakgrunnen
-    if (seen.size < rows.length) {
-      const keepIds = Array.from(seen.values()).map(r => r.id);
-      console.log('[DB] Rydder duplikater, beholder:', keepIds);
-      if (keepIds.length > 0) {
-        await this._q('DELETE', 'os_modules', 'id=not.in.(' + keepIds.join(',') + ')');
-      }
+    rows.forEach(r => seen.set(r.id, r));
+    const unique = Array.from(seen.values());
+    // Slett eventuelle duplikat-rader stille i bakgrunnen
+    if (unique.length < rows.length) {
+      const keepIds = unique.map(r => r.id).join(',');
+      this._q('DELETE', 'os_modules', 'id=not.in.(' + keepIds + ')');
     }
+    const mods = unique.map(r => r.data).filter(Boolean);
+    localStorage.setItem('lh_modules', JSON.stringify(mods));
     return mods;
   },
 
   async saveModules(modules) {
+    // Sørg for at alle moduler har stabil _id – og bruk denne som rad-ID i Supabase
     modules.forEach((m, i) => {
       if (!m._id) m._id = 'mod_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7);
     });
     localStorage.setItem('lh_modules', JSON.stringify(modules));
     for (let i = 0; i < modules.length; i++) {
       const m = modules[i];
+      // id og m._id er alltid det samme – upsert vil aldri lage duplikater
       const ok = await this._q('POST', 'os_modules', null, [{ id: m._id, data: m, sort_order: i }]);
       if (ok === null) return false;
     }
