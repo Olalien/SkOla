@@ -618,6 +618,13 @@
     z-index: 10;
   }
   .mc-edit-btn:hover { background: var(--c4); color: white; border-color: var(--c4); transform: scale(1.1); }
+
+  /* Ordsky panel styling fixes */
+  #wcSetupPanel select { background:#1e3a5f !important; color:white !important; border:none; }
+  #wcSetupPanel select option { background:#1e3a5f; color:white; }
+  #wcSetupPanel input { color:white !important; }
+  #wcSetupPanel input::placeholder { color:rgba(255,255,255,0.38) !important; }
+
   body.dark .mc-edit-btn { background: rgba(30,30,48,0.92); border-color: rgba(255,255,255,0.15); color: white; }
 </style>
 </head>
@@ -1580,7 +1587,7 @@
         </div>
 
         <!-- ── ORDSKY-innstillinger ── -->
-        <div id="wcSetupWord">
+        <div id="wcSetupWord" style="display:block;">
           <div style="margin-bottom:1rem;">
             <label style="display:block;font-size:0.78rem;font-weight:800;opacity:0.65;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em;">Spørsmål / tema til elevene</label>
             <input id="wcQuestion" type="text" placeholder="F.eks: Hva tenker du på når du hører ordet demokrati?" style="width:100%;padding:12px 14px;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;background:rgba(255,255,255,0.12);color:white;" />
@@ -6094,6 +6101,7 @@ async function wcStartSession() {
   const code = wcGenerateCode();
   const profFilter = document.getElementById('wcProfFilter') ? document.getElementById('wcProfFilter').checked : true;
   let data;
+  let anonymous = true; // default
 
   if (isPoll) {
     const q = document.getElementById('wcPollQuestion').value.trim();
@@ -6102,14 +6110,14 @@ async function wcStartSession() {
     document.querySelectorAll('#wcPollOptList input').forEach(i => { if (i.value.trim()) opts.push(i.value.trim()); });
     if (opts.length < 2) { showToast('Legg til minst 2 alternativer!'); return; }
     const showLive = document.getElementById('wcPollShowLive').value;
-    const anonymous = document.getElementById('wcPollAnonymousSelect').value === '1';
+    anonymous = document.getElementById('wcPollAnonymousSelect').value === '1';
     data = { mode:'poll', code, question:q, options:opts, votes:{}, showLive, anonymous, profFilter, phase:'active', createdAt: Date.now() };
   } else {
     const q = document.getElementById('wcQuestion').value.trim();
     if (!q) { showToast('Skriv et spørsmål/tema!'); return; }
     const maxWords = parseInt(document.getElementById('wcMaxWords').value);
     const showLive = document.getElementById('wcShowLive').value;
-    const anonymous = document.getElementById('wcAnonymousSelect').value === '1';
+    anonymous = document.getElementById('wcAnonymousSelect').value === '1';
     const wordMode = wcCurrentWordMode;
     let lockedOptions = [];
     if (wordMode === 'locked') {
@@ -6124,7 +6132,6 @@ async function wcStartSession() {
   document.getElementById('wcActiveCode').textContent = code;
   document.getElementById('wcActiveQ').textContent = data.question;
   document.getElementById('wcRespondentCount').textContent = '0';
-  // Anon badge
   const badge = document.getElementById('wcAnonBadge');
   if (badge) { badge.textContent = anonymous ? '🙈 Anonymt' : '👤 Med navn'; badge.style.background = anonymous ? '#e0e0e0' : '#fef3c7'; }
   document.getElementById('wcActivePanel').style.display = 'block';
