@@ -5997,38 +5997,32 @@ Svar BARE med selve forklaringen, ingen ekstra tekst.`
         '<span style="color:#e53e3e;">⚠️ Kunne ikke koble til AI. Sjekk internett og API-nøkkel.</span>';
     }
   });
+})();
+
 // ════════════════════════════════════════════════════════════
-//  WORDCLOUD & POLL
+//  WORDCLOUD & POLL  –  globale funksjoner
 // ════════════════════════════════════════════════════════════
 
 let wcSession = null;
 let wcsSession = null;
 let wcPollInterval = null;
-let wcPollOptionCount = 2;
+let wcPollOptionCount = 0;
 let wcLockedOptCount = 0;
-let wcCurrentWordMode = 'free';   // 'free' | 'locked'
-let wcCurrentResultView = 'cloud'; // 'cloud' | 'list'
+let wcCurrentWordMode = 'free';
+let wcCurrentResultView = 'cloud';
 
-// ── Norsk banneordfilter ──────────────────────────────────────
-const WC_BANNED = ['faen','helvete','jævla','jævlig','jäkla','dritt','drittunge','idiot','dust','tulling',
-  'kuk','pikk','fitte','røv','ræv','balle','kunta','hore','ludder','neger','nigger','retard',
-  'mongo','spast','homo','lesbe','nazi','hitler','fuck','shit','ass','bitch','dick','pussy','cunt'];
+const WC_BANNED = ['faen','helvete','jævla','jævlig','dritt','drittunge','idiot','dust',
+  'kuk','pikk','fitte','røv','ræv','hore','ludder','neger','nigger','retard',
+  'mongo','spast','fuck','shit','bitch','dick','pussy','cunt'];
 
-function wcHasBadWord(word) {
-  const w = word.toLowerCase().trim();
-  return WC_BANNED.some(b => w === b || w.includes(b));
+function wcHasBadWord(w) {
+  const lw = (w||'').toLowerCase().trim();
+  return WC_BANNED.some(b => lw === b || lw.includes(b));
 }
-
-function wcFilterWords(words) {
-  return words.filter(w => !wcHasBadWord(w));
-}
-
-// ── Helpers ───────────────────────────────────────────────────
 function wcGenerateCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   return Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
 }
-
 function wcShow(id) {
   ['wcs-enter','wcs-word','wcs-poll'].forEach(s => {
     const el = document.getElementById(s);
@@ -6038,51 +6032,80 @@ function wcShow(id) {
   if (el) el.style.display = 'block';
 }
 
-// ── Teacher setup ─────────────────────────────────────────────
+// ── LÆRER ──────────────────────────────────────────────────
 function wcOpenTeacher() {
   if (!state.isTeacher) { openTeacherModal(); return; }
   document.getElementById('wc-teacher-panel').style.display = 'block';
   document.getElementById('wc-student-panel').style.display = 'none';
   document.getElementById('wcSetupPanel').style.display = 'block';
   document.getElementById('wcActivePanel').style.display = 'none';
+  // Reset poll options
   wcPollOptionCount = 0;
   document.getElementById('wcPollOptList').innerHTML = '';
   wcAddPollOption(); wcAddPollOption();
+  // Reset locked options
   wcLockedOptCount = 0;
   document.getElementById('wcLockedOptList').innerHTML = '';
-  wcSetMode('word');      // ← setter wcSetupWord=block, wcSetupPoll=none
+  wcSetMode('word');
   wcSetWordMode('free');
 }
 
 function wcSetMode(mode) {
-  document.getElementById('wcSetupWord').style.display = mode === 'word' ? 'block' : 'none';
-  document.getElementById('wcSetupPoll').style.display = mode === 'poll' ? 'block' : 'none';
-  document.getElementById('wcModeWordBtn').style.background = mode === 'word' ? 'rgba(255,255,255,0.25)' : 'transparent';
-  document.getElementById('wcModeWordBtn').style.color = mode === 'word' ? 'white' : 'rgba(255,255,255,0.5)';
-  document.getElementById('wcModePollBtn').style.background = mode === 'poll' ? 'rgba(255,255,255,0.25)' : 'transparent';
-  document.getElementById('wcModePollBtn').style.color = mode === 'poll' ? 'white' : 'rgba(255,255,255,0.5)';
+  const wordDiv = document.getElementById('wcSetupWord');
+  const pollDiv = document.getElementById('wcSetupPoll');
+  const wordBtn = document.getElementById('wcModeWordBtn');
+  const pollBtn = document.getElementById('wcModePollBtn');
+  if (!wordDiv || !pollDiv) return;
+  wordDiv.style.display = mode === 'word' ? 'block' : 'none';
+  pollDiv.style.display = mode === 'poll' ? 'block' : 'none';
+  if (wordBtn) {
+    wordBtn.style.background = mode === 'word' ? 'rgba(255,255,255,0.25)' : 'transparent';
+    wordBtn.style.color      = mode === 'word' ? 'white' : 'rgba(255,255,255,0.45)';
+    wordBtn.style.border     = mode === 'word' ? '2px solid rgba(255,255,255,0.5)' : '2px solid rgba(255,255,255,0.2)';
+  }
+  if (pollBtn) {
+    pollBtn.style.background = mode === 'poll' ? 'rgba(255,255,255,0.25)' : 'transparent';
+    pollBtn.style.color      = mode === 'poll' ? 'white' : 'rgba(255,255,255,0.45)';
+    pollBtn.style.border     = mode === 'poll' ? '2px solid rgba(255,255,255,0.5)' : '2px solid rgba(255,255,255,0.2)';
+  }
 }
 
 function wcSetWordMode(mode) {
   wcCurrentWordMode = mode;
-  document.getElementById('wcLockedOpts').style.display = mode === 'locked' ? 'block' : 'none';
-  document.getElementById('wcWordModeFreeBtn').style.background   = mode === 'free'   ? 'rgba(255,255,255,0.25)' : 'transparent';
-  document.getElementById('wcWordModeFreeBtn').style.color        = mode === 'free'   ? 'white' : 'rgba(255,255,255,0.55)';
-  document.getElementById('wcWordModeLockedBtn').style.background = mode === 'locked' ? 'rgba(255,255,255,0.25)' : 'transparent';
-  document.getElementById('wcWordModeLockedBtn').style.color      = mode === 'locked' ? 'white' : 'rgba(255,255,255,0.55)';
-  // I låst modus er maks ord ikke relevant
-  document.getElementById('wcMaxWords').closest('div').style.opacity = mode === 'locked' ? '0.4' : '1';
-  document.getElementById('wcMaxWords').disabled = mode === 'locked';
+  const locked = document.getElementById('wcLockedOpts');
+  const freeBtn = document.getElementById('wcWordModeFreeBtn');
+  const lockedBtn = document.getElementById('wcWordModeLockedBtn');
+  const maxWordsEl = document.getElementById('wcMaxWords');
+  if (locked) locked.style.display = mode === 'locked' ? 'block' : 'none';
+  if (freeBtn) {
+    freeBtn.style.background = mode === 'free' ? 'rgba(255,255,255,0.25)' : 'transparent';
+    freeBtn.style.color      = mode === 'free' ? 'white' : 'rgba(255,255,255,0.45)';
+    freeBtn.style.border     = mode === 'free' ? '2px solid rgba(255,255,255,0.5)' : '2px solid rgba(255,255,255,0.2)';
+  }
+  if (lockedBtn) {
+    lockedBtn.style.background = mode === 'locked' ? 'rgba(255,255,255,0.25)' : 'transparent';
+    lockedBtn.style.color      = mode === 'locked' ? 'white' : 'rgba(255,255,255,0.45)';
+    lockedBtn.style.border     = mode === 'locked' ? '2px solid rgba(255,255,255,0.5)' : '2px solid rgba(255,255,255,0.2)';
+  }
+  if (maxWordsEl) {
+    maxWordsEl.disabled = (mode === 'locked');
+    const parent = maxWordsEl.closest('div');
+    if (parent) parent.style.opacity = mode === 'locked' ? '0.4' : '1';
+  }
 }
 
 function wcAddLockedOpt() {
   wcLockedOptCount++;
   const div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;';
-  div.innerHTML = `
-    <input type="text" placeholder="Alternativ ${wcLockedOptCount}"
-      style="flex:1;padding:9px 12px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-size:0.9rem;background:#1e3a5f;color:white;outline:none;border:1px solid rgba(255,255,255,0.2);" />
-    <button onclick="this.parentElement.remove()" style="background:rgba(255,0,0,0.3);border:none;color:white;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.8rem;">✕</button>`;
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.placeholder = 'Alternativ ' + wcLockedOptCount;
+  inp.style.cssText = 'flex:1;padding:9px 12px;border-radius:10px;border:none;font-family:Nunito,sans-serif;font-size:0.9rem;background:rgba(255,255,255,0.12);color:white;outline:none;';
+  const btn = document.createElement('button');
+  btn.textContent = '✕'; btn.type = 'button';
+  btn.style.cssText = 'background:rgba(255,50,50,0.4);border:none;color:white;padding:8px 10px;border-radius:8px;cursor:pointer;';
+  btn.onclick = function() { div.remove(); };
+  div.appendChild(inp); div.appendChild(btn);
   document.getElementById('wcLockedOptList').appendChild(div);
 }
 
@@ -6090,92 +6113,101 @@ function wcAddPollOption() {
   wcPollOptionCount++;
   const div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;';
-  div.innerHTML = `
-    <input type="text" placeholder="Alternativ ${wcPollOptionCount}"
-      style="flex:1;padding:9px 12px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-size:0.9rem;background:#1e3a5f;color:white;outline:none;border:1px solid rgba(255,255,255,0.2);" />
-    <button onclick="this.parentElement.remove()" style="background:rgba(255,0,0,0.3);border:none;color:white;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.8rem;">✕</button>`;
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.placeholder = 'Alternativ ' + wcPollOptionCount;
+  inp.style.cssText = 'flex:1;padding:9px 12px;border-radius:10px;border:none;font-family:Nunito,sans-serif;font-size:0.9rem;background:rgba(255,255,255,0.12);color:white;outline:none;';
+  const btn = document.createElement('button');
+  btn.textContent = '✕'; btn.type = 'button';
+  btn.style.cssText = 'background:rgba(255,50,50,0.4);border:none;color:white;padding:8px 10px;border-radius:8px;cursor:pointer;';
+  btn.onclick = function() { div.remove(); };
+  div.appendChild(inp); div.appendChild(btn);
   document.getElementById('wcPollOptList').appendChild(div);
 }
 
 async function wcStartSession() {
-  const isPoll = document.getElementById('wcSetupPoll').style.display !== 'none';
-  const code = wcGenerateCode();
-  const profFilter = document.getElementById('wcProfFilter') ? document.getElementById('wcProfFilter').checked : true;
-  let data;
-  let anonymous = true; // default
+  try {
+    const isPoll = document.getElementById('wcSetupPoll').style.display === 'block';
+    const code = wcGenerateCode();
+    const profFilter = document.getElementById('wcProfFilter') ? document.getElementById('wcProfFilter').checked : true;
+    let data, anonymous = true;
 
-  if (isPoll) {
-    const q = document.getElementById('wcPollQuestion').value.trim();
-    if (!q) { showToast('Skriv et spørsmål!'); return; }
-    const opts = [];
-    document.querySelectorAll('#wcPollOptList input').forEach(i => { if (i.value.trim()) opts.push(i.value.trim()); });
-    if (opts.length < 2) { showToast('Legg til minst 2 alternativer!'); return; }
-    const showLive = document.getElementById('wcPollShowLive').value;
-    anonymous = document.getElementById('wcPollAnonymousSelect').value === '1';
-    data = { mode:'poll', code, question:q, options:opts, votes:{}, showLive, anonymous, profFilter, phase:'active', createdAt: Date.now() };
-  } else {
-    const q = document.getElementById('wcQuestion').value.trim();
-    if (!q) { showToast('Skriv et spørsmål/tema!'); return; }
-    const maxWords = parseInt(document.getElementById('wcMaxWords').value);
-    const showLive = document.getElementById('wcShowLive').value;
-    anonymous = document.getElementById('wcAnonymousSelect').value === '1';
-    const wordMode = wcCurrentWordMode;
-    let lockedOptions = [];
-    if (wordMode === 'locked') {
-      document.querySelectorAll('#wcLockedOptList input').forEach(i => { if (i.value.trim()) lockedOptions.push(i.value.trim()); });
-      if (lockedOptions.length < 2) { showToast('Legg til minst 2 alternativer for låst modus!'); return; }
+    if (isPoll) {
+      const q = (document.getElementById('wcPollQuestion').value||'').trim();
+      if (!q) { showToast('✏️ Skriv et spørsmål!'); return; }
+      const opts = [];
+      document.querySelectorAll('#wcPollOptList input').forEach(i => { if ((i.value||'').trim()) opts.push(i.value.trim()); });
+      if (opts.length < 2) { showToast('Legg til minst 2 alternativer!'); return; }
+      const showLive = document.getElementById('wcPollShowLive').value;
+      anonymous = document.getElementById('wcPollAnonymousSelect').value === '1';
+      data = { mode:'poll', code, question:q, options:opts, votes:{}, showLive, anonymous, profFilter, phase:'active', createdAt:Date.now() };
+    } else {
+      const q = (document.getElementById('wcQuestion').value||'').trim();
+      if (!q) { showToast('✏️ Skriv et spørsmål/tema!'); return; }
+      const maxWords = parseInt(document.getElementById('wcMaxWords').value) || 3;
+      const showLive = document.getElementById('wcShowLive').value;
+      anonymous = document.getElementById('wcAnonymousSelect').value === '1';
+      let lockedOptions = [];
+      if (wcCurrentWordMode === 'locked') {
+        document.querySelectorAll('#wcLockedOptList input').forEach(i => { if ((i.value||'').trim()) lockedOptions.push(i.value.trim()); });
+        if (lockedOptions.length < 2) { showToast('Legg til minst 2 alternativer!'); return; }
+      }
+      data = { mode:'word', wordMode:wcCurrentWordMode, lockedOptions, code, question:q, maxWords, showLive, anonymous, profFilter, words:{}, removed:[], phase:'active', createdAt:Date.now() };
     }
-    data = { mode:'word', wordMode, lockedOptions, code, question:q, maxWords, showLive, anonymous, profFilter, words:{}, removed:[], phase:'active', createdAt: Date.now() };
-  }
 
-  await GAME.save('WC_' + code, data);
-  wcSession = { code, data };
-  document.getElementById('wcActiveCode').textContent = code;
-  document.getElementById('wcActiveQ').textContent = data.question;
-  document.getElementById('wcRespondentCount').textContent = '0';
-  const badge = document.getElementById('wcAnonBadge');
-  if (badge) { badge.textContent = anonymous ? '🙈 Anonymt' : '👤 Med navn'; badge.style.background = anonymous ? '#e0e0e0' : '#fef3c7'; }
-  document.getElementById('wcActivePanel').style.display = 'block';
-  document.getElementById('wcSetupPanel').style.display = 'none';
-  showToast('☁️ Økt startet! Kode: ' + code);
-  if (wcPollInterval) clearInterval(wcPollInterval);
-  wcPollInterval = setInterval(wcRefreshResults, 2000);
+    showToast('⏳ Starter økt…');
+    await GAME.save('WC_' + code, data);
+    wcSession = { code, data };
+
+    document.getElementById('wcActiveCode').textContent = code;
+    document.getElementById('wcActiveQ').textContent = data.question;
+    document.getElementById('wcRespondentCount').textContent = '0';
+    const badge = document.getElementById('wcAnonBadge');
+    if (badge) { badge.textContent = anonymous ? '🙈 Anonymt' : '👤 Med navn'; badge.style.background = anonymous ? '#e0e0e0' : '#fef3c7'; }
+    document.getElementById('wcSetupPanel').style.display = 'none';
+    document.getElementById('wcActivePanel').style.display = 'block';
+    showToast('✅ Økt startet! Kode: ' + code);
+    if (wcPollInterval) clearInterval(wcPollInterval);
+    wcPollInterval = setInterval(wcRefreshResults, 2000);
+  } catch(err) {
+    console.error('wcStartSession feil:', err);
+    showToast('⚠️ Feil ved oppstart: ' + err.message);
+  }
 }
 
-// ── Teacher: live refresh ─────────────────────────────────────
 async function wcRefreshResults() {
   if (!wcSession) return;
-  const fresh = await GAME.load('WC_' + wcSession.code);
-  if (!fresh) return;
-  wcSession.data = fresh;
-  let count = fresh.mode === 'word' ? Object.keys(fresh.words||{}).length : Object.keys(fresh.votes||{}).length;
-  const countEl = document.getElementById('wcRespondentCount');
-  if (countEl) countEl.textContent = count;
-  const panel = document.getElementById('wcResultsPanel');
-  if (panel && panel.style.display !== 'none') wcRenderResults(fresh);
+  try {
+    const fresh = await GAME.load('WC_' + wcSession.code);
+    if (!fresh) return;
+    wcSession.data = fresh;
+    const count = fresh.mode === 'word' ? Object.keys(fresh.words||{}).length : Object.keys(fresh.votes||{}).length;
+    const el = document.getElementById('wcRespondentCount');
+    if (el) el.textContent = count;
+    const panel = document.getElementById('wcResultsPanel');
+    if (panel && panel.style.display !== 'none') wcRenderResults(fresh);
+  } catch(e) { /* stille */ }
 }
 
 function wcToggleResults() {
   const panel = document.getElementById('wcResultsPanel');
-  const btn = document.getElementById('wcToggleBtn');
+  const btn   = document.getElementById('wcToggleBtn');
+  if (!panel) return;
   if (panel.style.display === 'none') {
     panel.style.display = 'block';
-    btn.textContent = '🙈 Skjul resultater';
+    if (btn) btn.textContent = '🙈 Skjul resultater';
     if (wcSession) wcRenderResults(wcSession.data);
   } else {
     panel.style.display = 'none';
-    btn.textContent = '👁 Vis resultater';
+    if (btn) btn.textContent = '👁 Vis resultater';
   }
 }
 
 function wcSetResultView(view) {
   wcCurrentResultView = view;
-  document.getElementById('wcViewCloudBtn').style.background = view === 'cloud' ? '#6366f1' : 'white';
-  document.getElementById('wcViewCloudBtn').style.color = view === 'cloud' ? 'white' : '#555';
-  document.getElementById('wcViewCloudBtn').style.borderColor = view === 'cloud' ? '#6366f1' : '#e0e0e0';
-  document.getElementById('wcViewListBtn').style.background = view === 'list' ? '#6366f1' : 'white';
-  document.getElementById('wcViewListBtn').style.color = view === 'list' ? 'white' : '#555';
-  document.getElementById('wcViewListBtn').style.borderColor = view === 'list' ? '#6366f1' : '#e0e0e0';
+  const cb = document.getElementById('wcViewCloudBtn');
+  const lb = document.getElementById('wcViewListBtn');
+  if (cb) { cb.style.background = view==='cloud'?'#6366f1':'white'; cb.style.color = view==='cloud'?'white':'#666'; cb.style.borderColor = view==='cloud'?'#6366f1':'#e0e0e0'; }
+  if (lb) { lb.style.background = view==='list'?'#6366f1':'white';  lb.style.color = view==='list'?'white':'#666';  lb.style.borderColor = view==='list'?'#6366f1':'#e0e0e0'; }
   if (wcSession) wcRenderResults(wcSession.data);
 }
 
@@ -6183,176 +6215,120 @@ function wcRenderResults(data) {
   const wcDiv   = document.getElementById('wcWordCloudDisplay');
   const listDiv = document.getElementById('wcWordListDisplay');
   const pollDiv = document.getElementById('wcPollDisplay');
-  if (!wcDiv || !listDiv || !pollDiv) return;
-
+  if (!wcDiv) return;
+  const removed = data.removed || [];
   if (data.mode === 'word') {
-    pollDiv.style.display = 'none';
-    const removed = data.removed || [];
-    const words = data.words || {};
+    if (pollDiv) pollDiv.style.display = 'none';
     if (wcCurrentResultView === 'cloud') {
-      wcDiv.style.display = 'flex';
-      listDiv.style.display = 'none';
-      wcDiv.innerHTML = wcBuildCloud(words, removed);
+      wcDiv.style.display = 'flex'; if (listDiv) listDiv.style.display = 'none';
+      wcDiv.innerHTML = wcBuildCloud(data.words||{}, removed);
     } else {
-      wcDiv.style.display = 'none';
-      listDiv.style.display = 'block';
-      listDiv.innerHTML = wcBuildList(words, removed, data.anonymous);
+      wcDiv.style.display = 'none'; if (listDiv) { listDiv.style.display = 'block'; listDiv.innerHTML = wcBuildList(data.words||{}, removed, data.anonymous); }
     }
   } else {
-    wcDiv.style.display = 'none';
-    listDiv.style.display = 'none';
-    pollDiv.style.display = 'block';
-    pollDiv.innerHTML = wcBuildPollBars(data.options||[], data.votes||{}, data.anonymous);
+    wcDiv.style.display = 'none'; if (listDiv) listDiv.style.display = 'none';
+    if (pollDiv) { pollDiv.style.display = 'block'; pollDiv.innerHTML = wcBuildPollBars(data.options||[], data.votes||{}, data.anonymous); }
   }
 }
 
-// ── Cloud builder ─────────────────────────────────────────────
 function wcBuildCloud(wordsObj, removed) {
-  removed = removed || [];
   const counts = {};
   Object.values(wordsObj).forEach(arr => {
-    (Array.isArray(arr) ? arr : [arr]).forEach(w => {
-      const k = w.trim().toLowerCase();
-      if (k && !removed.includes(k)) counts[k] = (counts[k]||0) + 1;
+    (Array.isArray(arr)?arr:[arr]).forEach(w => {
+      const k = (w||'').trim().toLowerCase();
+      if (k && !(removed||[]).includes(k)) counts[k] = (counts[k]||0)+1;
     });
   });
-  if (!Object.keys(counts).length) return '<span style="color:#aaa;font-size:0.9rem;">Ingen ord ennå...</span>';
+  if (!Object.keys(counts).length) return '<span style="color:#aaa;font-size:0.9rem;">Ingen ord ennå…</span>';
   const max = Math.max(...Object.values(counts));
   const colors = ['#FF6B6B','#FFD93D','#6BCB77','#4D96FF','#C77DFF','#0ea5e9','#f97316','#ec4899'];
-  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([word, cnt], i) => {
-    const size = 0.9 + (cnt/max)*2.2;
-    const color = colors[i%colors.length];
-    return `<span style="font-size:${size}rem;font-weight:${cnt>1?900:700};color:${color};padding:4px 8px;display:inline-block;line-height:1.3;cursor:default;" title="${cnt} svar">${escHtml(word)}</span>`;
-  }).join('');
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([word,cnt],i) =>
+    `<span style="font-size:${0.9+(cnt/max)*2.2}rem;font-weight:${cnt>1?900:700};color:${colors[i%colors.length]};padding:4px 8px;display:inline-block;line-height:1.3;" title="${cnt} svar">${escHtml(word)}</span>`
+  ).join('');
 }
 
-// ── List builder (teacher moderation) ────────────────────────
 function wcBuildList(wordsObj, removed, anonymous) {
-  removed = removed || [];
-  // Collect all {student, word} entries
-  const entries = [];
+  const byWord = {};
   Object.entries(wordsObj).forEach(([student, arr]) => {
-    (Array.isArray(arr) ? arr : [arr]).forEach(w => {
-      const k = w.trim().toLowerCase();
-      if (k) entries.push({ student, word: k });
+    (Array.isArray(arr)?arr:[arr]).forEach(w => {
+      const k = (w||'').trim().toLowerCase();
+      if (k) { if (!byWord[k]) byWord[k]=[]; byWord[k].push(student); }
     });
   });
-  // Count per word
-  const counts = {};
-  entries.forEach(e => { if (!removed.includes(e.word)) counts[e.word] = (counts[e.word]||0)+1; });
-  if (!entries.length) return '<div style="color:#aaa;text-align:center;padding:1rem;font-size:0.9rem;">Ingen ord ennå...</div>';
-
-  // Group by word
-  const byWord = {};
-  entries.forEach(e => {
-    if (!byWord[e.word]) byWord[e.word] = [];
-    byWord[e.word].push(e.student);
-  });
-
-  const isRemoved = w => removed.includes(w);
+  if (!Object.keys(byWord).length) return '<div style="color:#aaa;text-align:center;padding:1rem;">Ingen ord ennå…</div>';
   return '<div style="max-height:400px;overflow-y:auto;">' +
     Object.entries(byWord).sort((a,b)=>b[1].length-a[1].length).map(([word, students]) => {
-      const rem = isRemoved(word);
+      const rem = (removed||[]).includes(word);
       return `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:10px;margin-bottom:0.4rem;background:${rem?'#fff5f5':'#f4f4fb'};opacity:${rem?0.5:1};">
-        <div>
-          <span style="font-weight:800;font-size:0.95rem;color:${rem?'#aaa':'var(--dark)'};">${escHtml(word)}</span>
-          <span style="font-size:0.75rem;color:#aaa;margin-left:0.5rem;">${students.length} svar${!anonymous ? ' · ' + students.map(s=>escHtml(s)).join(', ') : ''}</span>
-        </div>
-        <button onclick="wcToggleRemoveWord('${word.replace(/'/g,"\\'")}',${rem})"
-          style="padding:5px 12px;border-radius:50px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;background:${rem?'#6BCB77':'#FF6B6B'};color:white;">
-          ${rem ? '↩ Vis' : '🗑 Fjern'}
-        </button>
+        <div><span style="font-weight:800;font-size:0.95rem;color:${rem?'#aaa':'var(--dark)'};">${escHtml(word)}</span>
+        <span style="font-size:0.75rem;color:#aaa;margin-left:0.5rem;">${students.length} svar${(!anonymous&&students.length)?' · '+students.map(s=>escHtml(s)).join(', '):''}</span></div>
+        <button onclick="wcToggleRemoveWord('${word.replace(/'/g,"\\'")}',${rem})" style="padding:5px 12px;border-radius:50px;border:none;font-family:Nunito,sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;background:${rem?'#6BCB77':'#FF6B6B'};color:white;">${rem?'↩ Vis':'🗑 Fjern'}</button>
       </div>`;
     }).join('') + '</div>';
 }
 
-async function wcToggleRemoveWord(word, isCurrentlyRemoved) {
+async function wcToggleRemoveWord(word, isRemoved) {
   if (!wcSession) return;
   const fresh = await GAME.load('WC_' + wcSession.code) || wcSession.data;
   fresh.removed = fresh.removed || [];
-  if (isCurrentlyRemoved) {
-    fresh.removed = fresh.removed.filter(w => w !== word);
-  } else {
-    if (!fresh.removed.includes(word)) fresh.removed.push(word);
-  }
+  if (isRemoved) { fresh.removed = fresh.removed.filter(w => w !== word); }
+  else { if (!fresh.removed.includes(word)) fresh.removed.push(word); }
   await GAME.save('WC_' + wcSession.code, fresh);
   wcSession.data = fresh;
   wcRenderResults(fresh);
 }
 
-// ── Poll builder ──────────────────────────────────────────────
 function wcBuildPollBars(options, votes, anonymous) {
   const totals = {};
   options.forEach(o => totals[o] = []);
   Object.entries(votes).forEach(([student, v]) => { if (totals[v] !== undefined) totals[v].push(student); });
-  const total = Object.values(totals).reduce((s,v)=>s+v.length,0);
+  const total = Object.values(totals).reduce((s,v)=>s+v.length, 0);
   const colors = ['#4D96FF','#FF6B6B','#6BCB77','#FFD93D','#C77DFF','#f97316'];
-  return options.map((opt, i) => {
-    const voters = totals[opt] || [];
-    const cnt = voters.length;
+  return options.map((opt,i) => {
+    const voters = totals[opt]||[], cnt = voters.length;
     const pct = total ? Math.round(cnt/total*100) : 0;
-    const names = !anonymous && voters.length ? `<div style="font-size:0.72rem;color:#888;margin-top:0.2rem;">${voters.map(s=>escHtml(s)).join(', ')}</div>` : '';
-    return `<div style="margin-bottom:1rem;">
-      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:0.9rem;margin-bottom:0.3rem;">
-        <span>${escHtml(opt)}</span>
-        <span style="color:${colors[i%colors.length]};">${cnt} (${pct}%)</span>
-      </div>
-      <div style="background:#f0f0f0;border-radius:50px;height:14px;overflow:hidden;">
-        <div style="width:${pct}%;height:100%;background:${colors[i%colors.length]};border-radius:50px;transition:width 0.5s ease;"></div>
-      </div>
-      ${names}
-    </div>`;
+    const names = (!anonymous && voters.length) ? `<div style="font-size:0.72rem;color:#888;margin-top:0.2rem;">${voters.map(s=>escHtml(s)).join(', ')}</div>` : '';
+    return `<div style="margin-bottom:1rem;"><div style="display:flex;justify-content:space-between;font-weight:800;font-size:0.9rem;margin-bottom:0.3rem;"><span>${escHtml(opt)}</span><span style="color:${colors[i%colors.length]};">${cnt} (${pct}%)</span></div><div style="background:#f0f0f0;border-radius:50px;height:14px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:${colors[i%colors.length]};border-radius:50px;transition:width 0.5s;"></div></div>${names}</div>`;
   }).join('');
 }
 
 async function wcEndSession() {
-  if (!wcSession || !confirm('Avslutte økt og slette dataene?')) return;
+  if (!wcSession) return;
+  if (!confirm('Avslutte økt og slette dataene?')) return;
   if (wcPollInterval) clearInterval(wcPollInterval);
-  await GAME.delete('WC_' + wcSession.code);
+  try { await GAME.delete('WC_' + wcSession.code); } catch(e) {}
   wcSession = null;
   document.getElementById('wcActivePanel').style.display = 'none';
+  document.getElementById('wcResultsPanel').style.display = 'none';
   document.getElementById('wcSetupPanel').style.display = 'block';
   showToast('✅ Økt avsluttet');
 }
 
-// ── Student ───────────────────────────────────────────────────
+// ── ELEV ───────────────────────────────────────────────────
 async function wcsJoin() {
   const code = (document.getElementById('wcsCodeInput').value||'').trim().toUpperCase();
   const errEl = document.getElementById('wcsError');
-  if (code.length !== 4) { errEl.style.display='block'; errEl.textContent='Koden må være 4 tegn!'; return; }
+  if (code.length !== 4) { if(errEl){errEl.style.display='block';errEl.textContent='Koden må være 4 tegn!';} return; }
   const data = await GAME.load('WC_' + code);
-  if (!data || data.phase !== 'active') {
-    errEl.style.display='block'; errEl.textContent='Fant ingen aktiv økt med den koden. Sjekk og prøv igjen!'; return;
-  }
-  errEl.style.display='none';
+  if (!data || data.phase !== 'active') { if(errEl){errEl.style.display='block';errEl.textContent='Fant ingen aktiv økt med denne koden.';} return; }
+  if (errEl) errEl.style.display = 'none';
   wcsSession = { code, data };
 
   if (data.mode === 'word') {
     document.getElementById('wcsWordQ').textContent = data.question;
     const container = document.getElementById('wcsWordInputs');
     container.innerHTML = '';
-
     if (data.wordMode === 'locked') {
-      // Vis knapper for hvert alternativ
-      const opts = data.lockedOptions || [];
       const colors = ['#4D96FF','#FF6B6B','#6BCB77','#FFD93D','#C77DFF','#f97316'];
       let selected = [];
-      opts.forEach((opt, i) => {
+      (data.lockedOptions||[]).forEach((opt,i) => {
         const btn = document.createElement('button');
-        btn.textContent = opt;
-        btn.id = 'wcsLockedOpt_' + i;
-        btn.setAttribute('data-opt', opt);
-        btn.style.cssText = `width:100%;text-align:left;padding:13px 16px;border:2px solid ${colors[i%colors.length]};border-radius:12px;background:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;margin-bottom:0.6rem;transition:all 0.18s;color:var(--dark);`;
+        btn.textContent = opt; btn.setAttribute('data-opt', opt); btn.type = 'button';
+        btn.style.cssText = `width:100%;text-align:left;padding:13px 16px;border:2px solid ${colors[i%colors.length]};border-radius:12px;background:white;font-family:Nunito,sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;margin-bottom:0.6rem;color:var(--dark);transition:all 0.18s;`;
         btn.onclick = function() {
           const idx = selected.indexOf(opt);
-          if (idx >= 0) {
-            selected.splice(idx,1);
-            btn.style.background='white'; btn.style.color='var(--dark)';
-          } else {
-            selected.push(opt);
-            btn.style.background=colors[i%colors.length]; btn.style.color='white';
-          }
-          // Store in hidden field
+          if (idx>=0) { selected.splice(idx,1); btn.style.background='white'; btn.style.color='var(--dark)'; }
+          else { selected.push(opt); btn.style.background=colors[i%colors.length]; btn.style.color='white'; }
           document.getElementById('wcsLockedSelected').value = JSON.stringify(selected);
         };
         container.appendChild(btn);
@@ -6361,33 +6337,28 @@ async function wcsJoin() {
       hidden.type='hidden'; hidden.id='wcsLockedSelected'; hidden.value='[]';
       container.appendChild(hidden);
     } else {
-      // Fritt – tekstinput
-      for (let i = 0; i < (data.maxWords||3); i++) {
+      for (let i=0; i<(data.maxWords||3); i++) {
         const inp = document.createElement('input');
-        inp.type='text'; inp.id='wcsWord_'+i; inp.placeholder='Ord '+(i+1)+'...';
-        inp.style.cssText='width:100%;padding:11px 13px;border:2px solid #e0e0e0;border-radius:12px;font-family:\'Nunito\',sans-serif;font-size:0.95rem;outline:none;margin-bottom:0.5rem;';
+        inp.type='text'; inp.id='wcsWord_'+i; inp.placeholder='Ord '+(i+1)+'…';
+        inp.style.cssText='width:100%;padding:11px 13px;border:2px solid #e0e0e0;border-radius:12px;font-family:Nunito,sans-serif;font-size:0.95rem;outline:none;margin-bottom:0.5rem;box-sizing:border-box;';
         inp.addEventListener('focus',function(){this.style.borderColor='#6366f1';});
         inp.addEventListener('blur',function(){this.style.borderColor='#e0e0e0';});
         container.appendChild(inp);
       }
     }
-
     document.getElementById('wcsWordBtn').style.display = 'block';
     document.getElementById('wcsWordDone').style.display = 'none';
     if (data.showLive === 'live') { document.getElementById('wcsLiveCloud').style.display='block'; wcsStartLiveRefresh(); }
     wcShow('wcs-word');
-
   } else {
     document.getElementById('wcsPollQ').textContent = data.question;
-    const optContainer = document.getElementById('wcsPollOptions');
     const colors = ['#4D96FF','#FF6B6B','#6BCB77','#FFD93D','#C77DFF','#f97316'];
-    optContainer.innerHTML = (data.options||[]).map((opt, i) => `
-      <button onclick="wcsVote('${escHtml(opt).replace(/'/g,"\\'")}',this)" style="width:100%;text-align:left;padding:13px 16px;border:2px solid ${colors[i%colors.length]};border-radius:12px;background:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;margin-bottom:0.6rem;transition:all 0.18s;color:var(--dark);"
-        onmouseover="this.style.background='${colors[i%colors.length]}';this.style.color='white'"
-        onmouseout="this.style.background='white';this.style.color='var(--dark)'">${escHtml(opt)}</button>`).join('');
+    document.getElementById('wcsPollOptions').innerHTML = (data.options||[]).map((opt,i) =>
+      `<button type="button" onclick="wcsVote('${opt.replace(/'/g,"\\'")}',this)" style="width:100%;text-align:left;padding:13px 16px;border:2px solid ${colors[i%colors.length]};border-radius:12px;background:white;font-family:Nunito,sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;margin-bottom:0.6rem;color:var(--dark);" onmouseover="this.style.background='${colors[i%colors.length]}';this.style.color='white'" onmouseout="if(!this.dataset.voted){this.style.background='white';this.style.color='var(--dark)'}">${escHtml(opt)}</button>`
+    ).join('');
     document.getElementById('wcsPollDone').style.display = 'none';
-    document.getElementById('wcsPollLive').style.display = data.showLive==='live' ? 'block' : 'none';
-    if (data.showLive==='live') wcsStartLiveRefresh();
+    document.getElementById('wcsPollLive').style.display = data.showLive === 'live' ? 'block' : 'none';
+    if (data.showLive === 'live') wcsStartLiveRefresh();
     wcShow('wcs-poll');
   }
 }
@@ -6396,55 +6367,46 @@ async function wcsSubmitWords() {
   if (!wcsSession) return;
   const data = wcsSession.data;
   let words = [];
-
   if (data.wordMode === 'locked') {
-    const selEl = document.getElementById('wcsLockedSelected');
-    words = selEl ? JSON.parse(selEl.value||'[]') : [];
+    const el = document.getElementById('wcsLockedSelected');
+    words = el ? JSON.parse(el.value||'[]') : [];
     if (!words.length) { showToast('Velg minst ett alternativ!'); return; }
   } else {
     let i = 0;
     while (document.getElementById('wcsWord_'+i)) {
-      const val = document.getElementById('wcsWord_'+i).value.trim();
-      if (val) words.push(val);
+      const v = (document.getElementById('wcsWord_'+i).value||'').trim();
+      if (v) words.push(v);
       i++;
     }
     if (!words.length) { showToast('Skriv minst ett ord!'); return; }
-    // Profanity filter
     if (data.profFilter) {
       const bad = words.filter(w => wcHasBadWord(w));
-      if (bad.length) {
-        showToast('⚠️ Et eller flere ord er ikke tillatt: ' + bad.join(', '));
-        return;
-      }
+      if (bad.length) { showToast('⚠️ Ikke tillatt: ' + bad.join(', ')); return; }
     }
   }
-
   const fresh = await GAME.load('WC_' + wcsSession.code) || data;
-  const studentKey = !data.anonymous && state.student?.name
-    ? state.student.name
-    : ('anon_' + Math.random().toString(36).slice(2,7));
+  const key = !data.anonymous && state.student && state.student.name ? state.student.name : 'anon_' + Math.random().toString(36).slice(2,7);
   fresh.words = fresh.words || {};
-  fresh.words[studentKey] = words;
+  fresh.words[key] = words;
   await GAME.save('WC_' + wcsSession.code, fresh);
-
   document.getElementById('wcsWordBtn').style.display = 'none';
   document.getElementById('wcsWordDone').style.display = 'block';
-  let j=0; while(document.getElementById('wcsWord_'+j)){document.getElementById('wcsWord_'+j).disabled=true;j++;}
-  document.querySelectorAll('#wcsWordInputs button').forEach(b=>b.disabled=true);
-  showToast('✅ Ordene er sendt!');
+  let i2 = 0;
+  while (document.getElementById('wcsWord_'+i2)) { document.getElementById('wcsWord_'+i2).disabled=true; i2++; }
+  document.querySelectorAll('#wcsWordInputs button').forEach(b => b.disabled=true);
+  showToast('✅ Sendt!');
 }
 
 async function wcsVote(option, btn) {
   if (!wcsSession) return;
-  document.querySelectorAll('#wcsPollOptions button').forEach(b=>b.disabled=true);
+  document.querySelectorAll('#wcsPollOptions button').forEach(b => { b.disabled=true; b.dataset.voted='0'; });
+  if (btn) { btn.dataset.voted='1'; btn.style.background='#4D96FF'; btn.style.color='white'; }
   const fresh = await GAME.load('WC_'+wcsSession.code) || wcsSession.data;
-  const studentKey = !fresh.anonymous && state.student?.name
-    ? state.student.name
-    : ('anon_'+Math.random().toString(36).slice(2,7));
-  fresh.votes = fresh.votes||{};
-  fresh.votes[studentKey] = option;
+  const key = !fresh.anonymous && state.student && state.student.name ? state.student.name : 'anon_'+Math.random().toString(36).slice(2,7);
+  fresh.votes = fresh.votes || {};
+  fresh.votes[key] = option;
   await GAME.save('WC_'+wcsSession.code, fresh);
-  document.getElementById('wcsPollDone').style.display='block';
+  document.getElementById('wcsPollDone').style.display = 'block';
   showToast('🗳️ Stemme registrert!');
 }
 
@@ -6453,27 +6415,25 @@ function wcsStartLiveRefresh() {
   if (wcsLiveInterval) clearInterval(wcsLiveInterval);
   wcsLiveInterval = setInterval(async () => {
     if (!wcsSession) { clearInterval(wcsLiveInterval); return; }
-    const fresh = await GAME.load('WC_'+wcsSession.code);
-    if (!fresh) return;
-    const removed = fresh.removed||[];
-    if (fresh.mode==='word') {
-      const canvas = document.getElementById('wcsLiveCloudCanvas');
-      if (canvas) canvas.innerHTML = wcBuildCloud(fresh.words||{}, removed);
-    } else {
-      const liveDiv = document.getElementById('wcsPollLiveDisplay');
-      if (liveDiv) liveDiv.innerHTML = wcBuildPollBars(fresh.options||[], fresh.votes||{}, true);
-    }
+    try {
+      const fresh = await GAME.load('WC_'+wcsSession.code);
+      if (!fresh) return;
+      if (fresh.mode === 'word') {
+        const el = document.getElementById('wcsLiveCloudCanvas');
+        if (el) el.innerHTML = wcBuildCloud(fresh.words||{}, fresh.removed||[]);
+      } else {
+        const el = document.getElementById('wcsPollLiveDisplay');
+        if (el) el.innerHTML = wcBuildPollBars(fresh.options||[], fresh.votes||{}, true);
+      }
+    } catch(e) {}
   }, 2500);
 }
 
-// ── Show view hook ────────────────────────────────────────────
 function wcShowView() {
-  // Liten forsinkelse for å sikre at state.isTeacher er riktig satt
   setTimeout(() => {
     if (state.isTeacher) {
       document.getElementById('wc-teacher-panel').style.display = 'block';
       document.getElementById('wc-student-panel').style.display = 'none';
-      // Bare re-init hvis ingen aktiv økt
       if (!wcSession) wcOpenTeacher();
     } else {
       document.getElementById('wc-teacher-panel').style.display = 'none';
@@ -6485,7 +6445,7 @@ function wcShowView() {
   }, 0);
 }
 
-})();
 </script>
 </body>
 </html>
+
