@@ -1561,7 +1561,7 @@
 
     <!-- ── TEACHER PANEL ── -->
     <div id="wc-teacher-panel" style="display:none;">
-      <div class="teacher-panel" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;margin-bottom:1rem;">
+      <div id="wcSetupPanel" class="teacher-panel" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;margin-bottom:1rem;">
         <h2 style="color:white;margin-bottom:1.25rem;">☁️ Ordsky &amp; Avstemning</h2>
 
         <!-- Mode tabs -->
@@ -5996,11 +5996,14 @@ function wcOpenTeacher() {
   if (!state.isTeacher) { openTeacherModal(); return; }
   document.getElementById('wc-teacher-panel').style.display = 'block';
   document.getElementById('wc-student-panel').style.display = 'none';
+  document.getElementById('wcSetupPanel').style.display = 'block';
+  document.getElementById('wcActivePanel').style.display = 'none';
   wcPollOptionCount = 0;
   document.getElementById('wcPollOptList').innerHTML = '';
   wcAddPollOption(); wcAddPollOption();
   wcLockedOptCount = 0;
   document.getElementById('wcLockedOptList').innerHTML = '';
+  wcSetMode('word');      // ← setter wcSetupWord=block, wcSetupPoll=none
   wcSetWordMode('free');
 }
 
@@ -6085,7 +6088,7 @@ async function wcStartSession() {
   const badge = document.getElementById('wcAnonBadge');
   if (badge) { badge.textContent = anonymous ? '🙈 Anonymt' : '👤 Med navn'; badge.style.background = anonymous ? '#e0e0e0' : '#fef3c7'; }
   document.getElementById('wcActivePanel').style.display = 'block';
-  document.querySelector('#wc-teacher-panel .teacher-panel').style.display = 'none';
+  document.getElementById('wcSetupPanel').style.display = 'none';
   showToast('☁️ Økt startet! Kode: ' + code);
   if (wcPollInterval) clearInterval(wcPollInterval);
   wcPollInterval = setInterval(wcRefreshResults, 2000);
@@ -6260,7 +6263,7 @@ async function wcEndSession() {
   await GAME.delete('WC_' + wcSession.code);
   wcSession = null;
   document.getElementById('wcActivePanel').style.display = 'none';
-  document.querySelector('#wc-teacher-panel .teacher-panel').style.display = 'block';
+  document.getElementById('wcSetupPanel').style.display = 'block';
   showToast('✅ Økt avsluttet');
 }
 
