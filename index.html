@@ -2166,6 +2166,14 @@ function loginTeacher() {
     renderResults();
     renderHomeModules();
     renderTaskModules();
+    // Oppdater Ordsky-visning hvis den er aktiv
+    const wcPanel = document.getElementById('wc-teacher-panel');
+    const wcStudent = document.getElementById('wc-student-panel');
+    if (wcPanel && wcStudent) {
+      wcPanel.style.display = 'block';
+      wcStudent.style.display = 'none';
+      if (!wcSession) wcOpenTeacher();
+    }
   } else {
     const err = document.getElementById('teacherError');
     if (err) { err.style.display='block'; setTimeout(()=>err.style.display='none',2500); }
@@ -6452,18 +6460,21 @@ function wcsStartLiveRefresh() {
 
 // ── Show view hook ────────────────────────────────────────────
 function wcShowView() {
-  if (state.isTeacher) {
-    document.getElementById('wc-teacher-panel').style.display = 'block';
-    document.getElementById('wc-student-panel').style.display = 'none';
-    wcOpenTeacher();
-  } else {
-    document.getElementById('wc-teacher-panel').style.display = 'none';
-    document.getElementById('wc-student-panel').style.display = 'block';
-    // Vis lærer-hint-knapp for ikke-innloggede
-    const hint = document.getElementById('wcTeacherLoginHint');
-    if (hint) hint.style.display = 'block';
-    wcShow('wcs-enter');
-  }
+  // Liten forsinkelse for å sikre at state.isTeacher er riktig satt
+  setTimeout(() => {
+    if (state.isTeacher) {
+      document.getElementById('wc-teacher-panel').style.display = 'block';
+      document.getElementById('wc-student-panel').style.display = 'none';
+      // Bare re-init hvis ingen aktiv økt
+      if (!wcSession) wcOpenTeacher();
+    } else {
+      document.getElementById('wc-teacher-panel').style.display = 'none';
+      document.getElementById('wc-student-panel').style.display = 'block';
+      const hint = document.getElementById('wcTeacherLoginHint');
+      if (hint) hint.style.display = 'block';
+      wcShow('wcs-enter');
+    }
+  }, 0);
 }
 
 })();
