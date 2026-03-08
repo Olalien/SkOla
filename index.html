@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- OlaSkole v20260308-1935 -->
 <html lang="no">
 <head>
 <meta charset="UTF-8">
@@ -1613,7 +1614,7 @@
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.65rem;margin-bottom:1rem;" class="form-grid-3">
             <div>
               <label style="display:block;font-size:0.72rem;font-weight:800;opacity:0.65;margin-bottom:0.35rem;text-transform:uppercase;">Maks ord per elev</label>
-              <select id="wcMaxWords" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
+              <select id="wcMaxWords" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#1e3a5f;color:white;outline:none;border:1px solid rgba(255,255,255,0.2);">
                 <option value="1">1 ord</option>
                 <option value="3" selected>3 ord</option>
                 <option value="5">5 ord</option>
@@ -1622,14 +1623,14 @@
             </div>
             <div>
               <label style="display:block;font-size:0.72rem;font-weight:800;opacity:0.65;margin-bottom:0.35rem;text-transform:uppercase;">Vis resultat</label>
-              <select id="wcShowLive" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
+              <select id="wcShowLive" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#1e3a5f;color:white;outline:none;border:1px solid rgba(255,255,255,0.2);">
                 <option value="live">Live</option>
                 <option value="end">Ved avslutning</option>
               </select>
             </div>
             <div>
               <label style="display:block;font-size:0.72rem;font-weight:800;opacity:0.65;margin-bottom:0.35rem;text-transform:uppercase;">Svar</label>
-              <select id="wcAnonymousSelect" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
+              <select id="wcAnonymousSelect" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#1e3a5f;color:white;outline:none;border:1px solid rgba(255,255,255,0.2);">
                 <option value="1">🙈 Anonymt</option>
                 <option value="0">👤 Med navn</option>
               </select>
@@ -1655,14 +1656,14 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:1rem;" class="form-grid-2">
             <div>
               <label style="display:block;font-size:0.72rem;font-weight:800;opacity:0.65;margin-bottom:0.35rem;text-transform:uppercase;">Vis resultat</label>
-              <select id="wcPollShowLive" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
+              <select id="wcPollShowLive" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#1e3a5f;color:white;outline:none;border:1px solid rgba(255,255,255,0.2);">
                 <option value="live">Live</option>
                 <option value="end">Ved avslutning</option>
               </select>
             </div>
             <div>
               <label style="display:block;font-size:0.72rem;font-weight:800;opacity:0.65;margin-bottom:0.35rem;text-transform:uppercase;">Svar</label>
-              <select id="wcPollAnonymousSelect" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
+              <select id="wcPollAnonymousSelect" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#1e3a5f;color:white;outline:none;border:1px solid rgba(255,255,255,0.2);">
                 <option value="1">🙈 Anonymt</option>
                 <option value="0">👤 Med navn</option>
               </select>
@@ -6080,7 +6081,7 @@ function wcAddLockedOpt() {
   div.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;';
   div.innerHTML = `
     <input type="text" placeholder="Alternativ ${wcLockedOptCount}"
-      style="flex:1;padding:9px 12px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-size:0.9rem;background:rgba(255,255,255,0.12);color:white;outline:none;" />
+      style="flex:1;padding:9px 12px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-size:0.9rem;background:#1e3a5f;color:white;outline:none;border:1px solid rgba(255,255,255,0.2);" />
     <button onclick="this.parentElement.remove()" style="background:rgba(255,0,0,0.3);border:none;color:white;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.8rem;">✕</button>`;
   document.getElementById('wcLockedOptList').appendChild(div);
 }
@@ -6091,7 +6092,7 @@ function wcAddPollOption() {
   div.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:center;';
   div.innerHTML = `
     <input type="text" placeholder="Alternativ ${wcPollOptionCount}"
-      style="flex:1;padding:9px 12px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-size:0.9rem;background:rgba(255,255,255,0.12);color:white;outline:none;" />
+      style="flex:1;padding:9px 12px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-size:0.9rem;background:#1e3a5f;color:white;outline:none;border:1px solid rgba(255,255,255,0.2);" />
     <button onclick="this.parentElement.remove()" style="background:rgba(255,0,0,0.3);border:none;color:white;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:0.8rem;">✕</button>`;
   document.getElementById('wcPollOptList').appendChild(div);
 }
