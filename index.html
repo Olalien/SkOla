@@ -3037,33 +3037,56 @@ const DB = {
 
   // ── MODULER (lærers innhold) ───────────────────────────────────────
   async loadModules() {
-    const rows = await this._q('GET', 'os_modules', 'order=sort_order.asc,created_at.asc&select=id,data,sort_order');
+    const rows = await this._q('GET', 'os_modules', 'order=created_at.asc&select=id,data,sort_order');
     if (rows === null) {
       try { return JSON.parse(localStorage.getItem('lh_modules') || '[]'); } catch { return []; }
     }
-    // Dedupliser på rad-ID (primærnøkkel) – behold siste per unik id
-    const seen = new Map();
-    rows.forEach(r => seen.set(r.id, r));
-    const unique = Array.from(seen.values());
-    // Slett eventuelle duplikat-rader stille i bakgrunnen
-    if (unique.length < rows.length) {
-      const keepIds = unique.map(r => r.id).join(',');
-      this._q('DELETE', 'os_modules', 'id=not.in.(' + keepIds + ')');
+    if (rows.length === 0) return [];
+
+    // ── Dedupliser: grupper på data._id, behold kun én rad per modul ──
+    // Rader uten data._id er gamle/korrupte og skal slettes
+    const keepIds   = [];   // rad-IDer vi beholder
+    const deleteIds = [];   // rad-IDer vi sletter
+    const seenModIds = new Map(); // data._id → rad-id
+
+    rows.forEach(r => {
+      const modId = r.data && r.data._id;
+      if (!modId) {
+        // Rad uten _id i data – slett den
+        deleteIds.push(r.id);
+      } else if (seenModIds.has(modId)) {
+        // Duplikat – slett den (beholder den første)
+        deleteIds.push(r.id);
+      } else {
+        seenModIds.set(modId, r.id);
+        keepIds.push(r);
+      }
+    });
+
+    // Slett søppel-rader fra Supabase i bakgrunnen
+    if (deleteIds.length > 0) {
+      console.log('[DB] Rydder', deleteIds.length, 'duplikat/korrupte rader fra Supabase');
+      for (const did of deleteIds) {
+        this._q('DELETE', 'os_modules', 'id=eq.' + did);
+      }
     }
-    const mods = unique.map(r => r.data).filter(Boolean);
+
+    // Sorter på sort_order
+    keepIds.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    const mods = keepIds.map(r => r.data).filter(Boolean);
     localStorage.setItem('lh_modules', JSON.stringify(mods));
     return mods;
   },
 
   async saveModules(modules) {
-    // Sørg for at alle moduler har stabil _id – og bruk denne som rad-ID i Supabase
+    // Sørg for at alle moduler har stabil _id
     modules.forEach((m, i) => {
       if (!m._id) m._id = 'mod_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7);
     });
     localStorage.setItem('lh_modules', JSON.stringify(modules));
+    // Upsert – rad-ID = data._id, aldri duplikater
     for (let i = 0; i < modules.length; i++) {
       const m = modules[i];
-      // id og m._id er alltid det samme – upsert vil aldri lage duplikater
       const ok = await this._q('POST', 'os_modules', null, [{ id: m._id, data: m, sort_order: i }]);
       if (ok === null) return false;
     }
