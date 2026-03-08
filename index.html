@@ -1557,46 +1557,56 @@
 
 <!-- WORDCLOUD / POLL VIEW -->
 <div class="view" id="view-wordcloud">
-  <div style="max-width:900px;margin:0 auto;">
+  <div style="max-width:960px;margin:0 auto;">
 
-    <!-- ── TEACHER PANEL ── -->
+    <!-- ── TEACHER SETUP (kun synlig når innlogget som lærer) ── -->
     <div id="wc-teacher-panel" style="display:none;">
-      <div id="wcSetupPanel" class="teacher-panel" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;margin-bottom:1rem;">
-        <h2 style="color:white;margin-bottom:1.25rem;">☁️ Ordsky &amp; Avstemning</h2>
 
-        <!-- Mode tabs -->
-        <div style="display:flex;gap:0.5rem;margin-bottom:1.25rem;">
-          <button id="wcModeWordBtn" onclick="wcSetMode('word')" style="flex:1;padding:11px;border-radius:12px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;transition:all 0.2s;">☁️ Ordsky</button>
-          <button id="wcModePollBtn" onclick="wcSetMode('poll')" style="flex:1;padding:11px;border-radius:12px;border:2px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.6);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;transition:all 0.2s;">🗳️ Avstemning</button>
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
+        <div>
+          <div style="font-family:'Fredoka One',cursive;font-size:1.9rem;color:var(--dark);">☁️ Ordsky &amp; Avstemning</div>
+          <div style="color:#888;font-size:0.9rem;">Opprett en økt – elever blir med via kode</div>
+        </div>
+      </div>
+
+      <!-- Setup card -->
+      <div id="wcSetupPanel" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:20px;padding:1.75rem;color:white;margin-bottom:1.25rem;">
+
+        <!-- Modus-velger -->
+        <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;">
+          <button id="wcModeWordBtn" onclick="wcSetMode('word')" style="flex:1;padding:12px;border-radius:12px;border:2px solid rgba(255,255,255,0.35);background:rgba(255,255,255,0.18);color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;transition:all 0.2s;">☁️ Ordsky</button>
+          <button id="wcModePollBtn" onclick="wcSetMode('poll')" style="flex:1;padding:12px;border-radius:12px;border:2px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.5);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;transition:all 0.2s;">🗳️ Avstemning</button>
         </div>
 
-        <!-- Wordcloud setup -->
+        <!-- ── ORDSKY-innstillinger ── -->
         <div id="wcSetupWord">
           <div style="margin-bottom:1rem;">
-            <label style="display:block;font-size:0.82rem;font-weight:800;opacity:0.7;margin-bottom:0.4rem;text-transform:uppercase;">Spørsmål / tema</label>
-            <input id="wcQuestion" type="text" placeholder="F.eks: Hva tenker du på når du hører ordet demokrati?" style="width:100%;padding:11px 13px;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;background:rgba(255,255,255,0.12);color:white;" />
+            <label style="display:block;font-size:0.78rem;font-weight:800;opacity:0.65;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em;">Spørsmål / tema til elevene</label>
+            <input id="wcQuestion" type="text" placeholder="F.eks: Hva tenker du på når du hører ordet demokrati?" style="width:100%;padding:12px 14px;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;background:rgba(255,255,255,0.12);color:white;" />
           </div>
 
-          <!-- Fri vs låst ordmodus -->
+          <!-- Fri vs låst modus -->
           <div style="margin-bottom:1rem;">
-            <label style="display:block;font-size:0.82rem;font-weight:800;opacity:0.7;margin-bottom:0.5rem;text-transform:uppercase;">Ordmodus</label>
+            <label style="display:block;font-size:0.78rem;font-weight:800;opacity:0.65;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Svartype</label>
             <div style="display:flex;gap:0.5rem;">
-              <button id="wcWordModeFreeBtn" onclick="wcSetWordMode('free')" style="flex:1;padding:9px;border-radius:10px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.18);color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">✏️ Fritt – elever skriver egne ord</button>
-              <button id="wcWordModeLockedBtn" onclick="wcSetWordMode('locked')" style="flex:1;padding:9px;border-radius:10px;border:2px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.55);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">🔒 Låst – velg blant alternativene</button>
+              <button id="wcWordModeFreeBtn" onclick="wcSetWordMode('free')" style="flex:1;padding:10px 8px;border-radius:10px;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.18);color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.2s;">✏️ Fritt – elever skriver</button>
+              <button id="wcWordModeLockedBtn" onclick="wcSetWordMode('locked')" style="flex:1;padding:10px 8px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.5);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.2s;">🔒 Låst – velg fra liste</button>
             </div>
           </div>
 
-          <!-- Låste alternativer (kun synlig i locked-modus) -->
+          <!-- Låste alternativer -->
           <div id="wcLockedOpts" style="display:none;margin-bottom:1rem;">
-            <label style="display:block;font-size:0.82rem;font-weight:800;opacity:0.7;margin-bottom:0.5rem;text-transform:uppercase;">Alternativer elevene kan velge</label>
+            <label style="display:block;font-size:0.78rem;font-weight:800;opacity:0.65;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Alternativer elevene kan velge blant</label>
             <div id="wcLockedOptList"></div>
-            <button onclick="wcAddLockedOpt()" style="background:rgba(255,255,255,0.1);border:2px dashed rgba(255,255,255,0.3);color:white;padding:8px 16px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;margin-top:0.4rem;width:100%;">+ Legg til alternativ</button>
+            <button onclick="wcAddLockedOpt()" style="background:rgba(255,255,255,0.08);border:2px dashed rgba(255,255,255,0.3);color:white;padding:8px 16px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;margin-top:0.4rem;width:100%;">+ Legg til alternativ</button>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;" class="form-grid-2">
+          <!-- Innstillinger-grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.65rem;margin-bottom:1rem;" class="form-grid-3">
             <div>
-              <label style="display:block;font-size:0.82rem;font-weight:800;opacity:0.7;margin-bottom:0.4rem;text-transform:uppercase;">Maks ord per elev</label>
-              <select id="wcMaxWords" style="width:100%;padding:9px 11px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
+              <label style="display:block;font-size:0.72rem;font-weight:800;opacity:0.65;margin-bottom:0.35rem;text-transform:uppercase;">Maks ord per elev</label>
+              <select id="wcMaxWords" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
                 <option value="1">1 ord</option>
                 <option value="3" selected>3 ord</option>
                 <option value="5">5 ord</option>
@@ -1604,128 +1614,149 @@
               </select>
             </div>
             <div>
-              <label style="display:block;font-size:0.82rem;font-weight:800;opacity:0.7;margin-bottom:0.4rem;text-transform:uppercase;">Vis resultat</label>
-              <select id="wcShowLive" style="width:100%;padding:9px 11px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
-                <option value="live">Live – mens elever skriver</option>
-                <option value="end">Kun når lærer avslutter</option>
+              <label style="display:block;font-size:0.72rem;font-weight:800;opacity:0.65;margin-bottom:0.35rem;text-transform:uppercase;">Vis resultat</label>
+              <select id="wcShowLive" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
+                <option value="live">Live</option>
+                <option value="end">Ved avslutning</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.72rem;font-weight:800;opacity:0.65;margin-bottom:0.35rem;text-transform:uppercase;">Svar</label>
+              <select id="wcAnonymousSelect" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
+                <option value="1">🙈 Anonymt</option>
+                <option value="0">👤 Med navn</option>
               </select>
             </div>
           </div>
 
-          <!-- Anonymt + filter -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.5rem;" class="form-grid-2">
-            <div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:10px 13px;display:flex;align-items:center;gap:0.6rem;cursor:pointer;" onclick="document.getElementById('wcAnonymous').click()">
-              <input type="checkbox" id="wcAnonymous" checked style="width:18px;height:18px;cursor:pointer;accent-color:var(--c2);" />
-              <label for="wcAnonymous" style="font-size:0.85rem;font-weight:800;cursor:pointer;">🙈 Anonyme svar</label>
-            </div>
-            <div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:10px 13px;display:flex;align-items:center;gap:0.6rem;cursor:pointer;" onclick="document.getElementById('wcProfFilter').click()">
-              <input type="checkbox" id="wcProfFilter" checked style="width:18px;height:18px;cursor:pointer;accent-color:var(--c2);" />
-              <label for="wcProfFilter" style="font-size:0.85rem;font-weight:800;cursor:pointer;">🚫 Filter for stygge ord</label>
+          <!-- Filter -->
+          <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:0.7rem;cursor:pointer;" onclick="document.getElementById('wcProfFilter').click()">
+            <input type="checkbox" id="wcProfFilter" checked style="width:18px;height:18px;cursor:pointer;accent-color:var(--c2);flex-shrink:0;" />
+            <div>
+              <div style="font-weight:800;font-size:0.85rem;">🚫 Aktiver filter for upassende ord</div>
+              <div style="font-size:0.75rem;opacity:0.6;margin-top:1px;">Blokkerer kjente banneord automatisk</div>
             </div>
           </div>
         </div>
 
-        <!-- Poll setup -->
+        <!-- ── AVSTEMNING-innstillinger ── -->
         <div id="wcSetupPoll" style="display:none;">
           <div style="margin-bottom:1rem;">
-            <label style="display:block;font-size:0.82rem;font-weight:800;opacity:0.7;margin-bottom:0.4rem;text-transform:uppercase;">Spørsmål</label>
-            <input id="wcPollQuestion" type="text" placeholder="F.eks: Hvilken periode likte du best?" style="width:100%;padding:11px 13px;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;background:rgba(255,255,255,0.12);color:white;" />
+            <label style="display:block;font-size:0.78rem;font-weight:800;opacity:0.65;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em;">Spørsmål</label>
+            <input id="wcPollQuestion" type="text" placeholder="F.eks: Hvilken periode likte du best?" style="width:100%;padding:12px 14px;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;background:rgba(255,255,255,0.12);color:white;" />
           </div>
-          <div id="wcPollOptions">
-            <label style="display:block;font-size:0.82rem;font-weight:800;opacity:0.7;margin-bottom:0.5rem;text-transform:uppercase;">Alternativer</label>
-            <div id="wcPollOptList"></div>
-            <button onclick="wcAddPollOption()" style="background:rgba(255,255,255,0.12);border:2px dashed rgba(255,255,255,0.3);color:white;padding:8px 16px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;margin-top:0.5rem;width:100%;">+ Legg til alternativ</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:1rem;" class="form-grid-2">
+            <div>
+              <label style="display:block;font-size:0.72rem;font-weight:800;opacity:0.65;margin-bottom:0.35rem;text-transform:uppercase;">Vis resultat</label>
+              <select id="wcPollShowLive" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
+                <option value="live">Live</option>
+                <option value="end">Ved avslutning</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.72rem;font-weight:800;opacity:0.65;margin-bottom:0.35rem;text-transform:uppercase;">Svar</label>
+              <select id="wcPollAnonymousSelect" style="width:100%;padding:9px 10px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:rgba(255,255,255,0.12);color:white;outline:none;">
+                <option value="1">🙈 Anonymt</option>
+                <option value="0">👤 Med navn</option>
+              </select>
+            </div>
           </div>
+          <label style="display:block;font-size:0.78rem;font-weight:800;opacity:0.65;margin-bottom:0.5rem;text-transform:uppercase;">Svaralternativer</label>
+          <div id="wcPollOptList"></div>
+          <button onclick="wcAddPollOption()" style="background:rgba(255,255,255,0.1);border:2px dashed rgba(255,255,255,0.3);color:white;padding:9px 16px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;margin-top:0.5rem;width:100%;">+ Legg til alternativ</button>
         </div>
 
-        <button onclick="wcStartSession()" style="width:100%;margin-top:1.25rem;background:var(--c2);color:var(--dark);border:none;padding:14px;border-radius:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">🚀 Start økt</button>
+        <button onclick="wcStartSession()" style="width:100%;margin-top:1.5rem;background:var(--c2);color:var(--dark);border:none;padding:15px;border-radius:13px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1.05rem;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">🚀 Start økt</button>
       </div>
 
-      <!-- Active session panel -->
+      <!-- ── Aktiv økt-panel ── -->
       <div id="wcActivePanel" style="display:none;">
-        <div class="teacher-panel" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;margin-bottom:1rem;">
+        <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:20px;padding:1.5rem;color:white;margin-bottom:1.25rem;">
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">
             <div>
-              <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--c2);">Kode: <span id="wcActiveCode" style="letter-spacing:4px;">----</span></div>
-              <div style="font-size:0.82rem;opacity:0.6;margin-top:0.2rem;" id="wcActiveQ"></div>
+              <div style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--c2);letter-spacing:2px;">Kode: <span id="wcActiveCode" style="letter-spacing:6px;font-size:1.8rem;">----</span></div>
+              <div style="font-size:0.85rem;opacity:0.6;margin-top:0.3rem;" id="wcActiveQ"></div>
             </div>
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-              <div style="background:rgba(255,255,255,0.1);padding:8px 16px;border-radius:50px;font-weight:800;font-size:0.88rem;"><span id="wcRespondentCount">0</span> svar</div>
-              <button onclick="wcToggleResults()" id="wcToggleBtn" style="background:var(--c3);color:var(--dark);border:none;padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">👁 Vis resultater</button>
-              <button onclick="wcEndSession()" style="background:var(--c1);color:white;border:none;padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">⏹ Avslutt</button>
+              <div style="background:rgba(255,255,255,0.12);padding:9px 18px;border-radius:50px;font-weight:800;font-size:0.9rem;"><span id="wcRespondentCount">0</span> svar</div>
+              <button onclick="wcToggleResults()" id="wcToggleBtn" style="background:var(--c3);color:var(--dark);border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">👁 Vis resultater</button>
+              <button onclick="wcEndSession()" style="background:var(--c1);color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">⏹ Avslutt</button>
             </div>
           </div>
-          <div style="font-size:0.82rem;opacity:0.5;text-align:center;">Elever går til OlaSkole → ☁️ Ordsky og skriver inn koden</div>
+          <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:9px 14px;font-size:0.82rem;opacity:0.7;text-align:center;">
+            📱 Elever: gå til <strong>OlaSkole → ☁️ Ordsky</strong> og skriv inn koden over
+          </div>
         </div>
 
         <!-- Live results -->
         <div id="wcResultsPanel" style="display:none;">
-          <div class="teacher-panel" style="padding:1.5rem;">
+          <div style="background:white;border-radius:16px;border:2px solid #e8eaed;padding:1.5rem;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
-              <div style="font-weight:800;font-size:0.9rem;color:#555;">Resultater <span id="wcAnonBadge" style="background:#e0e0e0;border-radius:50px;padding:2px 10px;font-size:0.75rem;margin-left:6px;">🙈 Anonymt</span></div>
-              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                <button id="wcViewCloudBtn" onclick="wcSetResultView('cloud')" style="padding:6px 13px;border-radius:50px;border:2px solid #6366f1;background:#6366f1;color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;">☁️ Sky</button>
-                <button id="wcViewListBtn" onclick="wcSetResultView('list')" style="padding:6px 13px;border-radius:50px;border:2px solid #e0e0e0;background:white;color:#555;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;">📋 Liste</button>
+              <div style="font-weight:800;font-size:0.9rem;color:#555;">
+                Resultater
+                <span id="wcAnonBadge" style="background:#e8eaed;border-radius:50px;padding:2px 10px;font-size:0.75rem;margin-left:6px;font-weight:700;">🙈 Anonymt</span>
+              </div>
+              <div style="display:flex;gap:0.5rem;">
+                <button id="wcViewCloudBtn" onclick="wcSetResultView('cloud')" style="padding:6px 14px;border-radius:50px;border:2px solid #6366f1;background:#6366f1;color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;">☁️ Sky</button>
+                <button id="wcViewListBtn" onclick="wcSetResultView('list')" style="padding:6px 14px;border-radius:50px;border:2px solid #e0e0e0;background:white;color:#666;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;">📋 Liste</button>
               </div>
             </div>
-            <!-- Cloud view -->
             <div id="wcWordCloudDisplay" style="min-height:180px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0.5rem;padding:1rem;background:#f8f8fb;border-radius:14px;"></div>
-            <!-- List view (with remove buttons) -->
             <div id="wcWordListDisplay" style="display:none;"></div>
-            <!-- Poll view -->
             <div id="wcPollDisplay" style="display:none;"></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ── STUDENT PANEL ── -->
+    <!-- ── ELEV-PANEL ── -->
     <div id="wc-student-panel">
 
-      <!-- Enter code -->
-      <div id="wcs-enter" style="max-width:400px;margin:2rem auto;">
+      <!-- Innloggingsknapp for lærer (vises kun når IKKE innlogget) -->
+      <div id="wcTeacherLoginHint" style="text-align:right;margin-bottom:0.75rem;display:none;">
+        <button onclick="wcOpenTeacher()" style="background:rgba(99,102,241,0.1);border:2px solid rgba(99,102,241,0.3);color:#6366f1;padding:7px 14px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">🔑 Lærer? Opprett økt her</button>
+      </div>
+
+      <!-- Skriv inn kode -->
+      <div id="wcs-enter" style="max-width:420px;margin:1.5rem auto;">
         <div style="text-align:center;margin-bottom:1.5rem;">
           <div style="font-size:3rem;margin-bottom:0.5rem;">☁️</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--dark);">Ordsky &amp; Avstemning</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:1.9rem;color:var(--dark);">Ordsky &amp; Avstemning</div>
           <div style="color:#888;margin-top:0.4rem;font-size:0.92rem;">Skriv inn koden fra læreren</div>
         </div>
-        <div class="teacher-panel">
-          <input id="wcsCodeInput" type="text" maxlength="4" placeholder="KODE" oninput="this.value=this.value.toUpperCase()" style="width:100%;padding:16px;font-family:'Fredoka One',cursive;font-size:2rem;text-align:center;border:3px solid #e0e0e0;border-radius:14px;outline:none;letter-spacing:6px;margin-bottom:1rem;" />
+        <div style="background:white;border-radius:18px;border:2px solid #e8eaed;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.07);">
+          <input id="wcsCodeInput" type="text" maxlength="4" placeholder="KODE" oninput="this.value=this.value.toUpperCase()"
+            style="width:100%;padding:18px;font-family:'Fredoka One',cursive;font-size:2.2rem;text-align:center;border:3px solid #e0e0e0;border-radius:14px;outline:none;letter-spacing:8px;margin-bottom:1rem;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e0e0e0'" />
           <button onclick="wcsJoin()" class="btn-primary" style="width:100%;font-size:1.1rem;padding:14px;">🚀 Bli med!</button>
           <div id="wcsError" style="display:none;color:var(--c1);font-weight:700;text-align:center;margin-top:0.75rem;font-size:0.9rem;"></div>
-          <!-- Teacher access -->
-          <div style="text-align:center;margin-top:1.25rem;">
-            <button onclick="wcOpenTeacher()" style="background:none;border:none;color:#aaa;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">🔑 Opprett økt som lærer</button>
-          </div>
         </div>
       </div>
 
-      <!-- Wordcloud input -->
-      <div id="wcs-word" style="display:none;max-width:500px;margin:2rem auto;">
-        <div class="teacher-panel">
-          <div style="font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--dark);margin-bottom:0.5rem;">☁️ Ordsky</div>
+      <!-- Ordsky-input -->
+      <div id="wcs-word" style="display:none;max-width:520px;margin:1.5rem auto;">
+        <div style="background:white;border-radius:18px;border:2px solid #e8eaed;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.07);">
+          <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--dark);margin-bottom:0.5rem;">☁️ Ordsky</div>
           <div id="wcsWordQ" style="background:var(--bg);border-radius:12px;padding:1rem;margin-bottom:1.25rem;font-weight:700;color:#555;font-size:0.95rem;border-left:4px solid #6366f1;"></div>
           <div id="wcsWordInputs"></div>
           <button onclick="wcsSubmitWords()" class="btn-primary" style="width:100%;margin-top:1rem;" id="wcsWordBtn">📤 Send inn ordene mine</button>
           <div id="wcsWordDone" style="display:none;text-align:center;padding:1.5rem;color:var(--c3);font-weight:800;font-size:1rem;">✅ Ordene er sendt! Vent på at læreren viser resultatet.</div>
-          <!-- Live cloud for student if showLive -->
           <div id="wcsLiveCloud" style="display:none;margin-top:1.25rem;">
-            <div style="font-weight:800;font-size:0.85rem;color:#888;margin-bottom:0.75rem;">🔴 Live ordsky:</div>
+            <div style="font-weight:800;font-size:0.82rem;color:#888;margin-bottom:0.75rem;">🔴 Live ordsky:</div>
             <div id="wcsLiveCloudCanvas" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0.5rem;padding:1rem;background:var(--bg);border-radius:14px;min-height:120px;"></div>
           </div>
         </div>
       </div>
 
-      <!-- Poll input -->
-      <div id="wcs-poll" style="display:none;max-width:500px;margin:2rem auto;">
-        <div class="teacher-panel">
-          <div style="font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--dark);margin-bottom:0.5rem;">🗳️ Avstemning</div>
+      <!-- Avstemning-input -->
+      <div id="wcs-poll" style="display:none;max-width:520px;margin:1.5rem auto;">
+        <div style="background:white;border-radius:18px;border:2px solid #e8eaed;padding:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.07);">
+          <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--dark);margin-bottom:0.5rem;">🗳️ Avstemning</div>
           <div id="wcsPollQ" style="background:var(--bg);border-radius:12px;padding:1rem;margin-bottom:1.25rem;font-weight:700;color:#555;font-size:0.95rem;border-left:4px solid var(--c2);"></div>
           <div id="wcsPollOptions"></div>
           <div id="wcsPollDone" style="display:none;margin-top:1rem;text-align:center;color:var(--c3);font-weight:800;">✅ Stemme registrert!</div>
-          <!-- Live results -->
           <div id="wcsPollLive" style="display:none;margin-top:1.25rem;">
-            <div style="font-weight:800;font-size:0.85rem;color:#888;margin-bottom:0.75rem;">📊 Live resultat:</div>
+            <div style="font-weight:800;font-size:0.82rem;color:#888;margin-bottom:0.75rem;">📊 Live resultat:</div>
             <div id="wcsPollLiveDisplay"></div>
           </div>
         </div>
@@ -6053,7 +6084,6 @@ function wcAddPollOption() {
 async function wcStartSession() {
   const isPoll = document.getElementById('wcSetupPoll').style.display !== 'none';
   const code = wcGenerateCode();
-  const anonymous = document.getElementById('wcAnonymous') ? document.getElementById('wcAnonymous').checked : true;
   const profFilter = document.getElementById('wcProfFilter') ? document.getElementById('wcProfFilter').checked : true;
   let data;
 
@@ -6063,13 +6093,15 @@ async function wcStartSession() {
     const opts = [];
     document.querySelectorAll('#wcPollOptList input').forEach(i => { if (i.value.trim()) opts.push(i.value.trim()); });
     if (opts.length < 2) { showToast('Legg til minst 2 alternativer!'); return; }
-    const showLive = document.getElementById('wcShowLive') ? document.getElementById('wcShowLive').value : 'live';
+    const showLive = document.getElementById('wcPollShowLive').value;
+    const anonymous = document.getElementById('wcPollAnonymousSelect').value === '1';
     data = { mode:'poll', code, question:q, options:opts, votes:{}, showLive, anonymous, profFilter, phase:'active', createdAt: Date.now() };
   } else {
     const q = document.getElementById('wcQuestion').value.trim();
     if (!q) { showToast('Skriv et spørsmål/tema!'); return; }
     const maxWords = parseInt(document.getElementById('wcMaxWords').value);
     const showLive = document.getElementById('wcShowLive').value;
+    const anonymous = document.getElementById('wcAnonymousSelect').value === '1';
     const wordMode = wcCurrentWordMode;
     let lockedOptions = [];
     if (wordMode === 'locked') {
@@ -6421,10 +6453,15 @@ function wcsStartLiveRefresh() {
 // ── Show view hook ────────────────────────────────────────────
 function wcShowView() {
   if (state.isTeacher) {
+    document.getElementById('wc-teacher-panel').style.display = 'block';
+    document.getElementById('wc-student-panel').style.display = 'none';
     wcOpenTeacher();
   } else {
     document.getElementById('wc-teacher-panel').style.display = 'none';
     document.getElementById('wc-student-panel').style.display = 'block';
+    // Vis lærer-hint-knapp for ikke-innloggede
+    const hint = document.getElementById('wcTeacherLoginHint');
+    if (hint) hint.style.display = 'block';
     wcShow('wcs-enter');
   }
 }
