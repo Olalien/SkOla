@@ -10,6 +10,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <style>
   :root {
     --c1:#FF6B6B;--c2:#FFD93D;--c3:#6BCB77;--c4:#4D96FF;--c5:#C77DFF;
@@ -1712,6 +1714,18 @@
             <div id="wcWordCloudDisplay" style="min-height:180px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0.5rem;padding:1rem;background:#f8f8fb;border-radius:14px;"></div>
             <div id="wcWordListDisplay" style="display:none;"></div>
             <div id="wcPollDisplay" style="display:none;"></div>
+
+            <!-- Eksport-knapper -->
+            <div id="wcExportBar" style="margin-top:1.25rem;padding-top:1rem;border-top:2px solid #f0f0f0;">
+              <div style="font-size:0.78rem;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.6rem;">📥 Eksporter resultater</div>
+              <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+                <button onclick="wcExport('png')" style="display:flex;align-items:center;gap:0.4rem;padding:8px 14px;border-radius:50px;border:2px solid #6366f1;background:white;color:#6366f1;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.18s;" onmouseover="this.style.background='#6366f1';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#6366f1'">🖼️ PNG</button>
+                <button onclick="wcExport('jpg')" style="display:flex;align-items:center;gap:0.4rem;padding:8px 14px;border-radius:50px;border:2px solid #0ea5e9;background:white;color:#0ea5e9;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.18s;" onmouseover="this.style.background='#0ea5e9';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#0ea5e9'">📷 JPG</button>
+                <button onclick="wcExport('pdf')" style="display:flex;align-items:center;gap:0.4rem;padding:8px 14px;border-radius:50px;border:2px solid #ef4444;background:white;color:#ef4444;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.18s;" onmouseover="this.style.background='#ef4444';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#ef4444'">📄 PDF</button>
+                <button onclick="wcExport('csv')" style="display:flex;align-items:center;gap:0.4rem;padding:8px 14px;border-radius:50px;border:2px solid #10b981;background:white;color:#10b981;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.18s;" onmouseover="this.style.background='#10b981';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#10b981'">📊 CSV</button>
+              </div>
+              <div id="wcExportStatus" style="display:none;margin-top:0.5rem;font-size:0.82rem;color:#6366f1;font-weight:700;"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -6427,6 +6441,168 @@ function wcsStartLiveRefresh() {
       }
     } catch(e) {}
   }, 2500);
+}
+
+// ── EKSPORT ─────────────────────────────────────────────────
+async function wcExport(format) {
+  if (!wcSession) return;
+  const data = wcSession.data;
+  const statusEl = document.getElementById('wcExportStatus');
+  const setStatus = (msg) => { if(statusEl){ statusEl.style.display='block'; statusEl.textContent=msg; } };
+  const clearStatus = () => { if(statusEl) setTimeout(()=>statusEl.style.display='none', 3000); };
+
+  const title = data.question || 'Ordsky';
+  const dateStr = new Date().toLocaleDateString('nb-NO');
+  const filename = (data.mode === 'poll' ? 'avstemning' : 'ordsky') + '_' + data.code;
+
+  if (format === 'csv') {
+    let csv = '';
+    if (data.mode === 'word') {
+      // Tell opp ord
+      const counts = {};
+      Object.values(data.words||{}).forEach(arr => {
+        (Array.isArray(arr)?arr:[arr]).forEach(w => {
+          const k = (w||'').trim().toLowerCase();
+          if (k && !(data.removed||[]).includes(k)) counts[k] = (counts[k]||0)+1;
+        });
+      });
+      csv = 'Ord,Antall\n' + Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([w,c])=>`"${w}",${c}`).join('\n');
+    } else {
+      const totals = {};
+      (data.options||[]).forEach(o => totals[o] = 0);
+      Object.values(data.votes||{}).forEach(v => { if(totals[v]!==undefined) totals[v]++; });
+      const total = Object.values(totals).reduce((s,v)=>s+v,0);
+      csv = 'Alternativ,Stemmer,Prosent\n' + (data.options||[]).map(o=>`"${o}",${totals[o]},${total?Math.round(totals[o]/total*100):0}%`).join('\n');
+    }
+    const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = filename + '.csv'; a.click();
+    setStatus('✅ CSV lastet ned!'); clearStatus();
+    return;
+  }
+
+  // For PNG/JPG/PDF bruker vi html2canvas
+  setStatus('⏳ Lager bilde…');
+
+  // Bygg en egen render-div utenfor DOM for eksport
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'width:900px;padding:40px;background:white;font-family:Nunito,sans-serif;position:fixed;left:-9999px;top:0;';
+
+  // Header
+  const header = document.createElement('div');
+  header.style.cssText = 'margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #6366f1;';
+  header.innerHTML = `
+    <div style="font-size:13px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">
+      ${data.mode==='poll'?'🗳️ Avstemning':'☁️ Ordsky'} · ${dateStr} · Kode: ${data.code}
+    </div>
+    <div style="font-size:24px;font-weight:900;color:#1a1a2e;">${escHtml(title)}</div>
+    <div style="margin-top:8px;font-size:13px;color:#aaa;">
+      ${data.anonymous?'🙈 Anonyme svar':'👤 Svar med navn'} · 
+      ${data.mode==='word'?Object.keys(data.words||{}).length+' deltakere':Object.keys(data.votes||{}).length+' stemmer'}
+    </div>`;
+  wrapper.appendChild(header);
+
+  // Innhold
+  const content = document.createElement('div');
+  if (data.mode === 'word') {
+    const counts = {};
+    Object.values(data.words||{}).forEach(arr => {
+      (Array.isArray(arr)?arr:[arr]).forEach(w => {
+        const k = (w||'').trim().toLowerCase();
+        if (k && !(data.removed||[]).includes(k)) counts[k] = (counts[k]||0)+1;
+      });
+    });
+    const max = Math.max(...Object.values(counts), 1);
+    const colors = ['#FF6B6B','#FFD93D','#6BCB77','#4D96FF','#C77DFF','#0ea5e9','#f97316','#ec4899'];
+    content.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;padding:32px;background:#f8f8fb;border-radius:16px;min-height:200px;';
+    content.innerHTML = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([word,cnt],i) =>
+      `<span style="font-size:${Math.round(14+(cnt/max)*36)}px;font-weight:${cnt>1?900:700};color:${colors[i%colors.length]};padding:4px 8px;display:inline-block;line-height:1.3;">${escHtml(word)}</span>`
+    ).join('');
+    // Liste under
+    const list = document.createElement('div');
+    list.style.cssText = 'margin-top:24px;';
+    list.innerHTML = '<div style="font-size:13px;font-weight:800;color:#888;text-transform:uppercase;margin-bottom:10px;">Ordfordeling</div>'
+      + Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([word,cnt]) => {
+        const pct = Math.round(cnt/Object.values(counts).reduce((s,v)=>s+v,0)*100);
+        return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;">
+          <span style="font-weight:800;font-size:14px;min-width:120px;">${escHtml(word)}</span>
+          <div style="flex:1;background:#eee;border-radius:50px;height:10px;"><div style="width:${pct}%;height:100%;background:#6366f1;border-radius:50px;"></div></div>
+          <span style="font-size:13px;color:#888;min-width:50px;text-align:right;">${cnt} svar</span>
+        </div>`;
+      }).join('');
+    wrapper.appendChild(content);
+    wrapper.appendChild(list);
+  } else {
+    const totals = {};
+    (data.options||[]).forEach(o => totals[o] = []);
+    Object.entries(data.votes||{}).forEach(([student,v]) => { if(totals[v]!==undefined) totals[v].push(student); });
+    const total = Object.values(totals).reduce((s,v)=>s+v.length,0);
+    const colors = ['#4D96FF','#FF6B6B','#6BCB77','#FFD93D','#C77DFF','#f97316'];
+    content.style.cssText = 'padding:16px 0;';
+    content.innerHTML = (data.options||[]).map((opt,i) => {
+      const cnt = (totals[opt]||[]).length;
+      const pct = total ? Math.round(cnt/total*100) : 0;
+      const voters = !data.anonymous ? (totals[opt]||[]).join(', ') : '';
+      return `<div style="margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;font-weight:800;font-size:16px;margin-bottom:6px;">
+          <span>${escHtml(opt)}</span>
+          <span style="color:${colors[i%colors.length]};">${cnt} stemmer (${pct}%)</span>
+        </div>
+        <div style="background:#eee;border-radius:50px;height:18px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${colors[i%colors.length]};border-radius:50px;transition:width 0.5s;"></div>
+        </div>
+        ${voters?`<div style="font-size:12px;color:#888;margin-top:4px;">${escHtml(voters)}</div>`:''}
+      </div>`;
+    }).join('');
+    wrapper.appendChild(content);
+  }
+
+  // Footer
+  const footer = document.createElement('div');
+  footer.style.cssText = 'margin-top:24px;padding-top:12px;border-top:1px solid #eee;font-size:11px;color:#ccc;text-align:right;';
+  footer.textContent = 'Eksportert fra OlaSkole · ' + dateStr;
+  wrapper.appendChild(footer);
+
+  document.body.appendChild(wrapper);
+
+  try {
+    const canvas = await html2canvas(wrapper, { scale:2, backgroundColor:'#ffffff', useCORS:true, logging:false });
+    document.body.removeChild(wrapper);
+
+    if (format === 'png') {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = filename + '.png'; a.click();
+      setStatus('✅ PNG lastet ned!');
+    } else if (format === 'jpg') {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/jpeg', 0.92);
+      a.download = filename + '.jpg'; a.click();
+      setStatus('✅ JPG lastet ned!');
+    } else if (format === 'pdf') {
+      const { jsPDF } = window.jspdf;
+      const imgData = canvas.toDataURL('image/png');
+      const pw = 210; // A4 bredde mm
+      const ph = (canvas.height / canvas.width) * pw;
+      const pdf = new jsPDF({ orientation: ph > 297 ? 'portrait' : 'portrait', unit:'mm', format:'a4' });
+      const pageH = 297;
+      // Del opp i sider om nødvendig
+      let yOffset = 0;
+      const imgH = (canvas.height / canvas.width) * pw;
+      while (yOffset < imgH) {
+        if (yOffset > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, -yOffset, pw, imgH);
+        yOffset += pageH;
+      }
+      pdf.save(filename + '.pdf');
+      setStatus('✅ PDF lastet ned!');
+    }
+  } catch(err) {
+    if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+    console.error('Eksport feil:', err);
+    setStatus('⚠️ Eksport feilet: ' + err.message);
+  }
+  clearStatus();
 }
 
 function wcShowView() {
