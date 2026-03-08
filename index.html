@@ -1579,11 +1579,11 @@ async function loadState() {
   showDbStatus();
   initDark();
   initMsToken();
-  // Load modules - always tries DB first, falls back to localStorage
-  state.modules = await DB.loadModules();
-  // If DB is configured but returned empty while localStorage has data,
-  // that means DB connection works but table is empty (new install)
-  // OR DB failed and we got fallback. Either way use what we got.
+  const dbMods = await DB.loadModules();
+  // Erstatt demo-moduler med ekte moduler fra Supabase
+  if (dbMods.length > 0) {
+    state.modules = dbMods;
+  }
   const savedStudent = localStorage.getItem('lh_student');
   if (savedStudent) {
     try { state.student = JSON.parse(savedStudent); } catch(e) { localStorage.removeItem('lh_student'); }
@@ -3079,14 +3079,14 @@ const DB = {
   },
 
   async saveModules(modules) {
-    // Sørg for at alle moduler har stabil _id
-    modules.forEach((m, i) => {
+    // Filtrer vekk demo-moduler – de skal aldri lagres til Supabase
+    const realModules = modules.filter(m => !m._isDemo);
+    realModules.forEach((m, i) => {
       if (!m._id) m._id = 'mod_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7);
     });
-    localStorage.setItem('lh_modules', JSON.stringify(modules));
-    // Upsert – rad-ID = data._id, aldri duplikater
-    for (let i = 0; i < modules.length; i++) {
-      const m = modules[i];
+    localStorage.setItem('lh_modules', JSON.stringify(realModules));
+    for (let i = 0; i < realModules.length; i++) {
+      const m = realModules[i];
       const ok = await this._q('POST', 'os_modules', null, [{ id: m._id, data: m, sort_order: i }]);
       if (ok === null) return false;
     }
@@ -3658,9 +3658,10 @@ if (window.pdfjsLib) {
   window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
-// Demo module if empty
+// Demo module if empty – vis kun visuelt, lagre IKKE til DB
 if (!state.modules.length) {
   state.modules = [{
+    _id: 'demo_demokrati_og_samfunn',
     name: 'Demokrati og samfunn',
     desc: 'Hva er demokrati, og hvordan fungerer det?',
     emoji: '🗳️',
@@ -3682,9 +3683,9 @@ if (!state.modules.length) {
       { front: 'Stortinget', back: 'Norges nasjonalforsamling med 169 representanter.' },
       { front: 'Valg', back: 'Prosess der borgerne velger sine politiske representanter.' }
     ],
-    createdAt: new Date().toLocaleString('no')
+    createdAt: new Date().toLocaleString('no'),
+    _isDemo: true
   }];
-  saveModulesToStorage();
   renderHomeModules();
   renderTaskModules();
 }
