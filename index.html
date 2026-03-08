@@ -557,6 +557,7 @@
     <button class="nav-tab" onclick="showView('tasks')" id="tasksTab">📚 Oppgaver</button>
     <button class="nav-tab" onclick="showView('join')" id="quizNavBtn" style="background:linear-gradient(135deg,var(--c5),#a855f7);color:white;">🎮 Quiz</button>
     <button class="nav-tab" onclick="arbOpen()" id="arbNavBtn" style="background:linear-gradient(135deg,var(--c3),#22c55e);color:white;">📚 Arbeid</button>
+    <button class="nav-tab" onclick="showView('kunngjoring')" id="kunngjoringNavBtn" style="display:none;position:relative;">📢 Meldinger<span id="kunngjoringDot" style="position:absolute;top:4px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--c1);display:none;border:2px solid white;"></span></button>
     <button class="nav-tab teacher-tab" onclick="checkTeacher()" style="display:none">🖊️ Lærerrom</button>
     <button class="nav-tab teacher-tab" onclick="openSettings()" style="display:none;position:relative;">⚙️ Innstillinger<span id="dbNavPill" style="position:absolute;top:4px;right:6px;width:9px;height:9px;border-radius:50%;background:#f59e0b;display:none;font-size:0;border:2px solid white;" title="Database: ikke konfigurert"></span></button>
   </div>
@@ -582,6 +583,10 @@
     <button class="mob-nav-btn" id="mob-join" onclick="showView('join')">
       <span class="mob-icon">🎮</span>Quiz
     </button>
+    <button class="mob-nav-btn" id="mob-kunngjoring" onclick="showView('kunngjoring')" style="display:none;position:relative;">
+      <span class="mob-icon">📢</span>Meldinger
+      <span id="kunngjoringDotMob" style="position:absolute;top:4px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--c1);display:none;border:2px solid white;"></span>
+    </button>
     <button class="mob-nav-btn teacher-tab" id="mob-teacher" onclick="checkTeacher()" style="display:none">
       <span class="mob-icon">🖊️</span>Lærer
     </button>
@@ -590,6 +595,16 @@
 
 <!-- Kunngjøringsbanner – vises for alle elever -->
 <div id="announcementBanner" style="display:none;padding:0.5rem 1rem;max-width:1200px;margin:0.5rem auto 0;"></div>
+
+<!-- KUNNGJØRING VIEW (elev) -->
+<div class="view" id="view-kunngjoring">
+  <div style="max-width:700px;margin:0 auto;padding:1rem;">
+    <div class="section-title">📢 Meldinger fra læreren</div>
+    <div id="studentAnnouncementList" style="margin-top:1rem;">
+      <p style="color:#aaa;text-align:center;padding:3rem;">Ingen aktive meldinger.</p>
+    </div>
+  </div>
+</div>
 
 <!-- HOME VIEW -->
 <div class="view active" id="view-home">
@@ -618,13 +633,25 @@
     <div class="student-login-box" id="studentLoginBox">
       <h2>👋 Hvem er du?</h2>
       <input type="text" id="studentName" placeholder="Ditt navn" />
-      <input type="text" id="studentClass" placeholder="Klasse (f.eks. 9B)" />
+      <select id="studentClass" style="width:100%;padding:12px 13px;border:2px solid #e0e0e0;border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;outline:none;margin-bottom:0.875rem;background:white;color:var(--text);cursor:pointer;">
+        <option value="">— Velg klasse —</option>
+        <optgroup label="8. trinn"><option value="8A">8A</option><option value="8B">8B</option><option value="8C">8C</option></optgroup>
+        <optgroup label="9. trinn"><option value="9A">9A</option><option value="9B">9B</option><option value="9C">9C</option></optgroup>
+        <optgroup label="10. trinn"><option value="10A">10A</option><option value="10B">10B</option><option value="10C">10C</option></optgroup>
+      </select>
+      <div style="margin-bottom:0.875rem;">
+        <div style="font-size:0.82rem;font-weight:800;color:#888;margin-bottom:0.4rem;">Velg avatar:</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;" id="avatarPicker">
+          ${['🦁','🐼','🦊','🐸','🐧','🦋','🌟','🚀','⚡','🎮','🎨','🏆'].map(e=>`<button type="button" onclick="selectAvatar('${e}')" style="font-size:1.6rem;background:none;border:2px solid transparent;border-radius:10px;padding:4px;cursor:pointer;transition:all 0.15s;" class="avatar-opt">${e}</button>`).join('')}
+        </div>
+        <input type="hidden" id="studentAvatar" value="🦁" />
+      </div>
       <button class="btn-primary" style="width:100%;margin-top:0.25rem;" onclick="studentLogin()">Start læring! 🚀</button>
     </div>
 
     <div id="welcomeBack" style="display:none;">
       <div class="welcome-back-card">
-        <div style="font-size:2.2rem;margin-bottom:0.4rem;">👋</div>
+        <div style="font-size:2.5rem;margin-bottom:0.4rem;" id="welcomeAvatar">🦁</div>
         <div style="font-family:'Fredoka One',cursive;font-size:1.35rem;margin-bottom:0.1rem;" id="welcomeName"></div>
         <div style="font-size:0.88rem;opacity:0.8;" id="welcomeClass"></div>
         <div id="studentProgressWrap" style="margin-top:0.75rem;background:rgba(255,255,255,0.2);border-radius:50px;height:8px;overflow:hidden;"><div id="studentProgressBar" style="height:100%;background:var(--c2);border-radius:50px;width:0%;transition:width 0.6s ease;"></div></div>
@@ -633,8 +660,6 @@
       </div>
     </div>
   </div>
-
-  <div class="badge-area" id="badgeArea" style="display:none; justify-content:center;"></div>
 
   <!-- Module search + grid -->
   <div id="homeModules">
@@ -687,6 +712,7 @@
       <button class="tr-tab"        id="trtab-emner"  onclick="trTab('emner')">📦 Emner</button>
       <button class="tr-tab"        id="trtab-results" onclick="trTab('results')">📊 Resultater</button>
       <button class="tr-tab"        id="trtab-klasser" onclick="trTab('klasser')">🏫 Klasser</button>
+      <button class="tr-tab"        id="trtab-dashboard" onclick="trTab('dashboard');renderClassDashboard()">📊 Oversikt</button>
       <button class="tr-tab"        id="trtab-kunngjoring" onclick="trTab('kunngjoring')">📢 Kunngjøring</button>
     </div>
   </div>
@@ -721,6 +747,23 @@
         <div class="form-row" style="margin:0">
           <label>Ikon</label>
           <input type="text" id="moduleEmoji" placeholder="📚" maxlength="2" value="📚" />
+        </div>
+      </div>
+      <!-- Cover image + deadline -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.875rem;margin-top:0.875rem;">
+        <div class="form-row" style="margin:0;">
+          <label>🖼️ Forsidebilde</label>
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+            <input type="text" id="moduleCoverUrl" placeholder="Lim inn bilde-URL..." style="flex:1;min-width:0;" oninput="previewCoverImage()" />
+            <label style="background:var(--c4);color:white;padding:7px 11px;border-radius:10px;font-size:0.8rem;font-weight:800;cursor:pointer;flex-shrink:0;white-space:nowrap;">
+              📁 Last opp<input type="file" accept="image/*" onchange="handleCoverUpload(this)" style="display:none;" />
+            </label>
+          </div>
+          <div id="coverPreviewThumb" style="display:none;margin-top:0.5rem;border-radius:10px;overflow:hidden;"><img id="coverPreviewImg" style="width:100%;height:80px;object-fit:cover;" /></div>
+        </div>
+        <div class="form-row" style="margin:0;">
+          <label>📅 Innleveringsfrist</label>
+          <input type="datetime-local" id="moduleDeadline" style="width:100%;background:#2d2d44;border:none;color:white;padding:9px 11px;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;" />
         </div>
       </div>
       <div class="form-row" style="margin:0">
@@ -1066,6 +1109,15 @@
     </div>
   </div>
 
+  <!-- DASHBOARD-PANE -->
+  <div class="tr-pane" id="trpane-dashboard">
+    <div class="teacher-panel" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);">
+      <h2>📊 Klasseoversikt</h2>
+      <p style="color:#666;font-size:0.9rem;margin-bottom:1.25rem;">Se fremgangen til alle elever på tvers av alle emner.</p>
+      <div id="classDashboardContent"><p style="color:#aaa;">Laster...</p></div>
+    </div>
+  </div>
+
   <!-- KUNNGJØRING-PANE -->
   <div class="tr-pane" id="trpane-kunngjoring">
     <div class="teacher-panel" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);">
@@ -1074,6 +1126,16 @@
       <div style="margin-bottom:1rem;">
         <label style="font-weight:800;font-size:0.85rem;color:#555;display:block;margin-bottom:0.5rem;">📝 Beskjed</label>
         <textarea id="announcementText" placeholder="F.eks: Husk innlevering fredag! Lykke til med prøven!" style="width:100%;min-height:100px;border:2px solid #fed7aa;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;resize:vertical;line-height:1.6;" onfocus="this.style.borderColor='var(--c1)'" onblur="this.style.borderColor='#fed7aa'"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.875rem;margin-bottom:1rem;">
+        <div>
+          <label style="font-weight:800;font-size:0.82rem;color:#555;display:block;margin-bottom:0.35rem;">📅 Publiseres fra (valgfritt)</label>
+          <input type="datetime-local" id="announcementFrom" style="width:100%;padding:9px 12px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;" />
+        </div>
+        <div>
+          <label style="font-weight:800;font-size:0.82rem;color:#555;display:block;margin-bottom:0.35rem;">🗓️ Fjernes automatisk (valgfritt)</label>
+          <input type="datetime-local" id="announcementUntil" style="width:100%;padding:9px 12px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;" />
+        </div>
       </div>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
         <select id="announcementType" style="padding:10px 14px;border-radius:50px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;outline:none;cursor:pointer;">
@@ -1409,6 +1471,11 @@
         <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--dark);">Spillet er ferdig!</div>
         <div style="margin-top:1rem;font-size:1.2rem;color:#555;">Din poengsum: <span style="color:var(--c4);font-weight:800;" id="sjFinalScore">0</span></div>
         <div style="margin-top:0.5rem;font-size:0.95rem;color:#888;" id="sjFinalRank"></div>
+        <!-- Klassens toppliste -->
+        <div id="classToppliste" style="display:none;margin-top:1.5rem;background:white;border-radius:16px;padding:1.25rem;max-width:400px;margin-left:auto;margin-right:auto;box-shadow:0 4px 20px rgba(0,0,0,0.08);text-align:left;">
+          <div style="font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--dark);margin-bottom:0.875rem;text-align:center;">🏅 Klassens toppliste</div>
+          <div id="classTopplListeRows"></div>
+        </div>
         <button class="btn-primary" style="margin-top:2rem;padding:14px 36px;font-size:1.1rem;" onclick="showView('home')">🏠 Tilbake til hjem</button>
         <button onclick="showPublicHighscores()" style="margin-top:0.75rem;background:var(--c2);color:var(--dark);border:none;padding:12px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:block;margin-left:auto;margin-right:auto;">🏆 Se high scores</button>
       </div>
@@ -1589,12 +1656,13 @@ function showView(name) {
   if (name === 'join' && state.isTeacher) crPopulateModules();
   if (name === 'arbeid') { arbState.moduleIdx = null; arbRenderModuleGrid(); }
   setProgress(name === 'home' ? 20 : name === 'tasks' ? 60 : 90);
+  if (name === 'kunngjoring') renderStudentAnnouncementList(document._lastAnnouncements||[]);
   syncMobileNav(name);
 }
 
 function syncMobileNav(name) {
   document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
-  const map = {home:'mob-home',tasks:'mob-tasks',arbeid:'mob-arbeid',join:'mob-join',teacher:'mob-teacher'};
+  const map = {home:'mob-home',tasks:'mob-tasks',arbeid:'mob-arbeid',join:'mob-join',teacher:'mob-teacher',kunngjoring:'mob-kunngjoring'};
   const btn = document.getElementById(map[name]);
   if (btn) btn.classList.add('active');
 }
@@ -1659,9 +1727,11 @@ function saveAnswersToStorage() {
 // ====== STUDENT ======
 async function studentLogin() {
   const name = document.getElementById('studentName').value.trim();
-  const cls  = document.getElementById('studentClass').value.trim();
-  if (!name) { alert('Skriv inn navnet ditt!'); return; }
-  state.student = { name, cls, joinedAt: new Date().toLocaleString('no') };
+  const cls  = document.getElementById('studentClass').value;
+  const avatar = document.getElementById('studentAvatar')?.value || '🦁';
+  if (!name) { showToast('Skriv inn navnet ditt!'); return; }
+  if (!cls) { showToast('Velg klassen din!'); return; }
+  state.student = { name, cls, avatar, joinedAt: new Date().toLocaleString('no') };
   localStorage.setItem('lh_student', JSON.stringify(state.student));
   const btn = document.querySelector('#studentLoginBox button');
   if (btn) { btn._orig = btn.textContent; btn.textContent = '⏳ Logger inn...'; btn.disabled = true; }
@@ -1669,7 +1739,7 @@ async function studentLogin() {
   _progressCache = await DB.loadProgress(name);
   const roster = await DB.loadRoster();
   if (!roster.find(r => r.name === name)) {
-    roster.push({ name, cls, joinedAt: new Date().toISOString() });
+    roster.push({ name, cls, avatar, joinedAt: new Date().toISOString() });
     _rosterCache = roster;
     await DB.saveRoster(roster);
   }
@@ -1700,13 +1770,12 @@ function showStudentWelcome() {
   if (wb) wb.style.display = 'block';
   const wn = document.getElementById('welcomeName');
   const wc = document.getElementById('welcomeClass');
+  const wa = document.getElementById('welcomeAvatar');
   const rb = document.getElementById('roleBadge');
-  if (wn) wn.textContent = 'Hei, ' + state.student.name + '! 👋';
+  if (wn) wn.textContent = 'Hei, ' + state.student.name + '!';
   if (wc) wc.textContent = state.student.cls || '';
-  if (rb) rb.textContent = '🎓 ' + state.student.name;
-  const ba = document.getElementById('badgeArea');
-  if (ba) ba.style.display = 'flex';
-  renderBadges();
+  if (wa) wa.textContent = state.student.avatar || '🦁';
+  if (rb) rb.textContent = (state.student.avatar||'🎓') + ' ' + state.student.name;
   updateStudentProgress();
 }
 
@@ -1947,7 +2016,7 @@ function msLogin(clientId) {
 // ====== TEACHER ROOM TABS ======
 function trTab(name) {
   document.querySelectorAll('.tr-tabs .tr-tab').forEach(t => t.classList.remove('active'));
-  ['trpane-new','trpane-emner','trpane-results','trpane-klasser','trpane-kunngjoring'].forEach(id => {
+  ['trpane-new','trpane-emner','trpane-results','trpane-klasser','trpane-dashboard','trpane-kunngjoring'].forEach(id => {
     const el = document.getElementById(id); if (el) el.classList.remove('active');
   });
   const btn = document.getElementById('trtab-' + name);
@@ -2004,12 +2073,16 @@ function renderHomeModules() {
   renderSubjectFilter();
   grid.innerHTML = visible.map((m, i) => {
     const realIdx = state.modules.indexOf(m);
+    const coverHtml = m.cover ? `<div style="height:90px;margin:-1.1rem -1.1rem 0.75rem;border-radius:var(--radius) var(--radius) 0 0;overflow:hidden;"><img src="${escHtml(m.cover)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.display='none'" /></div>` : '';
+    const deadlineHtml = m.deadline ? `<div style="margin-top:0.4rem;font-size:0.78rem;">${formatDeadline(m.deadline)}</div>` : '';
     return `<div class="module-card ${colors[i%5]}" style="position:relative;" onclick="openModule(${realIdx})" data-module-name="${escHtml(m.name)}" data-module-subject="${escHtml(m.emoji||'📚')}">
+      ${coverHtml}
       ${state.isTeacher ? `<button class="mc-edit-btn" onclick="event.stopPropagation();quickEditModule(${realIdx})" title="Rediger">✏️</button>` : ''}
       <span class="mc-emoji">${m.emoji||'📚'}</span>
       <h3>${escHtml(m.name)}</h3>
       <p>${escHtml(m.desc||'')}</p>
       <span class="task-count">${countTasks(m)} oppgaver</span>
+      ${deadlineHtml}
       ${isNewModule(m) ? '<span style="position:absolute;top:8px;left:8px;background:var(--c1);color:white;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;">NY</span>' : ''}
     </div>`;
   }).join('');
@@ -2095,8 +2168,12 @@ function renderModuleDetail(m) {
   if (m.write?.length) available.push({key:'write', label:'✍️ Skriveoppgave'});
   if (m.videos?.length) available.push({key:'video', label:'🎬 Video'});
   if (m.flashcards?.length) available.push({key:'fc', label:'🃏 Test deg selv'});
+  if (state.student) available.push({key:'notes', label:'📝 Notater'});
   if (!available.length) { content.innerHTML='<p style="color:#aaa;padding:2rem;">Ingen innhold i dette emnet ennå.</p>'; tabs.innerHTML=''; return; }
-  tabs.innerHTML = available.map((t,i)=>`<button class="task-tab ${i===0?'active':''}" onclick="switchTaskTab('${t.key}',this)">${t.label}</button>`).join('');
+  // Add practice mode button for quiz
+  const hasQuiz = m.quiz?.length;
+  tabs.innerHTML = available.map((t,i)=>`<button class="task-tab ${i===0?'active':''}" onclick="switchTaskTab('${t.key}',this)">${t.label}</button>`).join('')
+    + (hasQuiz ? `<button class="task-tab" onclick="switchTaskTab('practice',this)" style="background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;border:none;">🔁 Øv</button>` : '');
   switchTaskType(available[0].key, m);
 }
 
@@ -2119,6 +2196,8 @@ function switchTaskType(type, m) {
   else if (type==='write') content.innerHTML = renderWriteHTML(m);
   else if (type==='video') content.innerHTML = renderVideoHTML(m);
   else if (type==='fc') { content.innerHTML = renderFlashcardHTML(m); initFlashcards(m); }
+  else if (type==='notes') content.innerHTML = renderNotesHTML(m);
+  else if (type==='practice') { content.innerHTML = renderPracticeQuizHTML(m); }
 }
 
 function renderTextHTML(m) {
@@ -2237,8 +2316,7 @@ function saveDiscAnswer(di) {
 
 function renderWriteHTML(m) {
   if (!m.write?.length) return '<p style="color:#aaa;padding:2rem;">Ingen skriveoppgave ennå.</p>';
-  const lang = m.language || 'norsk bokmål';
-  const langAttr = lang.includes('engelsk') ? 'en' : 'no';
+  const moduleLang = m.language || 'norsk bokmål';
   return m.write.map((w,wi) => {
     const savedKey = state.student ? (state.student.name+'_m'+state.currentModule+'_write_'+wi) : null;
     const saved = savedKey ? state.studentAnswers[savedKey] : null;
@@ -2247,7 +2325,11 @@ function renderWriteHTML(m) {
       <div style="background:var(--bg);border-radius:12px;padding:1rem;margin-bottom:1rem;border-left:4px solid var(--c2);font-size:0.95rem;color:#555;">${escHtml(w.desc||'')}</div>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;align-items:center;">
         ${w.minWords?`<span style="font-size:0.82rem;color:#aaa;font-weight:700;background:#f0f0f0;padding:4px 10px;border-radius:50px;">Minimum ${w.minWords} ord</span>`:''}
-        <span style="font-size:0.78rem;color:#aaa;font-weight:700;">🌐 ${escHtml(lang)}</span>
+        <select id="writeLang-${wi}" onchange="updateWriteLang(${wi})" style="font-size:0.8rem;padding:4px 10px;border-radius:50px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;outline:none;color:#555;">
+          <option value="norsk bokmål" ${moduleLang.includes('bokmål')||(!moduleLang.includes('nynorsk')&&!moduleLang.includes('engelsk'))?'selected':''}>🇳🇴 Bokmål</option>
+          <option value="norsk nynorsk" ${moduleLang.includes('nynorsk')?'selected':''}>🇳🇴 Nynorsk</option>
+          <option value="engelsk" ${moduleLang.includes('engelsk')?'selected':''}>🇬🇧 Engelsk</option>
+        </select>
         <select onchange="applyWriteTemplate(${wi},this.value)" style="font-size:0.8rem;padding:4px 10px;border-radius:50px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;outline:none;color:#555;">
           <option value="">📝 Velg tekstmal...</option>
           <option value="argumenterende">📣 Argumenterende</option>
@@ -2257,7 +2339,7 @@ function renderWriteHTML(m) {
         </select>
       </div>
       <div id="writeTemplate-${wi}" style="display:none;background:#fffbea;border:2px dashed var(--c2);border-radius:12px;padding:0.875rem;margin-bottom:0.75rem;font-size:0.85rem;color:#666;line-height:1.65;"></div>
-      <textarea id="write-${wi}" lang="${langAttr}" spellcheck="true"
+      <textarea id="write-${wi}" lang="no" spellcheck="true"
         placeholder="Skriv teksten din her..."
         style="width:100%;min-height:200px;border:2px solid #e0e0e0;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;line-height:1.7;transition:border-color 0.2s;"
         onfocus="this.style.borderColor='var(--c4)'" onblur="this.style.borderColor='#e0e0e0'"
@@ -2266,12 +2348,92 @@ function renderWriteHTML(m) {
         <span id="wcount-${wi}" style="font-size:0.82rem;color:#aaa;font-weight:700;">0 ord</span>
         <span id="wreadability-${wi}" style="font-size:0.78rem;color:#aaa;font-weight:700;"></span>
         <div style="flex:1;"></div>
+        <button onclick="correctWriteText(${wi})" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:2px solid #bae6fd;color:#0369a1;padding:7px 13px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">🔍 Rettskriving</button>
         <button class="btn-save" onclick="saveWriteAnswer(${wi})">💾 Lagre</button>
         <span class="saved-badge" id="wsaved-${wi}" style="display:none;">✓ Lagret!</span>
+      </div>
+      <div id="wcorrect-${wi}" style="display:none;margin-top:0.75rem;background:#f0f9ff;border:2px solid #bae6fd;border-radius:12px;padding:0.875rem;font-size:0.88rem;color:#0c4a6e;line-height:1.7;"></div>
+
+      <!-- AI ORDOPPSLAG -->
+      <div style="margin-top:1rem;background:linear-gradient(135deg,#fdf4ff,#fce7ff);border:2px solid #e9d5ff;border-radius:14px;padding:1rem;">
+        <div style="font-weight:800;font-size:0.85rem;color:#7e22ce;margin-bottom:0.6rem;">🔤 Ord-oppslag med AI</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+          <input type="text" id="wordLookupInput-${wi}" placeholder="Skriv et ord eller uttrykk..." style="flex:1;min-width:0;padding:8px 12px;border:2px solid #d8b4fe;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;" />
+          <select id="wordLookupLang-${wi}" style="padding:8px 10px;border:2px solid #d8b4fe;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;outline:none;background:white;color:#7e22ce;cursor:pointer;">
+            <option value="norsk bokmål">🇳🇴 Bokmål</option>
+            <option value="norsk nynorsk">🇳🇴 Nynorsk</option>
+            <option value="engelsk">🇬🇧 Engelsk</option>
+          </select>
+          <button onclick="aiWordLookup(${wi})" style="background:linear-gradient(135deg,#a855f7,#7c3aed);color:white;border:none;padding:8px 14px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">Slå opp 🔎</button>
+        </div>
+        <div id="wordLookupResult-${wi}" style="display:none;background:white;border-radius:10px;padding:0.75rem;font-size:0.88rem;color:#4c1d95;line-height:1.7;min-height:40px;"></div>
       </div>
     </div>`;
   }).join('');
 }
+
+function updateWriteLang(wi) {
+  const sel = document.getElementById('writeLang-'+wi);
+  const ta = document.getElementById('write-'+wi);
+  if (!sel || !ta) return;
+  const lang = sel.value;
+  ta.lang = lang.includes('engelsk') ? 'en' : 'no';
+}
+
+async function correctWriteText(wi) {
+  const ta = document.getElementById('write-'+wi);
+  const langSel = document.getElementById('writeLang-'+wi);
+  const resultEl = document.getElementById('wcorrect-'+wi);
+  if (!ta || !resultEl) return;
+  const text = ta.value.trim();
+  if (!text) { showToast('Skriv noe tekst først!'); return; }
+  const lang = langSel ? langSel.value : 'norsk bokmål';
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '⏳ Sjekker teksten...';
+  const apiKey = localStorage.getItem('olaskole_apikey') || '';
+  if (!apiKey) { resultEl.innerHTML = '⚠️ Ingen AI-nøkkel satt. Gå til Innstillinger.'; return; }
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001', max_tokens:1000,
+        messages:[{role:'user',content:`Du er en rettskrivingslærer. Eleven har skrevet følgende tekst på ${lang}. Gi tilbakemelding på rettskriving, grammatikk og setningsstruktur. List opp konkrete feil og forbedringsforslag på norsk. Vær kort og konstruktiv. Tekst:\n\n${text}`}]
+      })
+    });
+    const data = await resp.json();
+    const txt = data.content?.[0]?.text || 'Ingen tilbakemelding.';
+    resultEl.innerHTML = '<b>🔍 Rettskrivingssjekk:</b><br>' + escHtml(txt).replace(/\n/g,'<br>');
+  } catch(e) { resultEl.innerHTML = '❌ Feil ved tilkobling til AI.'; }
+}
+
+async function aiWordLookup(wi) {
+  const inputEl = document.getElementById('wordLookupInput-'+wi);
+  const langEl = document.getElementById('wordLookupLang-'+wi);
+  const resultEl = document.getElementById('wordLookupResult-'+wi);
+  if (!inputEl || !resultEl) return;
+  const word = inputEl.value.trim();
+  if (!word) { showToast('Skriv et ord først!'); return; }
+  const lang = langEl ? langEl.value : 'norsk bokmål';
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '⏳ Slår opp...';
+  const apiKey = localStorage.getItem('olaskole_apikey') || '';
+  if (!apiKey) { resultEl.innerHTML = '⚠️ Ingen AI-nøkkel satt.'; return; }
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001', max_tokens:400,
+        messages:[{role:'user',content:`Eleven skriver på ${lang} og vil slå opp dette ordet eller uttrykket: "${word}". Gi: 1) Korrekt stavemåte på ${lang}, 2) Hva ordet betyr, 3) Et eksempel på bruk i setning, 4) Oversettelse til norsk bokmål (om det er et fremmedord). Svar kortfattet på norsk.`}]
+      })
+    });
+    const data = await resp.json();
+    const txt = data.content?.[0]?.text || 'Fant ikke ordet.';
+    resultEl.innerHTML = escHtml(txt).replace(/\n/g,'<br>');
+  } catch(e) { resultEl.innerHTML = '❌ Feil ved tilkobling til AI.'; }
+}
+
 
 const WRITE_TEMPLATES = {
   argumenterende: `<b>📣 Argumenterende tekst – mal:</b><br>
@@ -2538,6 +2700,8 @@ async function saveModule() {
     name, desc:document.getElementById('moduleDesc')?.value.trim()||'',
     emoji:document.getElementById('moduleEmoji')?.value.trim()||'📚',
     text:document.getElementById('moduleText')?.value.trim()||'',
+    cover:document.getElementById('moduleCoverUrl')?.value.trim()||'',
+    deadline:document.getElementById('moduleDeadline')?.value||'',
     quiz:[...state.tempQuiz], discussion:[...state.tempDisc],
     write:[...state.tempWrite], videos:[...state.tempVideos], flashcards:[...state.tempFlashcards],
     subject:document.getElementById('aiSubject')?.value||'',
@@ -2561,7 +2725,8 @@ async function saveModule() {
 
 function clearModuleForm() {
   state.tempQuiz=[];state.tempDisc=[];state.tempWrite=[];state.tempVideos=[];state.tempFlashcards=[];
-  ['moduleName','moduleDesc','moduleText'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['moduleName','moduleDesc','moduleText','moduleDeadline'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  clearCoverPreview();
   const emojiEl=document.getElementById('moduleEmoji');if(emojiEl)emojiEl.value='📚';
   ['quizPreview','discPreview','fcPreview'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
   const saveLabel=document.getElementById('saveModuleLabel');if(saveLabel)saveLabel.textContent='💾 Publiser emnet for elevene!';
@@ -2584,6 +2749,15 @@ function editModule(idx) {
   document.getElementById('moduleDesc').value=m.desc||'';
   document.getElementById('moduleEmoji').value=m.emoji||'📚';
   document.getElementById('moduleText').value=m.text||'';
+  // Cover image
+  const coverUrlEl = document.getElementById('moduleCoverUrl');
+  const coverThumb = document.getElementById('coverPreviewThumb');
+  const coverImg = document.getElementById('coverPreviewImg');
+  if (coverUrlEl) coverUrlEl.value = m.cover||'';
+  if (m.cover && coverImg && coverThumb) { coverImg.src=m.cover; coverThumb.style.display='block'; }
+  // Deadline
+  const deadlineEl = document.getElementById('moduleDeadline');
+  if (deadlineEl) deadlineEl.value = m.deadline||'';
   state.tempQuiz=JSON.parse(JSON.stringify(m.quiz||[]));
   state.tempDisc=JSON.parse(JSON.stringify(m.discussion||[]));
   state.tempWrite=JSON.parse(JSON.stringify(m.write||[]));
@@ -2631,8 +2805,10 @@ const ANNOUNCE_KEY = 'os_announcement';
 function saveAnnouncement() {
   const text = document.getElementById('announcementText')?.value.trim();
   const type = document.getElementById('announcementType')?.value || 'info';
+  const from = document.getElementById('announcementFrom')?.value || '';
+  const until = document.getElementById('announcementUntil')?.value || '';
   if (!text) { showToast('Skriv en beskjed først!'); return; }
-  const obj = { text, type, date: new Date().toLocaleString('no') };
+  const obj = { text, type, date: new Date().toLocaleString('no'), from, until };
   DB.saveFeedback(ANNOUNCE_KEY, JSON.stringify(obj));
   localStorage.setItem(ANNOUNCE_KEY, JSON.stringify(obj));
   showToast('📢 Kunngjøring sendt til alle elever!');
@@ -2651,6 +2827,7 @@ function clearAnnouncement() {
   if (status) status.textContent = 'Kunngjøringen er fjernet.';
   showToast('🗑 Kunngjøring fjernet');
   hideAnnouncementBanner();
+  updateKunngjoringDot([]);
 }
 
 async function loadAnnouncementEditor() {
@@ -2665,9 +2842,25 @@ async function loadAnnouncementEditor() {
     ta.value = obj.text || '';
     const sel = document.getElementById('announcementType');
     if (sel) sel.value = obj.type || 'info';
+    const fromEl = document.getElementById('announcementFrom');
+    const untilEl = document.getElementById('announcementUntil');
+    if (fromEl && obj.from) fromEl.value = obj.from;
+    if (untilEl && obj.until) untilEl.value = obj.until;
     if (prev) { prev.style.display='block'; prev.innerHTML = formatAnnouncementBanner(obj); }
-    if (status) status.textContent = 'Sist oppdatert: ' + (obj.date||'');
+    if (status) {
+      const fromStr = obj.from ? ` · Publiseres: ${new Date(obj.from).toLocaleString('no')}` : '';
+      const untilStr = obj.until ? ` · Fjernes: ${new Date(obj.until).toLocaleString('no')}` : '';
+      status.textContent = 'Sist oppdatert: ' + (obj.date||'') + fromStr + untilStr;
+    }
   }
+}
+
+function isAnnouncementActive(obj) {
+  if (!obj || !obj.text) return false;
+  const now = Date.now();
+  if (obj.from && new Date(obj.from).getTime() > now) return false;
+  if (obj.until && new Date(obj.until).getTime() < now) return false;
+  return true;
 }
 
 function formatAnnouncementBanner(obj) {
@@ -2679,28 +2872,237 @@ function formatAnnouncementBanner(obj) {
   const icons = { info:'ℹ️', viktig:'⚠️', bra:'🎉' };
   const s = styles[obj.type]||styles.info;
   const i = icons[obj.type]||'ℹ️';
-  return `<div style="${s}padding:0.875rem 1.25rem;border-radius:10px;font-weight:700;font-size:0.92rem;">${i} ${escHtml(obj.text)}</div>`;
+  const untilStr = obj.until ? `<span style="font-size:0.78rem;font-weight:700;opacity:0.7;margin-left:0.5rem;">Gjelder til ${new Date(obj.until).toLocaleDateString('no')}</span>` : '';
+  return `<div style="${s}padding:0.875rem 1.25rem;border-radius:10px;font-weight:700;font-size:0.92rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">${i} <span>${escHtml(obj.text)}</span>${untilStr}</div>`;
 }
 
 async function checkAndShowAnnouncement() {
-  // Vis kunngjøring til elever
   const rows = await DB.loadFeedback(ANNOUNCE_KEY);
   let obj = null;
   if (rows) { try { obj = JSON.parse(rows); } catch {} }
   if (!obj) { obj = JSON.parse(localStorage.getItem(ANNOUNCE_KEY)||'null'); }
+  const active = isAnnouncementActive(obj) ? [obj] : [];
+  document._lastAnnouncements = active;
   const banner = document.getElementById('announcementBanner');
-  if (!banner) return;
-  if (obj && obj.text) {
-    banner.innerHTML = formatAnnouncementBanner(obj);
-    banner.style.display = 'block';
-  } else {
-    banner.style.display = 'none';
+  if (banner) {
+    if (active.length) { banner.innerHTML = formatAnnouncementBanner(obj); banner.style.display='block'; }
+    else banner.style.display = 'none';
   }
+  updateKunngjoringDot(active);
+  renderStudentAnnouncementList(active);
+}
+
+function updateKunngjoringDot(active) {
+  const show = active.length > 0;
+  // Show/hide kunngjøring tab for students
+  const btn = document.getElementById('kunngjoringNavBtn');
+  const dot = document.getElementById('kunngjoringDot');
+  const dotMob = document.getElementById('kunngjoringDotMob');
+  const mobBtn = document.getElementById('mob-kunngjoring');
+  if (btn) btn.style.display = show && !state.isTeacher ? 'inline-block' : 'none';
+  if (dot) dot.style.display = show ? 'block' : 'none';
+  if (dotMob) dotMob.style.display = show ? 'block' : 'none';
+  if (mobBtn) mobBtn.style.display = show && !state.isTeacher ? 'flex' : 'none';
+}
+
+function renderStudentAnnouncementList(active) {
+  const el = document.getElementById('studentAnnouncementList');
+  if (!el) return;
+  if (!active.length) { el.innerHTML='<p style="color:#aaa;text-align:center;padding:3rem;">Ingen aktive meldinger.</p>'; return; }
+  el.innerHTML = active.map(obj => `
+    <div style="margin-bottom:1rem;">${formatAnnouncementBanner(obj)}</div>
+  `).join('');
 }
 
 function hideAnnouncementBanner() {
   const banner = document.getElementById('announcementBanner');
   if (banner) banner.style.display = 'none';
+}
+
+// ── AVATAR ──────────────────────────────────────────────────────────
+function selectAvatar(emoji) {
+  document.getElementById('studentAvatar').value = emoji;
+  document.querySelectorAll('.avatar-opt').forEach(b => {
+    b.style.borderColor = b.textContent===emoji ? 'var(--c4)' : 'transparent';
+    b.style.background = b.textContent===emoji ? 'var(--bg)' : 'none';
+  });
+}
+
+// ── FORSIDEBILDE ────────────────────────────────────────────────────
+function previewCoverImage() {
+  const url = document.getElementById('moduleCoverUrl')?.value.trim();
+  const thumb = document.getElementById('coverPreviewThumb');
+  const img = document.getElementById('coverPreviewImg');
+  if (!thumb || !img) return;
+  if (url) { img.src=url; thumb.style.display='block'; }
+  else thumb.style.display = 'none';
+}
+
+function handleCoverUpload(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = e.target.result;
+    const urlEl = document.getElementById('moduleCoverUrl');
+    const thumb = document.getElementById('coverPreviewThumb');
+    const img = document.getElementById('coverPreviewImg');
+    if (urlEl) urlEl.value = data;
+    if (img) img.src = data;
+    if (thumb) thumb.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── NOTATBLOKK ──────────────────────────────────────────────────────
+function renderNotesHTML(m) {
+  if (!state.student) return '<p style="color:#aaa;padding:2rem;">Logg inn for å bruke notatblokk.</p>';
+  const key = 'notes_' + state.student.name + '_m' + state.currentModule;
+  const saved = localStorage.getItem(key) || '';
+  return `<div class="discussion-card">
+    <h3 style="font-weight:800;margin-bottom:0.75rem;">📝 Mine notater</h3>
+    <p style="font-size:0.85rem;color:#888;margin-bottom:0.75rem;">Disse notatene er kun synlige for deg. Bruk dem til å skrive ned viktige poenger, spørsmål eller tanker fra emnet.</p>
+    <textarea id="notesArea" placeholder="Skriv notatene dine her..." style="width:100%;min-height:220px;border:2px solid #e0e0e0;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;line-height:1.7;resize:vertical;transition:border-color 0.2s;"
+      onfocus="this.style.borderColor='var(--c4)'" onblur="this.style.borderColor='#e0e0e0'"
+      oninput="autoSaveNotes()">${escHtml(saved)}</textarea>
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem;">
+      <span id="notesSavedBadge" style="font-size:0.8rem;color:var(--c3);font-weight:700;opacity:0;transition:opacity 0.3s;">✓ Lagret</span>
+    </div>
+  </div>`;
+}
+
+let _notesSaveTimer = null;
+function autoSaveNotes() {
+  if (!state.student) return;
+  const key = 'notes_' + state.student.name + '_m' + state.currentModule;
+  const val = document.getElementById('notesArea')?.value || '';
+  localStorage.setItem(key, val);
+  clearTimeout(_notesSaveTimer);
+  _notesSaveTimer = setTimeout(() => {
+    const badge = document.getElementById('notesSavedBadge');
+    if (badge) { badge.style.opacity='1'; setTimeout(()=>badge.style.opacity='0', 1500); }
+  }, 600);
+}
+
+// ── ØVINGSMODUS ─────────────────────────────────────────────────────
+function renderPracticeQuizHTML(m) {
+  if (!m.quiz?.length) return '<p style="color:#aaa;padding:2rem;">Ingen quiz å øve på.</p>';
+  const shuffled = [...m.quiz].sort(()=>Math.random()-0.5);
+  return `<div>
+    <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:14px;padding:0.875rem 1.25rem;margin-bottom:1.25rem;font-size:0.88rem;font-weight:700;color:#92400e;">
+      🔁 <b>Øvingsmodus</b> – Svarene teller ikke. Øv til du kan det!
+    </div>
+    ${shuffled.map((q,qi) => {
+      const opts = [{letter:'A',text:q.a,correct:true},{letter:'B',text:q.b,correct:false},{letter:'C',text:q.c,correct:false},{letter:'D',text:q.d,correct:false}].sort(()=>Math.random()-0.5);
+      const correctMap = JSON.stringify(opts.map(o=>o.correct));
+      return `<div class="quiz-card" id="pqcard-${qi}">
+        <div class="quiz-q">${qi+1}. ${escHtml(q.question)}</div>
+        <div class="quiz-opts">
+          ${opts.map((o,oi)=>`<button class="quiz-opt" onclick="checkPracticeAnswer(${qi},${o.correct},'${escHtml(q.explain||'')}',${oi},${correctMap})">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
+        </div>
+        <div class="quiz-feedback" id="pqfb-${qi}"></div>
+        <div id="pqretry-${qi}" style="display:none;margin-top:0.5rem;">
+          <button onclick="retryPracticeQuestion(${qi},'${escHtml(JSON.stringify(q).replace(/'/g,"\\'"))}')" style="background:none;border:2px solid var(--c4);color:var(--c4);padding:6px 14px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">🔄 Prøv igjen</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function checkPracticeAnswer(qi, isCorrect, explain, optIdx, correctMap) {
+  const card = document.getElementById('pqcard-'+qi);
+  const fb = document.getElementById('pqfb-'+qi);
+  const retry = document.getElementById('pqretry-'+qi);
+  if (!card || fb.innerHTML) return;
+  const opts = card.querySelectorAll('.quiz-opt');
+  opts.forEach((o,i) => {
+    o.disabled = true;
+    if (correctMap[i]) o.classList.add('correct');
+    else if (i===optIdx && !isCorrect) o.classList.add('wrong');
+  });
+  if (isCorrect) { SND.correct(); launchConfetti(); }
+  else { SND.wrong(); if (retry) retry.style.display='block'; }
+  fb.innerHTML = isCorrect
+    ? `<span style="color:var(--c3);font-weight:800;">✅ Riktig!</span>${explain?` <span style="color:#666;font-size:0.88rem;">${escHtml(explain)}</span>`:''}`
+    : `<span style="color:var(--c1);font-weight:800;">❌ Feil.</span>${explain?` <span style="color:#666;font-size:0.88rem;">💡 ${escHtml(explain)}</span>`:''}`;
+  // No saveAnswer in practice mode!
+}
+
+function retryPracticeQuestion(qi, qJson) {
+  const q = JSON.parse(qJson);
+  const card = document.getElementById('pqcard-'+qi);
+  if (!card) return;
+  const fb = document.getElementById('pqfb-'+qi);
+  const retry = document.getElementById('pqretry-'+qi);
+  if (fb) fb.innerHTML = '';
+  if (retry) retry.style.display='none';
+  const opts = card.querySelectorAll('.quiz-opt');
+  opts.forEach(o => { o.disabled=false; o.classList.remove('correct','wrong'); });
+}
+
+// ── KLASSEOVERSIKT DASHBOARD ─────────────────────────────────────────
+function renderClassDashboard() {
+  const el = document.getElementById('classDashboardContent');
+  if (!el) return;
+  const roster = getRosterSync();
+  if (!roster.length) { el.innerHTML='<p style="color:#aaa;">Ingen elever registrert ennå.</p>'; return; }
+
+  // Build completion matrix: for each student, which modules are "done"
+  const moduleCount = state.modules.filter(m=>!m.locked).length;
+  const students = roster.map(r => {
+    const name = r.name;
+    const totalTasks = state.modules.filter(m=>!m.locked).reduce((s,m) => s + countTasks(m), 0);
+    const answeredKeys = Object.keys(state.studentAnswers).filter(k => k.startsWith(name+'_'));
+    const done = answeredKeys.length;
+    const pct = totalTasks ? Math.round(done/totalTasks*100) : 0;
+    return { name, cls: r.cls||'?', done, total: totalTasks, pct };
+  }).sort((a,b) => b.pct - a.pct);
+
+  const byClass = {};
+  students.forEach(s => { if (!byClass[s.cls]) byClass[s.cls]=[]; byClass[s.cls].push(s); });
+
+  el.innerHTML = Object.entries(byClass).map(([cls,sts]) => `
+    <div style="background:white;border-radius:14px;border:2px solid #e8eaed;margin-bottom:1.25rem;overflow:hidden;">
+      <div style="padding:0.75rem 1rem;background:linear-gradient(135deg,var(--c4),var(--c5));color:white;font-weight:800;">🏫 ${escHtml(cls)}</div>
+      <div style="padding:0.5rem;">
+        ${sts.map(s => {
+          const color = s.pct>=80?'var(--c3)':s.pct>=40?'var(--c2)':'var(--c1)';
+          return `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;border-bottom:1px solid #f5f5f5;">
+            <span style="font-weight:800;min-width:120px;font-size:0.88rem;">${escHtml(s.name)}</span>
+            <div style="flex:1;background:#f0f0f0;border-radius:50px;height:10px;overflow:hidden;">
+              <div style="width:${s.pct}%;height:100%;background:${color};border-radius:50px;transition:width 0.5s;"></div>
+            </div>
+            <span style="font-size:0.8rem;font-weight:800;color:${color};min-width:48px;text-align:right;">${s.pct}%</span>
+            <span style="font-size:0.75rem;color:#aaa;">${s.done}/${s.total}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── INNLEVERINGSFRIST ────────────────────────────────────────────────
+function formatDeadline(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = d - now;
+  if (diff < 0) return `<span style="color:var(--c1);font-weight:800;">⏰ Frist utgått!</span>`;
+  const days = Math.floor(diff/86400000);
+  const hrs  = Math.floor((diff%86400000)/3600000);
+  const mins = Math.floor((diff%3600000)/60000);
+  if (days > 1) return `<span style="color:#888;font-size:0.82rem;">📅 Frist om ${days} dager (${d.toLocaleDateString('no')})</span>`;
+  if (days === 1) return `<span style="color:#f97316;font-weight:800;">⏳ Frist om 1 dag (${d.toLocaleString('no')})</span>`;
+  if (hrs > 0) return `<span style="color:var(--c1);font-weight:800;">🔥 Frist om ${hrs}t ${mins}m!</span>`;
+  return `<span style="color:var(--c1);font-weight:800;">🔥 Frist om ${mins} minutter!</span>`;
+}
+
+// ── COVER IMAGE – clearModuleForm & saveModule hooks ─────────────────
+function clearCoverPreview() {
+  const urlEl = document.getElementById('moduleCoverUrl');
+  const thumb = document.getElementById('coverPreviewThumb');
+  if (urlEl) urlEl.value='';
+  if (thumb) thumb.style.display='none';
 }
 
 function renderManageModules() {
@@ -4996,21 +5398,20 @@ function sjShowGameOver(data) {
   document.getElementById('sjFinalScore').textContent = finalScore;
   document.getElementById('sjFinalRank').textContent = rank > 0 ? `Du ble nr. ${rank} av ${sorted.length}` : '';
 
-  // Show mini scoreboard on student gameover screen
-  const medals = ['🥇','🥈','🥉'];
-  const miniBoard = document.createElement('div');
-  miniBoard.style.cssText = 'margin:1.25rem auto;max-width:320px;text-align:left;';
-  miniBoard.innerHTML = `<div style="font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--dark);margin-bottom:0.75rem;text-align:center;">🏆 Resultater</div>` +
-    sorted.slice(0,5).map((p,i) => `
-      <div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.75rem;border-radius:10px;background:${p.username===sjGame.username?'#fff9c4':'#f5f5f5'};margin-bottom:0.35rem;border:${p.username===sjGame.username?'2px solid var(--c2)':'2px solid transparent'}">
-        <span style="font-size:1.2rem;min-width:1.8rem;">${medals[i]||i+1}</span>
-        <span style="font-size:1.1rem;">${p.avatar}</span>
-        <span style="flex:1;font-weight:800;font-size:0.88rem;">${p.username}</span>
-        <span style="font-weight:900;color:var(--c4);">${p.score||0}</span>
+  // Klassens toppliste
+  const topEl = document.getElementById('classToppliste');
+  const rowsEl = document.getElementById('classTopplListeRows');
+  if (topEl && rowsEl && sorted.length > 1) {
+    const medals = ['🥇','🥈','🥉'];
+    rowsEl.innerHTML = sorted.slice(0, 10).map((p,i) => `
+      <div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.75rem;border-radius:10px;background:${p.username===sjGame.username?'#fff9c4':'#f9f9f9'};margin-bottom:0.35rem;border:${p.username===sjGame.username?'2px solid var(--c2)':'2px solid transparent'}">
+        <span style="font-size:1.2rem;min-width:1.8rem;text-align:center;">${medals[i]||(i+1)+'.'}</span>
+        <span style="font-size:1.1rem;">${p.avatar||'🦊'}</span>
+        <span style="flex:1;font-weight:800;font-size:0.88rem;">${escHtml(p.username)}</span>
+        <span style="font-weight:900;color:var(--c4);">${p.score||0} ⭐</span>
       </div>`).join('');
-
-  const rankEl = document.getElementById('sjFinalRank');
-  if (rankEl) rankEl.insertAdjacentElement('afterend', miniBoard);
+    topEl.style.display = 'block';
+  }
 
   sjShow('gameover');
 }
