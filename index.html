@@ -549,8 +549,6 @@
 <body>
 
 <div class="progress-top"><div class="progress-fill" id="progressFill"></div></div>
-<!-- Kunngjøringsbanner -->
-<div id="announcementBanner" style="display:none;padding:0.5rem 1rem;max-width:1200px;margin:0.5rem auto 0;"></div>
 
 <nav>
   <div class="logo" onclick="showView('home')" style="cursor:pointer;" title="Tilbake til hjem">Ola<span>Skole</span></div>
@@ -686,7 +684,6 @@
       <button class="tr-tab"        id="trtab-emner"  onclick="trTab('emner')">📦 Emner</button>
       <button class="tr-tab"        id="trtab-results" onclick="trTab('results')">📊 Resultater</button>
       <button class="tr-tab"        id="trtab-klasser" onclick="trTab('klasser')">🏫 Klasser</button>
-      <button class="tr-tab"        id="trtab-kunngjoring" onclick="trTab('kunngjoring')">📢 Kunngjøring</button>
     </div>
   </div>
 
@@ -784,25 +781,6 @@
             <select id="aiWriteTask" style="width:100%;padding:9px 11px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;background:#2d2d44;color:white;outline:none;">
               <option value="ja" selected>✅ Ja</option>
               <option value="nei">❌ Nei</option>
-            </select>
-          </div>
-          <div>
-            <label style="display:block;font-weight:800;font-size:0.78rem;opacity:0.7;margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:0.5px;">⏱️ Tidsbegrenset quiz</label>
-            <select id="aiQuizTimer" style="width:100%;padding:9px 11px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;background:#2d2d44;color:white;outline:none;">
-              <option value="0" selected>⏱️ Ingen tidsbegrensning</option>
-              <option value="15">15 sekunder</option>
-              <option value="20">20 sekunder</option>
-              <option value="30">30 sekunder</option>
-              <option value="45">45 sekunder</option>
-              <option value="60">60 sekunder</option>
-            </select>
-          </div>
-          <div>
-            <label style="display:block;font-weight:800;font-size:0.78rem;opacity:0.7;margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:0.5px;">🌐 Språk</label>
-            <select id="aiLanguage" style="width:100%;padding:9px 11px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;background:#2d2d44;color:white;outline:none;">
-              <option value="norsk bokmål" selected>🇳🇴 Norsk bokmål</option>
-              <option value="norsk nynorsk">🇳🇴 Norsk nynorsk</option>
-              <option value="engelsk">🇬🇧 Engelsk</option>
             </select>
           </div>
         </div>
@@ -1062,29 +1040,6 @@
       <div style="margin-top:1rem;padding:1rem;background:rgba(255,255,255,0.7);border-radius:12px;border-left:4px solid var(--c4);font-size:0.85rem;color:#555;line-height:1.7;">
         💡 Elever sorteres automatisk etter klassen de oppgir ved innlogging.
       </div>
-    </div>
-  </div>
-
-  <!-- KUNNGJØRING-PANE -->
-  <div class="tr-pane" id="trpane-kunngjoring">
-    <div class="teacher-panel" style="background:linear-gradient(135deg,#fff7ed,#ffedd5);">
-      <h2>📢 Kunngjøring til elever</h2>
-      <p style="color:#666;font-size:0.9rem;margin-bottom:1.25rem;">Skriv en beskjed som vises som en banner øverst på siden for alle elever når de logger inn.</p>
-      <div style="margin-bottom:1rem;">
-        <label style="font-weight:800;font-size:0.85rem;color:#555;display:block;margin-bottom:0.5rem;">📝 Beskjed</label>
-        <textarea id="announcementText" placeholder="F.eks: Husk innlevering fredag! Lykke til med prøven!" style="width:100%;min-height:100px;border:2px solid #fed7aa;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;resize:vertical;line-height:1.6;" onfocus="this.style.borderColor='var(--c1)'" onblur="this.style.borderColor='#fed7aa'"></textarea>
-      </div>
-      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
-        <select id="announcementType" style="padding:10px 14px;border-radius:50px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;outline:none;cursor:pointer;">
-          <option value="info">ℹ️ Info</option>
-          <option value="viktig">⚠️ Viktig</option>
-          <option value="bra">🎉 Positiv</option>
-        </select>
-        <button onclick="saveAnnouncement()" style="background:var(--c1);color:white;border:none;padding:10px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">📤 Send kunngjøring</button>
-        <button onclick="clearAnnouncement()" style="background:none;border:2px solid #e0e0e0;color:#888;padding:10px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">🗑 Fjern</button>
-      </div>
-      <div id="announcementPreview" style="display:none;border-radius:12px;padding:1rem 1.25rem;font-weight:700;font-size:0.92rem;margin-top:0.5rem;"></div>
-      <div id="announcementStatus" style="font-size:0.85rem;font-weight:700;color:#888;margin-top:0.5rem;"></div>
     </div>
   </div>
 </div>
@@ -1708,61 +1663,19 @@ function showStudentWelcome() {
   updateStudentProgress();
 }
 
-function getStreak() {
-  const today = new Date().toDateString();
-  const raw = localStorage.getItem('os_streak_' + (state.student?.name||''));
-  if (!raw) return { days: 0, lastDate: '' };
-  try { return JSON.parse(raw); } catch { return { days: 0, lastDate: '' }; }
-}
-
-function updateStreak() {
-  if (!state.student) return;
-  const key = 'os_streak_' + state.student.name;
-  const today = new Date().toDateString();
-  const yesterday = new Date(Date.now()-86400000).toDateString();
-  let s = getStreak();
-  if (s.lastDate === today) return; // allerede registrert i dag
-  if (s.lastDate === yesterday) s.days++; // fortsetter streak
-  else s.days = 1; // ny streak
-  s.lastDate = today;
-  localStorage.setItem(key, JSON.stringify(s));
-}
-
 function renderBadges() {
-  updateStreak();
   const answers = state.studentAnswers;
   const total = Object.keys(answers).length;
-  const quizCorrect = Object.values(answers).filter(a => a.correct).length;
-  const streak = getStreak();
   const badges = [];
-
-  // Aktivitetsbadges
-  if (total >= 1)  badges.push({ icon: '⭐', label: 'Første svar!' });
-  if (total >= 5)  badges.push({ icon: '🔥', label: '5 svar' });
+  if (total >= 1) badges.push({ icon: '⭐', label: 'Første svar!' });
+  if (total >= 5) badges.push({ icon: '🔥', label: '5 svar' });
   if (total >= 10) badges.push({ icon: '🏆', label: '10 svar' });
-  if (total >= 25) badges.push({ icon: '💎', label: '25 svar' });
-  if (total >= 50) badges.push({ icon: '👑', label: '50 svar' });
-
-  // Quiz-badges
-  if (quizCorrect >= 3)  badges.push({ icon: '🧠', label: 'Quiz-mester' });
-  if (quizCorrect >= 10) badges.push({ icon: '🎯', label: 'Quiz-ekspert' });
-
-  // Streak-badges
-  if (streak.days >= 2) badges.push({ icon: '📅', label: streak.days + ' dagers streak!' });
-  if (streak.days >= 7) badges.push({ icon: '🌟', label: '7-dagers streak!' });
-  if (streak.days >= 30) badges.push({ icon: '🚀', label: '30-dagers streak!' });
-
+  const quizCorrect = Object.values(answers).filter(a => a.correct).length;
+  if (quizCorrect >= 3) badges.push({ icon: '🧠', label: 'Quiz-mester' });
   const area = document.getElementById('badgeArea');
   if (!area) return;
-
-  // Vis streak-teller øverst
-  const streakHtml = streak.days >= 1
-    ? `<div class="badge earned" title="${streak.days} dager på rad!">🔥 ${streak.days} dag${streak.days===1?'':'er'} streak</div>`
-    : '';
-
-  area.innerHTML = streakHtml + badges.map(b =>
-    `<div class="badge earned"><span class="badge-icon">${b.icon}</span>${b.label}</div>`
-  ).join('') || '<div class="badge"><span class="badge-icon">🌱</span>Begynn å løse oppgaver!</div>';
+  area.innerHTML = badges.map(b => `<div class="badge earned"><span class="badge-icon">${b.icon}</span>${b.label}</div>`).join('') ||
+    '<div class="badge"><span class="badge-icon">🌱</span>Begynn å løse oppgaver!</div>';
 }
 
 function updateStudentProgress() {
@@ -1945,7 +1858,7 @@ function msLogin(clientId) {
 // ====== TEACHER ROOM TABS ======
 function trTab(name) {
   document.querySelectorAll('.tr-tabs .tr-tab').forEach(t => t.classList.remove('active'));
-  ['trpane-new','trpane-emner','trpane-results','trpane-klasser','trpane-kunngjoring'].forEach(id => {
+  ['trpane-new','trpane-emner','trpane-results','trpane-klasser'].forEach(id => {
     const el = document.getElementById(id); if (el) el.classList.remove('active');
   });
   const btn = document.getElementById('trtab-' + name);
@@ -1955,7 +1868,6 @@ function trTab(name) {
   if (name === 'emner') renderManageModules();
   if (name === 'results') renderResults();
   if (name === 'klasser') renderClassRoster();
-  if (name === 'kunngjoring') loadAnnouncementEditor();
 }
 
 function tcTab(name) {
@@ -2107,12 +2019,9 @@ function switchTaskTab(type, btn) {
 function switchTaskType(type, m) {
   const content = document.getElementById('taskTypeContent');
   if (!content || !m) return;
-  // Stopp eventuelle løpende quiz-timere
-  Object.values(_quizTimers||{}).forEach(t => clearInterval(t));
-  _quizTimers = {};
   state.currentTask = type;
   if (type==='text') content.innerHTML = renderTextHTML(m);
-  else if (type==='quiz') { content.innerHTML = renderQuizHTML(m); setTimeout(()=>startQuizTimers(m), 100); }
+  else if (type==='quiz') content.innerHTML = renderQuizHTML(m);
   else if (type==='disc') content.innerHTML = renderDiscHTML(m);
   else if (type==='write') content.innerHTML = renderWriteHTML(m);
   else if (type==='video') content.innerHTML = renderVideoHTML(m);
@@ -2140,9 +2049,8 @@ function markTextRead() {
 
 function renderQuizHTML(m) {
   if (!m.quiz?.length) return '<p style="color:#aaa;padding:2rem;">Ingen quiz ennå.</p>';
-  const timerSec = m.quizTimer || 0;
   const shuffled = [...m.quiz].map((q,i) => ({...q, origIdx:i}));
-  return `<div id="quizContainer">${shuffled.map((q, qi) => {
+  return shuffled.map((q, qi) => {
     const opts = [
       {letter:'A', text:q.a, correct:true},
       {letter:'B', text:q.b, correct:false},
@@ -2151,46 +2059,13 @@ function renderQuizHTML(m) {
     ].sort(()=>Math.random()-0.5);
     const correctMap = JSON.stringify(opts.map(o=>o.correct));
     return `<div class="quiz-card" id="qcard-${qi}">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
-        <div class="quiz-q" style="margin-bottom:0;">${qi+1}. ${escHtml(q.question)}</div>
-        ${timerSec>0?`<div id="qtimer-${qi}" style="font-size:0.85rem;font-weight:800;color:var(--c2);background:var(--dark);padding:4px 10px;border-radius:50px;min-width:44px;text-align:center;">${timerSec}s</div>`:''}
-      </div>
+      <div class="quiz-q">${qi+1}. ${escHtml(q.question)}</div>
       <div class="quiz-opts">
-        ${opts.map((o,oi)=>`<button class="quiz-opt" id="qopt-${qi}-${oi}" onclick="checkAnswer(${qi},${o.correct},'${escHtml(q.explain||'')}',${oi},${correctMap})">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
+        ${opts.map((o,oi)=>`<button class="quiz-opt" onclick="checkAnswer(${qi},${o.correct},'${escHtml(q.explain||'')}',${oi},${correctMap})">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
       </div>
       <div class="quiz-feedback" id="qfb-${qi}"></div>
     </div>`;
-  }).join('')}</div>`;
-}
-
-let _quizTimers = {};
-function startQuizTimers(m) {
-  const timerSec = m.quizTimer || 0;
-  if (!timerSec) return;
-  m.quiz.forEach((q, qi) => {
-    let left = timerSec;
-    _quizTimers[qi] = setInterval(() => {
-      const el = document.getElementById('qtimer-'+qi);
-      const fb = document.getElementById('qfb-'+qi);
-      if (!el || (fb && fb.innerHTML)) { clearInterval(_quizTimers[qi]); return; }
-      left--;
-      el.textContent = left + 's';
-      el.style.color = left <= 5 ? 'var(--c1)' : 'var(--c2)';
-      if (left <= 0) {
-        clearInterval(_quizTimers[qi]);
-        // Tid ute – marker som feil
-        const card = document.getElementById('qcard-'+qi);
-        if (!card) return;
-        const opts = card.querySelectorAll('.quiz-opt');
-        opts.forEach((o,i) => { o.disabled=true; });
-        if (fb && !fb.innerHTML) {
-          fb.innerHTML = `<span style="color:var(--c1);font-weight:800;">⏰ Tid ute!</span>${q.explain?` <span style="color:#666;font-size:0.88rem;">💡 ${escHtml(q.explain)}</span>`:''}`;
-          saveAnswer('quiz_'+qi, false);
-          el.textContent = '0s';
-        }
-      }
-    }, 1000);
-  });
+  }).join('');
 }
 
 function checkAnswer(qi, isCorrect, explain, optIdx, correctMap) {
@@ -2236,35 +2111,16 @@ function saveDiscAnswer(di) {
 
 function renderWriteHTML(m) {
   if (!m.write?.length) return '<p style="color:#aaa;padding:2rem;">Ingen skriveoppgave ennå.</p>';
-  const lang = m.language || 'norsk bokmål';
-  const langAttr = lang.includes('engelsk') ? 'en' : 'no';
   return m.write.map((w,wi) => {
     const savedKey = state.student ? (state.student.name+'_m'+state.currentModule+'_write_'+wi) : null;
     const saved = savedKey ? state.studentAnswers[savedKey] : null;
     return `<div class="discussion-card">
       <h3 style="font-weight:800;margin-bottom:0.5rem;">✍️ ${escHtml(w.title||'Skriveoppgave')}</h3>
       <div style="background:var(--bg);border-radius:12px;padding:1rem;margin-bottom:1rem;border-left:4px solid var(--c2);font-size:0.95rem;color:#555;">${escHtml(w.desc||'')}</div>
-      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;align-items:center;">
-        ${w.minWords?`<span style="font-size:0.82rem;color:#aaa;font-weight:700;background:#f0f0f0;padding:4px 10px;border-radius:50px;">Minimum ${w.minWords} ord</span>`:''}
-        <span style="font-size:0.78rem;color:#aaa;font-weight:700;">🌐 ${escHtml(lang)}</span>
-        <select onchange="applyWriteTemplate(${wi},this.value)" style="font-size:0.8rem;padding:4px 10px;border-radius:50px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;outline:none;color:#555;">
-          <option value="">📝 Velg tekstmal...</option>
-          <option value="argumenterende">📣 Argumenterende</option>
-          <option value="beskrivende">🔍 Beskrivende</option>
-          <option value="fortellende">📖 Fortellende</option>
-          <option value="reflekterende">💭 Reflekterende</option>
-        </select>
-      </div>
-      <div id="writeTemplate-${wi}" style="display:none;background:#fffbea;border:2px dashed var(--c2);border-radius:12px;padding:0.875rem;margin-bottom:0.75rem;font-size:0.85rem;color:#666;line-height:1.65;"></div>
-      <textarea id="write-${wi}" lang="${langAttr}" spellcheck="true"
-        placeholder="Skriv teksten din her..."
-        style="width:100%;min-height:200px;border:2px solid #e0e0e0;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;line-height:1.7;transition:border-color 0.2s;"
-        onfocus="this.style.borderColor='var(--c4)'" onblur="this.style.borderColor='#e0e0e0'"
-        oninput="countWords(${wi},${w.minWords||0})">${saved?escHtml(saved.val):''}</textarea>
-      <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.6rem;flex-wrap:wrap;">
+      ${w.minWords?`<div style="font-size:0.82rem;color:#aaa;margin-bottom:0.5rem;">Minimum ${w.minWords} ord</div>`:''}
+      <textarea id="write-${wi}" placeholder="Skriv teksten din her..." style="width:100%;min-height:180px;border:2px solid #e0e0e0;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;" oninput="countWords(${wi},${w.minWords||0})">${saved?escHtml(saved.val):''}</textarea>
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem;flex-wrap:wrap;">
         <span id="wcount-${wi}" style="font-size:0.82rem;color:#aaa;font-weight:700;">0 ord</span>
-        <span id="wreadability-${wi}" style="font-size:0.78rem;color:#aaa;font-weight:700;"></span>
-        <div style="flex:1;"></div>
         <button class="btn-save" onclick="saveWriteAnswer(${wi})">💾 Lagre</button>
         <span class="saved-badge" id="wsaved-${wi}" style="display:none;">✓ Lagret!</span>
       </div>
@@ -2272,64 +2128,13 @@ function renderWriteHTML(m) {
   }).join('');
 }
 
-const WRITE_TEMPLATES = {
-  argumenterende: `<b>📣 Argumenterende tekst – mal:</b><br>
-<b>Innledning:</b> Presenter tema og din påstand (hva du mener).<br>
-<b>Argument 1:</b> Første grunn for påstanden + eksempel/belegg.<br>
-<b>Argument 2:</b> Andre grunn + eksempel/belegg.<br>
-<b>Motargument:</b> Nevn et motsynspunkt og tilbakedvis det.<br>
-<b>Avslutning:</b> Oppsummer og gjenta påstanden.`,
-  beskrivende: `<b>🔍 Beskrivende tekst – mal:</b><br>
-<b>Innledning:</b> Hva skal du beskrive? Gi leseren et overblikk.<br>
-<b>Hoveddel:</b> Beskriv detaljert – bruk sanseinntrykk (se, høre, lukte, ta på).<br>
-<b>Detaljer:</b> Legg til fakta, egenskaper og kjennetegn.<br>
-<b>Avslutning:</b> Helhetsinntrykk – hva gjør dette emnet spesielt?`,
-  fortellende: `<b>📖 Fortellende tekst – mal:</b><br>
-<b>Innledning:</b> Presenter sted, tid og person(er). Skap spenning.<br>
-<b>Oppbygging:</b> Beskriv situasjonen som fører til konflikten.<br>
-<b>Høydepunkt:</b> Det viktigste som skjer – konflikt eller vendepunkt.<br>
-<b>Løsning:</b> Hvordan løses problemet?<br>
-<b>Avslutning:</b> Hva lærte personen? Hvordan endte det?`,
-  reflekterende: `<b>💭 Reflekterende tekst – mal:</b><br>
-<b>Innledning:</b> Hva reflekterer du over? Hvorfor er dette viktig for deg?<br>
-<b>Egne tanker:</b> Hva tenker du om dette temaet? Hva har du erfart?<br>
-<b>Perspektiv:</b> Kan andre se det annerledes? Hva sier fagstoffet?<br>
-<b>Avslutning:</b> Hva har du kommet frem til? Hva lurer du fortsatt på?`
-};
-
-function applyWriteTemplate(wi, type) {
-  const el = document.getElementById('writeTemplate-'+wi);
-  if (!el) return;
-  if (!type) { el.style.display='none'; el.innerHTML=''; return; }
-  el.style.display = 'block';
-  el.innerHTML = WRITE_TEMPLATES[type] || '';
-}
-
 function countWords(wi, minWords) {
   const el = document.getElementById('write-'+wi);
   const countEl = document.getElementById('wcount-'+wi);
-  const readEl = document.getElementById('wreadability-'+wi);
   if (!el || !countEl) return;
-  const text = el.value.trim();
-  const words = text ? text.split(/\s+/).filter(w=>w).length : 0;
+  const words = el.value.trim().split(/\s+/).filter(w=>w).length;
   countEl.textContent = words + ' ord';
   countEl.style.color = (minWords && words < minWords) ? 'var(--c1)' : 'var(--c3)';
-  // Lesbarhetsindikator (enkel LIX-tilnærming)
-  if (readEl && words > 10) {
-    const sentences = text.split(/[.!?]+/).filter(s=>s.trim()).length || 1;
-    const longWords = text.split(/\s+/).filter(w=>w.replace(/[^a-zA-ZæøåÆØÅ]/g,'').length > 6).length;
-    const lix = Math.round((words/sentences) + (longWords*100/words));
-    let label = '', color = '';
-    if (lix < 25) { label='😊 Veldig enkel'; color='#6BCB77'; }
-    else if (lix < 35) { label='✅ Enkel'; color='#6BCB77'; }
-    else if (lix < 45) { label='📖 Middels'; color='#FFD93D'; }
-    else if (lix < 55) { label='🎓 Vanskelig'; color='#FF9A3C'; }
-    else { label='🔬 Svært vanskelig'; color='#FF6B6B'; }
-    readEl.textContent = 'Lesbarhet: ' + label;
-    readEl.style.color = color;
-  } else if (readEl) {
-    readEl.textContent = '';
-  }
 }
 
 function saveWriteAnswer(wi) {
@@ -2417,6 +2222,7 @@ function saveAnswer(key, val) {
 
 // ====== TEACHER MODULE MANAGEMENT ======
 function getAiSettings() {
+  // Free-text takes priority; fall back to dropdown
   const fagFree = document.getElementById('aiSubjectFree')?.value.trim() || '';
   const fagDrop = document.getElementById('aiSubject')?.value || '';
   const fag = fagFree || fagDrop;
@@ -2429,9 +2235,7 @@ function getAiSettings() {
     writeTasks: document.getElementById('aiWriteTask')?.value !== 'nei',
     customPrompt: document.getElementById('aiCustomPrompt')?.value.trim()||'',
     fag,
-    maal: document.getElementById('aiGoalSelect')?.value||'',
-    language: document.getElementById('aiLanguage')?.value || 'norsk bokmål',
-    quizTimer: parseInt(document.getElementById('aiQuizTimer')?.value || '0')
+    maal: document.getElementById('aiGoalSelect')?.value||''
   };
 }
 
@@ -2531,7 +2335,6 @@ async function saveModule() {
   const name=document.getElementById('moduleName')?.value.trim();
   if(!name){showToast('Emnet trenger et navn!');return;}
   const wasEditing=editingModuleIdx!==null;
-  const s = getAiSettings();
   const module={
     _id: wasEditing ? (state.modules[editingModuleIdx]._id||null) : null,
     name, desc:document.getElementById('moduleDesc')?.value.trim()||'',
@@ -2540,8 +2343,6 @@ async function saveModule() {
     quiz:[...state.tempQuiz], discussion:[...state.tempDisc],
     write:[...state.tempWrite], videos:[...state.tempVideos], flashcards:[...state.tempFlashcards],
     subject:document.getElementById('aiSubject')?.value||'',
-    quizTimer: s.quizTimer || 0,
-    language: s.language || 'norsk bokmål',
     createdAt: wasEditing?state.modules[editingModuleIdx].createdAt:new Date().toLocaleString('no'),
     updatedAt: wasEditing?new Date().toLocaleString('no'):null,
     publishedAt: wasEditing?state.modules[editingModuleIdx].publishedAt:new Date().toISOString(),
@@ -2623,84 +2424,6 @@ function toggleLock(idx) {
 }
 
 function isNewModule(m){return m.publishedAt&&(Date.now()-new Date(m.publishedAt).getTime())<3*24*3600*1000;}
-
-// ── KUNNGJØRINGER ─────────────────────────────────────────────────
-const ANNOUNCE_KEY = 'os_announcement';
-
-function saveAnnouncement() {
-  const text = document.getElementById('announcementText')?.value.trim();
-  const type = document.getElementById('announcementType')?.value || 'info';
-  if (!text) { showToast('Skriv en beskjed først!'); return; }
-  const obj = { text, type, date: new Date().toLocaleString('no') };
-  DB.saveFeedback(ANNOUNCE_KEY, JSON.stringify(obj));
-  localStorage.setItem(ANNOUNCE_KEY, JSON.stringify(obj));
-  showToast('📢 Kunngjøring sendt til alle elever!');
-  loadAnnouncementEditor();
-}
-
-function clearAnnouncement() {
-  if (!confirm('Fjerne kunngjøringen?')) return;
-  DB.deleteFeedback(ANNOUNCE_KEY);
-  localStorage.removeItem(ANNOUNCE_KEY);
-  const ta = document.getElementById('announcementText');
-  if (ta) ta.value = '';
-  const prev = document.getElementById('announcementPreview');
-  if (prev) { prev.style.display='none'; prev.innerHTML=''; }
-  const status = document.getElementById('announcementStatus');
-  if (status) status.textContent = 'Kunngjøringen er fjernet.';
-  showToast('🗑 Kunngjøring fjernet');
-  hideAnnouncementBanner();
-}
-
-async function loadAnnouncementEditor() {
-  const ta = document.getElementById('announcementText');
-  const prev = document.getElementById('announcementPreview');
-  const status = document.getElementById('announcementStatus');
-  const rows = await DB.loadFeedback(ANNOUNCE_KEY);
-  let obj = null;
-  if (rows) { try { obj = JSON.parse(rows); } catch {} }
-  if (!obj) { obj = JSON.parse(localStorage.getItem(ANNOUNCE_KEY)||'null'); }
-  if (obj && ta) {
-    ta.value = obj.text || '';
-    const sel = document.getElementById('announcementType');
-    if (sel) sel.value = obj.type || 'info';
-    if (prev) { prev.style.display='block'; prev.innerHTML = formatAnnouncementBanner(obj); }
-    if (status) status.textContent = 'Sist oppdatert: ' + (obj.date||'');
-  }
-}
-
-function formatAnnouncementBanner(obj) {
-  const styles = {
-    info:    'background:#eff6ff;border-left:5px solid #3b82f6;color:#1e40af;',
-    viktig:  'background:#fff7ed;border-left:5px solid #f97316;color:#9a3412;',
-    bra:     'background:#f0fdf4;border-left:5px solid #22c55e;color:#166534;'
-  };
-  const icons = { info:'ℹ️', viktig:'⚠️', bra:'🎉' };
-  const s = styles[obj.type]||styles.info;
-  const i = icons[obj.type]||'ℹ️';
-  return `<div style="${s}padding:0.875rem 1.25rem;border-radius:10px;font-weight:700;font-size:0.92rem;">${i} ${escHtml(obj.text)}</div>`;
-}
-
-async function checkAndShowAnnouncement() {
-  // Vis kunngjøring til elever
-  const rows = await DB.loadFeedback(ANNOUNCE_KEY);
-  let obj = null;
-  if (rows) { try { obj = JSON.parse(rows); } catch {} }
-  if (!obj) { obj = JSON.parse(localStorage.getItem(ANNOUNCE_KEY)||'null'); }
-  const banner = document.getElementById('announcementBanner');
-  if (!banner) return;
-  if (obj && obj.text) {
-    banner.innerHTML = formatAnnouncementBanner(obj);
-    banner.style.display = 'block';
-  } else {
-    banner.style.display = 'none';
-  }
-}
-
-function hideAnnouncementBanner() {
-  const banner = document.getElementById('announcementBanner');
-  if (banner) banner.style.display = 'none';
-}
 
 function renderManageModules() {
   const container=document.getElementById('manageModulesList');
@@ -2985,7 +2708,7 @@ ${text.substring(0,2500)}
 Svar KUN med rå JSON, ingen forklaring, ingen markdown, ingen kodeblokker:
 {"quiz":[{"question":"...","a":"riktig","b":"feil","c":"feil","d":"feil","explain":"..."}],"discussion":["..."],"write":{"title":"...","desc":"...","minWords":150},"flashcards":[{"front":"...","back":"..."}]}
 Lag eksakt: ${s.quizCount} quiz-spørsmål, ${s.discCount} drøftingsspørsmål, ${s.fcCount} flashcards.${s.writeTasks?' Inkluder skriveoppgave.':' Sett write til null.'}
-Alt på ${s.language}. Kortfattede svar.`;
+Alt på norsk bokmål. Kortfattede svar.`;
   const res=await aiCallJSON(p,'aiSpinner',2000);
   const resultEl=document.getElementById('aiResult');
   if(!resultEl)return;
@@ -3013,7 +2736,7 @@ async function generateFromGoal(){
   const p=`Du er lærer. Klassetrinn: ${s.klasse}. Vanskelighetsgrad: ${s.vanske}. ${kontekst}${s.customPrompt?' Ekstra instruksjon: '+s.customPrompt:''}
 Svar KUN med rå JSON, ingen forklaring, ingen markdown, ingen kodeblokker. Formatet er:
 {"quiz":[{"question":"...","a":"riktig svar","b":"feil","c":"feil","d":"feil","explain":"..."}],"discussion":["spørsmål..."],"flashcards":[{"front":"begrep","back":"forklaring"}]}
-Lag eksakt: ${s.quizCount} quiz-spørsmål, ${s.discCount} drøftingsspørsmål, ${s.fcCount} flashcards. Alt på ${s.language}. Kortfattede svar.`;
+Lag eksakt: ${s.quizCount} quiz-spørsmål, ${s.discCount} drøftingsspørsmål, ${s.fcCount} flashcards. Alt på norsk bokmål. Kortfattede svar.`;
   const res=await aiCallJSON(p,'goalGenSpinner',2000);
   const resultEl=document.getElementById('goalGenResult');
   if(!resultEl)return;
@@ -3032,7 +2755,7 @@ async function aiGenerateSingleQuiz(){
   const s=getAiSettings();
   const resultEl=document.getElementById('sqResult');
   if(resultEl){resultEl.style.display='block';resultEl.innerHTML='<span style="color:#888;">⏳ Lager spørsmål...</span>';}
-  const p=`Lag ETT flervalg-spørsmål for ${s.klasse} (${s.vanske}) om: "${topic}". Svar KUN med JSON: {"question":"...","a":"riktig","b":"feil","c":"feil","d":"feil","explain":"..."} Alt på ${s.language}.`;
+  const p=`Lag ETT flervalg-spørsmål for ${s.klasse} (${s.vanske}) om: "${topic}". Svar KUN med JSON: {"question":"...","a":"riktig","b":"feil","c":"feil","d":"feil","explain":"..."} Alt på norsk bokmål.`;
   const res=await aiCallJSON(p,'sqSpinner');
   if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
   if(resultEl)resultEl.innerHTML=`<div style="background:white;border-radius:12px;padding:1rem;border:2px solid var(--c3);">
@@ -3058,7 +2781,7 @@ async function aiGenerateSingleDisc(){
   const s=getAiSettings();
   const resultEl=document.getElementById('sdResult');
   if(resultEl){resultEl.style.display='block';resultEl.innerHTML='<span style="color:#888;">⏳ Lager spørsmål...</span>';}
-  const p=`Lag 2 drøftingsspørsmål for ${s.klasse} om: "${topic}". Svar KUN med JSON: {"questions":["...","..."]} Alt på ${s.language}.`;
+  const p=`Lag 2 drøftingsspørsmål for ${s.klasse} om: "${topic}". Svar KUN med JSON: {"questions":["...","..."]} Alt på norsk bokmål.`;
   const res=await aiCallJSON(p,'sdSpinner');
   if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
   const qs=res.questions||[];
@@ -3076,7 +2799,7 @@ async function aiGenerateWriteTask(){
   const s=getAiSettings();
   const resultEl=document.getElementById('swResult');
   if(resultEl){resultEl.style.display='block';resultEl.innerHTML='<span style="color:#888;">⏳ Lager skriveoppgave...</span>';}
-  const p=`Lag EN skriveoppgave for ${s.klasse} om: "${topic}". Svar KUN med JSON: {"title":"...","desc":"Instruksjon til eleven...","minWords":150} Alt på ${s.language}.`;
+  const p=`Lag EN skriveoppgave for ${s.klasse} om: "${topic}". Svar KUN med JSON: {"title":"...","desc":"Instruksjon til eleven...","minWords":150} Alt på norsk bokmål.`;
   const res=await aiCallJSON(p,'swSpinner');
   if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
   if(resultEl)resultEl.innerHTML=`<div style="background:white;border-radius:12px;padding:1rem;border:2px solid var(--c3);">
@@ -3139,7 +2862,7 @@ async function aiGenerateFlashcards(){
   const s=getAiSettings();
   const resultEl=document.getElementById('fcAiResult');
   if(resultEl){resultEl.style.display='block';resultEl.innerHTML='<span style="color:#888;">⏳ Lager flashcards...</span>';}
-  const p=`Lag ${s.fcCount} flashcards for ${s.klasse} (${s.vanske}) om: "${topic}". Svar KUN med JSON: {"cards":[{"front":"Begrep","back":"Definisjon"}]} Alt på ${s.language}.`;
+  const p=`Lag ${s.fcCount} flashcards for ${s.klasse} (${s.vanske}) om: "${topic}". Svar KUN med JSON: {"cards":[{"front":"Begrep","back":"Definisjon"}]} Alt på norsk bokmål.`;
   const res=await aiCallJSON(p,'fcAiSpinner');
   if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
   const cards=res.cards||[];
@@ -3927,23 +3650,7 @@ function exportAllAnswersDocx() {
   try {
     showDbStatus();
   } catch(e) {}
-  // Vis kunngjøring til elever
-  try {
-    await checkAndShowAnnouncement();
-  } catch(e) {}
-  // Autosave for lærer – lagre emne-skjema hvert 30 sek
-  setInterval(() => {
-    if (!state.isTeacher) return;
-    const name = document.getElementById('moduleName')?.value.trim();
-    if (!name) return;
-    localStorage.setItem('os_autosave', JSON.stringify({
-      name,
-      desc: document.getElementById('moduleDesc')?.value||'',
-      text: document.getElementById('moduleText')?.value||'',
-      emoji: document.getElementById('moduleEmoji')?.value||'',
-      savedAt: new Date().toLocaleTimeString('no')
-    }));
-  }, 30000);
+  // renderManageModules is called from renderResults, triggered on teacher view open
 })();
 
 // Set up PDF.js worker
@@ -5147,160 +4854,6 @@ const SND = (() => {
   return { correct, wrong, click, tick, start, gameover, startBg, stopBg };
 })();
 
-// ── ORD-OPPSLAG (høyreklikk → "Hva betyr ordet?") ──────────────────
-(function() {
-  // Lag kontekstmeny-element
-  const menu = document.createElement('div');
-  menu.id = 'wordContextMenu';
-  menu.style.cssText = `
-    display:none;position:fixed;z-index:9999;
-    background:var(--dark);color:white;
-    border-radius:12px;padding:6px;
-    box-shadow:0 8px 32px rgba(0,0,0,0.35);
-    font-family:'Nunito',sans-serif;min-width:180px;
-  `;
-  menu.innerHTML = `
-    <button id="wordLookupBtn" style="
-      width:100%;background:none;border:none;color:white;
-      font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;
-      padding:10px 14px;border-radius:8px;cursor:pointer;text-align:left;
-      display:flex;align-items:center;gap:8px;transition:background 0.15s;
-    " onmouseover="this.style.background='rgba(255,255,255,0.1)'"
-       onmouseout="this.style.background='none'">
-      📖 Hva betyr ordet?
-    </button>
-  `;
-  document.body.appendChild(menu);
-
-  // Lag popup-boks for forklaring
-  const popup = document.createElement('div');
-  popup.id = 'wordPopup';
-  popup.style.cssText = `
-    display:none;position:fixed;z-index:10000;
-    background:white;color:var(--text);
-    border-radius:18px;padding:1.25rem 1.5rem;
-    box-shadow:0 12px 48px rgba(0,0,0,0.2);
-    font-family:'Nunito',sans-serif;max-width:320px;min-width:220px;
-    border:3px solid var(--c4);
-  `;
-  popup.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
-      <span id="wordPopupWord" style="font-weight:900;font-size:1.1rem;color:var(--c4);"></span>
-      <button onclick="document.getElementById('wordPopup').style.display='none'"
-        style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#aaa;padding:0 0 0 8px;">✕</button>
-    </div>
-    <div id="wordPopupBody" style="font-size:0.92rem;line-height:1.65;color:#444;"></div>
-  `;
-  document.body.appendChild(popup);
-
-  let selectedWord = '';
-
-  // Høyreklikk-lytter
-  document.addEventListener('contextmenu', function(e) {
-    // Finn markert eller klikket ord
-    const sel = window.getSelection();
-    let word = sel && sel.toString().trim();
-
-    // Hvis ingen markering, finn ordet under musepekeren
-    if (!word) {
-      const el = e.target;
-      const text = el.textContent || '';
-      const range = document.caretRangeFromPoint ? document.caretRangeFromPoint(e.clientX, e.clientY) : null;
-      if (range) {
-        range.expand('word');
-        word = range.toString().trim();
-      }
-    }
-
-    // Fjern skilletegn
-    word = word.replace(/[^a-zA-ZæøåÆØÅa-zA-Z0-9\-]/g, '').trim();
-
-    if (!word || word.length < 2) {
-      menu.style.display = 'none';
-      return;
-    }
-
-    selectedWord = word;
-
-    // Plasser menyen ved musepekeren
-    e.preventDefault();
-    menu.style.display = 'block';
-    let x = e.clientX, y = e.clientY;
-    if (x + 200 > window.innerWidth) x = window.innerWidth - 210;
-    if (y + 60 > window.innerHeight) y = window.innerHeight - 70;
-    menu.style.left = x + 'px';
-    menu.style.top = y + 'px';
-  });
-
-  // Skjul meny ved klikk utenfor
-  document.addEventListener('click', function(e) {
-    if (!menu.contains(e.target)) menu.style.display = 'none';
-  });
-  document.addEventListener('scroll', function() { menu.style.display = 'none'; }, true);
-
-  // Klikk på "Hva betyr ordet?"
-  document.getElementById('wordLookupBtn').addEventListener('click', async function() {
-    menu.style.display = 'none';
-    if (!selectedWord) return;
-
-    // Plasser popup nær der menyen var
-    const mx = parseInt(menu.style.left) || 200;
-    const my = parseInt(menu.style.top) || 200;
-    popup.style.display = 'block';
-    let px = mx, py = my + 10;
-    if (px + 340 > window.innerWidth) px = window.innerWidth - 340;
-    if (py + 200 > window.innerHeight) py = my - 210;
-    popup.style.left = px + 'px';
-    popup.style.top = py + 'px';
-
-    document.getElementById('wordPopupWord').textContent = selectedWord;
-    document.getElementById('wordPopupBody').innerHTML =
-      '<span style="color:#aaa;font-style:italic;">⏳ Slår opp...</span>';
-
-    const apiKey = getApiKey();
-    if (!apiKey) {
-      document.getElementById('wordPopupBody').innerHTML =
-        '<span style="color:#e53e3e;">⚠️ Ingen API-nøkkel satt. Gå til ⚙️ Innstillinger og legg inn nøkkel.</span>';
-      return;
-    }
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 200,
-          messages: [{
-            role: 'user',
-            content: `Forklar ordet "${selectedWord}" kort og enkelt på norsk for en ungdomsskoleelev. 
-Inkluder:
-1. Norsk oversettelse (hvis det er et engelsk ord)
-2. Kort forklaring (1-2 setninger)
-3. Et kort eksempel
-
-Svar BARE med selve forklaringen, ingen ekstra tekst.`
-          }]
-        })
-      });
-      const data = await res.json();
-      const text = data.content?.[0]?.text || 'Kunne ikke slå opp ordet.';
-      // Formater teksten litt
-      const html = text
-        .replace(/\n\n/g, '<br><br>')
-        .replace(/\n/g, '<br>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      document.getElementById('wordPopupBody').innerHTML = html;
-    } catch(e) {
-      document.getElementById('wordPopupBody').innerHTML =
-        '<span style="color:#e53e3e;">⚠️ Kunne ikke koble til AI. Sjekk internett og API-nøkkel.</span>';
-    }
-  });
-})();
-
-
+</script>
+</body>
+</html>
