@@ -3019,47 +3019,58 @@ const DB = {
       const text = await res.text();
       return (text && text !== 'null') ? JSON.parse(text) : [];
     } catch (e) {
-      console.error('[DB] fetch-feil:', method, table, e.message);
+      // «Failed to fetch» betyr vanligvis at Supabase-prosjektet er på pause
+      // Gå til supabase.com → åpne prosjektet → klikk «Resume project»
+      if (e.message === 'Failed to fetch' || e.message.includes('fetch')) {
+        console.error('[DB] KAN IKKE NÅ SUPABASE – prosjektet er sannsynligvis på pause!\n→ Gå til supabase.com, åpne prosjektet og klikk «Resume project»');
+        DB._paused = true;
+      } else {
+        console.error('[DB] fetch-feil:', method, table, e.message);
+      }
       return null;
     }
   },
 
   // ── MODULER (lærers innhold) ───────────────────────────────────────
   async loadModules() {
+    console.log('[DB] loadModules: henter fra Supabase...');
     const rows = await this._q('GET', 'os_modules', 'order=sort_order.asc,created_at.asc&select=id,data,sort_order');
     if (rows === null) {
-      // DB feil – bruk lokal cache
+      console.warn('[DB] loadModules: DB feilet – bruker localStorage');
       try { return JSON.parse(localStorage.getItem('lh_modules') || '[]'); } catch { return []; }
     }
+    console.log('[DB] loadModules: fikk', rows.length, 'rader:', rows.map(r=>r.id));
     const mods = rows.map(r => r.data).filter(Boolean);
     localStorage.setItem('lh_modules', JSON.stringify(mods));
     return mods;
   },
 
   async saveModules(modules) {
-    // Tildel stabile IDer
+    console.log('[DB] saveModules: lagrer', modules.length, 'moduler...');
     modules.forEach((m, i) => {
       if (!m._id) m._id = 'mod_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7);
     });
     localStorage.setItem('lh_modules', JSON.stringify(modules));
 
-    // Upsert én og én
     for (let i = 0; i < modules.length; i++) {
       const m = modules[i];
+      console.log('[DB] saveModules: upsert', m._id, '"' + m.name + '"');
       const ok = await this._q('POST', 'os_modules', null, [{ id: m._id, data: m, sort_order: i }]);
       if (ok === null) {
-        console.error('[DB] saveModules: upsert feilet for', m._id);
+        console.error('[DB] saveModules: FEILET for', m._id);
         return false;
       }
+      console.log('[DB] saveModules: OK', m._id);
     }
 
-    // Slett moduler som ikke lenger finnes
     if (modules.length > 0) {
       const ids = modules.map(m => m._id).join(',');
+      console.log('[DB] saveModules: sletter gamle. Beholder IDer:', ids);
       await this._q('DELETE', 'os_modules', 'id=not.in.(' + ids + ')');
     } else {
       await this._q('DELETE', 'os_modules', 'sort_order=gte.0');
     }
+    console.log('[DB] saveModules: FERDIG ✅');
     return true;
   },
 
@@ -3197,17 +3208,22 @@ const DB = {
 
   // ── DIAGNOSTIKK ───────────────────────────────────────────────────
   async testConnection() {
+    DB._paused = false;
     try {
       const res = await fetch(SB_URL + '/rest/v1/', {
         headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
       });
       if (!res.ok) return { ok: false, msg: '❌ HTTP ' + res.status + ' – sjekk nøkkel/URL' };
     } catch (e) {
-      return { ok: false, msg: '❌ Kan ikke nå Supabase: ' + e.message };
+      return {
+        ok: false,
+        paused: true,
+        msg: '⏸️ Supabase-prosjektet er på PAUSE!\n\nGå til supabase.com → åpne prosjektet → klikk «Resume project» → vent 30 sekunder → prøv igjen.'
+      };
     }
     const rows = await this._q('GET', 'os_modules', 'limit=1&select=id');
     if (rows === null) return { ok: false, msg: '⚠️ Tilkoblet, men tabellene mangler. Kjør SQL-skjemaet!' };
-    return { ok: true, msg: '✅ Tilkoblet og klar! (' + rows.length + ' emne(r) i database)' };
+    return { ok: true, msg: '✅ Alt OK! (' + rows.length + ' emne(r) i database)' };
   }
 };
 
@@ -3400,10 +3416,18 @@ async function saveKeyToFile() {
 async function testDbConnection() {
   showDbFeedback('⏳ Tester…', true);
   const result = await DB.testConnection();
-  showDbFeedback(result.msg, result.ok);
-  // Vis/skjul SQL-advarsel
-  const warn = document.getElementById('dbSqlWarning');
-  if (warn) warn.style.display = (!result.ok && result.msg.includes('tabellene mangler')) ? 'block' : 'none';
+  if (result.paused) {
+    showDbFeedback('⏸️ SUPABASE ER PÅ PAUSE – gå til supabase.com, åpne prosjektet og klikk «Resume project». Vent 30 sek og prøv igjen.', false);
+    const warn = document.getElementById('dbSqlWarning');
+    if (warn) {
+      warn.style.display = 'block';
+      warn.innerHTML = '<div style="font-weight:800;color:#991b1b;margin-bottom:0.5rem;">⏸️ Supabase-prosjektet er på PAUSE!</div><div style="font-size:0.82rem;color:#7f1d1d;line-height:1.7;margin-bottom:0.75rem;">Gratisplanen setter prosjektet på pause etter 1 uke uten aktivitet.<br><b>Slik fikser du det:</b><br>1. Gå til <a href="https://supabase.com" target="_blank" style="color:#dc2626;font-weight:800;">supabase.com</a> og logg inn<br>2. Åpne prosjektet ditt<br>3. Klikk den store oransje knappen <b>«Resume project»</b><br>4. Vent ca. 30 sekunder<br>5. Kom tilbake og trykk 🔬 Diagnose på nytt</div><button onclick="testDbConnection()" style="background:#dc2626;color:white;border:none;padding:9px 20px;border-radius:50px;font-family:\'Nunito\',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">🔄 Prøv igjen</button>';
+    }
+  } else {
+    showDbFeedback(result.msg, result.ok);
+    const warn = document.getElementById('dbSqlWarning');
+    if (warn) warn.style.display = (!result.ok && result.msg.includes('tabellene mangler')) ? 'block' : 'none';
+  }
 }
 
 async function runDbDiagnose() {
@@ -3424,7 +3448,7 @@ async function runDbDiagnose() {
   dlog('─────────────────────────────');
 
   // TEST 1: Grunnleggende tilkobling
-  dlog('TEST 1: Tilkobling...', '#FFD93D');
+  dlog('TEST 1: Tilkobling til Supabase...', '#FFD93D');
   try {
     const r = await fetch(SB_URL + '/rest/v1/', {
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
@@ -3436,8 +3460,15 @@ async function runDbDiagnose() {
       if (r.status === 401) dlog('  → Ugyldig API-nøkkel. Sjekk anon public key.', '#FF6B6B');
     }
   } catch(e) {
-    dlog('TEST 1: ❌ ' + e.message, '#FF6B6B');
-    dlog('  → CORS eller nettverksfeil. Kjør testen fra GitHub Pages, ikke lokal fil.', '#FFD93D');
+    dlog('TEST 1: ❌ KAN IKKE NÅ SUPABASE', '#FF6B6B');
+    dlog('  ┌─────────────────────────────────────────┐', '#FFD93D');
+    dlog('  │  SUPABASE ER SANNSYNLIGVIS PÅ PAUSE!    │', '#FFD93D');
+    dlog('  │  1. Gå til supabase.com                 │', '#FFD93D');
+    dlog('  │  2. Åpne prosjektet ditt                │', '#FFD93D');
+    dlog('  │  3. Klikk «Resume project»              │', '#FFD93D');
+    dlog('  │  4. Vent 30 sekunder                    │', '#FFD93D');
+    dlog('  │  5. Kjør diagnose på nytt               │', '#FFD93D');
+    dlog('  └─────────────────────────────────────────┘', '#FFD93D');
     return;
   }
 
