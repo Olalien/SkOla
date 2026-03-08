@@ -639,13 +639,6 @@
         <optgroup label="9. trinn"><option value="9A">9A</option><option value="9B">9B</option><option value="9C">9C</option></optgroup>
         <optgroup label="10. trinn"><option value="10A">10A</option><option value="10B">10B</option><option value="10C">10C</option></optgroup>
       </select>
-      <div style="margin-bottom:0.875rem;">
-        <div style="font-size:0.82rem;font-weight:800;color:#888;margin-bottom:0.4rem;">Velg avatar:</div>
-        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;" id="avatarPicker">
-          ${['🦁','🐼','🦊','🐸','🐧','🦋','🌟','🚀','⚡','🎮','🎨','🏆'].map(e=>`<button type="button" onclick="selectAvatar('${e}')" style="font-size:1.6rem;background:none;border:2px solid transparent;border-radius:10px;padding:4px;cursor:pointer;transition:all 0.15s;" class="avatar-opt">${e}</button>`).join('')}
-        </div>
-        <input type="hidden" id="studentAvatar" value="🦁" />
-      </div>
       <button class="btn-primary" style="width:100%;margin-top:0.25rem;" onclick="studentLogin()">Start læring! 🚀</button>
     </div>
 
@@ -1728,7 +1721,7 @@ function saveAnswersToStorage() {
 async function studentLogin() {
   const name = document.getElementById('studentName').value.trim();
   const cls  = document.getElementById('studentClass').value;
-  const avatar = document.getElementById('studentAvatar')?.value || '🦁';
+  const avatar = '🎓';
   if (!name) { showToast('Skriv inn navnet ditt!'); return; }
   if (!cls) { showToast('Velg klassen din!'); return; }
   state.student = { name, cls, avatar, joinedAt: new Date().toLocaleString('no') };
