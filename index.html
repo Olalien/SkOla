@@ -28,8 +28,8 @@
   .nav-tab:hover{background:rgba(255,255,255,0.1);color:white;}
   .nav-tab.active{background:var(--c2);color:var(--dark);}
   .nav-right{display:flex;align-items:center;gap:0.5rem;flex-shrink:0;}
-  .role-badge{background:rgba(255,255,255,0.1);color:white;padding:5px 10px;border-radius:50px;font-size:0.78rem;font-weight:700;}
-  .teacher-btn{background:var(--c1);color:white;padding:7px 12px;border-radius:50px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;transition:all 0.2s;white-space:nowrap;}
+  .role-badge{display:none;background:rgba(255,255,255,0.1);color:white;padding:5px 10px;border-radius:50px;font-size:0.78rem;font-weight:700;}
+  .teacher-btn{background:var(--c1);color:white;padding:7px 12px;border-radius:50px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
 
   /* ── MOBILE BOTTOM NAV ── */
   .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--dark);z-index:200;padding:0.3rem 0.1rem;padding-bottom:calc(0.3rem + env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,0.3);}
@@ -331,6 +331,9 @@
     .mobile-nav{display:block;}
     body{padding-bottom:calc(68px + env(safe-area-inset-bottom));}
     .view{padding:0.75rem;}
+    /* Compact teacher button in top nav on mobile */
+    .teacher-btn{font-size:0.72rem;padding:7px 10px;}
+    .dark-toggle{padding:5px 8px;font-size:0.9rem;}
 
     /* Bigger tap targets on all interactive elements */
     button{min-height:44px;}
