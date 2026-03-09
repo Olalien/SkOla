@@ -504,17 +504,22 @@
 <nav>
   <div class="logo" onclick="showView('home')" style="cursor:pointer;" title="Tilbake til hjem">Ola<span>Skole</span></div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showView('home')">🏠 Hjem</button>
-    <button class="nav-tab" onclick="showView('tasks')" id="tasksTab">📚 Oppgaver</button>
-    <button class="nav-tab" onclick="showView('join')" id="quizNavBtn" style="background:linear-gradient(135deg,var(--c5),#a855f7);color:white;">🎮 Quiz</button>
-    <button class="nav-tab" onclick="arbOpen()" id="arbNavBtn" style="background:linear-gradient(135deg,var(--c3),#22c55e);color:white;">📚 Arbeid</button>
-    <button class="nav-tab teacher-tab" onclick="checkTeacher()" style="display:none">🖊️ Lærerrom</button>
-    <button class="nav-tab teacher-tab" onclick="openSettings()" style="display:none;position:relative;">⚙️ Innstillinger<span id="dbNavPill" style="position:absolute;top:4px;right:6px;width:9px;height:9px;border-radius:50%;background:#f59e0b;display:none;font-size:0;border:2px solid white;" title="Database: ikke konfigurert"></span></button>
+    <button class="nav-tab active" onclick="showView('home')">Hjem</button>
+    <button class="nav-tab" onclick="showView('tasks')" id="tasksTab">Oppgaver</button>
+    <button class="nav-tab" onclick="showView('join')" id="quizNavBtn">Quiz</button>
+    <button class="nav-tab" onclick="arbOpen()" id="arbNavBtn">Arbeid</button>
+    <button class="nav-tab teacher-tab" onclick="checkTeacher()" style="display:none">Lærerrom</button>
+    <button class="nav-tab teacher-tab" onclick="openSettings()" style="display:none;position:relative;">Innstillinger<span id="dbNavPill" style="position:absolute;top:4px;right:6px;width:9px;height:9px;border-radius:50%;background:#f59e0b;display:none;font-size:0;border:2px solid rgba(8,9,14,0.8);" title="Database: ikke konfigurert"></span></button>
   </div>
   <div class="nav-right">
-    <div class="role-badge" id="roleBadge">👤 Gjest</div>
-    <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="Mørkt modus">🌙</button>
-    <button class="teacher-btn" onclick="openTeacherModal()">🔑 Lærer</button>
+    <div class="role-badge" id="roleBadge">Gjest</div>
+    <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="Mørkt modus">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <button class="teacher-btn" onclick="openTeacherModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+      Lærer
+    </button>
   </div>
 </nav>
 
@@ -522,16 +527,16 @@
 <nav class="mobile-nav" id="mobileNav">
   <div class="mobile-nav-inner">
     <button class="mob-nav-btn active" id="mob-home" onclick="mobNav('home')">
-      <span class="mob-icon">🏠</span>Hjem
+      <span class="mob-icon"></span>Hjem
     </button>
     <button class="mob-nav-btn" id="mob-tasks" onclick="mobNav('tasks')">
-      <span class="mob-icon">📚</span>Oppgaver
+      <span class="mob-icon"></span>Oppgaver
     </button>
     <button class="mob-nav-btn" id="mob-arbeid" onclick="arbOpen()">
       <span class="mob-icon">✏️</span>Arbeid
     </button>
     <button class="mob-nav-btn" id="mob-join" onclick="showView('join')">
-      <span class="mob-icon">🎮</span>Quiz
+      <span class="mob-icon"></span>Quiz
     </button>
     <button class="mob-nav-btn teacher-tab" id="mob-teacher" onclick="checkTeacher()" style="display:none">
       <span class="mob-icon">🖊️</span>Lærer
@@ -567,7 +572,7 @@
   <!-- Login / welcome card -->
   <div style="max-width:440px;margin:0 auto 1.75rem;">
     <div class="student-login-box" id="studentLoginBox">
-      <h2>👋 Hvem er du?</h2>
+      <h2>Hvem er du?</h2>
       <input type="text" id="studentName" placeholder="Ditt navn" />
       <input type="text" id="studentClass" placeholder="Klasse (f.eks. 9B)" />
       <button class="btn-primary" style="width:100%;margin-top:0.25rem;" onclick="studentLogin()">Start læring! 🚀</button>
@@ -608,7 +613,7 @@
 <!-- TASKS VIEW -->
 <div class="view" id="view-tasks">
   <div id="moduleList">
-    <div class="section-title">📚 Alle emner</div>
+    <div class="section-title">Alle emner</div>
     <div class="modules-grid" id="taskModulesGrid"></div>
     <div class="empty-state" id="taskEmpty" style="display:none">
       <span class="es-icon">📭</span>
@@ -632,13 +637,13 @@
 <!-- TEACHER VIEW -->
 <div class="view" id="view-teacher">
   <div class="tr-header">
-    <div class="section-title" style="margin-bottom:0;">⚙️ Lærerrom</div>
+    <div class="section-title" style="margin-bottom:0;">Lærerrom</div>
     <div class="tr-tabs">
-      <button class="tr-tab active" id="trtab-new"    onclick="trTab('new')">➕ Nytt emne</button>
-      <button class="tr-tab"        id="trtab-emner"  onclick="trTab('emner')">📦 Emner</button>
-      <button class="tr-tab"        id="trtab-results" onclick="trTab('results')">📊 Resultater</button>
-      <button class="tr-tab"        id="trtab-klasser" onclick="trTab('klasser')">🏫 Klasser</button>
-      <button class="tr-tab"        id="trtab-kunngjoring" onclick="trTab('kunngjoring')">📢 Kunngjøring</button>
+      <button class="tr-tab active" id="trtab-new"    onclick="trTab('new')">Nytt emne</button>
+      <button class="tr-tab"        id="trtab-emner"  onclick="trTab('emner')">Emner</button>
+      <button class="tr-tab"        id="trtab-results" onclick="trTab('results')">Resultater</button>
+      <button class="tr-tab"        id="trtab-klasser" onclick="trTab('klasser')">Klasser</button>
+      <button class="tr-tab"        id="trtab-kunngjoring" onclick="trTab('kunngjoring')">Kunngjøring</button>
     </div>
   </div>
 
@@ -659,7 +664,7 @@
 
     <!-- Step 1: Basisinfo -->
     <div class="teacher-panel">
-      <h2>📋 Emneinfo</h2>
+      <h2>Emneinfo</h2>
       <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:0.875rem;margin-bottom:0.875rem;flex-wrap:wrap;" class="form-grid-3">
         <div class="form-row" style="margin:0">
           <label>Emnenavn</label>
@@ -683,7 +688,7 @@
     <!-- AI + Filopplasting panel -->
     <div class="teacher-panel ai-panel">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.1rem;">
-        <h2 style="margin:0;">🤖 AI-verktøy</h2>
+        <h2 style="margin:0;">AI-verktøy</h2>
         <button onclick="toggleAiSettings()" id="aiSettingsToggle" style="background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.25);color:white;padding:7px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;">⚙️ AI-innstillinger <span id="aiSettingsArrow">▼</span></button>
       </div>
 
@@ -787,7 +792,7 @@
           </div>
           <div id="selectedGoalBadge" style="display:none;background:rgba(255,255,255,0.1);border-radius:10px;padding:0.5rem 0.875rem;font-size:0.82rem;color:#c7f3d4;font-weight:700;margin-bottom:0.75rem;line-height:1.5;"></div>
           <button onclick="generateFromGoal()" style="display:flex;align-items:center;gap:0.5rem;background:linear-gradient(135deg,#6BCB77,#4D96FF);color:white;border:none;padding:11px 20px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">
-            <span>✨ Generer fra fag/tema</span>
+            <span>Generer fra fag/tema</span>
             <div class="ai-spinner" id="goalGenSpinner"></div>
           </button>
           <div id="goalGenResult" style="display:none;margin-top:0.75rem;background:rgba(255,255,255,0.07);border-radius:12px;padding:1rem;border:1px solid rgba(255,255,255,0.15);"></div>
@@ -817,7 +822,7 @@
           <div id="filePreviewText" style="font-size:0.78rem;color:rgba(255,255,255,0.6);max-height:80px;overflow-y:auto;line-height:1.5;white-space:pre-wrap;"></div>
           <div style="margin-top:0.6rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
             <button class="btn-ai" onclick="generateFromFile()" style="font-size:0.85rem;padding:9px 16px;">
-              <span>✨ Generer fra dokument</span>
+              <span>Generer fra dokument</span>
               <div class="ai-spinner" id="fileAiSpinner"></div>
             </button>
             <button onclick="useFileAsText()" style="background:rgba(107,203,119,0.8);color:white;border:none;padding:9px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">📋 Bruk som fagtekst</button>
@@ -829,7 +834,7 @@
       <!-- Main AI generate button -->
       <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
         <button class="btn-ai" onclick="generateWithAI()" style="font-size:1rem;padding:13px 28px;">
-          <span>✨ Generer alle oppgaver fra tekst</span>
+          <span>Generer alle oppgaver fra tekst</span>
           <div class="ai-spinner" id="aiSpinner"></div>
         </button>
       </div>
@@ -839,28 +844,28 @@
     <!-- Task type tabs -->
     <div class="teacher-panel" style="padding:1.1rem 1.25rem;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
-        <h2 style="margin:0;">📝 Oppgaver</h2>
+        <h2 style="margin:0;">Oppgaver</h2>
         <span id="previewTotals" style="font-size:0.82rem;color:#aaa;font-weight:700;"></span>
       </div>
 
       <!-- Task category tab bar -->
       <div class="task-cat-tabs" id="taskCatTabs">
-        <button class="task-cat-btn active" id="tcbtn-quiz"  onclick="tcTab('quiz')">❓ Quiz</button>
-        <button class="task-cat-btn"        id="tcbtn-disc"  onclick="tcTab('disc')">💬 Drøfting</button>
-        <button class="task-cat-btn"        id="tcbtn-write" onclick="tcTab('write')">✍️ Skriving</button>
-        <button class="task-cat-btn"        id="tcbtn-video" onclick="tcTab('video')">🎬 Video</button>
-        <button class="task-cat-btn"        id="tcbtn-fc"    onclick="tcTab('fc')">🃏 Flashcards</button>
-        <button class="task-cat-btn"        id="tcbtn-preview" onclick="tcTab('preview')">👁 Forhåndsvisning</button>
+        <button class="task-cat-btn active" id="tcbtn-quiz"    onclick="tcTab('quiz')">Quiz</button>
+        <button class="task-cat-btn"        id="tcbtn-disc"    onclick="tcTab('disc')">Drøfting</button>
+        <button class="task-cat-btn"        id="tcbtn-write"   onclick="tcTab('write')">Skriving</button>
+        <button class="task-cat-btn"        id="tcbtn-video"   onclick="tcTab('video')">Video</button>
+        <button class="task-cat-btn"        id="tcbtn-fc"      onclick="tcTab('fc')">Flashcards</button>
+        <button class="task-cat-btn"        id="tcbtn-preview" onclick="tcTab('preview')">Forhåndsvisning</button>
       </div>
 
       <!-- QUIZ TAB -->
       <div class="task-cat-pane active" id="tcpane-quiz">
-        <div class="ai-mini-box" style="background:linear-gradient(135deg,#f5f3ff,#eff6ff);border-color:#e9d5ff;">
-          <div style="font-weight:800;font-size:0.92rem;color:var(--dark);margin-bottom:0.6rem;">✨ La AI lage et spørsmål</div>
+        <div class="ai-mini-box" style="background:var(--s2);border:1px solid rgba(168,85,247,0.2);">
+          <div style="display:flex;align-items:center;gap:7px;font-weight:800;font-size:0.85rem;color:var(--text-2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#c084fc;flex-shrink:0"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> La AI lage et spørsmål</div>
           <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:flex-end;">
-            <input type="text" id="aiQuizTopic" placeholder="Tema eller stikkord, f.eks. «fotosyntese»" style="flex:1;min-width:160px;padding:9px 12px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;outline:none;" />
+            <input type="text" id="aiQuizTopic" placeholder="Tema eller stikkord, f.eks. «fotosyntese»" style="flex:1;min-width:160px;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;background:var(--s3);color:var(--text);" />
             <button class="btn-ai" style="padding:9px 18px;font-size:0.88rem;" onclick="aiGenerateSingleQuiz()">
-              <span>✨ Lag spørsmål</span><div class="ai-spinner" id="sqSpinner"></div>
+              <span>Lag spørsmål</span><div class="ai-spinner" id="sqSpinner"></div>
             </button>
           </div>
           <div id="sqResult" style="display:none;margin-top:0.6rem;"></div>
@@ -868,42 +873,42 @@
         <div class="or-divider">— eller fyll inn manuelt —</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;" class="form-grid-2">
           <div class="form-row" style="margin:0;grid-column:1/-1"><label>Spørsmål</label><input type="text" id="quizQ" placeholder="Hva er..." /></div>
-          <div class="form-row" style="margin:0"><label>✅ Svar A (riktig)</label><input type="text" id="quizA" placeholder="Riktig svar" /></div>
-          <div class="form-row" style="margin:0"><label>❌ Svar B</label><input type="text" id="quizB" placeholder="Feil svar" /></div>
-          <div class="form-row" style="margin:0"><label>❌ Svar C</label><input type="text" id="quizC" placeholder="Feil svar" /></div>
-          <div class="form-row" style="margin:0"><label>❌ Svar D</label><input type="text" id="quizD" placeholder="Feil svar" /></div>
+          <div class="form-row" style="margin:0"><label>Svar A – riktig</label><input type="text" id="quizA" placeholder="Riktig svar" /></div>
+          <div class="form-row" style="margin:0"><label>Svar B</label><input type="text" id="quizB" placeholder="Feil svar" /></div>
+          <div class="form-row" style="margin:0"><label>Svar C</label><input type="text" id="quizC" placeholder="Feil svar" /></div>
+          <div class="form-row" style="margin:0"><label>Svar D</label><input type="text" id="quizD" placeholder="Feil svar" /></div>
           <div class="form-row" style="margin:0;grid-column:1/-1"><label>Forklaring ved riktig svar</label><input type="text" id="quizExplain" placeholder="Bra! Det er riktig fordi..." /></div>
         </div>
-        <button class="btn-success" style="margin-top:0.875rem;" onclick="addQuizQuestion()">✅ Legg til spørsmål</button>
+        <button class="btn-success" style="margin-top:0.875rem;display:flex;align-items:center;gap:6px;" onclick="addQuizQuestion()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Legg til spørsmål</button>
         <div id="quizPreview" style="margin-top:0.875rem;"></div>
       </div>
 
       <!-- DRØFTING TAB -->
       <div class="task-cat-pane" id="tcpane-disc">
-        <div class="ai-mini-box" style="background:linear-gradient(135deg,#fdf4ff,#fce7ff);border-color:#f0abfc;">
-          <div style="font-weight:800;font-size:0.92rem;color:var(--dark);margin-bottom:0.6rem;">✨ La AI foreslå drøftingsspørsmål</div>
+        <div class="ai-mini-box" style="background:var(--s2);border:1px solid rgba(168,85,247,0.2);">
+          <div style="display:flex;align-items:center;gap:7px;font-weight:800;font-size:0.85rem;color:var(--text-2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#c084fc;flex-shrink:0"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> La AI foreslå drøftingsspørsmål</div>
           <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:flex-end;">
-            <input type="text" id="aiDiscTopic" placeholder="Tema, f.eks. «klimaendringer»" style="flex:1;min-width:160px;padding:9px 12px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;outline:none;" />
-            <button style="background:linear-gradient(135deg,var(--c5),#a855f7);color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;" onclick="aiGenerateSingleDisc()">
-              <span>✨ Foreslå</span><div class="ai-spinner" id="sdSpinner"></div>
+            <input type="text" id="aiDiscTopic" placeholder="Tema, f.eks. «klimaendringer»" style="flex:1;min-width:160px;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;background:var(--s3);color:var(--text);" />
+            <button class="btn-ai" onclick="aiGenerateSingleDisc()">
+              <span>Foreslå</span><div class="ai-spinner" id="sdSpinner"></div>
             </button>
           </div>
           <div id="sdResult" style="display:none;margin-top:0.6rem;"></div>
         </div>
         <div class="or-divider">— eller skriv selv —</div>
         <div class="form-row"><label>Drøftingsspørsmål</label><textarea id="discQ" placeholder="Diskuter... / Hva mener du om... / Sammenlign..."></textarea></div>
-        <button class="btn-success" onclick="addDiscussion()">✅ Legg til drøftingsspørsmål</button>
+        <button class="btn-success" style="display:flex;align-items:center;gap:6px;" onclick="addDiscussion()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Legg til drøftingsspørsmål</button>
         <div id="discPreview" style="margin-top:0.875rem;"></div>
       </div>
 
       <!-- SKRIVING TAB -->
       <div class="task-cat-pane" id="tcpane-write">
-        <div class="ai-mini-box" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac;">
-          <div style="font-weight:800;font-size:0.92rem;color:var(--dark);margin-bottom:0.6rem;">✨ La AI lage en skriveoppgave</div>
+        <div class="ai-mini-box" style="background:var(--s2);border:1px solid rgba(168,85,247,0.2);">
+          <div style="display:flex;align-items:center;gap:7px;font-weight:800;font-size:0.85rem;color:var(--text-2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#c084fc;flex-shrink:0"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> La AI lage en skriveoppgave</div>
           <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:flex-end;">
-            <input type="text" id="aiWriteTopic" placeholder="Tema, f.eks. «klimaendringer og eget ansvar»" style="flex:1;min-width:160px;padding:9px 12px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;outline:none;" />
-            <button style="background:linear-gradient(135deg,var(--c3),#16a34a);color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;" onclick="aiGenerateWriteTask()">
-              <span>✨ Lag oppgave</span><div class="ai-spinner" id="swSpinner"></div>
+            <input type="text" id="aiWriteTopic" placeholder="Tema, f.eks. «klimaendringer og eget ansvar»" style="flex:1;min-width:160px;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;background:var(--s3);color:var(--text);" />
+            <button class="btn-ai" onclick="aiGenerateWriteTask()">
+              <span>Lag oppgave</span><div class="ai-spinner" id="swSpinner"></div>
             </button>
           </div>
           <div id="swResult" style="display:none;margin-top:0.6rem;"></div>
@@ -912,18 +917,18 @@
         <div class="form-row"><label>Oppgavetittel</label><input type="text" id="writeTitle" placeholder="Skriv et..." /></div>
         <div class="form-row"><label>Instruksjon til eleven</label><textarea id="writeDesc" placeholder="Skriv minst 150 ord om..."></textarea></div>
         <div class="form-row"><label>Minimum antall ord</label><input type="number" id="writeMin" placeholder="100" value="100" style="width:120px" /></div>
-        <button class="btn-success" onclick="addWriteTask()">✅ Legg til skriveoppgave</button>
+        <button class="btn-success" style="display:flex;align-items:center;gap:6px;" onclick="addWriteTask()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Legg til skriveoppgave</button>
       </div>
 
       <!-- VIDEO TAB -->
       <div class="task-cat-pane" id="tcpane-video">
-        <div class="ai-mini-box" style="background:linear-gradient(135deg,#fff1f2,#ffe4e6);border-color:#fca5a5;">
-          <div style="font-weight:800;font-size:0.92rem;color:var(--dark);margin-bottom:0.4rem;">✨ Finn YouTube-videoer med AI</div>
-          <div style="font-size:0.8rem;color:var(--text-2);margin-bottom:0.75rem;">AI foreslår relevante videoer med forhåndsvisning – du velger hvilke du vil bruke.</div>
+        <div class="ai-mini-box" style="background:var(--s2);border:1px solid rgba(168,85,247,0.2);">
+          <div style="display:flex;align-items:center;gap:7px;font-weight:800;font-size:0.85rem;color:var(--text-2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#c084fc;flex-shrink:0"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> Finn YouTube-videoer med AI</div>
+          <div style="font-size:0.8rem;color:var(--text-3);margin-bottom:0.75rem;line-height:1.6;">AI foreslår relevante videoer med forhåndsvisning – du velger hvilke du vil bruke.</div>
           <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:flex-end;">
-            <input type="text" id="aiVideoTopic" placeholder="Tema, f.eks. «fotosyntese» eller «2. verdenskrig»" style="flex:1;min-width:160px;padding:9px 12px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;outline:none;" />
-            <button style="background:linear-gradient(135deg,var(--c1),#dc2626);color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;" onclick="aiGenerateVideo()">
-              <span>✨ Finn videoer</span><div class="ai-spinner" id="svSpinner"></div>
+            <input type="text" id="aiVideoTopic" placeholder="Tema, f.eks. «fotosyntese» eller «2. verdenskrig»" style="flex:1;min-width:160px;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;background:var(--s3);color:var(--text);" />
+            <button class="btn-ai" onclick="aiGenerateVideo()">
+              <span>Finn videoer</span><div class="ai-spinner" id="svSpinner"></div>
             </button>
           </div>
           <div id="svResult" style="display:none;margin-top:0.75rem;"></div>
@@ -936,17 +941,17 @@
         <div id="manualVideoPreview" style="display:none;margin-bottom:0.875rem;"></div>
         <div class="form-row"><label>Tittel på videoen</label><input type="text" id="videoTitle" placeholder="Automatisk hentet fra URL, eller skriv selv..." /></div>
         <div class="form-row"><label>Oppgave til elevene (valgfritt)</label><textarea id="videoTask" placeholder="Etter å ha sett videoen, svar på..."></textarea></div>
-        <button class="btn-success" onclick="addVideo()">✅ Legg til video</button>
+        <button class="btn-success" style="display:flex;align-items:center;gap:6px;" onclick="addVideo()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Legg til video</button>
       </div>
 
       <!-- FLASHCARDS TAB -->
       <div class="task-cat-pane" id="tcpane-fc">
-        <div class="ai-mini-box" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#fbbf24;">
-          <div style="font-weight:800;font-size:0.92rem;color:var(--dark);margin-bottom:0.6rem;">✨ La AI lage flashcards</div>
+        <div class="ai-mini-box" style="background:var(--s2);border:1px solid rgba(168,85,247,0.2);">
+          <div style="display:flex;align-items:center;gap:7px;font-weight:800;font-size:0.85rem;color:var(--text-2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#c084fc;flex-shrink:0"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> La AI lage flashcards</div>
           <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:flex-end;">
-            <input type="text" id="aiFcTopic" placeholder="Tema, f.eks. «celler og biologi»" style="flex:1;min-width:160px;padding:9px 12px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;outline:none;" />
-            <button style="background:linear-gradient(135deg,var(--c2),#f59e0b);color:var(--dark);border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;" onclick="aiGenerateFlashcards()">
-              <span>✨ Lag flashcards</span><div class="ai-spinner" id="fcAiSpinner"></div>
+            <input type="text" id="aiFcTopic" placeholder="Tema, f.eks. «celler og biologi»" style="flex:1;min-width:160px;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;background:var(--s3);color:var(--text);" />
+            <button class="btn-ai" onclick="aiGenerateFlashcards()">
+              <span>Lag flashcards</span><div class="ai-spinner" id="fcAiSpinner"></div>
             </button>
           </div>
           <div id="fcAiResult" style="display:none;margin-top:0.6rem;"></div>
@@ -954,7 +959,7 @@
         <div class="or-divider">— eller legg til manuelt —</div>
         <div class="form-row"><label>Begrep / spørsmål (forside)</label><input type="text" id="fcFront" placeholder="Demokrati" /></div>
         <div class="form-row"><label>Definisjon / svar (bakside)</label><input type="text" id="fcBack" placeholder="Et styresett der folket bestemmer..." /></div>
-        <button class="btn-success" onclick="addFlashcard()">✅ Legg til flashcard</button>
+        <button class="btn-success" style="display:flex;align-items:center;gap:6px;" onclick="addFlashcard()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Legg til flashcard</button>
         <div id="fcPreview" style="margin-top:0.875rem;"></div>
       </div>
 
@@ -966,12 +971,10 @@
 
     <!-- Publish bar (sticky bottom) -->
     <div class="publish-bar">
-      <div style="font-size:0.85rem;color:var(--text-2);font-weight:700;" id="publishBarHint">Fyll inn emnenavn og legg til oppgaver for å publisere</div>
+      <div style="font-size:0.83rem;color:var(--text-3);font-weight:700;" id="publishBarHint">Fyll inn emnenavn og legg til oppgaver for å publisere</div>
       <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
-        <button class="btn-success" style="font-size:1rem;padding:13px 32px;" onclick="saveModule()">
-          <span id="saveModuleLabel">💾 Publiser for elevene!</span>
-        </button>
-        <button onclick="cancelEditModule()" id="cancelEditBtn" style="display:none;background:none;border:2px solid #e0e0e0;border-radius:50px;padding:12px 22px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;color:var(--text-2);">✕ Avbryt</button>
+        <button class="btn-primary" style="font-size:0.95rem;padding:12px 28px;display:flex;align-items:center;gap:8px;" onclick="saveModule()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 11 4 4"/></svg><span id="saveModuleLabel">Publiser for elevene</span></button>
+        <button onclick="cancelEditModule()" id="cancelEditBtn" style="display:none;" class="btn-cancel">Avbryt</button>
       </div>
     </div>
   </div>
@@ -981,7 +984,7 @@
   ═══════════════════════════════════════════ -->
   <div class="tr-pane" id="trpane-emner">
     <div class="teacher-panel">
-      <h2>📦 Publiserte emner</h2>
+      <h2>Publiserte emner</h2>
       <div id="manageModulesList"><p style="color:#aaa;">Ingen emner publisert ennå.</p></div>
     </div>
   </div>
@@ -991,10 +994,10 @@
   ═══════════════════════════════════════════ -->
   <div class="tr-pane" id="trpane-results">
     <div class="teacher-panel" id="resultsPanel">
-      <h2>📊 Elevsvar og resultater</h2>
+      <h2>Elevsvar og resultater</h2>
       <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;margin-bottom:1.25rem;">
         <select id="filterClass" onchange="renderResults()" style="padding:9px 13px;border:2px solid #e0e0e0;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;outline:none;cursor:pointer;"><option value="">👥 Alle klasser</option></select>
-        <select id="filterModule" onchange="renderResults()" style="padding:9px 13px;border:2px solid #e0e0e0;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;outline:none;cursor:pointer;"><option value="">📚 Alle emner</option></select>
+        <select id="filterModule" onchange="renderResults()" style="padding:9px 13px;border:2px solid #e0e0e0;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;outline:none;cursor:pointer;"><option value="">Alle emner</option></select>
         <button onclick="exportAllAnswersDocx()" style="background:var(--c4);color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">📄 Eksporter Word</button>
         <button onclick="exportAllAnswersTxt()" style="background:#22c55e;color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">📋 Eksporter tekst</button>
       </div>
@@ -1008,11 +1011,11 @@
   ═══════════════════════════════════════════ -->
   <div class="tr-pane" id="trpane-klasser">
     <div class="teacher-panel" style="background:linear-gradient(135deg,#f0f7ff,#eff6ff);">
-      <h2>🏫 Klasser og elever</h2>
+      <h2>Klasser og elever</h2>
       <p style="color:var(--text-2);font-size:0.9rem;margin-bottom:1.25rem;">Elever registreres automatisk ved innlogging. Du kan også legge til elever manuelt.</p>
       <div id="classRosterContainer"></div>
       <div style="margin-top:1rem;padding:1rem;background:rgba(255,255,255,0.7);border-radius:12px;border-left:4px solid var(--c4);font-size:0.85rem;color:var(--text-2);line-height:1.7;">
-        💡 Elever sorteres automatisk etter klassen de oppgir ved innlogging.
+        Elever sorteres automatisk etter klassen de oppgir ved innlogging.
       </div>
     </div>
   </div>
@@ -1269,7 +1272,7 @@
   <div id="teacherQuizSection" style="display:none;max-width:900px;margin:0 auto 2rem;">
     <div id="crOnlineWarning" style="display:none;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;font-size:0.88rem;line-height:1.7;">
       <b>⚠️ Ingen database koblet til!</b> Live Quiz virker kun på <b>samme nettleser</b> uten Supabase.<br>
-      Koble til Supabase under <b>⚙️ Innstillinger → Database</b>.
+      Koble til Supabase under <b>Innstillinger → Database</b>.
     </div>
     <!-- Tabs -->
     <div style="display:flex;gap:1rem;margin-bottom:1.5rem;background:var(--s2);border-radius:12px;padding:4px;;max-width:420px;">
@@ -1283,7 +1286,7 @@
       <div id="cr-setup">
         <div style="max-width:700px;margin:0 auto;">
           <div class="teacher-panel">
-            <h2>🚀 Start en live quizrunde</h2>
+            <h2>Start en live quizrunde</h2>
             <p style="color:var(--text-2);margin-bottom:1.5rem;font-size:0.95rem;">Velg en quizpakke. Elevene skriver inn en spillkode og svarer i sanntid.</p>
             <div class="form-row">
               <label>Velg emne / quizpakke</label>
@@ -1329,7 +1332,7 @@
                   <circle id="crTimerCircle" cx="30" cy="30" r="26" fill="none" stroke="var(--c3)" stroke-width="5"
                     stroke-dasharray="188.5" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 30 30)" style="transition:stroke-dashoffset 1s linear;"/>
                 </svg>
-                <div id="crTimerText" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Fredoka One',cursive;font-size:1rem;color:var(--dark);">20</div>
+                <div id="crTimerText" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Fredoka One',cursive;font-size:1rem;color:var(--text);">20</div>
               </div>
             </div>
           </div>
@@ -1346,7 +1349,7 @@
       <!-- Phase: scoreboard -->
       <div id="cr-scoreboard-view" style="display:none;">
         <div style="max-width:600px;margin:0 auto;text-align:center;">
-          <div style="font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--dark);margin-bottom:0.5rem;">🏆 Resultater</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--text);margin-bottom:0.5rem;">🏆 Resultater</div>
           <div class="cr-scoreboard" id="crScoreboard"></div>
           <div style="margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
             <button class="btn-primary" style="font-size:1.1rem;padding:14px 36px;" onclick="crPlayAgain()">🔄 Ny runde</button>
@@ -1360,7 +1363,7 @@
     <div id="crPane-hs" style="display:none;">
       <div style="max-width:700px;margin:0 auto;">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.25rem;">
-          <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--dark);">🏆 High Scores</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--text);">🏆 High Scores</div>
           <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
             <select id="hsQuizFilter" onchange="loadHighscoreView()" style="padding:8px 12px;border-radius:10px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;outline:none;">
               <option value="">— Alle quizer —</option>
@@ -1381,7 +1384,7 @@
     <!-- State: enter code -->
     <div id="sj-enter" style="max-width:400px;margin:2rem auto;text-align:center;">
       <div style="font-size:3rem;margin-bottom:0.5rem;">🎮</div>
-      <h2 style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--dark);margin-bottom:0.5rem;">Bli med i quizen!</h2>
+      <h2 style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--text);margin-bottom:0.5rem;">Bli med i quizen!</h2>
       <p style="color:var(--text-2);margin-bottom:1.5rem;">Skriv inn koden du fikk av læreren</p>
       <div class="cr-join-box">
         <input type="text" id="sjCodeInput" maxlength="4" placeholder="KODE" oninput="this.value=this.value.toUpperCase()" />
@@ -1390,14 +1393,14 @@
       </div>
       <!-- Public high scores link -->
       <div style="margin-top:2rem;">
-        <button onclick="showPublicHighscores()" style="background:none;border:2px solid var(--c2);color:var(--dark);padding:10px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">🏆 Se high scores</button>
+        <button onclick="showPublicHighscores()" style="background:none;border:2px solid var(--c2);color:var(--text);padding:10px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">🏆 Se high scores</button>
       </div>
     </div>
     <!-- State: public highscores (non-teacher) -->
     <div id="sj-highscores" style="display:none;max-width:700px;margin:0 auto;">
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
         <button onclick="sjShow('enter')" style="background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">← Tilbake</button>
-        <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--dark);">🏆 High Scores</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--text);">🏆 High Scores</div>
       </div>
       <div id="publicHsContainer"><div style="text-align:center;padding:2rem;color:#aaa;">⏳ Laster...</div></div>
     </div>
@@ -1405,7 +1408,7 @@
     <div id="sj-waiting" style="display:none;">
       <div class="cr-waiting">
         <div class="cr-waiting-avatar" id="sjAvatar">🦊</div>
-        <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--dark);" id="sjUsername">Brukernavn</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--text);" id="sjUsername">Brukernavn</div>
         <div style="color:var(--text-2);margin-top:0.5rem;">Venter på at læreren starter...</div>
         <div style="margin-top:1.5rem;background:var(--card);border-radius:16px;padding:1rem 1.5rem;display:inline-block;box-shadow:var(--shadow);">
           <div style="font-size:0.85rem;color:#aaa;font-weight:700;">Spillkode</div>
@@ -1437,7 +1440,7 @@
     <div id="sj-answered" style="display:none;">
       <div class="cr-answered">
         <div class="big-icon" id="sjAnsweredIcon">⏳</div>
-        <div style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--dark);margin-top:0.5rem;" id="sjAnsweredMsg">Svaret er registrert!</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--text);margin-top:0.5rem;" id="sjAnsweredMsg">Svaret er registrert!</div>
         <div style="color:var(--text-2);margin-top:0.5rem;">Venter på neste spørsmål...</div>
         <div style="margin-top:1.5rem;font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--c4);" id="sjCurrentScore">Poeng: 0</div>
       </div>
@@ -1448,18 +1451,18 @@
         <div class="big-icon" id="sjResultIcon">✅</div>
         <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;margin-top:0.5rem;" id="sjResultMsg">Riktig!</div>
         <div style="font-size:1rem;color:var(--c4);font-weight:700;margin-top:0.5rem;" id="sjPointsGained"></div>
-        <div style="margin-top:1rem;font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--dark);" id="sjTotalScore">Totalt: 0 poeng</div>
+        <div style="margin-top:1rem;font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--text);" id="sjTotalScore">Totalt: 0 poeng</div>
       </div>
     </div>
     <!-- State: game over -->
     <div id="sj-gameover" style="display:none;">
       <div class="cr-answered" style="text-align:center;padding:2rem;">
         <div style="font-size:4rem;margin-bottom:0.5rem;">🎊</div>
-        <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--dark);">Spillet er ferdig!</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--text);">Spillet er ferdig!</div>
         <div style="margin-top:1rem;font-size:1.2rem;color:var(--text-2);">Din poengsum: <span style="color:var(--c4);font-weight:800;" id="sjFinalScore">0</span></div>
         <div style="margin-top:0.5rem;font-size:0.95rem;color:var(--text-2);" id="sjFinalRank"></div>
         <button class="btn-primary" style="margin-top:2rem;padding:14px 36px;font-size:1.1rem;" onclick="showView('home')">🏠 Tilbake til hjem</button>
-        <button onclick="showPublicHighscores()" style="margin-top:0.75rem;background:var(--c2);color:var(--dark);border:none;padding:12px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:block;margin-left:auto;margin-right:auto;">🏆 Se high scores</button>
+        <button onclick="showPublicHighscores()" style="margin-top:0.75rem;background:var(--c2);color:var(--text);border:none;padding:12px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:block;margin-left:auto;margin-right:auto;">🏆 Se high scores</button>
       </div>
     </div>
   </div><!-- /studentQuizSection -->
@@ -1473,14 +1476,14 @@
     <div style="max-width:900px;margin:0 auto;">
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
         <div>
-          <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--dark);">📚 Arbeidsøkt</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--text);">📚 Arbeidsøkt</div>
           <div style="color:var(--text-2);font-size:0.95rem;">Velg et emne og jobb i ditt eget tempo</div>
         </div>
       </div>
 
       <!-- Student name prompt if not logged in -->
       <div id="arbLoginPrompt" style="display:none;background:var(--s1);border-radius:14px;padding:1.5rem;box-shadow:var(--shadow);max-width:400px;margin-bottom:1.5rem;">
-        <div style="font-weight:800;font-size:1.05rem;color:var(--dark);margin-bottom:1rem;">👤 Hvem er du?</div>
+        <div style="font-weight:800;font-size:1.05rem;color:var(--text);margin-bottom:1rem;">👤 Hvem er du?</div>
         <input type="text" id="arbNameInput" placeholder="Ditt navn" style="width:100%;padding:12px 14px;border:2px solid #e0e0e0;border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;margin-bottom:0.75rem;outline:none;" />
         <input type="text" id="arbClassInput" placeholder="Klasse (f.eks. 9B)" style="width:100%;padding:12px 14px;border:2px solid #e0e0e0;border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;margin-bottom:0.75rem;outline:none;" />
         <button class="btn-primary" style="width:100%;" onclick="arbLogin()">Fortsett →</button>
@@ -1505,7 +1508,7 @@
         <button onclick="arbBackToList()" style="background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;">← Tilbake</button>
         <button onclick="arbExportAnswers()" style="background:linear-gradient(135deg,#0078d4,#106ebe);color:white;border:none;padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.35rem;" title="Eksporter svar til Word/OneNote">📤 Eksporter</button>
         <div style="flex:1;">
-          <div style="font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--dark);" id="arbDetailTitle">Emne</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--text);" id="arbDetailTitle">Emne</div>
           <div style="font-size:0.85rem;color:var(--text-2);" id="arbDetailStudent"></div>
         </div>
         <!-- Progress ring -->
@@ -1531,7 +1534,7 @@
 <!-- TEACHER LOGIN MODAL -->
 <div class="modal-overlay" id="teacherModal">
   <div class="modal">
-    <h2>🔑 Lærertilgang</h2>
+    <h2>Lærertilgang</h2>
     <input type="password" id="teacherPass" placeholder="Passord" onkeydown="if(event.key==='Enter')loginTeacher()" />
     <div id="teacherError" style="display:none;color:var(--c1);font-weight:800;font-size:0.88rem;margin-bottom:0.5rem;">❌ Feil passord</div>
     <div class="modal-btns">
@@ -1547,7 +1550,7 @@
   <div class="modal" style="text-align:center;">
     <div id="scoreEmoji" style="font-size:4rem;margin-bottom:0.5rem;"></div>
     <h2 id="scoreTitle"></h2>
-    <div style="font-size:1.5rem;font-weight:800;color:var(--dark);margin:0.5rem 0;" id="scoreText"></div>
+    <div style="font-size:1.5rem;font-weight:800;color:var(--text);margin:0.5rem 0;" id="scoreText"></div>
     <div class="score-bar"><div class="score-fill" id="scoreFill" style="width:0%"></div></div>
     <p style="margin-top:1rem;color:var(--text-2);font-size:0.9rem;" id="scoreMsg"></p>
     <button class="btn-primary" style="margin-top:1rem;width:100%;" onclick="closeModal('scoreModal')">Fortsett 🎯</button>
@@ -1558,7 +1561,7 @@
 <div class="modal-overlay" id="exportModal">
   <div class="modal" style="max-width:480px;width:95%;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
-      <h2 style="margin:0;font-size:1.35rem;">📤 Eksporter svar</h2>
+      <h2 style="margin:0;font-size:1.35rem;">Eksporter svar</h2>
       <button onclick="closeModal('exportModal')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#aaa;">✕</button>
     </div>
     <div id="exportModalContent"></div>
@@ -2909,7 +2912,7 @@ function renderResults() {
     <div style="border:2px solid #e8eaed;border-radius:14px;margin-bottom:0.75rem;overflow:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1rem;cursor:pointer;background:var(--s2);" onclick="toggleStudentResults('sr-${escHtml(name)}')">
         <div>
-          <div style="font-weight:800;color:var(--dark);">👤 ${escHtml(name)}</div>
+          <div style="font-weight:800;color:var(--text);">👤 ${escHtml(name)}</div>
           <div style="font-size:0.78rem;color:#aaa;">${answers.length} svar</div>
         </div>
         <div style="display:flex;gap:0.4rem;align-items:center;">
@@ -2935,7 +2938,7 @@ function renderClassRoster() {
   roster.forEach(s=>{const cls=s.cls||'Ukjent';if(!byClass[cls])byClass[cls]=[];byClass[cls].push(s);});
   container.innerHTML=Object.entries(byClass).map(([cls,students])=>`
     <div style="background:var(--s1);border-radius:12px;border:1px solid var(--border);margin-bottom:0.75rem;overflow:hidden;">
-      <div style="padding:0.75rem 1rem;background:var(--s2);border-bottom:1px solid var(--border);font-weight:800;color:var(--dark);">🏫 ${escHtml(cls)} (${students.length} elever)</div>
+      <div style="padding:0.75rem 1rem;background:var(--s2);border-bottom:1px solid var(--border);font-weight:800;color:var(--text);">🏫 ${escHtml(cls)} (${students.length} elever)</div>
       <div style="padding:0.5rem 0;">
         ${students.map(s=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:0.4rem 1rem;border-bottom:1px solid #f5f5f5;">
           <span style="font-size:0.88rem;font-weight:700;">👤 ${escHtml(s.name)}</span>
@@ -4132,7 +4135,7 @@ function crPopulateModules() {
       arbList.innerHTML = state.modules.map(m => `
         <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid #f0f0f0;">
           <span style="font-size:1.5rem;">${m.emoji||'📚'}</span>
-          <span style="font-weight:700;font-size:0.92rem;color:var(--dark);">${escHtml(m.name)}</span>
+          <span style="font-weight:700;font-size:0.92rem;color:var(--text);">${escHtml(m.name)}</span>
           <span style="font-size:0.8rem;color:#aaa;margin-left:auto;">${countTasks(m)} oppgaver</span>
         </div>`).join('');
     }
@@ -4160,7 +4163,7 @@ async function showPublicHighscores() {
   for (const [quiz, entries] of Object.entries(byQuiz)) {
     const top = entries.sort((a,b) => b.score-a.score).slice(0,10);
     out += `<div style="background:var(--s1);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 4px 16px rgba(0,0,0,0.07);">
-      <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--dark);margin-bottom:0.875rem;">🎮 ${quiz}</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--text);margin-bottom:0.875rem;">🎮 ${quiz}</div>
       ${top.map((r,i) => `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;border-radius:10px;background:${i<3?['#fff9e6','#f0f4ff','#f0fff4'][i]:'#fafafa'};margin-bottom:0.4rem;">
         <span style="font-size:1.3rem;min-width:2rem;text-align:center;">${medals[i]||i+1}</span>
         <span style="font-weight:800;flex:1;">${r.player_name}</span>
@@ -4211,7 +4214,7 @@ async function loadHighscoreView() {
     const top = entries.sort((a,b) => b.score - a.score).slice(0, 20);
     html += `
       <div style="background:var(--s1);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 4px 16px rgba(0,0,0,0.07);">
-        <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--dark);margin-bottom:0.875rem;">🎮 ${quiz}</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--text);margin-bottom:0.875rem;">🎮 ${quiz}</div>
         ${top.map((r, i) => `
           <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;border-radius:10px;background:${i<3?['#fff9e6','#f0f4ff','#f0fff4'][i]:'#fafafa'};margin-bottom:0.4rem;">
             <div style="font-size:1.3rem;min-width:2rem;text-align:center;">${medals[i] || (i+1)}</div>
@@ -4368,7 +4371,7 @@ function arbRenderTab(type, m) {
   const container = document.getElementById('arbTaskContent');
   if (type === 'text') {
     container.innerHTML = `<div class="arb-content-card">
-      <h2 style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--dark);margin-bottom:1rem;">📖 ${escHtml(m.name)}</h2>
+      <h2 style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--text);margin-bottom:1rem;">📖 ${escHtml(m.name)}</h2>
       <div class="arb-text-content">${escHtml(m.text||'')}</div>
     </div>`;
     arbMarkDone('text');
@@ -4389,7 +4392,7 @@ function arbRenderQuiz(m) {
   const sKey = arbSKey();
   const container = document.getElementById('arbTaskContent');
   let html = `<div class="arb-content-card">
-    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--dark);margin-bottom:1.25rem;">❓ Quiz</h2>`;
+    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin-bottom:1.25rem;">Quiz</h2>`;
   m.quiz.forEach((q, qi) => {
     const savedAns = arbLoad(`quiz_${qi}`);
     const answered = savedAns !== null;
@@ -4440,7 +4443,7 @@ function arbCheckAnswer(qi, isCorrect, optIdx, explain, correctMap) {
 function arbRenderDisc(m) {
   const container = document.getElementById('arbTaskContent');
   let html = `<div class="arb-content-card">
-    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--dark);margin-bottom:1.25rem;">💬 Drøfting</h2>`;
+    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin-bottom:1.25rem;">💬 Drøfting</h2>`;
   m.discussion.forEach((d, di) => {
     const saved = arbLoad(`disc_${di}`) || '';
     html += `<div class="arb-disc-card">
@@ -4468,13 +4471,13 @@ function arbSaveDisc(di) {
 function arbRenderWrite(m) {
   const container = document.getElementById('arbTaskContent');
   let html = `<div class="arb-content-card">
-    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--dark);margin-bottom:1.25rem;">✍️ Skriveoppgave</h2>`;
+    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin-bottom:1.25rem;">✍️ Skriveoppgave</h2>`;
   m.write.forEach((w, wi) => {
     const saved = arbLoad(`write_${wi}`) || '';
     const wordCount = saved.split(/\s+/).filter(x=>x).length;
     const minOk = wordCount >= (w.minWords||100);
     html += `<div class="arb-write-card">
-      <div style="font-weight:800;font-size:1rem;color:var(--dark);margin-bottom:0.4rem;">✍️ ${escHtml(w.title)}</div>
+      <div style="font-weight:800;font-size:1rem;color:var(--text);margin-bottom:0.4rem;">✍️ ${escHtml(w.title)}</div>
       ${w.desc ? `<div style="font-size:0.88rem;color:var(--text-2);margin-bottom:0.75rem;background:#f0f4ff;border-radius:8px;padding:8px 12px;">📋 ${escHtml(w.desc)}</div>` : ''}
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;">
         <div style="font-size:0.82rem;color:#aaa;font-weight:700;">Minimum ${w.minWords||100} ord</div>
@@ -4521,11 +4524,11 @@ function arbSaveWrite(wi, minWords) {
 function arbRenderVideo(m) {
   const container = document.getElementById('arbTaskContent');
   let html = `<div class="arb-content-card">
-    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--dark);margin-bottom:1.25rem;">🎬 Video</h2>`;
+    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin-bottom:1.25rem;">🎬 Video</h2>`;
   m.videos.forEach((v, vi) => {
     const ytId = v.url ? v.url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)?.[1] : null;
     html += `<div style="background:#f8f9fa;border-radius:14px;padding:1.25rem;margin-bottom:1rem;border:2px solid #e8eaed;">
-      <div style="font-weight:800;font-size:1rem;color:var(--dark);margin-bottom:0.75rem;">🎬 ${escHtml(v.title)}</div>
+      <div style="font-weight:800;font-size:1rem;color:var(--text);margin-bottom:0.75rem;">🎬 ${escHtml(v.title)}</div>
       ${ytId ? `<div style="position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;margin-bottom:0.75rem;">
         <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
       </div>` : (v.url ? `<a href="${escHtml(v.url)}" target="_blank" style="color:var(--c4);font-weight:700;font-size:0.9rem;">${escHtml(v.url)}</a>` : '')}
@@ -4549,7 +4552,7 @@ function arbRenderFcCard(m) {
   const i = arbState.fcIndex;
   const card = cards[i];
   container.innerHTML = `<div class="arb-content-card">
-    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--dark);margin-bottom:0.5rem;">🃏 Flashcards</h2>
+    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin-bottom:0.5rem;">🃏 Flashcards</h2>
     <div class="arb-fc-hint">Klikk på kortet for å snu det</div>
     <div class="arb-fc-wrapper">
       <div class="arb-fc-inner" id="arbFcInner" onclick="document.getElementById('arbFcInner').classList.toggle('flipped')">
@@ -5049,7 +5052,7 @@ function sjShowGameOver(data) {
   const medals = ['🥇','🥈','🥉'];
   const miniBoard = document.createElement('div');
   miniBoard.style.cssText = 'margin:1.25rem auto;max-width:320px;text-align:left;';
-  miniBoard.innerHTML = `<div style="font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--dark);margin-bottom:0.75rem;text-align:center;">🏆 Resultater</div>` +
+  miniBoard.innerHTML = `<div style="font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--text);margin-bottom:0.75rem;text-align:center;">🏆 Resultater</div>` +
     sorted.slice(0,5).map((p,i) => `
       <div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.75rem;border-radius:10px;background:${p.username===sjGame.username?'#fff9c4':'#f5f5f5'};margin-bottom:0.35rem;border:${p.username===sjGame.username?'2px solid var(--c2)':'2px solid transparent'}">
         <span style="font-size:1.2rem;min-width:1.8rem;">${medals[i]||i+1}</span>
