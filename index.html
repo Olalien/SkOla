@@ -1870,6 +1870,7 @@ function showView(name) {
   if (name === 'teacher') { renderResults(); renderManageModules(); }
   if (name === 'join' && state.isTeacher) crPopulateModules();
   if (name === 'arbeid') { arbState.moduleIdx = null; arbRenderModuleGrid(); }
+  if (name === 'wc') { setTimeout(wcInit, 0); }
   setProgress(name === 'home' ? 20 : name === 'tasks' ? 60 : 90);
   syncMobileNav(name);
 }
@@ -4244,18 +4245,19 @@ const WC = {
 function wcInit() {
   const teacherPanel = document.getElementById('wc-teacher-panel');
   const studentPanel = document.getElementById('wc-student-panel');
+  if (!teacherPanel || !studentPanel) { console.error('[WC] panels not found'); return; }
   if (state.isTeacher) {
-    if (teacherPanel) teacherPanel.style.display = 'block';
-    if (studentPanel) studentPanel.style.display = 'none';
-    // Hide "Ny økt" button if setup is shown
-    const newBtn = document.getElementById('wc-new-btn');
-    if (newBtn && document.getElementById('wc-setup')?.style.display !== 'none') {
-      newBtn.style.display = 'none';
-    }
+    teacherPanel.style.display = 'block';
+    studentPanel.style.display = 'none';
     wcRenderTeacher();
   } else {
-    if (teacherPanel) teacherPanel.style.display = 'none';
-    if (studentPanel) studentPanel.style.display = 'block';
+    teacherPanel.style.display = 'none';
+    studentPanel.style.display = 'block';
+    // Reset join form, show it
+    const joinWrap = document.getElementById('wc-join-wrap');
+    const activeWrap = document.getElementById('wc-student-active');
+    if (joinWrap) joinWrap.style.display = 'block';
+    if (activeWrap) activeWrap.style.display = 'none';
     wcCheckActiveSession();
   }
 }
