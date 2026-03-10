@@ -1858,9 +1858,13 @@ function showView(name) {
   const viewEl = document.getElementById('view-' + name);
   if (!viewEl) return;
   viewEl.classList.add('active');
-  const tabs = document.querySelectorAll('.nav-tab');
-  const idx = ['home','tasks','teacher'].indexOf(name);
-  if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+  // Highlight correct nav tab by matching onclick content
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    const oc = tab.getAttribute('onclick') || '';
+    if (oc.includes("'"+name+"'") || oc.includes('"'+name+'"')) {
+      tab.classList.add('active');
+    }
+  });
   if (name === 'home') renderHomeModules();
   if (name === 'tasks') { DB.loadModules().then(m => { state.modules = m; renderTaskModules(); }); }
   if (name === 'teacher') { renderResults(); renderManageModules(); }
@@ -1872,7 +1876,7 @@ function showView(name) {
 
 function syncMobileNav(name) {
   document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
-  const map = {home:'mob-home',tasks:'mob-tasks',arbeid:'mob-arbeid',join:'mob-join',teacher:'mob-teacher'};
+  const map = {home:'mob-home',tasks:'mob-tasks',arbeid:'mob-arbeid',join:'mob-join',teacher:'mob-teacher',wc:'mob-wc'};
   const btn = document.getElementById(map[name]);
   if (btn) btn.classList.add('active');
 }
@@ -2258,7 +2262,6 @@ function tcTab(name) {
   if (btn) btn.classList.add('active');
   if (pane) pane.classList.add('active');
   if (name === 'preview') renderPreviewPanel();
-  if (name === 'wc') wcInit();
 }
 
 function toggleAiSettings() {
