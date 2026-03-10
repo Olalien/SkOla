@@ -1337,156 +1337,141 @@
 <!-- WORDCLOUD / VOTING VIEW -->
 <div class="view" id="view-wc">
 
-  <!-- STUDENT JOIN PANEL -->
-  <div id="wc-student-panel" style="display:none;">
-    <div style="max-width:420px;margin:2rem auto 0;">
-      <div style="text-align:center;margin-bottom:1.75rem;">
-        <div style="width:64px;height:64px;background:var(--accent-g);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-h)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="18" r="1.5"/><circle cx="6" cy="9" r="1"/><circle cx="18" cy="9" r="1"/><circle cx="6" cy="15" r="1"/><circle cx="18" cy="15" r="1"/></svg>
+  <!-- STUDENT PANEL - visible by default -->
+  <div id="wc-student-panel">
+    <div style="max-width:440px;margin:2.5rem auto 0;padding:0 0.5rem;">
+
+      <div style="text-align:center;margin-bottom:2rem;">
+        <div style="width:72px;height:72px;background:var(--accent-g);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-h)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="18" r="1.5"/><circle cx="6" cy="9" r="1"/><circle cx="18" cy="9" r="1"/><circle cx="6" cy="15" r="1"/><circle cx="18" cy="15" r="1"/></svg>
         </div>
-        <h2 style="font-family:'Fredoka One',cursive;font-size:1.6rem;margin-bottom:0.4rem;">Bli med i økt</h2>
-        <p style="color:var(--text-2);font-size:0.93rem;">Skriv inn koden du fikk av læreren</p>
+        <h2 style="font-family:'Fredoka One',cursive;font-size:1.75rem;color:var(--text);margin-bottom:0.5rem;">Bli med i økt</h2>
+        <p style="color:var(--text-2);font-size:0.95rem;">Skriv inn 4-bokstavskoden fra læreren</p>
       </div>
 
       <div id="wc-join-wrap">
-        <input type="text" id="wc-code-input" placeholder="KODE"
+        <input type="text" id="wc-code-input"
+          placeholder="KODE"
           maxlength="4"
-          style="text-transform:uppercase;text-align:center;font-size:2.2rem;font-family:'Fredoka One',cursive;letter-spacing:0.3em;padding:1rem;border-radius:14px;border:2px solid var(--border-2);background:var(--s2);color:var(--text);width:100%;outline:none;transition:border 0.2s;"
-          oninput="this.value=this.value.toUpperCase()"
+          autocomplete="off"
+          style="text-transform:uppercase;text-align:center;font-size:2.5rem;font-family:'Fredoka One',cursive;letter-spacing:0.35em;padding:1rem;border-radius:14px;border:2px solid var(--border-2);background:var(--s2);color:var(--text);width:100%;outline:none;transition:border-color 0.2s;display:block;margin-bottom:0.875rem;"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')"
           onfocus="this.style.borderColor='var(--accent)'"
           onblur="this.style.borderColor='var(--border-2)'"
         />
-        <button class="btn-primary" style="width:100%;margin-top:0.875rem;font-size:1rem;padding:14px;" onclick="wcJoinSession()">Bli med</button>
+        <button onclick="wcJoinSession()" style="width:100%;padding:14px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1.05rem;cursor:pointer;transition:background 0.18s;" onmouseover="this.style.background='var(--accent-h)'" onmouseout="this.style.background='var(--accent)'">Bli med</button>
       </div>
 
-      <div id="wc-student-active" style="display:none;">
-        <div class="teacher-panel" style="text-align:center;">
-          <div style="font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:0.5rem;" id="wc-student-title"></div>
-          <div style="color:var(--text-2);font-size:0.92rem;margin-bottom:1.25rem;" id="wc-student-question"></div>
+      <div id="wc-student-active" style="display:none;margin-top:1.5rem;">
+        <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.5rem;text-align:center;">
+          <div style="font-family:'Fredoka One',cursive;font-size:1.35rem;color:var(--text);margin-bottom:0.5rem;" id="wc-student-title"></div>
+          <div style="color:var(--text-2);font-size:0.92rem;margin-bottom:1.5rem;" id="wc-student-question"></div>
           <div id="wc-student-input-area"></div>
           <div id="wc-student-result-msg" style="display:none;margin-top:1rem;padding:1rem 1.25rem;background:var(--accent-g);border-radius:12px;border:1px solid var(--accent);color:var(--accent-h);font-weight:800;"></div>
         </div>
       </div>
+
     </div>
   </div>
 
-  <!-- TEACHER PANEL -->
+  <!-- TEACHER PANEL - hidden by default, shown via JS when teacher logs in -->
   <div id="wc-teacher-panel" style="display:none;">
+
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
-      <div class="section-title" style="margin-bottom:0;">Ordsky &amp; Avstemning</div>
-      <button class="btn-primary" onclick="wcShowSetup()" id="wc-new-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);">Ordsky &amp; Avstemning</div>
+      <button id="wc-new-btn" onclick="wcShowSetup()" style="display:flex;align-items:center;gap:6px;padding:9px 18px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Ny økt
       </button>
     </div>
 
-    <!-- SETUP PANEL -->
-    <div class="teacher-panel" id="wc-setup" style="display:none;margin-bottom:1rem;">
-      <div style="font-weight:800;font-size:1.05rem;margin-bottom:1rem;">Sett opp ny økt</div>
-      <label class="form-label">Tittel / spørsmål til elevene</label>
-      <input type="text" id="wc-title" placeholder="F.eks. «Hva forbinder du med demokrati?»" />
+    <!-- SETUP -->
+    <div id="wc-setup" style="display:none;background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1rem;">
+      <div style="font-weight:800;font-size:1.05rem;color:var(--text);margin-bottom:1.25rem;">Sett opp ny økt</div>
 
-      <label class="form-label" style="margin-top:0.875rem;">Modus</label>
-      <div class="wc-mode-btns">
-        <button class="wc-mode-btn active" id="wc-btn-word" onclick="wcSetMode('word')">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="18" r="1.5"/></svg>
-          Ordsky
-        </button>
-        <button class="wc-mode-btn" id="wc-btn-poll" onclick="wcSetMode('poll')">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Avstemning
-        </button>
+      <label style="display:block;font-size:0.78rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;">Tittel / spørsmål</label>
+      <input type="text" id="wc-title" placeholder="Hva forbinder du med demokrati?" style="margin-bottom:1rem;" />
+
+      <label style="display:block;font-size:0.78rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;">Modus</label>
+      <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+        <button class="wc-mode-btn active" id="wc-btn-word" onclick="wcSetMode('word')" style="flex:1;padding:0.7rem;border-radius:9px;border:2px solid var(--accent);background:var(--accent-g);color:var(--accent-h);font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Ordsky</button>
+        <button class="wc-mode-btn" id="wc-btn-poll" onclick="wcSetMode('poll')" style="flex:1;padding:0.7rem;border-radius:9px;border:2px solid var(--border-2);background:transparent;color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Avstemning</button>
       </div>
 
-      <div id="wc-word-mode-options" style="margin-top:0.5rem;">
-        <label class="form-label">Svartype fra elever</label>
-        <div class="wc-mode-btns">
-          <button class="wc-mode-btn active" id="wc-btn-free" onclick="wcSetWordMode('free')">Fritt svar</button>
-          <button class="wc-mode-btn" id="wc-btn-locked" onclick="wcSetWordMode('locked')">Forhåndsdefinerte ord</button>
+      <div id="wc-word-mode-options">
+        <label style="display:block;font-size:0.78rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;">Svartype</label>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+          <button class="wc-mode-btn active" id="wc-btn-free" onclick="wcSetWordMode('free')" style="flex:1;padding:0.6rem;border-radius:8px;border:2px solid var(--accent);background:var(--accent-g);color:var(--accent-h);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;font-size:0.88rem;">Fritt svar</button>
+          <button class="wc-mode-btn" id="wc-btn-locked" onclick="wcSetWordMode('locked')" style="flex:1;padding:0.6rem;border-radius:8px;border:2px solid var(--border-2);background:transparent;color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;font-size:0.88rem;">Forhåndsdefinert</button>
         </div>
-        <div id="wc-locked-words-wrap" style="display:none;margin-top:0.5rem;">
-          <label class="form-label">Tillatte ord (kommaseparert)</label>
-          <input type="text" id="wc-allowed-words" placeholder="Demokrati, Frihet, Rettferd, Krig, Fred" />
+        <div id="wc-locked-words-wrap" style="display:none;">
+          <label style="display:block;font-size:0.78rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;">Tillatte ord (kommaseparert)</label>
+          <input type="text" id="wc-allowed-words" placeholder="Demokrati, Frihet, Fred, Krig" style="margin-bottom:1rem;" />
         </div>
       </div>
 
-      <div id="wc-poll-options-wrap" style="display:none;margin-top:0.5rem;">
-        <label class="form-label">Svaralternativer (ett per linje)</label>
-        <textarea id="wc-poll-opts" rows="4" placeholder="Ja&#10;Nei&#10;Vet ikke"></textarea>
+      <div id="wc-poll-options-wrap" style="display:none;">
+        <label style="display:block;font-size:0.78rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;">Alternativer (ett per linje)</label>
+        <textarea id="wc-poll-opts" rows="4" placeholder="Ja&#10;Nei&#10;Vet ikke" style="margin-bottom:1rem;"></textarea>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.875rem;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:1.25rem;">
         <div>
-          <label class="form-label">Maks svar per elev</label>
-          <input type="number" id="wc-max-per-student" value="3" min="1" max="10" />
+          <label style="display:block;font-size:0.78rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;">Maks svar/elev</label>
+          <input type="number" id="wc-max-per-student" value="3" min="1" max="20" />
         </div>
         <div>
-          <label class="form-label">Filtrer banneord</label>
-          <select id="wc-filter-bad">
-            <option value="1">Ja – filtrer</option>
-            <option value="0">Nei</option>
-          </select>
+          <label style="display:block;font-size:0.78rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;">Banneordfilter</label>
+          <select id="wc-filter-bad"><option value="1">Ja</option><option value="0">Nei</option></select>
         </div>
         <div>
-          <label class="form-label">Svar synlige for</label>
-          <select id="wc-anon">
-            <option value="1">Kun lærer (anonymt)</option>
-            <option value="0">Alle kan se svarene</option>
-          </select>
+          <label style="display:block;font-size:0.78rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.4rem;">Svar synlig for</label>
+          <select id="wc-anon"><option value="1">Kun lærer</option><option value="0">Alle</option></select>
         </div>
       </div>
 
-      <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
-        <button class="btn-primary" onclick="wcStartSession()">Start økt</button>
-        <button class="btn-cancel" onclick="wcHideSetup()">Avbryt</button>
+      <div style="display:flex;gap:0.75rem;">
+        <button onclick="wcStartSession()" style="padding:11px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Start økt</button>
+        <button onclick="wcHideSetup()" style="padding:11px 22px;background:var(--s3);color:var(--text-2);border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Avbryt</button>
       </div>
     </div>
 
     <!-- ACTIVE SESSION -->
     <div id="wc-active" style="display:none;">
-      <div class="teacher-panel" style="text-align:center;margin-bottom:1rem;">
-        <div style="font-size:0.75rem;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem;">Aktiv kode – del med elevene</div>
-        <div class="wc-code-badge" id="wc-active-code">----</div>
-        <div style="font-size:0.9rem;color:var(--text-2);margin-top:0.35rem;font-weight:700;" id="wc-active-subtitle"></div>
-        <div style="font-size:0.8rem;color:var(--text-3);margin-top:0.5rem;" id="wc-response-count">0 svar</div>
-        <div style="display:flex;gap:0.75rem;justify-content:center;margin-top:1rem;flex-wrap:wrap;">
-          <button class="btn-cancel" onclick="wcEndSession()">Avslutt økt</button>
-          <button class="btn-primary" onclick="wcToggleResults()" id="wc-show-results-btn">Vis resultater</button>
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.5rem;text-align:center;margin-bottom:1rem;">
+        <div style="font-size:0.75rem;color:var(--text-3);font-weight:800;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">Kode – del med elevene</div>
+        <div id="wc-active-code" style="font-family:'Fredoka One',cursive;font-size:3.5rem;color:var(--accent-h);letter-spacing:0.2em;line-height:1;">----</div>
+        <div id="wc-active-subtitle" style="font-size:0.92rem;color:var(--text-2);font-weight:700;margin-top:0.4rem;"></div>
+        <div id="wc-response-count" style="font-size:0.8rem;color:var(--text-3);margin-top:0.4rem;">0 svar</div>
+        <div style="display:flex;gap:0.75rem;justify-content:center;margin-top:1.1rem;flex-wrap:wrap;">
+          <button onclick="wcEndSession()" style="padding:9px 20px;background:var(--s3);color:var(--text-2);border:1px solid var(--border-2);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Avslutt</button>
+          <button id="wc-show-results-btn" onclick="wcToggleResults()" style="padding:9px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Vis resultater</button>
         </div>
       </div>
-
-      <!-- Results canvas -->
       <div id="wc-results-panel" style="display:none;margin-bottom:1rem;">
-        <div class="wc-result-canvas" id="wc-cloud-canvas"></div>
-        <div class="wc-export-btns" style="justify-content:center;">
-          <button class="btn-save" style="padding:8px 16px;font-size:0.82rem;" onclick="wcExport('png')">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            PNG
-          </button>
-          <button class="btn-save" style="padding:8px 16px;font-size:0.82rem;" onclick="wcExport('jpg')">JPG</button>
-          <button class="btn-save" style="padding:8px 16px;font-size:0.82rem;" onclick="wcExport('csv')">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            CSV
-          </button>
+        <div id="wc-cloud-canvas" style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.5rem;min-height:200px;display:flex;flex-wrap:wrap;gap:0.6rem;align-items:center;justify-content:center;"></div>
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.75rem;flex-wrap:wrap;">
+          <button onclick="wcExport('png')" style="padding:8px 16px;background:var(--s2);color:var(--text-2);border:1px solid var(--border-2);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">PNG</button>
+          <button onclick="wcExport('jpg')" style="padding:8px 16px;background:var(--s2);color:var(--text-2);border:1px solid var(--border-2);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">JPG</button>
+          <button onclick="wcExport('csv')" style="padding:8px 16px;background:var(--s2);color:var(--text-2);border:1px solid var(--border-2);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">CSV</button>
         </div>
       </div>
-
-      <!-- Responses list -->
       <div id="wc-responses-list"></div>
     </div>
 
     <!-- EMPTY STATE -->
     <div id="wc-no-session" style="text-align:center;padding:3rem 1rem;">
-      <div style="width:64px;height:64px;background:var(--s2);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="18" r="1.5"/><circle cx="6" cy="9" r="1"/><circle cx="18" cy="9" r="1"/><circle cx="6" cy="15" r="1"/><circle cx="18" cy="15" r="1"/></svg>
+      <div style="width:72px;height:72px;background:var(--s2);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="18" r="1.5"/><circle cx="6" cy="9" r="1"/><circle cx="18" cy="9" r="1"/><circle cx="6" cy="15" r="1"/><circle cx="18" cy="15" r="1"/></svg>
       </div>
-      <div style="font-weight:800;font-size:1.05rem;margin-bottom:0.4rem;">Ingen aktiv økt</div>
-      <div style="color:var(--text-2);font-size:0.88rem;margin-bottom:1.25rem;">Opprett en ny økt for å samle svar fra elevene i sanntid</div>
-      <button class="btn-primary" onclick="wcShowSetup()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <div style="font-weight:800;font-size:1.05rem;color:var(--text);margin-bottom:0.5rem;">Ingen aktiv økt</div>
+      <div style="color:var(--text-2);font-size:0.88rem;margin-bottom:1.25rem;">Opprett en ny økt for å samle inn svar fra elevene i sanntid</div>
+      <button onclick="wcShowSetup()" style="display:inline-flex;align-items:center;gap:6px;padding:11px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Ny økt
       </button>
     </div>
+
   </div>
 
 </div><!-- /view-wc -->
@@ -1870,7 +1855,7 @@ function showView(name) {
   if (name === 'teacher') { renderResults(); renderManageModules(); }
   if (name === 'join' && state.isTeacher) crPopulateModules();
   if (name === 'arbeid') { arbState.moduleIdx = null; arbRenderModuleGrid(); }
-  if (name === 'wc') { setTimeout(wcInit, 0); }
+  if (name === 'wc') wcInit();
   setProgress(name === 'home' ? 20 : name === 'tasks' ? 60 : 90);
   syncMobileNav(name);
 }
@@ -4245,7 +4230,7 @@ const WC = {
 function wcInit() {
   const teacherPanel = document.getElementById('wc-teacher-panel');
   const studentPanel = document.getElementById('wc-student-panel');
-  if (!teacherPanel || !studentPanel) { console.error('[WC] panels not found'); return; }
+  if (!teacherPanel || !studentPanel) return;
   if (state.isTeacher) {
     teacherPanel.style.display = 'block';
     studentPanel.style.display = 'none';
@@ -4253,12 +4238,6 @@ function wcInit() {
   } else {
     teacherPanel.style.display = 'none';
     studentPanel.style.display = 'block';
-    // Reset join form, show it
-    const joinWrap = document.getElementById('wc-join-wrap');
-    const activeWrap = document.getElementById('wc-student-active');
-    if (joinWrap) joinWrap.style.display = 'block';
-    if (activeWrap) activeWrap.style.display = 'none';
-    wcCheckActiveSession();
   }
 }
 
