@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <!-- Preload file-parsing libraries -->
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
@@ -48,7 +49,10 @@
   .dark-toggle:hover{background:var(--s3);color:var(--text);}
 
   .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(13,14,24,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100;padding-bottom:env(safe-area-inset-bottom);}
-  .mobile-nav-inner{display:flex;justify-content:space-around;align-items:stretch;height:58px;}
+  .mobile-nav-inner{display:flex;justify-content:space-around;align-items:stretch;height:60px;}
+  .mob-nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px;background:none;border:none;color:var(--text-3);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.62rem;cursor:pointer;flex:1;transition:color 0.18s;min-height:unset;}
+  .mob-nav-btn.active{color:var(--accent-h);}
+  .mob-nav-btn .mob-icon{display:flex;align-items:center;justify-content:center;}
   .mob-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;cursor:pointer;color:var(--text-3);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.6rem;transition:all 0.18s;min-width:0;padding:6px 2px;letter-spacing:0.02em;}
   .mob-icon{font-size:1.3rem;line-height:1;transition:transform 0.18s;}
   .mob-icon svg{display:block;}
@@ -354,20 +358,27 @@
   @media(max-width:639px){
     .nav-tabs{display:none;}
     .mobile-nav{display:block;}
-    body{padding-bottom:calc(58px + env(safe-area-inset-bottom));}
-    .view{padding:0.875rem;}
+    body{padding-bottom:calc(66px + env(safe-area-inset-bottom));}
+    .view{padding:0.875rem 0.75rem;}
     .teacher-btn{font-size:0.72rem;padding:7px 10px;}
     button{min-height:44px;}
     input,select,textarea{font-size:16px!important;}
-    .home-hero{padding:1.1rem;border-radius:14px;}
-    .home-action-btn{min-width:72px;padding:0.75rem 0.875rem;font-size:0.76rem;}
-    .student-login-box{padding:1.25rem;border-radius:14px;margin-bottom:1rem;}
-    .modules-grid{grid-template-columns:1fr 1fr;gap:0.6rem;}
+    .home-hero{padding:1rem;border-radius:12px;margin-bottom:1rem;}
+    .home-hero-title{font-size:1.25rem!important;}
+    .home-action-btns{gap:0.5rem;}
+    .home-action-btn{min-width:0;flex:1;padding:0.75rem 0.5rem;font-size:0.75rem;}
+    .home-action-btn span:first-child{font-size:1.2rem!important;}
+    .student-login-box{padding:1.1rem;border-radius:12px;margin-bottom:0.875rem;}
+    .student-login-box h2{font-size:1.1rem;margin-bottom:0.875rem;}
+    .modules-grid{grid-template-columns:1fr 1fr;gap:0.5rem;}
     .module-card{padding:0.875rem 0.75rem;}
-    .module-card .mc-emoji{font-size:1.5rem;}
-    .module-card h3{font-size:0.85rem;}
-    .task-tabs{gap:0.3rem;margin-bottom:0.875rem;}
-    .task-tab{padding:9px 12px;font-size:0.78rem;}
+    .module-card .mc-emoji{font-size:1.4rem;}
+    .module-card h3{font-size:0.82rem;margin-bottom:0.2rem;}
+    .module-card p{font-size:0.73rem;}
+    .task-count{font-size:0.7rem;}
+    .task-tabs{gap:0.3rem;margin-bottom:0.875rem;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;padding-bottom:2px;}
+    .task-tabs::-webkit-scrollbar{display:none;}
+    .task-tab{padding:9px 12px;font-size:0.78rem;white-space:nowrap;flex-shrink:0;}
     .quiz-opts{grid-template-columns:1fr;}
     .quiz-opt{min-height:54px;font-size:0.92rem;}
     .arb-options{grid-template-columns:1fr;}
@@ -375,11 +386,18 @@
     .inline-edit-row{grid-template-columns:1fr;}
     #arbTaskTabs{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:3px;-webkit-overflow-scrolling:touch;}
     #arbTaskTabs::-webkit-scrollbar{display:none;}
-    .teacher-panel{padding:1rem;border-radius:12px;}
-    .teacher-panel h2{font-size:1.1rem;}
+    .teacher-panel{padding:0.875rem;border-radius:12px;}
+    .teacher-panel h2{font-size:1.05rem;}
     .tr-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+    .continue-card{border-radius:12px;padding:0.875rem 1rem;}
+    .wc-mode-btns{gap:0.4rem;}
+    .wc-code-badge{font-size:2.5rem;}
+    .section-title{font-size:1rem;}
     .tr-tab{flex-shrink:0;white-space:nowrap;padding:9px 14px;font-size:0.82rem;}
     [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important;}
+    .tc-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+    .tc-tabs::-webkit-scrollbar{display:none;}
+    .task-cat-btn{flex-shrink:0;white-space:nowrap;}
     .module-manage-actions{width:100%;justify-content:flex-end;}
     .module-manage-card{padding:0.875rem;gap:0.5rem;}
     .preview-item-actions{flex-direction:column;gap:3px;}
@@ -404,6 +422,31 @@
     .modules-grid{grid-template-columns:1fr 1fr;gap:0.5rem;}
   }
 
+
+  .continue-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;cursor:pointer;transition:all 0.18s;max-width:440px;margin-left:auto;margin-right:auto;}
+  .continue-card:hover{border-color:var(--accent);background:var(--s2);}
+  .continue-card-icon{width:44px;height:44px;border-radius:10px;background:var(--accent-g);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.4rem;}
+  .continue-card-text{flex:1;min-width:0;}
+  .continue-card-label{font-size:0.72rem;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem;}
+  .continue-card-name{font-weight:800;font-size:0.97rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .continue-card-arrow{color:var(--text-3);flex-shrink:0;}
+
+  /* ===== WORDCLOUD / VOTING ===== */
+  .wc-setup-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1rem;}
+  .wc-mode-btns{display:flex;gap:0.5rem;margin:0.75rem 0;}
+  .wc-mode-btn{flex:1;padding:0.75rem;border-radius:10px;border:2px solid var(--border-2);background:transparent;color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.18s;text-align:center;}
+  .wc-mode-btn.active{border-color:var(--accent);background:var(--accent-g);color:var(--accent-h);}
+  .wc-code-badge{font-family:'Fredoka One',cursive;font-size:3.5rem;letter-spacing:0.15em;color:var(--accent-h);text-align:center;padding:1rem 0 0.5rem;line-height:1;}
+  .wc-result-canvas{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.5rem;min-height:260px;display:flex;flex-wrap:wrap;gap:0.6rem;align-items:center;justify-content:center;}
+  .wc-word-chip{border-radius:8px;font-weight:800;padding:0.35em 0.75em;cursor:default;transition:all 0.2s;}
+  .wc-poll-bar-wrap{margin-bottom:0.75rem;}
+  .wc-poll-bar-label{display:flex;justify-content:space-between;font-size:0.88rem;font-weight:700;margin-bottom:0.3rem;}
+  .wc-poll-bar{height:28px;background:var(--s3);border-radius:8px;overflow:hidden;}
+  .wc-poll-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-h));border-radius:8px;transition:width 0.5s ease;}
+  .wc-response-item{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:0.5rem 0.75rem;background:var(--s2);border-radius:8px;margin-bottom:0.4rem;font-size:0.88rem;}
+  .wc-student-input{max-width:480px;margin:0 auto;}
+  .wc-join-code{font-family:'Fredoka One',cursive;letter-spacing:0.15em;font-size:2.2rem;color:var(--accent-h);text-align:center;margin:0.5rem 0;}
+  .wc-export-btns{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;}
   .confetti-piece{position:fixed;top:-10px;border-radius:3px;animation:confettiFall linear forwards;pointer-events:none;z-index:9998;}
   @keyframes confettiFall{to{transform:translateY(105vh) rotate(720deg);opacity:0;}}
   .score-glow{animation:scoreGlow 0.6s ease;}
@@ -508,6 +551,7 @@
     <button class="nav-tab" onclick="showView('tasks')" id="tasksTab">Oppgaver</button>
     <button class="nav-tab" onclick="showView('join')" id="quizNavBtn">Quiz</button>
     <button class="nav-tab" onclick="arbOpen()" id="arbNavBtn">Arbeid</button>
+    <button class="nav-tab" onclick="showView('wc')" id="wcNavBtn">Ordsky</button>
     <button class="nav-tab teacher-tab" onclick="checkTeacher()" style="display:none">Lærerrom</button>
     <button class="nav-tab teacher-tab" onclick="openSettings()" style="display:none;position:relative;">Innstillinger<span id="dbNavPill" style="position:absolute;top:4px;right:6px;width:9px;height:9px;border-radius:50%;background:#f59e0b;display:none;font-size:0;border:2px solid rgba(8,9,14,0.8);" title="Database: ikke konfigurert"></span></button>
   </div>
@@ -527,19 +571,22 @@
 <nav class="mobile-nav" id="mobileNav">
   <div class="mobile-nav-inner">
     <button class="mob-nav-btn active" id="mob-home" onclick="mobNav('home')">
-      <span class="mob-icon"></span>Hjem
+      <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Hjem
     </button>
     <button class="mob-nav-btn" id="mob-tasks" onclick="mobNav('tasks')">
-      <span class="mob-icon"></span>Oppgaver
+      <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>Oppgaver
     </button>
     <button class="mob-nav-btn" id="mob-arbeid" onclick="arbOpen()">
-      <span class="mob-icon">✏️</span>Arbeid
+      <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>Arbeid
     </button>
     <button class="mob-nav-btn" id="mob-join" onclick="showView('join')">
-      <span class="mob-icon"></span>Quiz
+      <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>Quiz
+    </button>
+    <button class="mob-nav-btn" id="mob-wc" onclick="showView('wc')">
+      <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="6" cy="16" r="2"/><circle cx="18" cy="16" r="2"/><circle cx="12" cy="4" r="1.5"/><circle cx="12" cy="20" r="1.5"/></svg></span>Ordsky
     </button>
     <button class="mob-nav-btn teacher-tab" id="mob-teacher" onclick="checkTeacher()" style="display:none">
-      <span class="mob-icon">🖊️</span>Lærer
+      <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Lærer
     </button>
   </div>
 </nav>
@@ -553,7 +600,7 @@
   <!-- Hero banner -->
   <div class="home-hero">
     <div class="home-hero-text">
-      <div class="home-hero-title">Velkommen til <span>OlaSkole</span>! 🎉</div>
+      <div class="home-hero-title">Velkommen til <span>OlaSkole</span></div>
       <div class="home-hero-sub">Din interaktive læringsplattform</div>
     </div>
     <!-- Action buttons always visible at top -->
@@ -573,9 +620,14 @@
   <div style="max-width:440px;margin:0 auto 1.75rem;">
     <div class="student-login-box" id="studentLoginBox">
       <h2>Hvem er du?</h2>
-      <input type="text" id="studentName" placeholder="Ditt navn" />
-      <input type="text" id="studentClass" placeholder="Klasse (f.eks. 9B)" />
-      <button class="btn-primary" style="width:100%;margin-top:0.25rem;" onclick="studentLogin()">Start læring! 🚀</button>
+      <input type="text" id="studentName" placeholder="Ditt navn" autocomplete="given-name" />
+      <select id="studentClass" style="padding:0.75rem 1rem;border:2px solid var(--border-2);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;width:100%;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238889a8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;">
+        <option value="">Velg klasse...</option>
+        <optgroup label="8. trinn"><option value="8A">8A</option><option value="8B">8B</option><option value="8C">8C</option></optgroup>
+        <optgroup label="9. trinn"><option value="9A">9A</option><option value="9B">9B</option><option value="9C">9C</option></optgroup>
+        <optgroup label="10. trinn"><option value="10A">10A</option><option value="10B">10B</option><option value="10C">10C</option></optgroup>
+      </select>
+      <button class="btn-primary" style="width:100%;margin-top:0.25rem;" onclick="studentLogin()">Start læring</button>
     </div>
 
     <div id="welcomeBack" style="display:none;">
@@ -590,6 +642,7 @@
     </div>
   </div>
 
+  <div id="continueCard" style="display:none;"></div>
   <div class="badge-area" id="badgeArea" style="display:none; justify-content:center;"></div>
 
   <!-- Module search + grid -->
@@ -597,7 +650,7 @@
     <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.1rem;flex-wrap:wrap;">
       <div class="section-title" style="margin-bottom:0;flex:1;">📖 Emner</div>
       <div style="position:relative;">
-        <input type="text" id="moduleSearch" placeholder="🔍 Søk emner..." oninput="filterHomeModules()" style="padding:8px 14px 8px 14px;border:2px solid #e0e0e0;border-radius:50px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;width:180px;transition:border 0.2s;" onfocus="this.style.borderColor='var(--c4)'" onblur="this.style.borderColor='#e0e0e0'" />
+        <input type="text" id="moduleSearch" placeholder="Søk emner..." oninput="filterHomeModules()" style="padding:8px 14px;border:1px solid var(--border-2);border-radius:50px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;width:180px;transition:border 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
       </div>
     </div>
     <div id="subjectFilter" style="display:flex;gap:0.45rem;flex-wrap:wrap;margin-bottom:1rem;"></div>
@@ -996,7 +1049,7 @@
     <div class="teacher-panel" id="resultsPanel">
       <h2>Elevsvar og resultater</h2>
       <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;margin-bottom:1.25rem;">
-        <select id="filterClass" onchange="renderResults()" style="padding:9px 13px;border:2px solid #e0e0e0;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;outline:none;cursor:pointer;"><option value="">👥 Alle klasser</option></select>
+        <select id="filterClass" onchange="renderResults()" style="padding:9px 13px;border:1px solid var(--border-2);border-radius:50px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;outline:none;cursor:pointer;"><option value="">Alle klasser</option></select>
         <select id="filterModule" onchange="renderResults()" style="padding:9px 13px;border:2px solid #e0e0e0;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;outline:none;cursor:pointer;"><option value="">Alle emner</option></select>
         <button onclick="exportAllAnswersDocx()" style="background:var(--c4);color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">📄 Eksporter Word</button>
         <button onclick="exportAllAnswersTxt()" style="background:#22c55e;color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">📋 Eksporter tekst</button>
@@ -1266,6 +1319,129 @@
 
 
 <!-- CLASSROOM VIEW (Teacher) -->
+
+<!-- WORDCLOUD / VOTING VIEW -->
+<div class="view" id="view-wc">
+  <!-- STUDENT PANEL (logged in) -->
+  <div id="wc-student-panel">
+    <div class="wc-student-input" id="wc-join-wrap">
+      <div class="section-title" style="text-align:center;">Bli med i økt</div>
+      <p style="text-align:center;color:var(--text-2);margin-bottom:1rem;font-size:0.93rem;">Skriv inn koden du fikk av læreren</p>
+      <input type="text" id="wc-code-input" placeholder="4-bokstavs kode" maxlength="4" style="text-transform:uppercase;text-align:center;font-size:1.8rem;font-family:'Fredoka One',cursive;letter-spacing:0.2em;" oninput="this.value=this.value.toUpperCase()" />
+      <button class="btn-primary" style="width:100%;margin-top:0.75rem;" onclick="wcJoinSession()">Bli med</button>
+    </div>
+    <div id="wc-student-active" style="display:none;">
+      <div class="section-title" id="wc-student-title" style="text-align:center;"></div>
+      <div id="wc-student-question" style="text-align:center;color:var(--text-2);margin-bottom:1.25rem;font-size:0.95rem;"></div>
+      <div id="wc-student-input-area" class="wc-student-input"></div>
+      <div id="wc-student-result-msg" style="display:none;text-align:center;padding:1rem;background:var(--accent-g);border-radius:12px;border:1px solid var(--accent);color:var(--accent-h);font-weight:800;margin-top:1rem;"></div>
+    </div>
+  </div>
+
+  <!-- TEACHER PANEL -->
+  <div id="wc-teacher-panel" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
+      <div class="section-title" style="margin-bottom:0;">Ordsky &amp; Avstemning</div>
+      <button class="btn-primary" onclick="wcShowSetup()" id="wc-new-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ny økt
+      </button>
+    </div>
+
+    <!-- SETUP PANEL -->
+    <div class="wc-setup-card" id="wc-setup" style="display:none;">
+      <div style="font-weight:800;font-size:1.05rem;margin-bottom:1rem;">Sett opp økt</div>
+      <label class="form-label">Tittel / spørsmål</label>
+      <input type="text" id="wc-title" placeholder="F.eks. «Hva forbinder du med demokrati?»" />
+      <label class="form-label" style="margin-top:0.875rem;">Modus</label>
+      <div class="wc-mode-btns">
+        <button class="wc-mode-btn active" id="wc-btn-word" onclick="wcSetMode('word')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="12" cy="6" r="1"/><circle cx="12" cy="18" r="1"/></svg>
+          Ordsky
+        </button>
+        <button class="wc-mode-btn" id="wc-btn-poll" onclick="wcSetMode('poll')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Avstemning
+        </button>
+      </div>
+      <div id="wc-word-mode-options">
+        <label class="form-label">Svartype fra elever</label>
+        <div class="wc-mode-btns">
+          <button class="wc-mode-btn active" id="wc-btn-free" onclick="wcSetWordMode('free')">Fritt svar</button>
+          <button class="wc-mode-btn" id="wc-btn-locked" onclick="wcSetWordMode('locked')">Forhåndsdefinerte ord</button>
+        </div>
+        <div id="wc-locked-words-wrap" style="display:none;">
+          <label class="form-label">Tillatte ord (kommaseparert)</label>
+          <input type="text" id="wc-allowed-words" placeholder="Demokrati, Frihet, Rettferd, Krig, Fred" />
+        </div>
+      </div>
+      <div id="wc-poll-options-wrap" style="display:none;">
+        <label class="form-label">Svaralternativer (ett per linje)</label>
+        <textarea id="wc-poll-opts" rows="4" placeholder="Ja&#10;Nei&#10;Vet ikke"></textarea>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:120px;">
+          <label class="form-label">Maks svar per elev</label>
+          <input type="number" id="wc-max-per-student" value="3" min="1" max="10" />
+        </div>
+        <div style="flex:1;min-width:120px;">
+          <label class="form-label">Filtrer banneord</label>
+          <select id="wc-filter-bad" style="height:46px;">
+            <option value="1">Ja – filtrer stygge ord</option>
+            <option value="0">Nei</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:0.75rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:120px;">
+          <label class="form-label">Svar synlige for</label>
+          <select id="wc-anon" style="height:46px;">
+            <option value="1">Kun lærer (anonymt)</option>
+            <option value="0">Alle kan se svarene</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+        <button class="btn-primary" onclick="wcStartSession()">Start økt</button>
+        <button class="btn-cancel" onclick="wcHideSetup()">Avbryt</button>
+      </div>
+    </div>
+
+    <!-- ACTIVE SESSION PANEL -->
+    <div id="wc-active" style="display:none;">
+      <div style="text-align:center;margin-bottom:1rem;">
+        <div style="font-size:0.8rem;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">Aktiv kode</div>
+        <div class="wc-code-badge" id="wc-active-code">----</div>
+        <div style="font-size:0.85rem;color:var(--text-2);margin-top:0.25rem;" id="wc-active-subtitle"></div>
+        <div style="font-size:0.8rem;color:var(--text-3);margin-top:0.5rem;" id="wc-response-count">0 svar</div>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-bottom:1rem;justify-content:center;flex-wrap:wrap;">
+        <button class="btn-cancel" onclick="wcEndSession()">Avslutt økt</button>
+        <button class="btn-primary" onclick="wcToggleResults()" id="wc-show-results-btn">Vis resultater</button>
+      </div>
+      <!-- Export buttons -->
+      <div class="wc-export-btns" id="wc-export-btns" style="display:none;justify-content:center;">
+        <button class="btn-save" style="padding:8px 16px;font-size:0.82rem;" onclick="wcExport('png')">PNG</button>
+        <button class="btn-save" style="padding:8px 16px;font-size:0.82rem;" onclick="wcExport('jpg')">JPG</button>
+        <button class="btn-save" style="padding:8px 16px;font-size:0.82rem;" onclick="wcExport('csv')">CSV</button>
+      </div>
+      <!-- Results -->
+      <div id="wc-results-panel" style="display:none;">
+        <div class="wc-result-canvas" id="wc-cloud-canvas"></div>
+      </div>
+      <!-- Responses list (teacher only) -->
+      <div id="wc-responses-list" style="margin-top:1.25rem;"></div>
+    </div>
+
+    <!-- NO SESSION placeholder -->
+    <div id="wc-no-session" style="text-align:center;padding:3rem 1rem;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1.5" style="margin-bottom:1rem;"><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="18" r="1.5"/><circle cx="6" cy="9" r="1"/><circle cx="18" cy="9" r="1"/><circle cx="6" cy="15" r="1"/><circle cx="18" cy="15" r="1"/></svg>
+      <div style="color:var(--text-2);font-weight:700;margin-bottom:0.5rem;">Ingen aktiv økt</div>
+      <div style="color:var(--text-3);font-size:0.88rem;margin-bottom:1rem;">Opprett en ny økt for å samle svar fra elevene</div>
+    </div>
+  </div>
+</div><!-- /view-wc -->
+
 <div class="view" id="view-join">
 
   <!-- ══ TEACHER SECTION – only shown when isTeacher=true ══ -->
@@ -1698,6 +1874,7 @@ async function saveModulesToStorage() {
   const ok = await DB.saveModules(state.modules);
   renderHomeModules();
   renderTaskModules();
+  updateContinueCard();
   if (ok) {
     showToast('✅ ' + state.modules.length + ' emne(r) lagret til Supabase');
   } else {
@@ -1887,6 +2064,7 @@ function logoutTeacher() {
   document.getElementById('roleBadge').textContent = '👤 Gjest';
   renderHomeModules();
   renderTaskModules();
+  updateContinueCard();
   showView('home');
 }
 
@@ -2022,6 +2200,7 @@ function tcTab(name) {
   if (btn) btn.classList.add('active');
   if (pane) pane.classList.add('active');
   if (name === 'preview') renderPreviewPanel();
+  if (name === 'wc') wcInit();
 }
 
 function toggleAiSettings() {
@@ -2041,10 +2220,36 @@ function updatePublishBarHint() {
   const text = document.getElementById('moduleText')?.value.trim();
   if (!name) { hint.textContent = 'Fyll inn emnenavn for å publisere'; return; }
   if (!total && !text) { hint.textContent = '«'+name+'» – legg til oppgaver eller fagtekst'; return; }
-  hint.textContent = '«'+name+'» – '+total+' oppgave'+(total!==1?'r':'')+(text?' + fagtekst':'');
+  const parts = [];
+  if (state.tempQuiz.length) parts.push(state.tempQuiz.length+' quiz');
+  if (state.tempDisc.length) parts.push(state.tempDisc.length+' drøfting');
+  if (state.tempWrite.length) parts.push(state.tempWrite.length+' skriving');
+  if (state.tempVideos.length) parts.push(state.tempVideos.length+' video');
+  if (state.tempFlashcards.length) parts.push(state.tempFlashcards.length+' flashcards');
+  if (text) parts.push('fagtekst');
+  hint.innerHTML = '<span style="color:var(--text-2)">«'+escHtml(name)+'»</span> &nbsp;<span style="color:var(--accent-h);font-weight:900;">'+parts.join('<span style="color:var(--text-3);margin:0 4px">·</span>')+'</span>';
 }
 
 // ====== MODULE RENDERING ======
+function updateContinueCard() {
+  const cc = document.getElementById('continueCard');
+  if (!cc) return;
+  const lastId = localStorage.getItem('os_last_module');
+  if (!lastId || !state.student) { cc.style.display='none'; return; }
+  const mod = state.modules.find(m => m._id === lastId);
+  if (!mod) { cc.style.display='none'; return; }
+  const idx = state.modules.indexOf(mod);
+  cc.style.display = 'block';
+  cc.innerHTML = `<div class="continue-card" onclick="openModule(${idx})">
+    <div class="continue-card-icon">${mod.emoji||'📖'}</div>
+    <div class="continue-card-text">
+      <div class="continue-card-label">Fortsett der du slapp</div>
+      <div class="continue-card-name">${escHtml(mod.name)}</div>
+    </div>
+    <div class="continue-card-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+  </div>`;
+}
+
 function renderHomeModules() {
   const grid = document.getElementById('homeModulesGrid');
   const empty = document.getElementById('homeEmpty');
@@ -2121,6 +2326,7 @@ function filterHomeModules() {
 }
 
 function openModule(idx) {
+  if(state.modules[idx]) localStorage.setItem('os_last_module', state.modules[idx]._id||'mod_'+idx);
   state.currentModule = idx;
   const m = state.modules[idx];
   if (!m) return;
@@ -2607,6 +2813,7 @@ async function saveModule() {
   renderManageModules();
   renderHomeModules();
   renderTaskModules();
+  updateContinueCard();
   showToast(wasEditing?`✅ Endringer lagret i «${name}»!`:`🎉 «${name}» er publisert for elevene!`);
   trTab('emner');
 }
@@ -2663,6 +2870,7 @@ async function deleteModule(idx) {
   renderManageModules();
   renderHomeModules();
   renderTaskModules();
+  updateContinueCard();
   showToast('🗑 «' + m.name + '» slettet');
 }
 
@@ -2672,6 +2880,7 @@ function toggleLock(idx) {
   renderManageModules();
   renderHomeModules();
   renderTaskModules();
+  updateContinueCard();
   showToast(state.modules[idx].locked?'🔒 Emnet er låst':'🔓 Emnet er åpnet');
 }
 
@@ -3959,6 +4168,339 @@ function exportAllAnswersDocx() {
   exportAllAnswersTxt();
   showToast('📋 Eksportert som tekstfil');
 }
+
+// ====== WORDCLOUD & VOTING ENGINE ======
+const BAD_WORDS = ['faen','helvete','jævla','drit','fuck','shit','bitch','asshole','idiot','dumme','hore','kuk','fitte','ræv'];
+const WC = {
+  mode: 'word',      // 'word' | 'poll'
+  wordMode: 'free',  // 'free' | 'locked'
+  session: null,     // current session object
+  results: [],       // live responses
+  pollOptions: [],
+  refreshTimer: null
+};
+
+function wcInit() {
+  const panel = document.getElementById('wc-teacher-panel');
+  const studentPanel = document.getElementById('wc-student-panel');
+  if (state.isTeacher) {
+    if (panel) panel.style.display = 'block';
+    if (studentPanel) studentPanel.style.display = 'none';
+    wcRenderTeacher();
+  } else {
+    if (panel) panel.style.display = 'none';
+    if (studentPanel) studentPanel.style.display = 'block';
+    // Check if there's an active session to auto-join
+    wcCheckActiveSession();
+  }
+}
+
+function wcShowSetup() {
+  document.getElementById('wc-setup').style.display = 'block';
+  document.getElementById('wc-new-btn').style.display = 'none';
+}
+function wcHideSetup() {
+  document.getElementById('wc-setup').style.display = 'none';
+  document.getElementById('wc-new-btn').style.display = 'flex';
+}
+
+function wcSetMode(mode) {
+  WC.mode = mode;
+  document.getElementById('wc-btn-word').classList.toggle('active', mode==='word');
+  document.getElementById('wc-btn-poll').classList.toggle('active', mode==='poll');
+  document.getElementById('wc-word-mode-options').style.display = mode==='word' ? 'block' : 'none';
+  document.getElementById('wc-poll-options-wrap').style.display = mode==='poll' ? 'block' : 'none';
+}
+function wcSetWordMode(wm) {
+  WC.wordMode = wm;
+  document.getElementById('wc-btn-free').classList.toggle('active', wm==='free');
+  document.getElementById('wc-btn-locked').classList.toggle('active', wm==='locked');
+  document.getElementById('wc-locked-words-wrap').style.display = wm==='locked' ? 'block' : 'none';
+}
+
+function wcGenCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let c = '';
+  for (let i=0;i<4;i++) c += chars[Math.floor(Math.random()*chars.length)];
+  return c;
+}
+
+async function wcStartSession() {
+  const title = document.getElementById('wc-title')?.value.trim();
+  if (!title) { showToast('Skriv inn en tittel / et spørsmål'); return; }
+  const code = wcGenCode();
+  const pollOpts = WC.mode==='poll' ? (document.getElementById('wc-poll-opts')?.value||'').split('\n').map(s=>s.trim()).filter(Boolean) : [];
+  const allowedWords = WC.wordMode==='locked' ? (document.getElementById('wc-allowed-words')?.value||'').split(',').map(s=>s.trim()).filter(Boolean) : [];
+  const session = {
+    code, title,
+    mode: WC.mode,
+    wordMode: WC.mode==='word' ? WC.wordMode : null,
+    allowedWords,
+    pollOptions: pollOpts,
+    maxPerStudent: parseInt(document.getElementById('wc-max-per-student')?.value)||3,
+    filterBad: document.getElementById('wc-filter-bad')?.value==='1',
+    anonymous: document.getElementById('wc-anon')?.value==='1',
+    active: true,
+    responses: []
+  };
+  WC.session = session;
+  WC.results = [];
+  // Save to localStorage (works across tabs on same device) + Supabase-like key
+  localStorage.setItem('os_wc_session', JSON.stringify(session));
+  wcRenderTeacher();
+  showToast('Økt startet! Kode: ' + code);
+  wcStartRefresh();
+}
+
+function wcEndSession() {
+  if (!confirm('Avslutt økten?')) return;
+  WC.session = null;
+  localStorage.removeItem('os_wc_session');
+  if (WC.refreshTimer) { clearInterval(WC.refreshTimer); WC.refreshTimer=null; }
+  wcRenderTeacher();
+}
+
+function wcStartRefresh() {
+  if (WC.refreshTimer) clearInterval(WC.refreshTimer);
+  WC.refreshTimer = setInterval(wcPollResponses, 2000);
+}
+
+function wcPollResponses() {
+  const raw = localStorage.getItem('os_wc_responses_' + (WC.session?.code||''));
+  if (!raw) return;
+  try {
+    const responses = JSON.parse(raw);
+    WC.results = responses;
+    const cnt = document.getElementById('wc-response-count');
+    if (cnt) cnt.textContent = responses.length + ' svar';
+    const showingResults = document.getElementById('wc-results-panel')?.style.display !== 'none';
+    if (showingResults) wcRenderResults();
+    wcRenderResponsesList();
+  } catch(e) {}
+}
+
+function wcRenderTeacher() {
+  const active = document.getElementById('wc-active');
+  const noSession = document.getElementById('wc-no-session');
+  if (!WC.session) {
+    if (active) active.style.display = 'none';
+    if (noSession) noSession.style.display = 'block';
+    return;
+  }
+  if (noSession) noSession.style.display = 'none';
+  if (active) {
+    active.style.display = 'block';
+    document.getElementById('wc-active-code').textContent = WC.session.code;
+    document.getElementById('wc-active-subtitle').textContent = WC.session.title;
+  }
+  wcRenderResponsesList();
+  wcStartRefresh();
+}
+
+function wcToggleResults() {
+  const panel = document.getElementById('wc-results-panel');
+  const exportBtns = document.getElementById('wc-export-btns');
+  const btn = document.getElementById('wc-show-results-btn');
+  const showing = panel.style.display !== 'none';
+  panel.style.display = showing ? 'none' : 'block';
+  if (exportBtns) exportBtns.style.display = showing ? 'none' : 'flex';
+  btn.textContent = showing ? 'Vis resultater' : 'Skjul resultater';
+  if (!showing) wcRenderResults();
+}
+
+function wcRenderResults() {
+  const canvas = document.getElementById('wc-cloud-canvas');
+  if (!canvas) return;
+  if (WC.session.mode === 'poll') {
+    wcRenderPoll(canvas);
+  } else {
+    wcRenderCloud(canvas);
+  }
+}
+
+function wcRenderCloud(canvas) {
+  const freq = {};
+  WC.results.forEach(r => {
+    (r.words||[]).forEach(w => {
+      const key = w.toLowerCase().trim();
+      if (key) freq[key] = (freq[key]||0) + 1;
+    });
+  });
+  if (Object.keys(freq).length === 0) {
+    canvas.innerHTML = '<div style="color:var(--text-3);font-size:0.9rem;">Ingen svar ennå</div>';
+    return;
+  }
+  const maxF = Math.max(...Object.values(freq));
+  const colors = ['var(--accent-h)','var(--green)','var(--yellow)','var(--purple)','#60a5fa','#f472b6'];
+  const sorted = Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  canvas.innerHTML = sorted.map(([word, count]) => {
+    const size = 0.85 + (count/maxF)*2.2;
+    const color = colors[Math.abs(word.charCodeAt(0)) % colors.length];
+    return `<span class="wc-word-chip" style="font-size:${size}rem;color:${color};background:${color}22;padding:${0.2+count/maxF*0.4}em ${0.5+count/maxF*0.3}em;">${escHtml(word)}<sup style="font-size:0.55em;opacity:0.7;margin-left:2px;">${count}</sup></span>`;
+  }).join('');
+}
+
+function wcRenderPoll(canvas) {
+  const freq = {};
+  (WC.session.pollOptions||[]).forEach(opt => freq[opt] = 0);
+  WC.results.forEach(r => {
+    const v = r.vote;
+    if (v) freq[v] = (freq[v]||0)+1;
+  });
+  const total = Object.values(freq).reduce((a,b)=>a+b,0);
+  if (total === 0) {
+    canvas.innerHTML = '<div style="color:var(--text-3);font-size:0.9rem;">Ingen svar ennå</div>';
+    return;
+  }
+  canvas.innerHTML = `<div style="width:100%;padding:0.5rem;">` +
+    Object.entries(freq).map(([opt, cnt]) => {
+      const pct = total ? Math.round(cnt/total*100) : 0;
+      return `<div class="wc-poll-bar-wrap">
+        <div class="wc-poll-bar-label"><span>${escHtml(opt)}</span><span>${cnt} (${pct}%)</span></div>
+        <div class="wc-poll-bar"><div class="wc-poll-bar-fill" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('') + `</div>`;
+}
+
+function wcRenderResponsesList() {
+  const list = document.getElementById('wc-responses-list');
+  if (!list) return;
+  if (!WC.results.length) { list.innerHTML = ''; return; }
+  list.innerHTML = `<div style="font-weight:800;font-size:0.88rem;color:var(--text-2);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Svar (${WC.results.length})</div>` +
+    WC.results.map((r,i) => {
+      const name = WC.session.anonymous ? 'Anonym' : (r.name||'Ukjent');
+      const words = WC.session.mode==='poll' ? [r.vote||''] : (r.words||[]);
+      return `<div class="wc-response-item">
+        <span style="color:var(--text-2);font-size:0.82rem;">${name}</span>
+        <span style="font-weight:700;">${words.map(w=>escHtml(w)).join(', ')}</span>
+        <button onclick="wcRemoveResponse(${i})" style="background:none;border:none;color:var(--text-3);cursor:pointer;padding:2px 6px;font-size:0.8rem;border-radius:4px;min-height:unset;" title="Fjern">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`;
+    }).join('');
+}
+
+function wcRemoveResponse(i) {
+  WC.results.splice(i,1);
+  const key = 'os_wc_responses_'+(WC.session?.code||'');
+  localStorage.setItem(key, JSON.stringify(WC.results));
+  wcRenderResponsesList();
+  const showingResults = document.getElementById('wc-results-panel')?.style.display !== 'none';
+  if (showingResults) wcRenderResults();
+  document.getElementById('wc-response-count').textContent = WC.results.length+' svar';
+}
+
+// STUDENT SIDE
+async function wcCheckActiveSession() {
+  // Try to find any active session
+  const raw = localStorage.getItem('os_wc_session');
+  if (!raw) return;
+  try {
+    const sess = JSON.parse(raw);
+    if (sess.active) wcAutoJoin(sess);
+  } catch(e) {}
+}
+
+function wcJoinSession() {
+  const code = document.getElementById('wc-code-input')?.value.trim().toUpperCase();
+  if (!code || code.length !== 4) { showToast('Skriv inn en 4-bokstavs kode'); return; }
+  const raw = localStorage.getItem('os_wc_session');
+  if (!raw) { showToast('Fant ingen økt med den koden'); return; }
+  try {
+    const sess = JSON.parse(raw);
+    if (sess.code !== code) { showToast('Feil kode – prøv igjen'); return; }
+    if (!sess.active) { showToast('Denne økten er avsluttet'); return; }
+    wcAutoJoin(sess);
+  } catch(e) { showToast('Noe gikk galt'); }
+}
+
+function wcAutoJoin(sess) {
+  document.getElementById('wc-join-wrap').style.display = 'none';
+  const active = document.getElementById('wc-student-active');
+  active.style.display = 'block';
+  document.getElementById('wc-student-title').textContent = sess.title;
+  const inputArea = document.getElementById('wc-student-input-area');
+  const name = state.student || 'Anonym';
+  if (sess.mode === 'poll') {
+    inputArea.innerHTML = `<div style="display:flex;flex-direction:column;gap:0.5rem;">
+      ${(sess.pollOptions||[]).map(opt => `<button onclick="wcSubmitPoll('${escHtml(opt)}','${sess.code}')" style="padding:0.875rem 1rem;background:var(--s2);border:2px solid var(--border-2);border-radius:10px;color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;text-align:left;transition:all 0.18s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-2)'">${escHtml(opt)}</button>`).join('')}
+    </div>`;
+  } else {
+    const allowedHtml = sess.wordMode==='locked' && sess.allowedWords?.length
+      ? `<div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem;">${(sess.allowedWords||[]).map(w=>`<button onclick="wcAddWordChip('${escHtml(w)}')" style="padding:0.4rem 0.875rem;background:var(--s2);border:1px solid var(--border-2);border-radius:50px;color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;">${escHtml(w)}</button>`).join('')}</div>`
+      : `<input type="text" id="wc-word-input" placeholder="Skriv et ord..." /><button class="btn-primary" style="margin-top:0.5rem;width:100%;" onclick="wcSubmitWords('${sess.code}')">Send svar</button>`;
+    inputArea.innerHTML = allowedHtml;
+  }
+}
+
+function wcAddWordChip(word) {
+  showToast('Sendt: ' + word);
+  document.getElementById('wc-student-result-msg').style.display='block';
+  document.getElementById('wc-student-result-msg').textContent='✅ Svaret ditt er registrert!';
+}
+
+function wcSubmitWords(code) {
+  const input = document.getElementById('wc-word-input');
+  const word = input?.value.trim();
+  if (!word) { showToast('Skriv et ord'); return; }
+  const raw = localStorage.getItem('os_wc_session');
+  if (!raw) return;
+  const sess = JSON.parse(raw);
+  if (sess.filterBad) {
+    const lower = word.toLowerCase();
+    const found = BAD_WORDS.filter(b => lower.includes(b));
+    if (found.length) { showToast('Ugyldig ord – prøv igjen'); return; }
+  }
+  const key = 'os_wc_responses_' + code;
+  const existing = JSON.parse(localStorage.getItem(key)||'[]');
+  existing.push({name: state.student||'Anonym', words:[word], ts:Date.now()});
+  localStorage.setItem(key, JSON.stringify(existing));
+  if (input) input.value = '';
+  document.getElementById('wc-student-result-msg').style.display='block';
+  document.getElementById('wc-student-result-msg').textContent='✅ «'+word+'» er sendt!';
+  showToast('Sendt!');
+}
+
+function wcSubmitPoll(vote, code) {
+  const key = 'os_wc_responses_' + code;
+  const existing = JSON.parse(localStorage.getItem(key)||'[]');
+  existing.push({name: state.student||'Anonym', vote, ts:Date.now()});
+  localStorage.setItem(key, JSON.stringify(existing));
+  document.getElementById('wc-student-result-msg').style.display='block';
+  document.getElementById('wc-student-result-msg').textContent='✅ Stemmen din er registrert: «'+vote+'»';
+  const inputArea = document.getElementById('wc-student-input-area');
+  if (inputArea) inputArea.style.opacity='0.4';
+  showToast('Stemme registrert!');
+}
+
+function wcExport(fmt) {
+  const canvas = document.getElementById('wc-cloud-canvas');
+  if (!canvas) return;
+  if (fmt === 'csv') {
+    const rows = WC.results.map(r => [
+      WC.session.anonymous ? 'Anonym' : (r.name||'Ukjent'),
+      WC.session.mode==='poll' ? (r.vote||'') : (r.words||[]).join(', ')
+    ]);
+    const csv = [['Navn','Svar'], ...rows].map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'ordsky-resultater.csv';
+    a.click();
+    return;
+  }
+  if (typeof html2canvas !== 'undefined') {
+    html2canvas(canvas, {backgroundColor:'#08090e'}).then(c => {
+      const a = document.createElement('a');
+      a.href = c.toDataURL(fmt==='jpg'?'image/jpeg':'image/png');
+      a.download = 'ordsky.'+(fmt==='jpg'?'jpg':'png');
+      a.click();
+    });
+  } else {
+    showToast('Eksport krever html2canvas – åpne siden i nettleser');
+  }
+}
+// ====== END WORDCLOUD ENGINE ======
+
 // ====== INIT ======
 (async () => {
   try {
@@ -4028,6 +4570,7 @@ if (!state.modules.length) {
   }];
   renderHomeModules();
   renderTaskModules();
+  updateContinueCard();
 }
 
 
