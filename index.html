@@ -1277,7 +1277,7 @@
             <div style="font-weight:800;font-size:0.88rem;color:var(--text);margin-bottom:0.875rem;display:flex;align-items:center;gap:0.5rem;">
               <span>🅦</span> Wordle-innstillinger
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
               <div>
                 <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Vanskelighetsgrad</label>
                 <select id="gsWordleDiff" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
@@ -1292,6 +1292,13 @@
                   <option value="5" selected>5 bokstaver</option>
                   <option value="6">6 bokstaver</option>
                   <option value="7">7 bokstaver</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Språk</label>
+                <select id="gsWordleLang" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
+                  <option value="no" selected>🇳🇴 Norsk</option>
+                  <option value="en">🇬🇧 Engelsk</option>
                 </select>
               </div>
             </div>
@@ -1398,8 +1405,14 @@
       </div>
 
       <!-- Active sessions -->
-      <div>
-        <div style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.875rem;padding-top:1rem;border-top:1px solid var(--border);">Aktive og kommende økter</div>
+      <div style="padding-top:1rem;border-top:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.875rem;">
+          <div style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;">Aktive og kommende økter</div>
+          <button onclick="gsLoadSessions()" style="padding:5px 12px;background:var(--s2);border:1px solid var(--border-2);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-2);cursor:pointer;display:flex;align-items:center;gap:5px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Oppdater
+          </button>
+        </div>
         <div id="gsSessionList"><div style="color:var(--text-3);font-size:0.88rem;">Laster...</div></div>
       </div>
 
@@ -1790,10 +1803,11 @@
   <!-- WORDLE GAME -->
   <div id="gz-wordle" style="display:none;">
     <div style="max-width:440px;margin:0 auto;">
-      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap;">
         <button onclick="gzBackToLobby()" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">← Tilbake</button>
         <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;">Wordle</div>
-        <div id="wordle-diff-badge" style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;"></div>
+        <div id="wordle-diff-badge" style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;"></div>
+        <div id="wordle-lang-badge" style="font-size:0.8rem;font-weight:800;color:var(--text-2);background:var(--s2);border:1px solid var(--border-2);border-radius:6px;padding:4px 10px;"></div>
         <div id="wordle-score-badge" style="margin-left:auto;background:var(--accent-g);border:1px solid var(--accent);border-radius:8px;padding:5px 12px;font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--accent-h);display:none;"></div>
       </div>
       <div id="wordle-msg" style="text-align:center;min-height:28px;font-weight:800;font-size:0.92rem;margin-bottom:0.75rem;color:var(--text-2);"></div>
@@ -1812,38 +1826,60 @@
 
   <!-- WORLDLE GAME -->
   <div id="gz-worldle" style="display:none;">
-    <div style="max-width:500px;margin:0 auto;">
-      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+    <div style="max-width:580px;margin:0 auto;">
+
+      <!-- Header row -->
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;">
         <button onclick="gzBackToLobby()" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">← Tilbake</button>
-        <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;">Worldle</div>
-        <div style="margin-left:auto;font-size:0.82rem;color:var(--text-3);font-weight:700;" id="worldle-attempts-left">6 forsøk igjen</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.5rem;letter-spacing:1px;">WORLDLE</div>
+        <div id="worldle-diff-badge" style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;background:var(--s2);border:1px solid var(--border-2);border-radius:6px;padding:3px 9px;"></div>
+        <div style="margin-left:auto;font-size:0.82rem;color:var(--accent-h);font-weight:800;" id="worldle-attempts-left"></div>
       </div>
-      <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.25rem;text-align:center;margin-bottom:1.25rem;">
-        <div style="font-size:0.75rem;color:var(--text-3);font-weight:800;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;">Hvilket land er dette?</div>
-        <svg id="worldle-svg" viewBox="0 0 100 100" style="width:220px;height:220px;fill:var(--accent-h);opacity:0.85;" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Instruction -->
+      <div style="font-size:0.83rem;color:var(--text-2);margin-bottom:0.875rem;text-align:center;">
+        Gjettingen din vil vise avstand og retning til det riktige landet.
+      </div>
+
+      <!-- Input + autocomplete FIRST (like worldlegame.io) -->
+      <div style="position:relative;margin-bottom:1rem;">
+        <div style="display:flex;gap:0.5rem;">
+          <input type="text" id="worldle-input" placeholder="Skriv inn land ..." autocomplete="off"
+            style="flex:1;padding:13px 16px;border:2px solid var(--border-2);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:1rem;font-weight:600;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='var(--accent)'"
+            onblur="setTimeout(()=>{const ac=document.getElementById('worldle-autocomplete');if(ac)ac.style.display='none';},200)"
+            oninput="worldleAutocomplete(this.value)"
+            onkeydown="worldleInputKeydown(event)"
+          />
+          <button onclick="worldleGuess()" style="padding:13px 22px;background:#22c55e;color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;transition:background 0.18s;" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">Enter</button>
+        </div>
+        <!-- Autocomplete dropdown -->
+        <div id="worldle-autocomplete" style="display:none;position:absolute;top:calc(100% + 3px);left:0;right:80px;background:var(--s1);border:1px solid var(--border-2);border-radius:10px;overflow:hidden;z-index:20;box-shadow:0 8px 30px rgba(0,0,0,0.35);max-height:260px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- Guesses table (worldlegame.io style) -->
+      <div id="worldle-guesses" style="margin-bottom:1rem;display:flex;flex-direction:column;gap:5px;"></div>
+
+      <!-- Silhouette - large black shape on light bg -->
+      <div id="worldle-silhouette-card" style="background:white;border-radius:16px;padding:1.5rem;text-align:center;margin-bottom:0.875rem;border:1px solid #e5e7eb;">
+        <svg id="worldle-svg" viewBox="0 0 200 200" style="width:260px;height:260px;fill:#111;max-width:100%;" xmlns="http://www.w3.org/2000/svg">
           <path id="worldle-path" d=""/>
         </svg>
-        <div id="worldle-hint" style="margin-top:0.75rem;font-size:0.85rem;color:var(--text-2);font-weight:700;min-height:20px;"></div>
       </div>
-      <div id="worldle-guesses" style="margin-bottom:0.875rem;display:flex;flex-direction:column;gap:6px;"></div>
-      <div style="display:flex;gap:0.5rem;position:relative;">
-        <input type="text" id="worldle-input" placeholder="Skriv landets navn..." autocomplete="off"
-          style="flex:1;padding:12px 14px;border:2px solid var(--border-2);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s;"
-          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'"
-          oninput="worldleAutocomplete(this.value)"
-          onkeydown="if(event.key==='Enter')worldleGuess()"
-        />
-        <div id="worldle-autocomplete" style="display:none;position:absolute;bottom:54px;left:0;right:56px;background:var(--s2);border:1px solid var(--border-2);border-radius:10px;overflow:hidden;z-index:10;"></div>
-        <button onclick="worldleGuess()" style="padding:12px 18px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Gjett</button>
-      </div>
-      <div id="worldle-result" style="display:none;text-align:center;margin-top:1.25rem;padding:1.25rem;background:var(--s1);border:1px solid var(--border);border-radius:14px;">
-        <div id="worldle-result-msg" style="font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:0.5rem;"></div>
-        <div id="worldle-result-country" style="color:var(--text-2);font-size:0.9rem;margin-bottom:1rem;"></div>
+
+      <!-- Hints row (appears after guesses) -->
+      <div id="worldle-hint" style="display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center;margin-bottom:0.875rem;min-height:0;"></div>
+
+      <!-- Result overlay -->
+      <div id="worldle-result" style="display:none;text-align:center;padding:1.5rem;background:var(--s1);border:1px solid var(--border);border-radius:14px;margin-bottom:1rem;">
+        <div id="worldle-result-msg" style="font-family:'Fredoka One',cursive;font-size:1.5rem;margin-bottom:0.5rem;"></div>
+        <div id="worldle-result-country" style="color:var(--text-2);font-size:0.9rem;margin-bottom:1.25rem;line-height:1.6;"></div>
         <div style="display:flex;gap:0.75rem;justify-content:center;">
-          <button onclick="gzStartWorldle()" style="padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Spill igjen</button>
-          <button onclick="gzBackToLobby()" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>
+          <button onclick="gzStartWorldle()" style="padding:11px 24px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Spill igjen</button>
+          <button onclick="gzBackToLobby()" style="padding:11px 24px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake</button>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -5410,6 +5446,8 @@ function gzStartWordle() {
   // Update board display
   const diffEl = document.getElementById('wordle-diff-badge');
   if (diffEl) diffEl.textContent = {easy:'Lett',normal:'Normal',hard:'Vanskelig'}[diff] || '';
+  const langBadge = document.getElementById('wordle-lang-badge');
+  if (langBadge) langBadge.textContent = lang === 'en' ? '🇬🇧 Engelsk' : '🇳🇴 Norsk';
   document.getElementById('wordle-result').style.display='none';
   document.getElementById('wordle-msg').textContent='';
   wordleRender();
@@ -5483,7 +5521,10 @@ function wordleColor(word, guess, idx) {
 function wordleRenderKeyboard() {
   const kb = document.getElementById('wordle-keyboard');
   if (!kb || GZ.session.wordleShowKeyboard === false) { if(kb) kb.innerHTML=''; return; }
-  const rows = ['QWERTYUIOPÅ','ASDFGHJKLØÆ','ZXCVBNM⌫↵'];
+  const lang = GZ.session.wordleLang || 'no';
+  const rows = lang === 'en'
+    ? ['QWERTYUIOP','ASDFGHJKL','ZXCVBNM⌫↵']
+    : ['QWERTYUIOPÅ','ASDFGHJKLØÆ','ZXCVBNM⌫↵'];
   const showColors = GZ.session.wordleShowColors !== false;
   // Build letter → best color map using proper duplicate handling
   const colors = {};
@@ -5527,44 +5568,64 @@ const WORDLE_INVALID_CACHE = new Set();
 
 async function wordleCheckWord(word) {
   if (!word) return false;
-  const w = word.toLowerCase();
+  const w = word.toLowerCase().trim();
   if (WORDLE_VALID_CACHE.has(w)) return true;
   if (WORDLE_INVALID_CACHE.has(w)) return false;
 
   const lang = GZ.session.wordleLang || 'no';
 
-  // For Norwegian - check against our built-in list first
-  if (lang === 'no') {
-    const inBuiltin = GZ_WORDS_NO.some(bw => bw.toLowerCase() === w);
-    if (inBuiltin) { WORDLE_VALID_CACHE.add(w); return true; }
-    // Try Norsk Ordbok API (free)
-    try {
-      const res = await fetch(`https://ordbokapi.org/ordbokapi/api/v1/articles?wordForm=${encodeURIComponent(w)}&dict=bm,nn&scope=e`, {signal: AbortSignal.timeout(2000)});
-      if (res.ok) {
-        const data = await res.json();
-        const valid = (data.bm && data.bm.length > 0) || (data.nn && data.nn.length > 0);
-        valid ? WORDLE_VALID_CACHE.add(w) : WORDLE_INVALID_CACHE.add(w);
-        return valid;
-      }
-    } catch(e) {}
-    // Fallback: accept if it uses Norwegian alphabet characters
-    const noChars = /^[a-zæøå]+$/.test(w);
-    if (noChars) WORDLE_VALID_CACHE.add(w);
-    return noChars;
+  // Custom words are always valid
+  const customWords = (GZ.session.customWords||[]).map(x=>x.toLowerCase());
+  if (customWords.includes(w)) { WORDLE_VALID_CACHE.add(w); return true; }
+
+  // Built-in word list check
+  if (GZ_WORDS_NO.some(bw => bw.toLowerCase() === w)) {
+    WORDLE_VALID_CACHE.add(w); return true;
+  }
+  if (GZ_WORDS_EN && GZ_WORDS_EN.some(bw => bw.toLowerCase() === w)) {
+    WORDLE_VALID_CACHE.add(w); return true;
   }
 
-  // For English - use Free Dictionary API
+  // English - Free Dictionary API (reliable, supports CORS)
   if (lang === 'en') {
     try {
-      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(w)}`, {signal: AbortSignal.timeout(2000)});
+      const res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(w),
+        { signal: AbortSignal.timeout(3000) });
       if (res.ok) { WORDLE_VALID_CACHE.add(w); return true; }
       if (res.status === 404) { WORDLE_INVALID_CACHE.add(w); return false; }
-    } catch(e) {}
-    return /^[a-z]+$/.test(w); // fallback
+    } catch(e) { console.warn('[Wordle] Dict API error:', e.message); }
+    // If API unreachable, accept valid English chars
+    const valid = /^[a-z]+$/.test(w);
+    valid ? WORDLE_VALID_CACHE.add(w) : WORDLE_INVALID_CACHE.add(w);
+    return valid;
   }
 
-  // For other languages / no validation - accept any alphabetic
-  return /^[a-zæøåäöü]+$/.test(w);
+  // Norwegian - use ordbokene.no (Universitetet i Bergen) - correct CORS endpoint
+  if (lang === 'no') {
+    try {
+      const res = await fetch(
+        'https://ordbokene.no/api/bm,nn/search?q=' + encodeURIComponent(w) + '&include=e',
+        { signal: AbortSignal.timeout(3000) }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        // Response has articles array - if any exact match exists, word is valid
+        const hasMatch = (data.articles?.bm?.length > 0) || (data.articles?.nn?.length > 0) ||
+                         (data.meta?.bm?.total > 0) || (data.meta?.nn?.total > 0);
+        hasMatch ? WORDLE_VALID_CACHE.add(w) : WORDLE_INVALID_CACHE.add(w);
+        return hasMatch;
+      }
+    } catch(e) { console.warn('[Wordle] Ordbokene API error:', e.message); }
+    // Fallback: accept Norwegian alphabet words
+    const valid = /^[a-zæøå]+$/.test(w);
+    valid ? WORDLE_VALID_CACHE.add(w) : WORDLE_INVALID_CACHE.add(w);
+    return valid;
+  }
+
+  // Generic fallback
+  const valid = /^[a-zæøåäöü]+$/.test(w);
+  valid ? WORDLE_VALID_CACHE.add(w) : WORDLE_INVALID_CACHE.add(w);
+  return valid;
 }
 
 function wordleShakeRow() {
@@ -5634,7 +5695,11 @@ function gzStartWorldle() {
   const diff = (GZ._gameDiff && GZ._gameDiff.worldle) || sess.worldleDiff || 'normal';
   const maxTries = diff==='easy' ? 8 : diff==='hard' ? 4 : 6;
   WORLDLE_ST = { country, guesses:[], over:false, maxTries };
-  document.getElementById('worldle-path')?.setAttribute('d', country.d);
+  const path = document.getElementById('worldle-path');
+  if (path) path.setAttribute('d', country.d);
+  // Scale path to fit new 200x200 viewBox
+  const svg = document.getElementById('worldle-svg');
+  if (svg) svg.setAttribute('viewBox', '0 0 100 100');
   document.getElementById('worldle-guesses').innerHTML='';
   document.getElementById('worldle-result').style.display='none';
   document.getElementById('worldle-input').value='';
@@ -5642,23 +5707,140 @@ function gzStartWorldle() {
   // Initial hint
   const hintEl = document.getElementById('worldle-hint');
   const attEl = document.getElementById('worldle-attempts-left');
-  if (hintEl) hintEl.textContent = sess.worldleShowContinent!==false ? 'Kontinent: '+country.c : '';
-  if (attEl) attEl.textContent = maxTries+' forsøk';
+  if (hintEl) {
+    if (sess.worldleShowContinent!==false) {
+      const chip = document.createElement('span');
+      chip.style.cssText='display:inline-block;background:var(--s2);border:1px solid var(--border-2);border-radius:6px;padding:3px 10px;font-size:0.8rem;font-weight:700;';
+      chip.textContent='🌍 '+country.c;
+      hintEl.innerHTML='';
+      hintEl.appendChild(chip);
+    } else {
+      hintEl.innerHTML='';
+    }
+  }
+  if (attEl) attEl.textContent = maxTries + ' forsøk igjen';
+  const diffBadge = document.getElementById('worldle-diff-badge');
+  if (diffBadge) diffBadge.textContent = {easy:'Lett',normal:'Normal',hard:'Vanskelig'}[diff]||'';
 }
+
+function worldleLevenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length:m+1}, (_,i)=>[i,...Array(n).fill(0)]);
+  for (let j=0;j<=n;j++) dp[0][j]=j;
+  for (let i=1;i<=m;i++) for (let j=1;j<=n;j++)
+    dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+let worldleAcIdx = -1;
 
 function worldleAutocomplete(val) {
   const ac = document.getElementById('worldle-autocomplete');
   if (!ac) return;
-  if (!val || val.length<2) { ac.style.display='none'; return; }
-  const matches = GZ_COUNTRIES.filter(c=>c.n.toLowerCase().startsWith(val.toLowerCase())).slice(0,6);
-  if (!matches.length) { ac.style.display='none'; return; }
+  worldleAcIdx = -1;
+  if (!val || val.length < 1) { ac.style.display='none'; return; }
+  const v = val.toLowerCase().trim();
+
+  // Get filtered pool based on continent
+  const sess = GZ.session;
+  let pool = GZ_COUNTRIES;
+  if (sess.worldleContinent && sess.worldleContinent !== 'all') {
+    pool = GZ_COUNTRIES.filter(c=>c.c===sess.worldleContinent);
+  }
+
+  // Score each country
+  const scored = pool.map(c => {
+    const name = c.n.toLowerCase();
+    let score = 0;
+    if (name === v) score = 100;
+    else if (name.startsWith(v)) score = 90 - name.length;
+    else if (name.includes(v)) score = 70;
+    else {
+      // Fuzzy: check if typed chars appear in order
+      let idx = 0;
+      for (const ch of v) {
+        const pos = name.indexOf(ch, idx);
+        if (pos === -1) { score = -1; break; }
+        idx = pos + 1;
+        score += 1;
+      }
+      if (score > 0) score = Math.max(0, score - worldleLevenshtein(v, name.substring(0, v.length)));
+    }
+    return { c, score };
+  }).filter(x=>x.score>=0).sort((a,b)=>b.score-a.score).slice(0,8);
+
+  if (!scored.length) { ac.style.display='none'; return; }
+
   ac.style.display='block';
-  ac.innerHTML=matches.map(c=>`<div onclick="worldleSelectCountry('${c.n}')" style="padding:9px 14px;cursor:pointer;font-weight:700;font-size:0.9rem;border-bottom:1px solid var(--border);" onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">${c.f} ${c.n}</div>`).join('');
+  ac.innerHTML = scored.map((x,i) => {
+    const already = WORLDLE_ST.guesses.map(g=>g.toLowerCase()).includes(x.c.n.toLowerCase());
+    return `<div onclick="worldleSelectCountry('${x.c.n.replace(/'/g,"\\'")}',event)"
+      data-idx="${i}"
+      style="padding:9px 14px;cursor:pointer;font-weight:700;font-size:0.88rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;${already?'opacity:0.45;':''};"
+      onmouseover="worldleAcHover(${i})"
+      onmouseout="">
+      <span style="font-size:1.2rem;">${x.c.f}</span>
+      <span style="flex:1;">${worldleHighlight(x.c.n, val)}</span>
+      <span style="font-size:0.72rem;color:var(--text-3);">${x.c.c}</span>
+      ${already ? '<span style="font-size:0.7rem;color:var(--text-3);">✓ prøvd</span>' : ''}
+    </div>`;
+  }).join('');
 }
 
-function worldleSelectCountry(name) {
-  const inp=document.getElementById('worldle-input'); if(inp) inp.value=name;
-  const ac=document.getElementById('worldle-autocomplete'); if(ac) ac.style.display='none';
+function worldleHighlight(name, query) {
+  const q = query.toLowerCase();
+  const n = name.toLowerCase();
+  if (n.startsWith(q)) {
+    return `<strong>${name.substring(0,q.length)}</strong>${name.substring(q.length)}`;
+  }
+  return name;
+}
+
+function worldleAcHover(idx) {
+  worldleAcIdx = idx;
+  document.querySelectorAll('#worldle-autocomplete > div').forEach((el,i) => {
+    el.style.background = i===idx ? 'var(--accent-g)' : '';
+  });
+}
+
+function worldleInputKeydown(e) {
+  const ac = document.getElementById('worldle-autocomplete');
+  const items = ac?.querySelectorAll('div');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    worldleAcIdx = Math.min(worldleAcIdx+1, (items?.length||1)-1);
+    worldleAcHover(worldleAcIdx);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    worldleAcIdx = Math.max(0, worldleAcIdx-1);
+    worldleAcHover(worldleAcIdx);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (worldleAcIdx >= 0 && items?.[worldleAcIdx]) {
+      const name = items[worldleAcIdx].dataset?.name || items[worldleAcIdx].textContent?.trim();
+      const inp = document.getElementById('worldle-input');
+      if (inp && name) { inp.value = name; }
+      if (ac) ac.style.display = 'none';
+      worldleAcIdx = -1;
+      worldleGuess();
+    } else {
+      worldleGuess();
+    }
+  } else if (e.key === 'Escape') {
+    if (ac) ac.style.display = 'none';
+    worldleAcIdx = -1;
+  }
+}
+
+function worldleSelectCountry(name, e) {
+  if (e) e.preventDefault();
+  const inp = document.getElementById('worldle-input');
+  if (inp) { inp.value = name; inp.focus(); }
+  const ac = document.getElementById('worldle-autocomplete');
+  if (ac) ac.style.display = 'none';
+  worldleAcIdx = -1;
+  // Auto-submit on click
+  worldleGuess();
 }
 
 function worldleHaversine(lat1, lon1, lat2, lon2) {
@@ -5684,77 +5866,113 @@ function worldleArrow(bearing) {
 
 function worldleGuess() {
   if (WORLDLE_ST.over) return;
-  const inp=document.getElementById('worldle-input');
-  const guess=(inp?.value||'').trim();
+  const inp = document.getElementById('worldle-input');
+  let guess = (inp?.value||'').trim();
   if (!guess) return;
-  inp.value=''; document.getElementById('worldle-autocomplete').style.display='none';
-  const correct = guess.toLowerCase()===WORLDLE_ST.country.n.toLowerCase();
-  WORLDLE_ST.guesses.push(guess);
-  const gl=document.getElementById('worldle-guesses');
-  if (gl && !correct) {
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:10px 14px;border-radius:10px;background:rgba(239,68,68,0.08);border:1px solid #ef444433;font-weight:700;font-size:0.9rem;animation:fadeIn 0.3s ease;';
-    const target=WORLDLE_ST.country;
-    const guessCountry=GZ_COUNTRIES.find(c=>c.n.toLowerCase()===guess.toLowerCase());
-    let rightSide = '';
-    if (guessCountry && guessCountry.lat!=null && target.lat!=null) {
-      const dist=worldleHaversine(guessCountry.lat,guessCountry.lon,target.lat,target.lon);
-      const bearing=worldleBearing(guessCountry.lat,guessCountry.lon,target.lat,target.lon);
-      const pct=Math.max(0,Math.round((1-dist/20000)*100));
-      // SVG directional arrow (rotated based on bearing)
-      const arrowSvg=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(${Math.round(bearing)}deg);flex-shrink:0;"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`;
-      const pctColor = pct>70?'#22c55e':pct>40?'#f59e0b':'#ef4444';
-      rightSide=`<div style="display:flex;align-items:center;gap:0.75rem;">
-        <span style="color:${pctColor};font-family:'Fredoka One',cursive;font-size:1rem;">${pct}%</span>
-        <span style="color:var(--text-3);font-size:0.82rem;">${dist.toLocaleString('no-NO')} km</span>
-        <span style="color:var(--accent-h);">${arrowSvg}</span>
+
+  // Accept autocomplete selection if active
+  const acItems = document.querySelectorAll('#worldle-autocomplete > div');
+  if (worldleAcIdx >= 0 && acItems[worldleAcIdx]) {
+    guess = acItems[worldleAcIdx].dataset?.name || guess;
+  }
+
+  inp.value = '';
+  document.getElementById('worldle-autocomplete').style.display = 'none';
+  worldleAcIdx = -1;
+
+  const target = WORLDLE_ST.country;
+  const guessCountry = GZ_COUNTRIES.find(c => c.n.toLowerCase() === guess.toLowerCase());
+  if (!guessCountry) {
+    // Unknown country - shake input
+    inp.style.borderColor = '#ef4444';
+    inp.placeholder = 'Ukjent land – prøv autocomplete';
+    setTimeout(() => { inp.style.borderColor = 'var(--border-2)'; inp.placeholder = 'Skriv inn land ...'; }, 1500);
+    return;
+  }
+
+  const correct = guessCountry.n.toLowerCase() === target.n.toLowerCase();
+  WORLDLE_ST.guesses.push(guessCountry.n);
+
+  const gl = document.getElementById('worldle-guesses');
+  if (gl) {
+    const row = document.createElement('div');
+
+    if (correct) {
+      // Green winning row
+      row.style.cssText = 'display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:0;border-radius:8px;overflow:hidden;animation:fadeIn 0.3s ease;border:1px solid #22c55e44;';
+      row.innerHTML = `
+        <div style="padding:11px 14px;background:rgba(34,197,94,0.15);font-weight:700;font-size:0.92rem;display:flex;align-items:center;gap:0.6rem;">
+          <span style="font-size:1.2rem;">${guessCountry.f}</span>
+          <span>${escHtml(guessCountry.n)}</span>
+        </div>
+        <div style="padding:11px 16px;background:rgba(34,197,94,0.1);font-weight:700;font-size:0.88rem;text-align:center;border-left:1px solid #22c55e33;color:#22c55e;">Du vant! 🎉</div>
+        <div style="padding:11px 12px;background:rgba(34,197,94,0.15);display:flex;align-items:center;justify-content:center;border-left:1px solid #22c55e33;">
+          <span style="font-size:1.3rem;">🏆</span>
+        </div>`;
+    } else {
+      // Calculate distance and bearing
+      const dist = worldleHaversine(guessCountry.lat||0, guessCountry.lon||0, target.lat||0, target.lon||0);
+      const bearing = worldleBearing(guessCountry.lat||0, guessCountry.lon||0, target.lat||0, target.lon||0);
+      const distStr = dist < 10 ? '< 10 km' : '~ ' + dist.toLocaleString('no-NO') + ' km';
+
+      // Arrow box - exact worldlegame.io style: blue box with white arrow, rotated
+      const arrowBox = `<div style="width:36px;height:36px;background:#4f6ef7;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" style="transform:rotate(${Math.round(bearing)}deg);display:block;">
+          <polygon points="12,2 20,20 12,15 4,20"/>
+        </svg>
       </div>`;
-      // Accumulate revealed info
-      if (!WORLDLE_ST.revealedInfo) WORLDLE_ST.revealedInfo = {};
-      WORLDLE_ST.revealedInfo.lastDist = dist;
-      WORLDLE_ST.revealedInfo.lastBearing = bearing;
+
+      row.style.cssText = 'display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:0;border-radius:8px;overflow:hidden;animation:fadeIn 0.3s ease;border:1px solid var(--border-2);';
+      row.innerHTML = `
+        <div style="padding:11px 14px;background:var(--s2);font-weight:700;font-size:0.92rem;display:flex;align-items:center;gap:0.6rem;">
+          <span style="font-size:1.2rem;">${guessCountry.f}</span>
+          <span>${escHtml(guessCountry.n)}</span>
+        </div>
+        <div style="padding:11px 16px;background:var(--s2);font-weight:700;font-size:0.88rem;text-align:center;white-space:nowrap;border-left:1px solid var(--border);color:var(--text-2);">${distStr}</div>
+        <div style="padding:11px 12px;background:var(--s2);display:flex;align-items:center;justify-content:center;border-left:1px solid var(--border);">${arrowBox}</div>`;
     }
-    row.innerHTML=`<span>❌ ${escHtml(guessCountry ? guessCountry.f+' ' : '')}${escHtml(guess)}</span>${rightSide}`;
     gl.appendChild(row);
-    // Scroll to latest
     gl.scrollTop = gl.scrollHeight;
   }
+
   if (correct) {
-    const tries=WORLDLE_ST.guesses.length;
-    const score=Math.max(50,500-(tries-1)*80);
-    WORLDLE_ST.over=true;
-    document.getElementById('worldle-result').style.display='block';
-    document.getElementById('worldle-result-msg').textContent='🌍 Riktig! '+WORLDLE_ST.country.f;
-    document.getElementById('worldle-result-country').textContent=WORLDLE_ST.country.n+' · Kontinent: '+WORLDLE_ST.country.c+' · '+score+' poeng';
-    gzSaveScore('worldle', score);
-  } else if (WORLDLE_ST.guesses.length>=WORLDLE_ST.maxTries) {
-    WORLDLE_ST.over=true;
-    document.getElementById('worldle-result').style.display='block';
-    document.getElementById('worldle-result-msg').textContent='😔 Det var '+WORLDLE_ST.country.n+' '+WORLDLE_ST.country.f;
-    document.getElementById('worldle-result-country').textContent='Kontinent: '+WORLDLE_ST.country.c+' · 0 poeng';
-    gzSaveScore('worldle', 0);
+    const tries = WORLDLE_ST.guesses.length;
+    const score = Math.max(50, 500-(tries-1)*80);
+    WORLDLE_ST.over = true;
+    setTimeout(() => {
+      document.getElementById('worldle-result').style.display = 'block';
+      document.getElementById('worldle-result-msg').textContent = 'Du vant! ' + target.f;
+      document.getElementById('worldle-result-country').textContent =
+        target.n + ' · ' + target.c + ' · Befolkning: ' + target.p + '\n' + score + ' poeng';
+      gzSaveScore('worldle', score);
+    }, 400);
+  } else if (WORLDLE_ST.guesses.length >= WORLDLE_ST.maxTries) {
+    WORLDLE_ST.over = true;
+    setTimeout(() => {
+      document.getElementById('worldle-result').style.display = 'block';
+      document.getElementById('worldle-result-msg').textContent = 'Svaret var: ' + target.n + ' ' + target.f;
+      document.getElementById('worldle-result-country').textContent = target.c + ' · Befolkning: ' + target.p + ' · 0 poeng';
+      gzSaveScore('worldle', 0);
+    }, 400);
   } else {
-    // Progressive hints - build up as guesses accumulate
+    // Update attempts + progressive hints
     const sess = GZ.session;
-    const hintEl = document.getElementById('worldle-hint');
-    const attEl = document.getElementById('worldle-attempts-left');
     const numGuesses = WORLDLE_ST.guesses.length;
     const remaining = WORLDLE_ST.maxTries - numGuesses;
+    const attEl = document.getElementById('worldle-attempts-left');
+    if (attEl) attEl.textContent = remaining + (remaining===1 ? ' forsøk igjen' : ' forsøk igjen');
 
-    // Build up revealed info line
-    const infoChips = [];
-    if (sess.worldleShowContinent !== false) infoChips.push('🌍 '+WORLDLE_ST.country.c);
-    if (sess.worldleShowPop !== false && numGuesses >= 2) infoChips.push('👥 '+WORLDLE_ST.country.p);
-    if (numGuesses >= 3) {
-      const hi = Math.min(numGuesses-2, WORLDLE_ST.country.hints.length-1);
-      infoChips.push('💡 '+WORLDLE_ST.country.hints[hi]);
+    // Build hint chips
+    const hintEl = document.getElementById('worldle-hint');
+    if (hintEl) {
+      const chips = [];
+      if (sess.worldleShowContinent !== false) chips.push('🌍 ' + target.c);
+      if (sess.worldleShowPop !== false && numGuesses >= 2) chips.push('👥 ' + target.p);
+      if (numGuesses >= 3) chips.push('💡 ' + target.hints[Math.min(numGuesses-2, target.hints.length-1)]);
+      hintEl.innerHTML = chips.map(c =>
+        `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--s2);border:1px solid var(--border-2);border-radius:6px;padding:4px 10px;font-size:0.8rem;font-weight:700;">${c}</span>`
+      ).join('');
     }
-    if (numGuesses >= 4 && WORLDLE_ST.country.hints.length > 1) {
-      infoChips.push('💡 '+WORLDLE_ST.country.hints[Math.min(numGuesses-1, WORLDLE_ST.country.hints.length-1)]);
-    }
-
-    if (hintEl) hintEl.innerHTML = infoChips.map(c=>`<span style="display:inline-block;background:var(--s2);border:1px solid var(--border-2);border-radius:6px;padding:3px 10px;font-size:0.8rem;font-weight:700;margin:2px;">${c}</span>`).join('');
-    if (attEl) attEl.textContent = remaining+' forsøk igjen';
   }
 }
 
@@ -5937,6 +6155,7 @@ async function gsCreate() {
   const customWords=customWordsRaw.split(',').map(w=>w.trim().toUpperCase()).filter(w=>w.length===wLen);
   // Game-specific settings
   const wordleDiff = document.getElementById('gsWordleDiff')?.value || 'normal';
+  const wordleLang = document.getElementById('gsWordleLang')?.value || 'no';
   const wordleShowColors = document.getElementById('gsWordleColors')?.checked !== false;
   const wordleShowKeyboard = document.getElementById('gsWordleKb')?.checked !== false;
   const worldleDiff = document.getElementById('gsWorldleDiff')?.value || 'normal';
@@ -5950,7 +6169,7 @@ async function gsCreate() {
   const ends   = new Date(endVal).toISOString();
   const config = { 
     name, games, customWords, code, wordleLen:wLen,
-    wordleDiff, wordleShowColors, wordleShowKeyboard,
+    wordleDiff, wordleLang, wordleShowColors, wordleShowKeyboard,
     worldleDiff, worldleContinent, worldleShowContinent, worldleShowPop,
     whoamiDiff, whoamiCategory, whoamiCustom
   };
@@ -6369,6 +6588,80 @@ const GZ_WORDS_NO = [
   'ANGER','KNUST','DRØMT','GAVEN','ARENE','SPRAK','SVAKE','GANGE','FESTE','BRINGT'
 ];
 
+const GZ_WORDS_EN = [
+  'about','above','abuse','actor','acute','admit','adopt','adult','after','again',
+  'agent','agree','ahead','alarm','album','alert','alike','alive','alley','allow',
+  'alone','along','alter','angel','anger','angle','angry','angst','anime','ankle',
+  'annex','apart','apple','apply','arena','argue','arise','armor','army','aroma',
+  'arose','array','arson','aside','asked','atlas','attic','audit','avoid','awake',
+  'award','aware','badly','bagel','baked','baker','bases','basic','basis','beach',
+  'began','begin','being','below','bench','bible','black','blade','blame','bland',
+  'blank','blast','blaze','bleed','blend','bless','blind','block','blood','bloom',
+  'blown','board','bonus','boost','booth','bound','brain','brand','brave','bread',
+  'break','breed','brick','bride','brief','bring','broad','broke','brown','brush',
+  'build','built','bunch','burst','cabin','candy','carry','cause','cease','chain',
+  'chair','chaos','charm','chart','chase','cheap','check','cheek','chess','chest',
+  'chief','child','china','chord','chose','civic','civil','claim','clash','class',
+  'clean','clear','clerk','click','cliff','climb','cling','clock','clone','close',
+  'cloud','coach','coast','color','comes','comic','comma','coral','count','court',
+  'cover','crack','craft','crash','crazy','cream','creek','crime','cross','crowd',
+  'crown','crush','curve','cycle','daily','dance','datum','dealt','death','debut',
+  'decry','delay','dense','depot','depth','derby','devil','disco','ditch','doing',
+  'dolce','doubt','dough','draft','drain','drama','drank','drawn','dream','dress',
+  'dried','drift','drill','drink','drive','drove','drunk','dryer','dying','eager',
+  'eagle','early','earth','eight','elite','empty','enemy','enjoy','enter','entry',
+  'equal','error','essay','event','every','exact','exist','extra','fable','faced',
+  'faith','false','fancy','fatal','favor','feast','fence','fever','field','fifth',
+  'fifty','fight','final','first','fixed','flame','flash','flesh','flock','floor',
+  'float','flung','focus','force','forge','found','franc','frank','fraud','fresh',
+  'front','frost','froze','fruit','fully','funny','gamut','ghost','given','glass',
+  'globe','gloom','gloss','going','grace','grade','grain','grand','grant','grape',
+  'grasp','grass','grave','great','green','greet','grief','grind','groan','group',
+  'grove','grown','guard','guess','guest','guide','guild','guilt','guise','gusto',
+  'happy','harsh','haven','heart','heavy','hedge','honor','horse','hotel','house',
+  'human','humor','hurry','image','index','inner','input','inter','intro','irony',
+  'issue','ivory','judge','juice','juicy','jumbo','karen','kayak','knife','knock',
+  'known','label','later','layer','learn','least','leave','legal','level','light',
+  'limit','liver','local','lodge','logic','loose','lunar','lying','magic','major',
+  'maker','manor','march','marry','match','mayor','media','mercy','merit','metal',
+  'meter','midst','might','minor','minus','mixed','model','money','month','moral',
+  'motif','mount','mouth','moved','movie','multi','music','naive','named','nerve',
+  'never','night','noble','noise','north','noted','novel','nurse','nymph','ocean',
+  'offer','often','onset','orbit','order','other','ought','outer','ovary','oxide',
+  'ozone','paint','panel','panic','paper','pasta','patch','pause','peace','pearl',
+  'penny','phase','phone','photo','piano','piece','pilot','pinch','pixel','pizza',
+  'place','plain','plane','plant','plate','plaza','plead','pluck','plumb','plume',
+  'point','polar','power','press','price','pride','prime','print','prior','prize',
+  'probe','prone','proof','prose','proud','prove','proxy','psalm','pulse','punch',
+  'pupil','queen','query','quest','queue','quick','quiet','quota','quote','radar',
+  'raise','rally','ranch','range','rapid','ratio','reach','ready','realm','rebel',
+  'refer','reign','relax','repay','reply','reset','rider','ridge','right','risky',
+  'rival','river','robot','rocky','rouge','rough','round','route','rover','ruled',
+  'rural','saint','sauce','scale','scare','scene','scope','score','scout','sense',
+  'serve','seven','shaft','shake','shall','shame','shape','share','shark','sharp',
+  'shift','shine','shirt','shock','shore','short','shout','shrug','siege','sight',
+  'silly','since','sixth','sixty','sized','skill','skull','slash','slate','slave',
+  'sleep','slice','slide','slope','slump','smart','smile','smoke','solar','solid',
+  'solve','sorry','south','space','spare','spark','speak','speed','spell','spend',
+  'spice','spine','spoke','sport','spray','squad','staff','stage','stain','stake',
+  'stale','stand','stark','start','state','stays','steal','steam','steel','steep',
+  'steer','stern','stick','stiff','still','stone','stood','store','storm','story',
+  'stout','strap','straw','strip','stuck','study','style','sugar','suite','sunny',
+  'super','surge','swamp','swear','sweep','sweet','swept','swift','swing','swore',
+  'sworn','syrup','table','taken','taste','teach','tense','tenth','terms','terry',
+  'theme','there','thick','thing','think','third','those','three','threw','throw',
+  'thumb','tiger','tight','timer','tired','title','today','token','total','touch',
+  'tough','tower','toxic','trace','track','trade','trail','train','trait','trash',
+  'treat','trend','trial','tried','troop','truck','truly','trunk','trust','truth',
+  'tutor','twice','twist','typed','ultra','uncle','under','union','unity','until',
+  'upset','urban','usage','usual','utter','valid','value','valve','vapor','vault',
+  'verse','video','vigil','vigor','vinyl','viral','virus','visit','visor','vista',
+  'vital','vivid','vocal','vodka','voice','voter','vague','wager','waste','watch',
+  'water','weary','weave','weigh','weird','wheat','where','which','while','white',
+  'whole','whose','wider','widow','witch','woman','women','world','worry','worse',
+  'worst','worth','would','wound','wrath','wrist','wrote','xenon','yacht','yearn',
+  'young','youth','zebra','zesty'
+];
 const GZ_COUNTRIES = [
   {n:'Norge',      f:'🇳🇴', c:'Europa',   p:'~5 mill',  d:'M60,5L70,8L73,14L68,20L74,26L70,33L76,40L72,48L66,58L59,68L51,78L43,85L36,83L31,76L33,68L37,61L32,54L36,47L33,40L38,32L35,25L39,18L44,12L50,8Z', lat:65,lon:13, hints:['Nordisk land med fjorder','Grenser til Sverige og Finland','Oljenasjon i Nordsjøen','Vikingenes hjemland','Laks og midnattsol']},
   {n:'Sverige',    f:'🇸🇪', c:'Europa',   p:'~10 mill', d:'M46,5L58,7L66,12L70,20L67,28L71,36L68,44L63,52L65,60L62,68L55,74L47,78L40,74L36,66L38,58L40,50L37,42L39,34L37,26L40,18L44,12Z', lat:62,lon:15, hints:['Nordisk land','Naboer med Norge og Finland','IKEA og ABBA','Grenser til Danmark via bro','Kongedømme med kongehuset Bernadotte']},
