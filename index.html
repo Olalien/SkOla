@@ -4280,7 +4280,7 @@ const DB = {
   async testConnection() {
     DB._paused = false;
     try {
-      const res = await fetch(SB_URL + '/rest/v1/', {
+      const res = await fetch(SB_URL + '/rest/v1/os_game_sessions?limit=0', {
         headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
       });
       if (!res.ok) return { ok: false, msg: '❌ HTTP ' + res.status + ' – sjekk nøkkel/URL' };
@@ -5036,7 +5036,7 @@ async function gzLogin() {
   if (btn) { btn.textContent = 'Sjekker...'; btn.disabled = true; }
 
   // Try Supabase (works cross-device)
-  const rows = await DB._q('GET','os_game_sessions','code=eq.'+encodeURIComponent(code)+'&select=*');
+  const rows = await sbSelect('os_game_sessions', 'code=eq.'+encodeURIComponent(code)+'&select=*');
   if (rows === null) {
     // Supabase unreachable - try localStorage
     console.warn('[GZ] Supabase unreachable, trying localStorage');
@@ -5169,7 +5169,7 @@ async function gzSaveScore(game, score) {
   const player = state.student ? (state.student.name || state.student) : 'Anonym';
   const id = (GZ.session.code||'x') + '_' + game + '_' + player.replace(/\s/g,'_');
   try {
-    await DB._q('POST','os_game_scores','',{ id, session_code: GZ.session.code, player_name: player, game, score });
+    await sbInsert('os_game_scores', { id, session_code: GZ.session.code, player_name: player, game, score });
   } catch(e) {}
   localStorage.setItem('oz_score_'+GZ.session.code+'_'+game, score);
 }
@@ -5478,7 +5478,7 @@ async function gsCreate() {
   }));
 
   // Save to Supabase - DB._q returns null on failure, [] or array on success
-  const sbResult = await DB._q('POST','os_game_sessions','',sess);
+  const sbResult = await sbInsert('os_game_sessions', sess);
   if (sbResult !== null) {
     showToast('✅ Økt lagret i sky! Kode: ' + code);
   } else {
@@ -5505,7 +5505,7 @@ async function gsLoadSessions() {
   let sessions = [];
 
   // Merge Supabase + localStorage sessions
-  const rows = await DB._q('GET','os_game_sessions','select=*&order=created_at.desc&limit=20');
+  const rows = await sbSelect('os_game_sessions', 'select=*&order=created_at.desc&limit=20');
   if (rows && rows.length) sessions = rows.map(s => ({
       code: s.code||s.id,
       name: (s.config&&s.config.name)||s.name||s.id,
@@ -5590,7 +5590,7 @@ async function gsViewLeaderboard(code) {
   wrap.style.display='block';
   table.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;">Laster...</div>';
   try {
-    const rows=await DB._q('GET','os_game_scores',`session_code=eq.${code}&select=*&order=score.desc`);
+    const rows=await sbSelect('os_game_scores', 'session_code=eq.'+encodeURIComponent(code)+'&select=*&order=score.desc');
     if(!rows||!rows.length) { table.innerHTML='<div style="color:var(--text-3);">Ingen poeng ennå</div>'; return; }
     const totals={};
     rows.forEach(r=>{ totals[r.player_name]=(totals[r.player_name]||0)+r.score; });
@@ -5671,7 +5671,8 @@ async function gsEndSession(code) {
   if (!confirm('Avslutte spilløkt ' + code + '? Elevene kan ikke lenger logge inn.')) return;
   // Set ends_at to now in Supabase
   try {
-    await DB._q('PATCH','os_game_sessions','id=eq.'+encodeURIComponent(code),{ ends_at: new Date().toISOString() });
+    const url = SB_URL+'/rest/v1/os_game_sessions?id=eq.'+encodeURIComponent(code);
+    await fetch(url, { method:'PATCH', headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}, body: JSON.stringify({ends_at: new Date().toISOString()}) });
   } catch(e) {}
   // Update localStorage
   const raw = localStorage.getItem('os_game_session_'+code);
@@ -5707,6 +5708,57 @@ function gsEditSession(code) {
 }
 
 
+
+// Direct Supabase fetch for game tables (plain INSERT, no upsert)
+async function sbInsert(table, data) {
+  const url = SB_URL + '/rest/v1/' + table;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('[sbInsert]', table, res.status, err.substring(0, 300));
+      return null;
+    }
+    return true;
+  } catch(e) {
+    console.error('[sbInsert] fetch error:', e.message);
+    return null;
+  }
+}
+
+async function sbSelect(table, query) {
+  const url = SB_URL + '/rest/v1/' + table + (query ? '?' + query : '');
+  try {
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('[sbSelect]', table, res.status, err.substring(0, 300));
+      return null;
+    }
+    const text = await res.text();
+    return (text && text !== 'null') ? JSON.parse(text) : [];
+  } catch(e) {
+    console.error('[sbSelect] fetch error:', e.message);
+    return null;
+  }
+}
+
 async function gsDiagnose() {
   const el = document.getElementById('gs-diag-result');
   if (!el) return;
@@ -5720,7 +5772,7 @@ async function gsDiagnose() {
 
   // Test 1: Can we reach Supabase at all?
   try {
-    const res = await fetch(SB_URL + '/rest/v1/', {
+    const res = await fetch(SB_URL + '/rest/v1/os_game_sessions?limit=0', {
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
     });
     lines.push('✅ Supabase nåbar (HTTP ' + res.status + ')');
@@ -5732,7 +5784,7 @@ async function gsDiagnose() {
   }
 
   // Test 2: Does os_game_sessions table exist?
-  const rows = await DB._q('GET', 'os_game_sessions', 'limit=1&select=id,code');
+  const rows = await sbSelect('os_game_sessions', 'limit=1&select=id,code');
   if (rows === null) {
     lines.push('❌ TABELL os_game_sessions MANGLER');
     lines.push('   → Klikk "Kopier SQL" og kjør det i Supabase SQL Editor');
@@ -5742,7 +5794,7 @@ async function gsDiagnose() {
 
   // Test 3: Can we write to it?
   const testCode = 'ZZZTEST';
-  const writeRes = await DB._q('POST', 'os_game_sessions', '', {
+  const writeRes = await sbInsert('os_game_sessions', {
     id: testCode, code: testCode, name: 'test', starts_at: new Date().toISOString(),
     ends_at: new Date(Date.now() + 60000).toISOString(), config: { test: true }
   });
@@ -5752,12 +5804,12 @@ async function gsDiagnose() {
   } else {
     lines.push('✅ Skrivetilgang OK');
     // Cleanup
-    await DB._q('DELETE', 'os_game_sessions', 'code=eq.ZZZTEST');
+    const delUrl = SB_URL+'/rest/v1/os_game_sessions?code=eq.ZZZTEST'; await fetch(delUrl, {method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
     lines.push('✅ Slettetilgang OK');
   }
 
   // Test 4: os_game_scores
-  const scores = await DB._q('GET', 'os_game_scores', 'limit=1&select=id');
+  const scores = await sbSelect('os_game_scores', 'limit=1&select=id');
   if (scores === null) {
     lines.push('❌ TABELL os_game_scores MANGLER');
   } else {
