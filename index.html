@@ -465,6 +465,16 @@
   .wc-join-code{font-family:'Fredoka One',cursive;letter-spacing:0.15em;font-size:2.2rem;color:var(--accent-h);text-align:center;margin:0.5rem 0;}
   .wc-export-btns{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;}
   .confetti-piece{position:fixed;top:-10px;border-radius:3px;animation:confettiFall linear forwards;pointer-events:none;z-index:9998;}
+  @keyframes wordleFlip {
+    0%   { transform: rotateX(0deg); }
+    50%  { transform: rotateX(-90deg); }
+    100% { transform: rotateX(0deg); }
+  }
+  @keyframes wordleShake {
+    0%,100% { transform:translateX(0); }
+    20%,60% { transform:translateX(-6px); }
+    40%,80% { transform:translateX(6px); }
+  }
   @keyframes confettiFall{to{transform:translateY(105vh) rotate(720deg);opacity:0;}}
   .score-glow{animation:scoreGlow 0.6s ease;}
   @keyframes scoreGlow{0%,100%{box-shadow:none;}50%{box-shadow:0 0 60px rgba(79,110,247,0.5);}}
@@ -1254,13 +1264,132 @@
 
         <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Aktive spill</label>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
-          <label style="display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:0.88rem;"><input type="checkbox" id="gsWordle" checked> Wordle</label>
-          <label style="display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:0.88rem;"><input type="checkbox" id="gsWorldle" checked> Worldle</label>
-          <label style="display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:0.88rem;"><input type="checkbox" id="gsWhoami" checked> Who Am I</label>
+          <label style="display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:0.88rem;"><input type="checkbox" id="gsWordle" checked onchange="gsToggleGamePanel('wordle',this.checked)"> Wordle</label>
+          <label style="display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:0.88rem;"><input type="checkbox" id="gsWorldle" checked onchange="gsToggleGamePanel('worldle',this.checked)"> Worldle</label>
+          <label style="display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:0.88rem;"><input type="checkbox" id="gsWhoami" checked onchange="gsToggleGamePanel('whoami',this.checked)"> Who Am I</label>
         </div>
 
-        <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Egendefinerte Wordle-ord (5 bokstaver, kommaseparert – valgfri)</label>
-        <input type="text" id="gsCustomWords" placeholder="SKOLE, FJORD, BUNAD, NORSK" style="margin-bottom:0.875rem;" />
+        <!-- PER-GAME SETTINGS -->
+        <div id="gs-game-settings" style="margin-bottom:1rem;">
+
+          <!-- WORDLE SETTINGS -->
+          <div class="gs-game-panel" id="gs-wordle-panel" style="border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:0.75rem;background:var(--s2);">
+            <div style="font-weight:800;font-size:0.88rem;color:var(--text);margin-bottom:0.875rem;display:flex;align-items:center;gap:0.5rem;">
+              <span>🅦</span> Wordle-innstillinger
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+              <div>
+                <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Vanskelighetsgrad</label>
+                <select id="gsWordleDiff" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
+                  <option value="easy">Lett (8 forsøk)</option>
+                  <option value="normal" selected>Normal (6 forsøk)</option>
+                  <option value="hard">Vanskelig (4 forsøk)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Ordlengde</label>
+                <select id="gsWordleLen" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
+                  <option value="5" selected>5 bokstaver</option>
+                  <option value="6">6 bokstaver</option>
+                  <option value="7">7 bokstaver</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:1rem;margin-bottom:0.75rem;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:700;cursor:pointer;"><input type="checkbox" id="gsWordleColors" checked> Fargehint (grønn/gul)</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:700;cursor:pointer;"><input type="checkbox" id="gsWordleKb" checked> Tastatur-hjelp</label>
+            </div>
+            <div style="margin-bottom:0.75rem;">
+              <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Egne ord (kommaseparert, 5–7 bokstaver)</label>
+              <input type="text" id="gsCustomWords" placeholder="SKOLE, FJORD, BUNAD, NORSK" />
+            </div>
+            <div>
+              <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">AI-generer ordpakke fra tema</label>
+              <div style="display:flex;gap:0.5rem;">
+                <input type="text" id="gsWordleAiTopic" placeholder="F.eks. Norgeshistorie, biologi, matematikk..." style="flex:1;" />
+                <button onclick="gsGenerateWordleWords()" style="padding:8px 14px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;">
+                  <span id="gsWordleAiSpinner" style="display:none;" class="ai-spinner"></span>
+                  AI-generer
+                </button>
+              </div>
+              <div id="gsWordleAiResult" style="display:none;margin-top:0.5rem;font-size:0.8rem;color:var(--text-2);"></div>
+            </div>
+          </div>
+
+          <!-- WORLDLE SETTINGS -->
+          <div class="gs-game-panel" id="gs-worldle-panel" style="border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:0.75rem;background:var(--s2);">
+            <div style="font-weight:800;font-size:0.88rem;color:var(--text);margin-bottom:0.875rem;display:flex;align-items:center;gap:0.5rem;">
+              <span>🌍</span> Worldle-innstillinger
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+              <div>
+                <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Vanskelighetsgrad</label>
+                <select id="gsWorldleDiff" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
+                  <option value="easy">Lett (8 forsøk)</option>
+                  <option value="normal" selected>Normal (6 forsøk)</option>
+                  <option value="hard">Vanskelig (4 forsøk)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Filtrer verdensdel</label>
+                <select id="gsWorldleContinent" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
+                  <option value="all">Alle land</option>
+                  <option value="Europa">Europa</option>
+                  <option value="Asia">Asia</option>
+                  <option value="Amerika">Amerika</option>
+                  <option value="Afrika">Afrika</option>
+                  <option value="Oseania">Oseania</option>
+                  <option value="Asia/Europa">Asia/Europa</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:700;cursor:pointer;"><input type="checkbox" id="gsWorldleContinent2" checked> Vis kontinent-hint</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:700;cursor:pointer;"><input type="checkbox" id="gsWorldlePop" checked> Vis befolknings-hint</label>
+            </div>
+          </div>
+
+          <!-- WHOAMI SETTINGS -->
+          <div class="gs-game-panel" id="gs-whoami-panel" style="border:1px solid var(--border);border-radius:12px;padding:1rem;background:var(--s2);">
+            <div style="font-weight:800;font-size:0.88rem;color:var(--text);margin-bottom:0.875rem;display:flex;align-items:center;gap:0.5rem;">
+              <span>❓</span> Who Am I-innstillinger
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+              <div>
+                <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Vanskelighetsgrad</label>
+                <select id="gsWhoamiDiff" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
+                  <option value="easy">Lett (2 hint vises)</option>
+                  <option value="normal" selected>Normal (1 hint vises)</option>
+                  <option value="hard">Vanskelig (ingen hint)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Kategori</label>
+                <select id="gsWhoamiCat" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
+                  <option value="alle">Alle kategorier</option>
+                  <option value="politiker">Politikere</option>
+                  <option value="vitenskapsmann">Vitenskapsmenn</option>
+                  <option value="kunstner">Kunstnere</option>
+                  <option value="idrett">Idrettsutøvere</option>
+                  <option value="historisk">Historiske</option>
+                  <option value="aktivist">Aktivister</option>
+                  <option value="gründer">Gründere</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">AI-generer persons-pakke fra tema</label>
+              <div style="display:flex;gap:0.5rem;">
+                <input type="text" id="gsWhoamiAiTopic" placeholder="F.eks. norske historiske personer, olympiske utøvere..." style="flex:1;" />
+                <button onclick="gsGeneratePersons()" style="padding:8px 14px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;">
+                  <span id="gsPersonAiSpinner" style="display:none;" class="ai-spinner"></span>
+                  AI-generer
+                </button>
+              </div>
+              <div id="gsWhoamiAiResult" style="display:none;margin-top:0.5rem;font-size:0.8rem;color:var(--text-2);"></div>
+            </div>
+          </div>
+        </div>
 
         <button onclick="gsCreate()" style="display:flex;align-items:center;gap:7px;padding:11px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.93rem;cursor:pointer;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1664,6 +1793,7 @@
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
         <button onclick="gzBackToLobby()" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">← Tilbake</button>
         <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;">Wordle</div>
+        <div id="wordle-diff-badge" style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;"></div>
         <div id="wordle-score-badge" style="margin-left:auto;background:var(--accent-g);border:1px solid var(--accent);border-radius:8px;padding:5px 12px;font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--accent-h);display:none;"></div>
       </div>
       <div id="wordle-msg" style="text-align:center;min-height:28px;font-weight:800;font-size:0.92rem;margin-bottom:0.75rem;color:var(--text-2);"></div>
@@ -5219,10 +5349,20 @@ async function gzShowLeaderboard() {
 // ── WORDLE ──
 function gzStartWordle() {
   gzShowPanel('gz-wordle');
-  const custom = (GZ.session.customWords||[]).filter(w=>w.length===5);
-  const pool = custom.length ? [...GZ_WORDS_NO,...custom] : GZ_WORDS_NO;
+  const sess = GZ.session;
+  const wLen = sess.wordleLen || 5;
+  const custom = (sess.customWords||[]).filter(w=>w.length===wLen).map(w=>w.toLowerCase());
+  const base = GZ_WORDS_NO.filter(w=>w.length===wLen).map(w=>w.toLowerCase());
+  const pool = custom.length > 0 ? custom : base.length > 0 ? base : GZ_WORDS_NO.map(w=>w.toLowerCase());
   const word = pool[Math.floor(Math.random()*pool.length)];
-  WORDLE_ST = { word, guesses:[], cur:'', over:false, maxTries:6 };
+  const diff = sess.wordleDiff || 'normal';
+  const maxTries = diff==='easy' ? 8 : diff==='hard' ? 4 : 6;
+  WORDLE_ST = { word, guesses:[], cur:'', over:false, maxTries, wLen:word.length };
+  // Update board display
+  const diffEl = document.getElementById('wordle-diff-badge');
+  if (diffEl) diffEl.textContent = {easy:'Lett',normal:'Normal',hard:'Vanskelig'}[diff] || '';
+  document.getElementById('wordle-result').style.display='none';
+  document.getElementById('wordle-msg').textContent='';
   wordleRender();
   wordleRenderKeyboard();
 }
@@ -5231,23 +5371,31 @@ function wordleRender() {
   const board = document.getElementById('wordle-board');
   if (!board) return;
   board.innerHTML = '';
+  const wLen = WORDLE_ST.word.length;
+  const cellSize = wLen <= 5 ? 54 : wLen <= 6 ? 48 : 42;
+  const showColors = GZ.session.wordleShowColors !== false;
   for (let r=0; r<WORDLE_ST.maxTries; r++) {
     const row = document.createElement('div');
-    row.style.cssText='display:flex;gap:6px;';
+    row.style.cssText='display:flex;gap:5px;';
     const guess = WORDLE_ST.guesses[r];
     const isCurrent = r === WORDLE_ST.guesses.length && !WORDLE_ST.over;
-    for (let c=0; c<5; c++) {
+    const colors = guess ? wordleGetColors(WORDLE_ST.word, guess) : null;
+    for (let c=0; c<wLen; c++) {
       const cell = document.createElement('div');
-      cell.style.cssText='width:54px;height:54px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:\'Fredoka One\',cursive;font-size:1.6rem;font-weight:800;transition:all 0.18s;';
+      cell.style.cssText=`width:${cellSize}px;height:${cellSize}px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:${cellSize>48?'1.5':'1.2'}rem;font-weight:800;transition:all 0.25s;`;
       if (guess) {
         const letter = guess[c] || '';
-        const color = wordleColor(WORDLE_ST.word, guess, c);
+        const color = showColors ? colors[c] : '#55566e';
         cell.textContent = letter.toUpperCase();
         cell.style.background = color; cell.style.color='white'; cell.style.border='2px solid '+color;
+        // Flip animation
+        cell.style.animation = `wordleFlip 0.4s ${c*0.08}s both`;
       } else if (isCurrent) {
         cell.textContent = (WORDLE_ST.cur[c]||'').toUpperCase();
-        cell.style.background='var(--s2)'; cell.style.border='2px solid '+(WORDLE_ST.cur[c]?'var(--accent)':'var(--border-2)');
+        cell.style.background='var(--s2)';
+        cell.style.border='2px solid '+(WORDLE_ST.cur[c]?'var(--accent)':'var(--border-2)');
         cell.style.color='var(--text)';
+        if (WORDLE_ST.cur[c]) cell.style.transform='scale(1.08)';
       } else {
         cell.style.background='var(--s2)'; cell.style.border='2px solid var(--border)';
       }
@@ -5257,23 +5405,46 @@ function wordleRender() {
   }
 }
 
+function wordleGetColors(word, guess) {
+  const wLen = word.length;
+  const colors = new Array(wLen).fill('#55566e');
+  const wordArr = word.split('');
+  const guessArr = guess.split('');
+  // Pass 1: mark greens
+  for (let i = 0; i < wLen; i++) {
+    if (guessArr[i] === wordArr[i]) {
+      colors[i] = '#22c55e';
+      wordArr[i] = null; guessArr[i] = null;
+    }
+  }
+  // Pass 2: mark yellows (remaining letters)
+  for (let i = 0; i < wLen; i++) {
+    if (guessArr[i] === null) continue;
+    const wi = wordArr.indexOf(guessArr[i]);
+    if (wi !== -1) {
+      colors[i] = '#f59e0b';
+      wordArr[wi] = null;
+    }
+  }
+  return colors;
+}
 function wordleColor(word, guess, idx) {
-  if (guess[idx]===word[idx]) return '#22c55e';
-  if (word.includes(guess[idx])) return '#f59e0b';
-  return '#55566e';
+  return wordleGetColors(word, guess)[idx];
 }
 
 function wordleRenderKeyboard() {
   const kb = document.getElementById('wordle-keyboard');
-  if (!kb) return;
+  if (!kb || GZ.session.wordleShowKeyboard === false) { if(kb) kb.innerHTML=''; return; }
   const rows = ['QWERTYUIOPÅ','ASDFGHJKLØÆ','ZXCVBNM⌫↵'];
-  // Build letter → best color map
+  const showColors = GZ.session.wordleShowColors !== false;
+  // Build letter → best color map using proper duplicate handling
   const colors = {};
   WORDLE_ST.guesses.forEach(g => {
-    for(let i=0;i<5;i++) {
-      const l=g[i], c=wordleColor(WORDLE_ST.word,g,i);
+    const rowColors = wordleGetColors(WORDLE_ST.word, g);
+    for(let i=0;i<g.length;i++) {
+      const l=g[i], c=rowColors[i];
       const priority = {'#22c55e':3,'#f59e0b':2,'#55566e':1};
-      if ((priority[c]||0) > (priority[colors[l]]||0)) colors[l]=c;
+      if ((priority[c]||0) > (priority[colors[l]]||0)) colors[l]=showColors?c:'#55566e';
     }
   });
   kb.innerHTML = rows.map(row => `<div style="display:flex;gap:5px;">${[...row].map(k => {
@@ -5288,7 +5459,7 @@ function wordleKey(k) {
   if (WORDLE_ST.over) return;
   if (k==='⌫') { WORDLE_ST.cur=WORDLE_ST.cur.slice(0,-1); }
   else if (k==='↵') { wordleSubmit(); return; }
-  else if (WORDLE_ST.cur.length<5) { WORDLE_ST.cur+=k.toLowerCase(); }
+  else if (WORDLE_ST.cur.length<(WORDLE_ST.word?.length||5)) { WORDLE_ST.cur+=k.toLowerCase(); }
   wordleRender();
 }
 
@@ -5296,13 +5467,23 @@ document.addEventListener('keydown', e => {
   if (document.getElementById('gz-wordle')?.style.display==='none') return;
   if (e.key==='Enter') wordleSubmit();
   else if (e.key==='Backspace') { WORDLE_ST.cur=WORDLE_ST.cur.slice(0,-1); wordleRender(); }
-  else if (/^[a-zA-ZæøåÆØÅ]$/.test(e.key) && WORDLE_ST.cur.length<5) {
+  else if (/^[a-zA-ZæøåÆØÅ]$/.test(e.key) && WORDLE_ST.cur.length<(WORDLE_ST.word?.length||5)) {
     WORDLE_ST.cur+=e.key.toLowerCase(); wordleRender();
   }
 });
 
 function wordleSubmit() {
-  if (WORDLE_ST.over || WORDLE_ST.cur.length!==5) return;
+  const wLen = WORDLE_ST.word.length;
+  if (WORDLE_ST.over || WORDLE_ST.cur.length!==wLen) {
+    if (WORDLE_ST.cur.length > 0 && WORDLE_ST.cur.length < wLen) {
+      // Shake animation
+      const board = document.getElementById('wordle-board');
+      const rows = board?.querySelectorAll('div');
+      const curRow = rows?.[WORDLE_ST.guesses.length];
+      if (curRow) { curRow.style.animation='wordleShake 0.4s'; setTimeout(()=>curRow.style.animation='',400); }
+    }
+    return;
+  }
   WORDLE_ST.guesses.push(WORDLE_ST.cur);
   const won = WORDLE_ST.cur === WORDLE_ST.word;
   WORDLE_ST.cur='';
@@ -5331,15 +5512,27 @@ function wordleSubmit() {
 // ── WORLDLE ──
 function gzStartWorldle() {
   gzShowPanel('gz-worldle');
-  const country = GZ_COUNTRIES[Math.floor(Math.random()*GZ_COUNTRIES.length)];
-  WORLDLE_ST = { country, guesses:[], over:false, maxTries:6 };
+  const sess = GZ.session;
+  // Filter by continent if specified
+  let pool = GZ_COUNTRIES;
+  if (sess.worldleContinent && sess.worldleContinent !== 'all') {
+    const filtered = GZ_COUNTRIES.filter(c=>c.c===sess.worldleContinent);
+    if (filtered.length > 0) pool = filtered;
+  }
+  const country = pool[Math.floor(Math.random()*pool.length)];
+  const diff = sess.worldleDiff || 'normal';
+  const maxTries = diff==='easy' ? 8 : diff==='hard' ? 4 : 6;
+  WORLDLE_ST = { country, guesses:[], over:false, maxTries };
   document.getElementById('worldle-path')?.setAttribute('d', country.d);
-  document.getElementById('worldle-hint').textContent='Kontinent: '+country.c;
   document.getElementById('worldle-guesses').innerHTML='';
   document.getElementById('worldle-result').style.display='none';
   document.getElementById('worldle-input').value='';
-  document.getElementById('worldle-attempts-left').textContent=country.hints[0];
   document.getElementById('worldle-autocomplete').style.display='none';
+  // Initial hint
+  const hintEl = document.getElementById('worldle-hint');
+  const attEl = document.getElementById('worldle-attempts-left');
+  if (hintEl) hintEl.textContent = sess.worldleShowContinent!==false ? 'Kontinent: '+country.c : '';
+  if (attEl) attEl.textContent = maxTries+' forsøk';
 }
 
 function worldleAutocomplete(val) {
@@ -5357,6 +5550,27 @@ function worldleSelectCountry(name) {
   const ac=document.getElementById('worldle-autocomplete'); if(ac) ac.style.display='none';
 }
 
+function worldleHaversine(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLon = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+}
+function worldleBearing(lat1, lon1, lat2, lon2) {
+  const dLon = (lon2-lon1)*Math.PI/180;
+  const y = Math.sin(dLon)*Math.cos(lat2*Math.PI/180);
+  const x = Math.cos(lat1*Math.PI/180)*Math.sin(lat2*Math.PI/180) -
+    Math.sin(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.cos(dLon);
+  const bearing = Math.atan2(y,x)*180/Math.PI;
+  return (bearing+360)%360;
+}
+function worldleArrow(bearing) {
+  const dirs = ['⬆️','↗️','➡️','↘️','⬇️','↙️','⬅️','↖️'];
+  return dirs[Math.round(bearing/45)%8];
+}
+
 function worldleGuess() {
   if (WORLDLE_ST.over) return;
   const inp=document.getElementById('worldle-input');
@@ -5365,12 +5579,22 @@ function worldleGuess() {
   inp.value=''; document.getElementById('worldle-autocomplete').style.display='none';
   const correct = guess.toLowerCase()===WORLDLE_ST.country.n.toLowerCase();
   WORLDLE_ST.guesses.push(guess);
-  // Show guess row
   const gl=document.getElementById('worldle-guesses');
-  if(gl) {
+  if (gl && !correct) {
     const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:0.5rem;padding:8px 12px;border-radius:8px;background:'+(correct?'rgba(34,197,94,0.12)':'rgba(239,68,68,0.08)')+';border:1px solid '+(correct?'#22c55e44':'#ef444433')+';font-weight:700;font-size:0.9rem;';
-    row.innerHTML=(correct?'✅':'❌')+' '+escHtml(guess);
+    row.style.cssText='display:flex;align-items:center;gap:0.5rem;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,0.08);border:1px solid #ef444433;font-weight:700;font-size:0.88rem;';
+    // Distance + direction
+    const target=WORLDLE_ST.country;
+    const guessCountry=GZ_COUNTRIES.find(c=>c.n.toLowerCase()===guess.toLowerCase());
+    let distStr = '';
+    if (guessCountry && guessCountry.lat && target.lat) {
+      const dist=worldleHaversine(guessCountry.lat,guessCountry.lon,target.lat,target.lon);
+      const bearing=worldleBearing(guessCountry.lat,guessCountry.lon,target.lat,target.lon);
+      const arrow=worldleArrow(bearing);
+      const pct=Math.max(0,Math.round((1-dist/20000)*100));
+      distStr=` <span style="color:var(--text-3);font-size:0.8rem;">${arrow} ${dist.toLocaleString('no')} km · ${pct}%</span>`;
+    }
+    row.innerHTML='❌ '+escHtml(guess)+distStr;
     gl.appendChild(row);
   }
   if (correct) {
@@ -5388,29 +5612,56 @@ function worldleGuess() {
     document.getElementById('worldle-result-country').textContent='Kontinent: '+WORLDLE_ST.country.c+' · 0 poeng';
     gzSaveScore('worldle', 0);
   } else {
-    // Show next hint
-    const hintIdx=Math.min(WORLDLE_ST.guesses.length, WORLDLE_ST.country.hints.length-1);
+    // Progressive hints
+    const sess = GZ.session;
+    const hintParts = [];
+    if (sess.worldleShowContinent !== false) hintParts.push('Kontinent: '+WORLDLE_ST.country.c);
+    if (sess.worldleShowPop !== false && WORLDLE_ST.guesses.length >= 2) hintParts.push('Befolkning: '+WORLDLE_ST.country.p);
+    if (WORLDLE_ST.guesses.length >= 3) {
+      const hintIdx=Math.min(WORLDLE_ST.guesses.length-1, WORLDLE_ST.country.hints.length-1);
+      hintParts.push(WORLDLE_ST.country.hints[hintIdx]);
+    }
     const attEl=document.getElementById('worldle-attempts-left');
-    if(attEl) attEl.textContent='Hint: '+WORLDLE_ST.country.hints[hintIdx];
+    if(attEl) attEl.textContent = hintParts.join(' · ') || (WORLDLE_ST.maxTries - WORLDLE_ST.guesses.length)+' forsøk igjen';
     const hintEl=document.getElementById('worldle-hint');
-    if(hintEl) hintEl.textContent='Kontinent: '+WORLDLE_ST.country.c+' · Befolkning: '+WORLDLE_ST.country.p;
+    if(hintEl) hintEl.textContent = sess.worldleShowContinent!==false ? 'Kontinent: '+WORLDLE_ST.country.c : '';
   }
 }
 
 // ── WHO AM I ──
 function gzStartWhoami() {
   gzShowPanel('gz-whoami');
-  const person = GZ_PERSONS[Math.floor(Math.random()*GZ_PERSONS.length)];
-  WHOAMI_ST = { person, revealed:0, over:false, maxHints:5, maxScore:500 };
+  const sess = GZ.session;
+  // Filter by category
+  let pool = GZ_PERSONS;
+  if (sess.whoamiCategory && sess.whoamiCategory !== 'alle') {
+    const filtered = GZ_PERSONS.filter(p=>p.cat===sess.whoamiCategory);
+    if (filtered.length > 0) pool = filtered;
+  }
+  // Use custom persons if set
+  if (sess.whoamiCustom && sess.whoamiCustom.length > 0) {
+    pool = sess.whoamiCustom;
+  }
+  const person = pool[Math.floor(Math.random()*pool.length)];
+  // Difficulty
+  const diff = sess.whoamiDiff || 'normal';
+  const autoReveal = diff==='easy' ? 2 : diff==='hard' ? 0 : 1; // auto-reveal hints
+  const maxScore = diff==='easy' ? 300 : diff==='hard' ? 700 : 500;
+  const maxHints = person.hints.length;
+  WHOAMI_ST = { person, revealed:0, over:false, maxHints, maxScore, diff };
   document.getElementById('whoami-hints-container').innerHTML='';
   document.getElementById('whoami-result').style.display='none';
   document.getElementById('whoami-input').value='';
   document.getElementById('whoami-reveal-btn').style.display='inline-flex';
-  document.getElementById('whoami-points-left').textContent='500 poeng mulig';
-  whoamiRevealHint(); // auto-show first hint
+  // Auto-reveal hints based on difficulty
+  for (let i=0; i<autoReveal; i++) whoamiRevealHint(true);
+  if (autoReveal === 0) whoamiRevealHint(true); // always show at least 1
+  // Update points display
+  const ptsRemaining = Math.max(100, maxScore - WHOAMI_ST.revealed*Math.floor(maxScore/maxHints));
+  document.getElementById('whoami-points-left').textContent = ptsRemaining+' poeng mulig';
 }
 
-function whoamiRevealHint() {
+function whoamiRevealHint(silent) {
   const st=WHOAMI_ST;
   if (st.over || st.revealed>=st.maxHints) return;
   const hint=st.person.hints[st.revealed];
@@ -5418,17 +5669,20 @@ function whoamiRevealHint() {
   const container=document.getElementById('whoami-hints-container');
   if(container) {
     const el=document.createElement('div');
-    el.style.cssText='padding:0.875rem 1.1rem;background:var(--s1);border:1px solid var(--border);border-radius:12px;font-weight:700;font-size:0.92rem;animation:fadeIn 0.3s ease;';
-    el.innerHTML=`<span style="color:var(--accent-h);font-family:'Fredoka One',cursive;margin-right:8px;">Hint ${st.revealed}:</span>${escHtml(hint)}`;
+    el.style.cssText=`padding:0.875rem 1.1rem;background:var(--s1);border:1px solid var(--border);border-radius:12px;font-weight:700;font-size:0.92rem;${silent?'':'animation:fadeIn 0.3s ease;'}`;
+    const catColors={politiker:'#4f6ef7',vitenskapsmann:'#22c55e',kunstner:'#a855f7',idrett:'#f59e0b',historisk:'#ef4444',aktivist:'#06b6d4',gründer:'#f59e0b',oppdagelsesreisende:'#22c55e'};
+    const catColor = catColors[st.person.cat] || 'var(--accent-h)';
+    el.innerHTML=`<span style="color:${catColor};font-family:'Fredoka One',cursive;margin-right:8px;">Hint ${st.revealed}:</span>${escHtml(hint)}`;
     container.appendChild(el);
   }
-  const score=(st.maxHints-st.revealed+1)*100;
+  const pointsPerHint = Math.floor((st.maxScore||500)/st.maxHints);
+  const remaining = Math.max(100, (st.maxScore||500) - st.revealed*pointsPerHint);
   const ptsEl=document.getElementById('whoami-points-left');
-  if(ptsEl) ptsEl.textContent=(st.revealed<st.maxHints?score+' poeng mulig':'Siste hint!');
+  if(ptsEl) ptsEl.textContent=(st.revealed<st.maxHints?remaining+' poeng mulig':'Siste hint!');
   const btn=document.getElementById('whoami-reveal-btn');
   if(btn) {
     if(st.revealed>=st.maxHints) btn.style.display='none';
-    else btn.textContent=`Vis neste hint (−100 poeng)`;
+    else btn.textContent=`Vis neste hint (−${pointsPerHint} poeng)`;
   }
 }
 
@@ -5437,9 +5691,13 @@ function whoamiGuess() {
   const inp=document.getElementById('whoami-input');
   const guess=(inp?.value||'').trim().toLowerCase();
   if (!guess) return;
-  const correct=WHOAMI_ST.person.n.toLowerCase().includes(guess) || guess.includes(WHOAMI_ST.person.n.toLowerCase().split(' ')[1]||'XXXXXXX');
+  // Accept last name or full name match
+  const fullName = WHOAMI_ST.person.n.toLowerCase();
+  const lastName = fullName.split(' ').slice(-1)[0];
+  const correct = fullName.includes(guess) || guess.includes(lastName) || guess.length > 3 && fullName.includes(guess.split(' ')[0]);
   if (correct) {
-    const score=Math.max(100,(WHOAMI_ST.maxHints-WHOAMI_ST.revealed+1)*100);
+    const pointsPerHint = Math.floor((WHOAMI_ST.maxScore||500)/WHOAMI_ST.maxHints);
+    const score=Math.max(100,(WHOAMI_ST.maxScore||500) - (WHOAMI_ST.revealed-1)*pointsPerHint);
     WHOAMI_ST.over=true;
     document.getElementById('whoami-result').style.display='block';
     document.getElementById('whoami-result-msg').textContent='🎉 Riktig!';
@@ -5452,6 +5710,83 @@ function whoamiGuess() {
 }
 
 // ── TEACHER SESSION MANAGEMENT ──
+
+async function gsGenerateWordleWords() {
+  const topic = document.getElementById('gsWordleAiTopic')?.value.trim();
+  if (!topic) { showToast('Skriv inn et tema'); return; }
+  const spinner = document.getElementById('gsWordleAiSpinner');
+  const resultEl = document.getElementById('gsWordleAiResult');
+  if (spinner) spinner.style.display = 'inline-block';
+  if (resultEl) resultEl.style.display = 'none';
+  const wLen = parseInt(document.getElementById('gsWordleLen')?.value||'5');
+  const key = getApiKey();
+  if (!key) { showToast('Ingen API-nøkkel – sjekk Innstillinger'); if(spinner)spinner.style.display='none'; return; }
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:500,
+        messages:[{role:'user',content:`Lag en liste med nøyaktig 20 norske ord med nøyaktig ${wLen} bokstaver som handler om temaet: "${topic}". Bare norske ord, ingen engelske. Svar KUN med en kommaseparert liste over ordene med store bokstaver, ingen annen tekst. Eksempel: FJORD,STEIN,SNØEN`}]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content?.[0]?.text||'').trim().toUpperCase();
+    const words = text.split(/[,\s]+/).map(w=>w.replace(/[^A-ZÆØÅ]/g,'')).filter(w=>w.length===wLen);
+    if (!words.length) throw new Error('Ingen gyldige ord generert');
+    // Put in the custom words field
+    const inp = document.getElementById('gsCustomWords');
+    if (inp) inp.value = words.join(', ');
+    if (resultEl) { resultEl.style.display='block'; resultEl.textContent=`✅ ${words.length} ord generert fra "${topic}": ${words.slice(0,5).join(', ')}${words.length>5?'...':''}`; }
+    showToast('✅ '+words.length+' Wordle-ord generert!');
+  } catch(e) {
+    showToast('❌ '+e.message);
+  } finally {
+    if (spinner) spinner.style.display='none';
+  }
+}
+
+async function gsGeneratePersons() {
+  const topic = document.getElementById('gsWhoamiAiTopic')?.value.trim();
+  if (!topic) { showToast('Skriv inn et tema'); return; }
+  const spinner = document.getElementById('gsPersonAiSpinner');
+  const resultEl = document.getElementById('gsWhoamiAiResult');
+  if (spinner) spinner.style.display = 'inline-block';
+  if (resultEl) resultEl.style.display = 'none';
+  const key = getApiKey();
+  if (!key) { showToast('Ingen API-nøkkel – sjekk Innstillinger'); if(spinner)spinner.style.display='none'; return; }
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:2000,
+        messages:[{role:'user',content:`Lag 5 «Who Am I»-kort med kjente personer relatert til temaet: "${topic}". Hver person skal ha 5 hint som gradvis avslører hvem personen er (starter vagt, slutter spesifikt). Svar KUN med JSON: [{"n":"Fullt navn","cat":"kategori","hints":["Hint1","Hint2","Hint3","Hint4","Hint5"]}] Kategorier: politiker, vitenskapsmann, kunstner, idrett, historisk, aktivist, gründer. Alt på norsk.`}]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error('Ugyldig svar fra AI');
+    const persons = JSON.parse(jsonMatch[0]);
+    window._gsCustomPersons = persons;
+    if (resultEl) {
+      resultEl.style.display='block';
+      resultEl.innerHTML=`✅ ${persons.length} personer generert: ${persons.map(p=>p.n).join(', ')}<br><small style="color:var(--text-3)">Disse vil bli brukt i Who Am I for denne økten</small>`;
+    }
+    showToast('✅ '+persons.length+' Who Am I-kort generert!');
+  } catch(e) {
+    showToast('❌ '+e.message);
+  } finally {
+    if (spinner) spinner.style.display='none';
+  }
+}
+
+
+function gsToggleGamePanel(game, show) {
+  const panel = document.getElementById('gs-'+game+'-panel');
+  if (panel) panel.style.display = show ? 'block' : 'none';
+}
 async function gsCreate() {
   const name=document.getElementById('gsName')?.value.trim();
   const startVal=document.getElementById('gsStart')?.value;
@@ -5463,11 +5798,28 @@ async function gsCreate() {
   if(document.getElementById('gsWordle')?.checked) games.push('wordle');
   if(document.getElementById('gsWorldle')?.checked) games.push('worldle');
   if(document.getElementById('gsWhoami')?.checked) games.push('whoami');
+  const wLen = parseInt(document.getElementById('gsWordleLen')?.value||'5');
   const customWordsRaw=document.getElementById('gsCustomWords')?.value||'';
-  const customWords=customWordsRaw.split(',').map(w=>w.trim().toUpperCase()).filter(w=>w.length===5);
+  const customWords=customWordsRaw.split(',').map(w=>w.trim().toUpperCase()).filter(w=>w.length===wLen);
+  // Game-specific settings
+  const wordleDiff = document.getElementById('gsWordleDiff')?.value || 'normal';
+  const wordleShowColors = document.getElementById('gsWordleColors')?.checked !== false;
+  const wordleShowKeyboard = document.getElementById('gsWordleKb')?.checked !== false;
+  const worldleDiff = document.getElementById('gsWorldleDiff')?.value || 'normal';
+  const worldleContinent = document.getElementById('gsWorldleContinent')?.value || 'all';
+  const worldleShowContinent = document.getElementById('gsWorldleContinent2')?.checked !== false;
+  const worldleShowPop = document.getElementById('gsWorldlePop')?.checked !== false;
+  const whoamiDiff = document.getElementById('gsWhoamiDiff')?.value || 'normal';
+  const whoamiCategory = document.getElementById('gsWhoamiCat')?.value || 'alle';
+  const whoamiCustom = window._gsCustomPersons || null;
   const starts = startVal ? new Date(startVal).toISOString() : new Date().toISOString();
   const ends   = new Date(endVal).toISOString();
-  const config = { name, games, customWords, code };
+  const config = { 
+    name, games, customWords, code, wordleLen:wLen,
+    wordleDiff, wordleShowColors, wordleShowKeyboard,
+    worldleDiff, worldleContinent, worldleShowContinent, worldleShowPop,
+    whoamiDiff, whoamiCategory, whoamiCustom
+  };
   const sess = { id: code, code, name, starts_at: starts, ends_at: ends, config };
 
   // Always save to localStorage so same-device works instantly
@@ -5884,60 +6236,73 @@ const GZ_WORDS_NO = [
 ];
 
 const GZ_COUNTRIES = [
-  {n:'Norge',      f:'🇳🇴', c:'Europa',   p:'~5 mill',  d:'M60,5L70,8L73,14L68,20L74,26L70,33L76,40L72,48L66,58L59,68L51,78L43,85L36,83L31,76L33,68L37,61L32,54L36,47L33,40L38,32L35,25L39,18L44,12L50,8Z', hints:['Nordisk land med fjorder','Grenser til Sverige og Finland','Oljenasjon i Nordsjøen','Vikingenes hjemland','Laks og midnattsol']},
-  {n:'Sverige',    f:'🇸🇪', c:'Europa',   p:'~10 mill', d:'M46,5L58,7L66,12L70,20L67,28L71,36L68,44L63,52L65,60L62,68L55,74L47,78L40,74L36,66L38,58L40,50L37,42L39,34L37,26L40,18L44,12Z', hints:['Nordisk land','Naboer med Norge og Finland','IKEA og ABBA','Grenser til Danmark via bro','Kongedømme med kongehuset Bernadotte']},
-  {n:'Danmark',    f:'🇩🇰', c:'Europa',   p:'~6 mill',  d:'M42,25L52,20L60,25L62,35L58,45L50,52L42,50L36,43L35,33Z', hints:['Nordisk land, halvøya','Grenser til Tyskland i sør','LEGO og H.C. Andersen','Kongedømme','Kjent for smørrebrød']},
-  {n:'Finland',    f:'🇫🇮', c:'Europa',   p:'~5,5 mill',d:'M46,10L58,6L68,10L74,18L72,28L65,36L72,44L68,54L61,62L52,67L43,64L36,55L33,44L35,33L37,22Z', hints:['Nordisk land','Tusen innsjøer','Naboer med Sverige, Norge og Russland','Sauna er fra dette landet','Helsinki er hovedstaden']},
-  {n:'Island',     f:'🇮🇸', c:'Europa',   p:'~370 000', d:'M22,38L38,28L58,26L74,32L80,44L74,56L58,64L38,62L22,52Z', hints:['Øystat i Nordatlanteren','Kjent for geysirer og nordlys','En av verdens nordligste stater','Reykjavik er hovedstad','Vikingætt']},
-  {n:'Frankrike',  f:'🇫🇷', c:'Europa',   p:'~67 mill', d:'M38,15L60,15L72,28L72,48L60,62L40,62L28,50L28,28Z', hints:['Vesteuropeisk land','Eiffeltårnet er kjent ikon','Vin og baguetter','Grenser til Spania, Italia og Tyskland','Paris er verdens mest besøkte by']},
-  {n:'Tyskland',   f:'🇩🇪', c:'Europa',   p:'~84 mill', d:'M38,12L62,12L70,20L72,32L68,42L65,52L55,58L45,58L35,52L30,42L28,30L32,20Z', hints:['Midteuropeisk land','Grenser til 9 land','Kjent for øl, pølser og biler','Berlin er hovedstad','Delt i øst og vest under den kalde krigen']},
-  {n:'Spania',     f:'🇪🇸', c:'Europa',   p:'~47 mill', d:'M25,20L72,18L82,30L80,50L72,62L50,68L30,65L18,55L15,38Z', hints:['Sørvest i Europa','Grenser til Portugal og Frankrike','Flamenco og tyre kampspill','Real Madrid og FC Barcelona','Madrid er hovedstad']},
-  {n:'Italia',     f:'🇮🇹', c:'Europa',   p:'~60 mill', d:'M42,8L55,10L62,18L58,28L62,38L58,48L60,55L65,62L70,68L68,76L60,80L54,74L48,68L44,74L36,76L32,70L38,62L40,54L36,46L36,35L38,25L40,15Z', hints:['Ser ut som en støvel','Middelhavland','Pizza og pasta','Roma er evig by og hovedstad','Hjem til Vatikanet']},
-  {n:'Storbritannia',f:'🇬🇧',c:'Europa',  p:'~67 mill', d:'M42,12L56,10L64,18L62,28L66,36L62,46L56,54L50,58L44,56L38,50L36,40L38,30L36,22Z', hints:['Øystat vest for Europa','Kjent for te og høflig vær','Hjemsted for Beatles og Rolling Stones','London er en av verdens største byer','Monarki med kong Charles']},
-  {n:'Nederland',  f:'🇳🇱', c:'Europa',   p:'~17 mill', d:'M35,30L62,28L70,36L68,50L55,56L38,54L28,45Z', hints:['Vesteuropeisk lavland','Kjent for tulipaner og vindmøller','Amsterdam er hovedstad','Mye land er under havnivå','Sykkelparadis']},
-  {n:'Polen',      f:'🇵🇱', c:'Europa',   p:'~38 mill', d:'M28,25L72,22L78,32L76,48L64,58L48,60L30,56L20,45L22,33Z', hints:['Midtøsteuropeisk land','Grenser til Russland, Ukraina og Tyskland','Warszawa er hovedstad','Kjent for Chopin','Katolsk og stolt nasjon']},
-  {n:'Sveits',     f:'🇨🇭', c:'Europa',   p:'~8,7 mill',d:'M30,36L65,34L72,46L65,58L40,60L28,50Z', hints:['Lite alpeland i Europa','Kjent for sjokolade og ost','Nøytralt land','Ingen kystlinje','Genève er FNs europeiske sete']},
-  {n:'USA',        f:'🇺🇸', c:'Amerika',  p:'~330 mill',d:'M10,28L32,22L55,20L72,22L88,28L90,40L85,50L75,52L70,60L62,62L55,58L45,55L36,52L28,55L22,50L12,45L8,36Z', hints:['Supermakt i Nord-Amerika','50 delstater','Washington D.C. er hovedstad','Kjent for Hollywood og NASA','Kaldkrig-rival med Sovjet']},
-  {n:'Canada',     f:'🇨🇦', c:'Amerika',  p:'~38 mill', d:'M5,20L25,15L45,12L65,10L85,15L95,25L95,40L85,45L70,48L55,45L40,48L28,45L15,42L5,35Z', hints:['Nordamerikansk land med lengst kystlinje','Grenser kun til USA','Ahorn-løvet på flagget','Ottawa er hovedstad','Kjent for ishockey og grizzlybjørn']},
-  {n:'Mexico',     f:'🇲🇽', c:'Amerika',  p:'~130 mill',d:'M15,28L45,22L65,25L78,35L80,48L72,58L60,65L48,68L38,62L28,55L18,45Z', hints:['Søramerikansk stat i Mellom-Amerika','Grenser til USA i nord','Tortillas og tacos','Tenochtitlan (Mexico City) var aztekernes by','Turistmål med pyramider']},
-  {n:'Brasil',     f:'🇧🇷', c:'Amerika',  p:'~214 mill',d:'M30,10L70,8L85,18L90,32L88,48L80,60L70,70L58,78L45,78L32,70L20,58L15,42L18,26Z', hints:['Søramerikansk gigant','Verdens største regnskog','Fotballnasjon','Rio de Janeiro og karneval','Snakker portugisisk']},
-  {n:'Argentina',  f:'🇦🇷', c:'Amerika',  p:'~45 mill', d:'M38,5L60,5L68,15L65,28L60,42L56,55L58,68L55,80L50,90L45,95L40,88L36,75L32,60L30,45L30,28L32,15Z', hints:['Smalest i sør i Sør-Amerika','Buenos Aires er europeisklignende storby','Tango og biff','Grenser til Chile langs Andesfjellene','Messi er herfra']},
-  {n:'Chile',      f:'🇨🇱', c:'Amerika',  p:'~19 mill', d:'M44,8L56,10L60,20L58,35L56,50L58,63L56,76L52,88L47,95L42,88L40,75L40,60L38,45L38,30L40,18Z', hints:['Verdens lengste og smaleste land','Langs vestkysten av Sør-Amerika','Andesfjellene i øst','Atacama-ørkenen er verdens tørreste','Santiago er hovedstad']},
-  {n:'Russland',   f:'🇷🇺', c:'Asia/Europa',p:'~144 mill',d:'M5,28L30,20L55,18L75,20L92,25L96,35L90,45L75,50L55,52L38,50L20,52L8,47L4,37Z', hints:['Verdens største land','Strekker seg over 11 tidssoner','Moskva er hovedstad','Grenser til 14 land','Var Sovjetunionens kjerne']},
-  {n:'Tyrkia',     f:'🇹🇷', c:'Asia/Europa',p:'~84 mill',d:'M15,33L45,28L68,30L88,35L92,44L85,53L68,56L45,55L22,53L12,45Z', hints:['Bro mellom Europa og Asia','Istanbul er byens historiske perle','Grenser til Hellas og Syria','Ankara er faktisk hovedstad','Kjent for kebab og baklava']},
-  {n:'Saudi-Arabia',f:'🇸🇦',c:'Asia',     p:'~35 mill', d:'M25,22L68,20L78,30L82,45L75,60L60,70L45,72L30,65L20,52L18,36Z', hints:['Den arabiske halvøya','Verdens største oljeprodusent','Mekka og Medina er hellige steder','Monarkiet al-Saud','Riyadh er hovedstad']},
-  {n:'Egypt',      f:'🇪🇬', c:'Afrika',   p:'~100 mill',d:'M22,20L73,18L80,28L78,55L68,65L48,65L28,60L18,48L16,32Z', hints:['Nordøstafrikansk land','Nilen renner gjennom','Pyramidene i Giza','Grenser til Libya og Sudan','Kairo er Afrikas største by']},
-  {n:'India',      f:'🇮🇳', c:'Asia',     p:'~1,4 mrd', d:'M32,12L68,12L78,22L80,35L75,48L68,58L60,68L52,76L48,80L44,76L36,68L28,58L22,46L20,32Z', hints:['Verdens mest folkerike land','Ganges er hellig elv','Cricket er nasjonalsporten','Delhi er landets hovedstad','Gandhi og Taj Mahal er herfra']},
-  {n:'Kina',       f:'🇨🇳', c:'Asia',     p:'~1,4 mrd', d:'M22,18L55,10L80,15L92,28L90,42L78,55L60,62L42,60L26,52L15,40L15,28Z', hints:['Verdens nest mest folkerike land','Den kinesiske muren','Grenser til 14 land','Beijing er hovedstad','Den store stupa og ris-terrasser']},
-  {n:'Japan',      f:'🇯🇵', c:'Asia',     p:'~125 mill',d:'M58,12L72,14L80,22L78,35L70,44L60,50L50,52L42,48L38,40L40,30L48,20Z', hints:['Øystat i Stillehavet','Soloppgangens land','Sushi, anime og samuraier','Tokyo er verdens mest folkerike by','Kjent for teknologi og Fuji-fjellet']},
-  {n:'Sør-Korea',  f:'🇰🇷', c:'Asia',     p:'~52 mill', d:'M32,30L65,28L74,38L70,52L58,62L42,62L30,55L26,44Z', hints:['Østasiatisk halvøyland','K-pop og K-drama','Seoul er en gigantby','Grenser til Nord-Korea','Kjent for Samsung og Hyundai']},
-  {n:'Australia',  f:'🇦🇺', c:'Oseania',  p:'~26 mill', d:'M20,28L48,18L75,20L90,32L92,48L82,60L65,68L48,68L32,60L18,48Z', hints:['Kontinent og land i ett','Sydney Opera House','Kenguru og koala','Canberra er faktisk hovedstad (ikke Sydney)','Great Barrier Reef']},
-  {n:'Sør-Afrika', f:'🇿🇦', c:'Afrika',   p:'~60 mill', d:'M22,18L72,18L82,30L80,48L68,62L55,70L48,74L42,70L28,60L18,44L16,30Z', hints:['Sørspissen av Afrika','Nelson Mandela var herfra','Kjent for diamanter og safari','Tre hovedsteder','Apartheidregimet avsluttes i 1994']},
-  {n:'Marokko',    f:'🇲🇦', c:'Afrika',   p:'~37 mill', d:'M24,18L62,15L75,22L80,36L75,52L60,60L40,60L22,52L16,38Z', hints:['Nordvestafrikansk land','Grenser til Algerie og Vest-Sahara','Marrakesh og Casablanca','Sahara i sør','Arabisk-berberisk kultur']},
-  {n:'Nigeria',    f:'🇳🇬', c:'Afrika',   p:'~220 mill',d:'M24,20L72,18L80,28L80,45L70,58L52,64L34,62L20,52L18,36Z', hints:['Afrikas mest folkerike land','Niger-deltaet er oljerik','Lagos er gigantby','Naboer med Niger og Kamerun','Abuja er hovedstad']},
+  {n:'Norge',      f:'🇳🇴', c:'Europa',   p:'~5 mill',  d:'M60,5L70,8L73,14L68,20L74,26L70,33L76,40L72,48L66,58L59,68L51,78L43,85L36,83L31,76L33,68L37,61L32,54L36,47L33,40L38,32L35,25L39,18L44,12L50,8Z', lat:65,lon:13, hints:['Nordisk land med fjorder','Grenser til Sverige og Finland','Oljenasjon i Nordsjøen','Vikingenes hjemland','Laks og midnattsol']},
+  {n:'Sverige',    f:'🇸🇪', c:'Europa',   p:'~10 mill', d:'M46,5L58,7L66,12L70,20L67,28L71,36L68,44L63,52L65,60L62,68L55,74L47,78L40,74L36,66L38,58L40,50L37,42L39,34L37,26L40,18L44,12Z', lat:62,lon:15, hints:['Nordisk land','Naboer med Norge og Finland','IKEA og ABBA','Grenser til Danmark via bro','Kongedømme med kongehuset Bernadotte']},
+  {n:'Danmark',    f:'🇩🇰', c:'Europa',   p:'~6 mill',  d:'M42,25L52,20L60,25L62,35L58,45L50,52L42,50L36,43L35,33Z', lat:56,lon:10, hints:['Nordisk land, halvøya','Grenser til Tyskland i sør','LEGO og H.C. Andersen','Kongedømme','Kjent for smørrebrød']},
+  {n:'Finland',    f:'🇫🇮', c:'Europa',   p:'~5,5 mill',d:'M46,10L58,6L68,10L74,18L72,28L65,36L72,44L68,54L61,62L52,67L43,64L36,55L33,44L35,33L37,22Z', lat:64,lon:26, hints:['Nordisk land','Tusen innsjøer','Naboer med Sverige, Norge og Russland','Sauna er fra dette landet','Helsinki er hovedstaden']},
+  {n:'Island',     f:'🇮🇸', c:'Europa',   p:'~370 000', d:'M22,38L38,28L58,26L74,32L80,44L74,56L58,64L38,62L22,52Z', lat:65,lon:-18, hints:['Øystat i Nordatlanteren','Kjent for geysirer og nordlys','En av verdens nordligste stater','Reykjavik er hovedstad','Vikingætt']},
+  {n:'Frankrike',  f:'🇫🇷', c:'Europa',   p:'~67 mill', d:'M38,15L60,15L72,28L72,48L60,62L40,62L28,50L28,28Z', lat:46,lon:2, hints:['Vesteuropeisk land','Eiffeltårnet er kjent ikon','Vin og baguetter','Grenser til Spania, Italia og Tyskland','Paris er verdens mest besøkte by']},
+  {n:'Tyskland',   f:'🇩🇪', c:'Europa',   p:'~84 mill', d:'M38,12L62,12L70,20L72,32L68,42L65,52L55,58L45,58L35,52L30,42L28,30L32,20Z', lat:51,lon:10, hints:['Midteuropeisk land','Grenser til 9 land','Kjent for øl, pølser og biler','Berlin er hovedstad','Delt i øst og vest under den kalde krigen']},
+  {n:'Spania',     f:'🇪🇸', c:'Europa',   p:'~47 mill', d:'M25,20L72,18L82,30L80,50L72,62L50,68L30,65L18,55L15,38Z', lat:40,lon:-4, hints:['Sørvest i Europa','Grenser til Portugal og Frankrike','Flamenco og tyre kampspill','Real Madrid og FC Barcelona','Madrid er hovedstad']},
+  {n:'Italia',     f:'🇮🇹', c:'Europa',   p:'~60 mill', d:'M42,8L55,10L62,18L58,28L62,38L58,48L60,55L65,62L70,68L68,76L60,80L54,74L48,68L44,74L36,76L32,70L38,62L40,54L36,46L36,35L38,25L40,15Z', lat:42,lon:12, hints:['Ser ut som en støvel','Middelhavland','Pizza og pasta','Roma er evig by og hovedstad','Hjem til Vatikanet']},
+  {n:'Storbritannia',f:'🇬🇧',c:'Europa',  p:'~67 mill', d:'M42,12L56,10L64,18L62,28L66,36L62,46L56,54L50,58L44,56L38,50L36,40L38,30L36,22Z', lat:54,lon:-2, hints:['Øystat vest for Europa','Kjent for te og høflig vær','Hjemsted for Beatles og Rolling Stones','London er en av verdens største byer','Monarki med kong Charles']},
+  {n:'Nederland',  f:'🇳🇱', c:'Europa',   p:'~17 mill', d:'M35,30L62,28L70,36L68,50L55,56L38,54L28,45Z', lat:52,lon:5, hints:['Vesteuropeisk lavland','Kjent for tulipaner og vindmøller','Amsterdam er hovedstad','Mye land er under havnivå','Sykkelparadis']},
+  {n:'Polen',      f:'🇵🇱', c:'Europa',   p:'~38 mill', d:'M28,25L72,22L78,32L76,48L64,58L48,60L30,56L20,45L22,33Z', lat:52,lon:20, hints:['Midtøsteuropeisk land','Grenser til Russland, Ukraina og Tyskland','Warszawa er hovedstad','Kjent for Chopin','Katolsk og stolt nasjon']},
+  {n:'Sveits',     f:'🇨🇭', c:'Europa',   p:'~8,7 mill',d:'M30,36L65,34L72,46L65,58L40,60L28,50Z', lat:47,lon:8, hints:['Lite alpeland i Europa','Kjent for sjokolade og ost','Nøytralt land','Ingen kystlinje','Genève er FNs europeiske sete']},
+  {n:'USA',        f:'🇺🇸', c:'Amerika',  p:'~330 mill',d:'M10,28L32,22L55,20L72,22L88,28L90,40L85,50L75,52L70,60L62,62L55,58L45,55L36,52L28,55L22,50L12,45L8,36Z', lat:38,lon:-97, hints:['Supermakt i Nord-Amerika','50 delstater','Washington D.C. er hovedstad','Kjent for Hollywood og NASA','Kaldkrig-rival med Sovjet']},
+  {n:'Canada',     f:'🇨🇦', c:'Amerika',  p:'~38 mill', d:'M5,20L25,15L45,12L65,10L85,15L95,25L95,40L85,45L70,48L55,45L40,48L28,45L15,42L5,35Z', lat:60,lon:-95, hints:['Nordamerikansk land med lengst kystlinje','Grenser kun til USA','Ahorn-løvet på flagget','Ottawa er hovedstad','Kjent for ishockey og grizzlybjørn']},
+  {n:'Mexico',     f:'🇲🇽', c:'Amerika',  p:'~130 mill',d:'M15,28L45,22L65,25L78,35L80,48L72,58L60,65L48,68L38,62L28,55L18,45Z', lat:23,lon:-102, hints:['Søramerikansk stat i Mellom-Amerika','Grenser til USA i nord','Tortillas og tacos','Tenochtitlan (Mexico City) var aztekernes by','Turistmål med pyramider']},
+  {n:'Brasil',     f:'🇧🇷', c:'Amerika',  p:'~214 mill',d:'M30,10L70,8L85,18L90,32L88,48L80,60L70,70L58,78L45,78L32,70L20,58L15,42L18,26Z', lat:-10,lon:-55, hints:['Søramerikansk gigant','Verdens største regnskog','Fotballnasjon','Rio de Janeiro og karneval','Snakker portugisisk']},
+  {n:'Argentina',  f:'🇦🇷', c:'Amerika',  p:'~45 mill', d:'M38,5L60,5L68,15L65,28L60,42L56,55L58,68L55,80L50,90L45,95L40,88L36,75L32,60L30,45L30,28L32,15Z', lat:-34,lon:-64, hints:['Smalest i sør i Sør-Amerika','Buenos Aires er europeisklignende storby','Tango og biff','Grenser til Chile langs Andesfjellene','Messi er herfra']},
+  {n:'Chile',      f:'🇨🇱', c:'Amerika',  p:'~19 mill', d:'M44,8L56,10L60,20L58,35L56,50L58,63L56,76L52,88L47,95L42,88L40,75L40,60L38,45L38,30L40,18Z', lat:-30,lon:-71, hints:['Verdens lengste og smaleste land','Langs vestkysten av Sør-Amerika','Andesfjellene i øst','Atacama-ørkenen er verdens tørreste','Santiago er hovedstad']},
+  {n:'Russland',   f:'🇷🇺', c:'Asia/Europa',p:'~144 mill',d:'M5,28L30,20L55,18L75,20L92,25L96,35L90,45L75,50L55,52L38,50L20,52L8,47L4,37Z', lat:60,lon:100, hints:['Verdens største land','Strekker seg over 11 tidssoner','Moskva er hovedstad','Grenser til 14 land','Var Sovjetunionens kjerne']},
+  {n:'Tyrkia',     f:'🇹🇷', c:'Asia/Europa',p:'~84 mill',d:'M15,33L45,28L68,30L88,35L92,44L85,53L68,56L45,55L22,53L12,45Z', lat:39,lon:35, hints:['Bro mellom Europa og Asia','Istanbul er byens historiske perle','Grenser til Hellas og Syria','Ankara er faktisk hovedstad','Kjent for kebab og baklava']},
+  {n:'Saudi-Arabia',f:'🇸🇦',c:'Asia',     p:'~35 mill', d:'M25,22L68,20L78,30L82,45L75,60L60,70L45,72L30,65L20,52L18,36Z', lat:24,lon:45, hints:['Den arabiske halvøya','Verdens største oljeprodusent','Mekka og Medina er hellige steder','Monarkiet al-Saud','Riyadh er hovedstad']},
+  {n:'Egypt',      f:'🇪🇬', c:'Afrika',   p:'~100 mill',d:'M22,20L73,18L80,28L78,55L68,65L48,65L28,60L18,48L16,32Z', lat:27,lon:30, hints:['Nordøstafrikansk land','Nilen renner gjennom','Pyramidene i Giza','Grenser til Libya og Sudan','Kairo er Afrikas største by']},
+  {n:'India',      f:'🇮🇳', c:'Asia',     p:'~1,4 mrd', d:'M32,12L68,12L78,22L80,35L75,48L68,58L60,68L52,76L48,80L44,76L36,68L28,58L22,46L20,32Z', lat:21,lon:78, hints:['Verdens mest folkerike land','Ganges er hellig elv','Cricket er nasjonalsporten','Delhi er landets hovedstad','Gandhi og Taj Mahal er herfra']},
+  {n:'Kina',       f:'🇨🇳', c:'Asia',     p:'~1,4 mrd', d:'M22,18L55,10L80,15L92,28L90,42L78,55L60,62L42,60L26,52L15,40L15,28Z', lat:35,lon:105, hints:['Verdens nest mest folkerike land','Den kinesiske muren','Grenser til 14 land','Beijing er hovedstad','Den store stupa og ris-terrasser']},
+  {n:'Japan',      f:'🇯🇵', c:'Asia',     p:'~125 mill',d:'M58,12L72,14L80,22L78,35L70,44L60,50L50,52L42,48L38,40L40,30L48,20Z', lat:36,lon:138, hints:['Øystat i Stillehavet','Soloppgangens land','Sushi, anime og samuraier','Tokyo er verdens mest folkerike by','Kjent for teknologi og Fuji-fjellet']},
+  {n:'Sør-Korea',  f:'🇰🇷', c:'Asia',     p:'~52 mill', d:'M32,30L65,28L74,38L70,52L58,62L42,62L30,55L26,44Z', lat:37,lon:128, hints:['Østasiatisk halvøyland','K-pop og K-drama','Seoul er en gigantby','Grenser til Nord-Korea','Kjent for Samsung og Hyundai']},
+  {n:'Australia',  f:'🇦🇺', c:'Oseania',  p:'~26 mill', d:'M20,28L48,18L75,20L90,32L92,48L82,60L65,68L48,68L32,60L18,48Z', lat:-27,lon:133, hints:['Kontinent og land i ett','Sydney Opera House','Kenguru og koala','Canberra er faktisk hovedstad (ikke Sydney)','Great Barrier Reef']},
+  {n:'Sør-Afrika', f:'🇿🇦', c:'Afrika',   p:'~60 mill', d:'M22,18L72,18L82,30L80,48L68,62L55,70L48,74L42,70L28,60L18,44L16,30Z', lat:-29,lon:25, hints:['Sørspissen av Afrika','Nelson Mandela var herfra','Kjent for diamanter og safari','Tre hovedsteder','Apartheidregimet avsluttes i 1994']},
+  {n:'Marokko',    f:'🇲🇦', c:'Afrika',   p:'~37 mill', d:'M24,18L62,15L75,22L80,36L75,52L60,60L40,60L22,52L16,38Z', lat:32,lon:-5, hints:['Nordvestafrikansk land','Grenser til Algerie og Vest-Sahara','Marrakesh og Casablanca','Sahara i sør','Arabisk-berberisk kultur']},
+  {n:'Nigeria',    f:'🇳🇬', c:'Afrika',   p:'~220 mill',d:'M24,20L72,18L80,28L80,45L70,58L52,64L34,62L20,52L18,36Z', lat:10,lon:8, hints:['Afrikas mest folkerike land','Niger-deltaet er oljerik','Lagos er gigantby','Naboer med Niger og Kamerun','Abuja er hovedstad']},
 ];
 
 const GZ_PERSONS = [
-  {n:'Nelson Mandela',    hints:['Sørafrikansk politiker','Sonet 27 år i fengsel for sine overbevisninger','Kjempet mot apartheid med ikkevold','Fikk Nobels fredspris i 1993','Ble Sør-Afrikas første svarte president i 1994']},
-  {n:'Marie Curie',       hints:['Polsk-fransk forsker (1867–1934)','Første kvinne til å vinne Nobelprisen','Oppdaget grunnstoffene polonium og radium','Eneste person til å vinne to Nobelpriser i ulike naturvitenskaplige fag','Forsket på radioaktivitet – døde av det']},
-  {n:'Albert Einstein',   hints:['Tysk-sveitsisk-amerikansk vitenskapsmann','Levde fra 1879 til 1955','Kjent for relativitetsteorien','Utviklet formelen E=mc²','Fikk Nobels fysikkpris i 1921']},
-  {n:'Leonardo da Vinci', hints:['Italiensk renessansekunstner (1452–1519)','Malte Mona Lisa og Det siste måltid','Var også ingeniør og oppfinner','Tegnet skisser av fly og tankliknende maskiner 400 år for tidlig','Regnes som verdenshistoriens mest allsidige geni']},
-  {n:'Mahatma Gandhi',    hints:['Indisk frihetsleder (1869–1948)','Kjent for ikkevoldelig motstand (satyagraha)','Ledet India mot frigjøring fra Storbritannia','Kallenavn betyr «stor sjel»','Ble skutt og drept i januar 1948']},
-  {n:'Martin Luther King',hints:['Amerikansk borgerrettighetsleder','Baptistpastor som kjempet for rasemessig likhet','Holdt talen «I Have a Dream» i 1963','Mottok Nobels fredspris i 1964','Ble skutt og drept i Memphis i april 1968']},
-  {n:'Anne Frank',        hints:['Tysk-nederlandsk jødisk jente (1929–1945)','Flyktet med familien til Amsterdam for nazistene','Gjemte seg i et skjulested i Amsterdam i to år','Dagboken hennes ble en av historiens mest leste bøker','Ble deportert og døde i Bergen-Belsen']},
-  {n:'Fridtjof Nansen',   hints:['Norsk polarforsker og diplomat (1861–1930)','Krysset Grønlands innlandsis på ski i 1888','Ledet Fram-ekspedisjonen mot Nordpolen','Fikk Nobels fredspris i 1922 for flyktningarbeid','Nansen-passet er oppkalt etter ham']},
-  {n:'Cleopatra',         hints:['Hersket over Egypt for ca. 2000 år siden','Siste farao av ptolemeisk ætt','Var faktisk av gresk opprinnelse, ikke egyptisk','Hadde romantiske forhold til Julius Caesar og Marcus Antonius','Tok livet av seg etter at Marcus Antonius døde']},
-  {n:'William Shakespeare',hints:['Engelsk forfatter (1564–1616)','Levde og virket i London under dronning Elizabeth I','Skrev 37 skuespill og 154 sonetter','Kjent for Romeo og Julie, Hamlet og Macbeth','Regnes som verdenslitteraturens mest innflytelsesrike forfatter']},
-  {n:'Barack Obama',      hints:['Amerikansk politiker (f. 1961)','Advokat og senator fra Illinois','USAs 44. president (2009–2017)','Første afroamerikanske president i USA','Mottok Nobels fredspris i 2009']},
-  {n:'Greta Thunberg',    hints:['Svensk klimaaktivist (f. 2003)','Begynte å streike utenfor det svenske parlamentet i august 2018','Grunnla bevegelsen Fridays for Future','Har diagnosen Aspergers syndrom','Ble Times person of the year i 2019']},
-  {n:'Isaac Newton',      hints:['Engelsk vitenskapsmann (1643–1727)','Formulerte gravitasjonsloven','Utviklet klassisk mekanikk','En eple-anekdote er knyttet til oppdagelsen hans','Bidro til calculus og optikk']},
-  {n:'Nikola Tesla',      hints:['Serbisk-amerikansk oppfinner (1856–1943)','Kjent for å utvikle vekselstrøm (AC)','Rivaliserte med Thomas Edison','Oppfant blant annet Tesla-spolen','Elbilselskapet Tesla er oppkalt etter ham']},
-  {n:'Malala Yousafzai',  hints:['Pakistansk utdanningssaktivist (f. 1997)','Ble skutt i hodet av Taliban som 15-åring','Overlevde og fortsatte kampen for jenters skolegang','Yngste mottaker av Nobels fredspris (2014)','Studerte ved Oxford og grunnla Malala Fund']},
-  {n:'Christopher Columbus',hints:['Italiensk sjøfarer (1451–1506)','Seilte på vegne av den spanske kronen','Krysset Atlanterhavet i 1492','Mente han hadde nådd Asia – fant Amerika','Gjorde fire reiser til den nye verden']},
-  {n:'Frida Kahlo',       hints:['Meksikansk kunstner (1907–1954)','Kjent for selvportretter med surrealistisk preg','Levde med kroniske smerter etter en bussulykke som ung','Gift med mureren Diego Rivera','Symbol for feminisme og mexicansk kultur']},
-  {n:'Roald Dahl',        hints:['Halvnorsk-britisk forfatter (1916–1990)','Faren hans var norsk fra Sarpsborg','Tjenestegjorde i RAF under 2. verdenskrig','Kjent for Charlie og sjokoladefabrikken og Matilda','Også forfatter av voksenlitteratur og noveller']},
-  {n:'Elon Musk',         hints:['Sør-afrikansk-amerikanerskaper (f. 1971)','Grunnla PayPal, SpaceX og var med å grunnlegge Tesla','Kjøpte og omdøpte Twitter til X','En av verdens rikeste personer','Drømmer om å kolonisere Mars']},
-  {n:'Winston Churchill',  hints:['Britisk statsleder (1874–1965)','Ledet Storbritannia gjennom 2. verdenskrig','Kjent for inspirerende taler («We shall fight on the beaches»)','Fikk Nobelprisen i litteratur i 1953','Statsminister i to perioder']},
+  {n:'Nelson Mandela',cat:'politiker',    hints:['Sørafrikansk politiker','Sonet 27 år i fengsel for sine overbevisninger','Kjempet mot apartheid med ikkevold','Fikk Nobels fredspris i 1993','Ble Sør-Afrikas første svarte president i 1994']},
+  {n:'Marie Curie',cat:'vitenskapsmann',       hints:['Polsk-fransk forsker (1867–1934)','Første kvinne til å vinne Nobelprisen','Oppdaget grunnstoffene polonium og radium','Eneste person til å vinne to Nobelpriser i ulike naturvitenskaplige fag','Forsket på radioaktivitet – døde av det']},
+  {n:'Albert Einstein',cat:'vitenskapsmann',   hints:['Tysk-sveitsisk-amerikansk vitenskapsmann','Levde fra 1879 til 1955','Kjent for relativitetsteorien','Utviklet formelen E=mc²','Fikk Nobels fysikkpris i 1921']},
+  {n:'Leonardo da Vinci',cat:'kunstner', hints:['Italiensk renessansekunstner (1452–1519)','Malte Mona Lisa og Det siste måltid','Var også ingeniør og oppfinner','Tegnet skisser av fly og tankliknende maskiner 400 år for tidlig','Regnes som verdenshistoriens mest allsidige geni']},
+  {n:'Mahatma Gandhi',cat:'politiker',    hints:['Indisk frihetsleder (1869–1948)','Kjent for ikkevoldelig motstand (satyagraha)','Ledet India mot frigjøring fra Storbritannia','Kallenavn betyr «stor sjel»','Ble skutt og drept i januar 1948']},
+  {n:'Martin Luther King',cat:'politiker',hints:['Amerikansk borgerrettighetsleder','Baptistpastor som kjempet for rasemessig likhet','Holdt talen «I Have a Dream» i 1963','Mottok Nobels fredspris i 1964','Ble skutt og drept i Memphis i april 1968']},
+  {n:'Anne Frank',cat:'historisk',        hints:['Tysk-nederlandsk jødisk jente (1929–1945)','Flyktet med familien til Amsterdam for nazistene','Gjemte seg i et skjulested i Amsterdam i to år','Dagboken hennes ble en av historiens mest leste bøker','Ble deportert og døde i Bergen-Belsen']},
+  {n:'Fridtjof Nansen',cat:'oppdagelsesreisende',   hints:['Norsk polarforsker og diplomat (1861–1930)','Krysset Grønlands innlandsis på ski i 1888','Ledet Fram-ekspedisjonen mot Nordpolen','Fikk Nobels fredspris i 1922 for flyktningarbeid','Nansen-passet er oppkalt etter ham']},
+  {n:'Cleopatra',cat:'historisk',         hints:['Hersket over Egypt for ca. 2000 år siden','Siste farao av ptolemeisk ætt','Var faktisk av gresk opprinnelse, ikke egyptisk','Hadde romantiske forhold til Julius Caesar og Marcus Antonius','Tok livet av seg etter at Marcus Antonius døde']},
+  {n:'William Shakespeare',cat:'kunstner',hints:['Engelsk forfatter (1564–1616)','Levde og virket i London under dronning Elizabeth I','Skrev 37 skuespill og 154 sonetter','Kjent for Romeo og Julie, Hamlet og Macbeth','Regnes som verdenslitteraturens mest innflytelsesrike forfatter']},
+  {n:'Barack Obama',cat:'politiker',      hints:['Amerikansk politiker (f. 1961)','Advokat og senator fra Illinois','USAs 44. president (2009–2017)','Første afroamerikanske president i USA','Mottok Nobels fredspris i 2009']},
+  {n:'Greta Thunberg',cat:'aktivist',    hints:['Svensk klimaaktivist (f. 2003)','Begynte å streike utenfor det svenske parlamentet i august 2018','Grunnla bevegelsen Fridays for Future','Har diagnosen Aspergers syndrom','Ble Times person of the year i 2019']},
+  {n:'Isaac Newton',cat:'vitenskapsmann',      hints:['Engelsk vitenskapsmann (1643–1727)','Formulerte gravitasjonsloven','Utviklet klassisk mekanikk','En eple-anekdote er knyttet til oppdagelsen hans','Bidro til calculus og optikk']},
+  {n:'Nikola Tesla',cat:'vitenskapsmann',      hints:['Serbisk-amerikansk oppfinner (1856–1943)','Kjent for å utvikle vekselstrøm (AC)','Rivaliserte med Thomas Edison','Oppfant blant annet Tesla-spolen','Elbilselskapet Tesla er oppkalt etter ham']},
+  {n:'Malala Yousafzai',cat:'aktivist',  hints:['Pakistansk utdanningssaktivist (f. 1997)','Ble skutt i hodet av Taliban som 15-åring','Overlevde og fortsatte kampen for jenters skolegang','Yngste mottaker av Nobels fredspris (2014)','Studerte ved Oxford og grunnla Malala Fund']},
+  {n:'Christopher Columbus',cat:'oppdagelsesreisende',hints:['Italiensk sjøfarer (1451–1506)','Seilte på vegne av den spanske kronen','Krysset Atlanterhavet i 1492','Mente han hadde nådd Asia – fant Amerika','Gjorde fire reiser til den nye verden']},
+  {n:'Frida Kahlo',cat:'kunstner',       hints:['Meksikansk kunstner (1907–1954)','Kjent for selvportretter med surrealistisk preg','Levde med kroniske smerter etter en bussulykke som ung','Gift med mureren Diego Rivera','Symbol for feminisme og mexicansk kultur']},
+  {n:'Roald Dahl',cat:'kunstner',        hints:['Halvnorsk-britisk forfatter (1916–1990)','Faren hans var norsk fra Sarpsborg','Tjenestegjorde i RAF under 2. verdenskrig','Kjent for Charlie og sjokoladefabrikken og Matilda','Også forfatter av voksenlitteratur og noveller']},
+  {n:'Elon Musk',cat:'gründer',         hints:['Sør-afrikansk-amerikanerskaper (f. 1971)','Grunnla PayPal, SpaceX og var med å grunnlegge Tesla','Kjøpte og omdøpte Twitter til X','En av verdens rikeste personer','Drømmer om å kolonisere Mars']},
+  {n:'Winston Churchill',cat:'politiker',  hints:['Britisk statsleder (1874–1965)','Ledet Storbritannia gjennom 2. verdenskrig','Kjent for inspirerende taler («We shall fight on the beaches»)','Fikk Nobelprisen i litteratur i 1953','Statsminister i to perioder']},
+  // Idrettsutøvere
+  {n:'Usain Bolt',        cat:'idrett', hints:['Jamaicansk sprinter','Verdens raskeste mann','Satte verdensrekord på 100m (9,58 sek) i 2009','Vant 8 OL-gull','Kjent for «lightning bolt»-posen']},
+  {n:'Lionel Messi',      cat:'idrett', hints:['Argentinsk fotballspiller','Vant VM med Argentina i 2022','Har spilt for Barcelona og PSG','Vant Gullballen 8 ganger','Mange regner ham som tidenes beste fotballspiller']},
+  {n:'Simone Biles',      cat:'idrett', hints:['Amerikansk gymnast (f. 1997)','Vant 4 OL-gull i Rio 2016','Kjent for å utføre elementer ingen andre tør','Trakk seg fra OL 2020 av psykiske helsegrunner','Regnes som tidenes beste gymnast']},
+  {n:'Muhammad Ali',      cat:'idrett', hints:['Amerikansk bokselegende (1942–2016)','Tidligere navn: Cassius Clay','Verdensmeser i tungvekt tre ganger','Kjent for «float like a butterfly, sting like a bee»','Politisk aktivist under Vietnam-krigen']},
+  {n:'Serena Williams',   cat:'idrett', hints:['Amerikansk tennisspiller (f. 1981)','Vant 23 Grand Slam-titler','Regnes som tidenes beste tennisspiller','Søster av Venus Williams','La opp i 2022']},
+  // Vitenskapsmenn
+  {n:'Charles Darwin',    cat:'vitenskapsmann', hints:['Britisk naturvitenskaper (1809–1882)','Reiste med HMS Beagle til Galápagos','Utviklet teorien om naturlig utvalg','Boken «Artenes opprinnelse» fra 1859','Hans teorier la grunnlaget for moderne biologi']},
+  {n:'Stephen Hawking',   cat:'vitenskapsmann', hints:['Britisk fysiker (1942–2018)','Diagnostisert med ALS som 21-åring','Forsket på svarte hull og kvantemekanikk','Kjent for boken «En kort historien om tiden»','Kommuniserte via talesyntesizer']},
+  {n:'Alan Turing',       cat:'vitenskapsmann', hints:['Britisk matematiker (1912–1954)','Regnes som datamaskinens far','Knakk den tyske Enigma-koden under 2. verdenskrig','Turing-testen sjekker om maskiner kan tenke','Ble forfulgt for sin seksuelle legning']},
+  // Kunstnere
+  {n:'Pablo Picasso',     cat:'kunstner', hints:['Spansk maler (1881–1973)','Grunnla kubismen sammen med Georges Braque','Malte «Guernica» som protest mot fascistisk bombeangrep','Produserte over 20 000 kunstverk','En av 1900-tallets mest innflytelsesrike kunstnere']},
+  {n:'Beethoven',         cat:'kunstner', hints:['Tysk komponist (1770–1827)','Begynte å miste hørselen rundt 1800','Komponerte 9 symfonier','Den 9. symfonien ble skrevet da han var helt døv','«For Elise» og «Måneskinn-sonaten» er blant hans kjente verk']},
 ];
 // ====== END GAME ZONE DATA ======
 
