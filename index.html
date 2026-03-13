@@ -1359,13 +1359,13 @@
               <div>
                 <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Filtrer verdensdel</label>
                 <select id="gsWorldleContinent" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
-                  <option value="all">Alle land</option>
-                  <option value="Europa">Europa</option>
-                  <option value="Asia">Asia</option>
-                  <option value="Amerika">Amerika</option>
-                  <option value="Afrika">Afrika</option>
-                  <option value="Oseania">Oseania</option>
-                  <option value="Asia/Europa">Asia/Europa</option>
+                  <option value="all">🌐 Alle land</option>
+                  <option value="Europa">🏛 Europa</option>
+                  <option value="Asia">🏯 Asia</option>
+                  <option value="Amerika">🗽 Amerika</option>
+                  <option value="Afrika">🌴 Afrika</option>
+                  <option value="Oseania">🏄 Oseania</option>
+                  <option value="Asia/Europa">🌏 Asia/Europa</option>
                 </select>
               </div>
             </div>
@@ -1829,7 +1829,10 @@
         <div id="wordle-lang-badge" style="font-size:0.8rem;font-weight:800;color:var(--text-2);background:var(--s2);border:1px solid var(--border-2);border-radius:6px;padding:4px 10px;"></div>
         <div id="wordle-score-badge" style="margin-left:auto;background:var(--accent-g);border:1px solid var(--accent);border-radius:8px;padding:5px 12px;font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--accent-h);display:none;"></div>
       </div>
-      <div id="wordle-msg" style="text-align:center;min-height:28px;font-weight:800;font-size:0.92rem;margin-bottom:0.75rem;color:var(--text-2);"></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:1rem;min-height:28px;margin-bottom:0.75rem;">
+        <div id="wordle-msg" style="font-weight:800;font-size:0.92rem;color:var(--text-2);"></div>
+        <button id="wordle-giveup-btn" onclick="wordleGiveUp()" style="padding:5px 14px;background:transparent;border:1px solid var(--border-2);border-radius:6px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.78rem;color:var(--text-3);cursor:pointer;transition:all 0.18s;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='var(--border-2)';this.style.color='var(--text-3)'">Gi opp</button>
+      </div>
       <div id="wordle-board" style="display:flex;flex-direction:column;gap:6px;align-items:center;margin-bottom:1.25rem;"></div>
       <div id="wordle-keyboard" style="display:flex;flex-direction:column;gap:6px;align-items:center;"></div>
       <div id="wordle-result" style="display:none;text-align:center;margin-top:1.25rem;padding:1.25rem;background:var(--s1);border:1px solid var(--border);border-radius:14px;">
@@ -1911,10 +1914,11 @@
         <div style="margin-left:auto;font-size:0.82rem;color:var(--accent-h);font-weight:800;" id="whoami-points-left">500 poeng mulig</div>
       </div>
       <div id="whoami-hints-container" style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.25rem;"></div>
-      <div id="whoami-reveal-btn-wrap" style="text-align:center;margin-bottom:1rem;">
+      <div id="whoami-reveal-btn-wrap" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-bottom:1rem;">
         <button onclick="whoamiRevealHint()" id="whoami-reveal-btn" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">
           Vis neste hint (−100 poeng)
         </button>
+        <button id="whoami-giveup-btn" onclick="whoamiGiveUp()" style="padding:10px 18px;background:transparent;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;color:var(--text-3);cursor:pointer;transition:all 0.18s;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='var(--border-2)';this.style.color='var(--text-3)'">Gi opp</button>
       </div>
       <div style="position:relative;">
         <div style="display:flex;gap:0.5rem;">
@@ -5349,12 +5353,12 @@ function gzRenderGameCards() {
       <div style="margin-bottom:0.875rem;">
         <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Verdensdel</label>
         <select id="student-worldle-continent" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
-          <option value="all">🌍 Alle land</option>
-          <option value="Europa">🇪🇺 Europa</option>
-          <option value="Asia">🌏 Asia</option>
-          <option value="Afrika">🌍 Afrika</option>
-          <option value="Amerika">🌎 Amerika</option>
-          <option value="Oseania">🏝 Oseania</option>
+          <option value="all">🌐 Alle land</option>
+          <option value="Europa">🏛 Europa</option>
+          <option value="Asia">🏯 Asia</option>
+          <option value="Afrika">🌴 Afrika</option>
+          <option value="Amerika">🗽 Amerika</option>
+          <option value="Oseania">🏄 Oseania</option>
         </select>
       </div>` : ''}
       ${g.id === 'whoami' && (!sess.whoamiCategory || sess.whoamiCategory === 'alle') ? `
@@ -5517,6 +5521,8 @@ function gzStartWordle() {
   if (langBadge) langBadge.textContent = lang === 'en' ? '🇬🇧 Engelsk' : '🇳🇴 Norsk';
   document.getElementById('wordle-result').style.display='none';
   document.getElementById('wordle-msg').textContent='';
+  const wgb = document.getElementById('wordle-giveup-btn');
+  if (wgb) { wgb.style.display='inline-block'; wgb.style.color='var(--text-3)'; wgb.style.borderColor='var(--border-2)'; }
   wordleRender();
   wordleRenderKeyboard();
 }
@@ -5727,6 +5733,8 @@ async function wordleSubmit() {
     const tries = WORDLE_ST.guesses.length;
     const score = Math.max(100, 600-(tries-1)*100);
     WORDLE_ST.over=true;
+    const wGiveUp = document.getElementById('wordle-giveup-btn');
+    if (wGiveUp) wGiveUp.style.display='none';
     document.getElementById('wordle-result').style.display='block';
     document.getElementById('wordle-result-msg').textContent='🎉 Riktig på '+tries+(tries===1?' forsøk!':' forsøk!');
     document.getElementById('wordle-result-word').textContent='Ordet var: '+WORDLE_ST.word.toUpperCase()+' · '+score+' poeng';
@@ -5735,6 +5743,8 @@ async function wordleSubmit() {
     gzSaveScore('wordle', score);
   } else if (WORDLE_ST.guesses.length>=WORDLE_ST.maxTries) {
     WORDLE_ST.over=true;
+    const wGiveUp2 = document.getElementById('wordle-giveup-btn');
+    if (wGiveUp2) wGiveUp2.style.display='none';
     document.getElementById('wordle-result').style.display='block';
     document.getElementById('wordle-result-msg').textContent='😔 Ikke denne gangen!';
     document.getElementById('wordle-result-word').textContent='Ordet var: '+WORDLE_ST.word.toUpperCase()+' · 0 poeng';
@@ -5789,6 +5799,10 @@ function gzStartWorldle() {
     }
   }
   if (attEl) attEl.textContent = maxTries + ' forsøk igjen';
+  const wlgb = document.getElementById('worldle-giveup-btn');
+  if (wlgb) { wlgb.style.display='inline-block'; wlgb.style.color='var(--text-3)'; wlgb.style.borderColor='var(--border-2)'; }
+  const worldleInp = document.getElementById('worldle-input');
+  if (worldleInp) worldleInp.disabled = false;
   const diffBadge = document.getElementById('worldle-diff-badge');
   if (diffBadge) diffBadge.textContent = {easy:'Lett',normal:'Normal',hard:'Vanskelig'}[diff]||'';
 }
@@ -6012,6 +6026,8 @@ function worldleGuess() {
     const tries = WORLDLE_ST.guesses.length;
     const score = Math.max(50, 500-(tries-1)*80);
     WORLDLE_ST.over = true;
+    const wldGiveUp = document.getElementById('worldle-giveup-btn');
+    if (wldGiveUp) wldGiveUp.style.display = 'none';
     setTimeout(() => {
       document.getElementById('worldle-result').style.display = 'block';
       document.getElementById('worldle-result-msg').textContent = 'Du vant! ' + target.f;
@@ -6021,6 +6037,8 @@ function worldleGuess() {
     }, 400);
   } else if (WORLDLE_ST.guesses.length >= WORLDLE_ST.maxTries) {
     WORLDLE_ST.over = true;
+    const wldGiveUp2 = document.getElementById('worldle-giveup-btn');
+    if (wldGiveUp2) wldGiveUp2.style.display = 'none';
     setTimeout(() => {
       document.getElementById('worldle-result').style.display = 'block';
       document.getElementById('worldle-result-msg').textContent = 'Svaret var: ' + target.n + ' ' + target.f;
@@ -6778,6 +6796,90 @@ create index if not exists idx_game_scores_session on os_game_scores(session_cod
     .catch(() => { document.getElementById('gs-diag-result').style.display='block'; document.getElementById('gs-diag-result').textContent = sql; });
 }
 // ====== END GAME ZONE ENGINE ======
+
+
+// ── GIVE UP functions ──
+function wordleGiveUp() {
+  if (WORDLE_ST.over) return;
+  if (!confirm('Er du sikker på at du vil gi opp? Du får 0 poeng.')) return;
+  WORDLE_ST.over = true;
+  const resultEl = document.getElementById('wordle-result');
+  const msgEl = document.getElementById('wordle-result-msg');
+  const wordEl = document.getElementById('wordle-result-word');
+  const btn = document.getElementById('wordle-giveup-btn');
+  if (btn) btn.style.display = 'none';
+  if (resultEl) resultEl.style.display = 'block';
+  if (msgEl) {
+    msgEl.style.color = '#ef4444';
+    msgEl.textContent = '🏳️ Du ga opp!';
+  }
+  if (wordEl) wordEl.textContent = 'Ordet var: ' + WORDLE_ST.word.toUpperCase() + ' · 0 poeng';
+  // Replace play-again button with "ny oppgave" message
+  const resultActions = resultEl.querySelector('div:last-child');
+  if (resultActions) {
+    resultActions.innerHTML = `
+      <button onclick="gzStartWordle()" style="padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Prøv et nytt ord</button>
+      <button onclick="gzBackToLobby()" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>`;
+  }
+  gzSaveScore('wordle', 0);
+}
+
+function worldleGiveUp() {
+  if (WORLDLE_ST.over) return;
+  if (!confirm('Er du sikker på at du vil gi opp? Du får 0 poeng.')) return;
+  WORLDLE_ST.over = true;
+  const btn = document.getElementById('worldle-giveup-btn');
+  if (btn) btn.style.display = 'none';
+  const inp = document.getElementById('worldle-input');
+  if (inp) inp.disabled = true;
+  // Show give-up result
+  const resultEl = document.getElementById('worldle-result');
+  const msgEl = document.getElementById('worldle-result-msg');
+  const countryEl = document.getElementById('worldle-result-country');
+  if (resultEl) resultEl.style.display = 'block';
+  if (msgEl) {
+    msgEl.style.color = '#ef4444';
+    msgEl.textContent = '🏳️ Du ga opp! Det var: ' + WORLDLE_ST.country.n + ' ' + WORLDLE_ST.country.f;
+  }
+  if (countryEl) countryEl.textContent = WORLDLE_ST.country.c + ' · Befolkning: ' + WORLDLE_ST.country.p + ' · 0 poeng';
+  // Replace buttons
+  const resultActions = resultEl.querySelector('div:last-child');
+  if (resultActions) {
+    resultActions.innerHTML = `
+      <button onclick="gzStartWorldle()" style="padding:11px 24px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Prøv et nytt land</button>
+      <button onclick="gzBackToLobby()" style="padding:11px 24px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake</button>`;
+  }
+  gzSaveScore('worldle', 0);
+}
+
+function whoamiGiveUp() {
+  if (WHOAMI_ST.over) return;
+  if (!confirm('Er du sikker på at du vil gi opp? Du får 0 poeng.')) return;
+  WHOAMI_ST.over = true;
+  // Reveal all remaining hints
+  while (WHOAMI_ST.revealed < WHOAMI_ST.maxHints) {
+    whoamiRevealHint(true);
+  }
+  const revealBtnWrap = document.getElementById('whoami-reveal-btn-wrap');
+  if (revealBtnWrap) revealBtnWrap.style.display = 'none';
+  const resultEl = document.getElementById('whoami-result');
+  const msgEl = document.getElementById('whoami-result-msg');
+  const nameEl = document.getElementById('whoami-result-name');
+  if (resultEl) resultEl.style.display = 'block';
+  if (msgEl) {
+    msgEl.style.color = '#ef4444';
+    msgEl.textContent = '🏳️ Du ga opp!';
+  }
+  if (nameEl) nameEl.textContent = 'Det var: ' + WHOAMI_ST.person.n + ' · 0 poeng';
+  // Replace buttons with "ny oppgave"
+  const resultActions = resultEl.querySelector('div:last-child');
+  if (resultActions) {
+    resultActions.innerHTML = `
+      <button onclick="gzStartWhoami()" style="padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Prøv en ny person</button>
+      <button onclick="gzBackToLobby()" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>`;
+  }
+  gzSaveScore('whoami', 0);
+}
 
 // ====== GAME ZONE DATA ======
 const GZ_WORDS_NO = [
