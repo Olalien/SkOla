@@ -566,6 +566,7 @@
     <button class="nav-tab" onclick="showView('join')" id="quizNavBtn">Quiz</button>
     <button class="nav-tab" onclick="arbOpen()" id="arbNavBtn">Arbeid</button>
     <button class="nav-tab" onclick="showView('wc')" id="wcNavBtn">Ordsky</button>
+    <button class="nav-tab" onclick="showView('spill')" id="spillNavBtn">Spill</button>
     <button class="nav-tab teacher-tab" onclick="checkTeacher()" style="display:none">Lærerrom</button>
     <button class="nav-tab teacher-tab" onclick="openSettings()" style="display:none;position:relative;">Innstillinger<span id="dbNavPill" style="position:absolute;top:4px;right:6px;width:9px;height:9px;border-radius:50%;background:#f59e0b;display:none;font-size:0;border:2px solid rgba(8,9,14,0.8);" title="Database: ikke konfigurert"></span></button>
   </div>
@@ -598,6 +599,9 @@
     </button>
     <button class="mob-nav-btn" id="mob-wc" onclick="showView('wc')">
       <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="6" cy="16" r="2"/><circle cx="18" cy="16" r="2"/><circle cx="12" cy="4" r="1.5"/><circle cx="12" cy="20" r="1.5"/></svg></span>Ordsky
+    </button>
+    <button class="mob-nav-btn" id="mob-spill" onclick="showView('spill')">
+      <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="m17 12-3-2v4l3-2z"/><path d="M7 10v4"/><path d="M5 12h4"/></svg></span>Spill
     </button>
     <button class="mob-nav-btn teacher-tab" id="mob-teacher" onclick="checkTeacher()" style="display:none">
       <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Lærer
@@ -711,6 +715,7 @@
       <button class="tr-tab"        id="trtab-results" onclick="trTab('results')">Resultater</button>
       <button class="tr-tab"        id="trtab-klasser" onclick="trTab('klasser')">Klasser</button>
       <button class="tr-tab"        id="trtab-kunngjoring" onclick="trTab('kunngjoring')">Kunngjøring</button>
+      <button class="tr-tab"        id="trtab-spill" onclick="trTab('spill')">Spill</button>
     </div>
   </div>
 
@@ -896,6 +901,61 @@
           </div>
         </div>
         <div class="ai-result" id="fileAiResult" style="margin-top:0.6rem;"></div>
+      </div>
+
+      <!-- URL analyse -->
+      <div style="margin-bottom:1.1rem;">
+        <div style="font-size:0.78rem;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Analyser nettside / URL</div>
+        <div style="display:flex;gap:0.5rem;">
+          <input type="url" id="aiUrlInput" placeholder="https://snl.no/Demokrati"
+            style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:10px 14px;color:white;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;"
+            onfocus="this.style.borderColor='var(--accent-h)'"
+            onblur="this.style.borderColor='rgba(255,255,255,0.18)'"
+          />
+          <button class="btn-ai" onclick="generateFromUrl()" style="padding:10px 16px;white-space:nowrap;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Analyser</span>
+            <div class="ai-spinner" id="urlAiSpinner"></div>
+          </button>
+        </div>
+        <div id="urlStatus" style="display:none;margin-top:0.5rem;padding:8px 12px;border-radius:8px;font-size:0.85rem;font-weight:700;"></div>
+        <div class="ai-result" id="urlAiResult" style="margin-top:0.5rem;"></div>
+      </div>
+
+      <!-- Bilde-opplasting -->
+      <div style="margin-bottom:1.1rem;">
+        <div style="font-size:0.78rem;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Analyser bilde</div>
+        <div id="imgDropZone"
+          onclick="document.getElementById('imgUploadInput').click()"
+          ondragover="event.preventDefault();this.style.borderColor='var(--accent-h)'"
+          ondragleave="this.style.borderColor='rgba(255,255,255,0.2)'"
+          ondrop="handleImgDrop(event)"
+          style="border:2px dashed rgba(255,255,255,0.2);border-radius:14px;padding:1rem 1.25rem;cursor:pointer;background:rgba(255,255,255,0.05);transition:all 0.2s;display:flex;align-items:center;gap:1rem;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" id="imgDropIcon"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <div>
+            <div style="font-weight:800;color:white;font-size:0.92rem;" id="imgDropLabel">Last opp bilde</div>
+            <div style="color:rgba(255,255,255,0.45);font-size:0.78rem;margin-top:0.15rem;">JPG · PNG · WEBP — maks 5 MB</div>
+          </div>
+          <input type="file" id="imgUploadInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="handleImgSelect(event)" />
+        </div>
+        <div id="imgPreviewBox" style="display:none;margin-top:0.6rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:0.875rem;">
+          <div style="display:flex;align-items:flex-start;gap:0.875rem;">
+            <img id="imgPreviewThumb" style="width:80px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0;" />
+            <div style="flex:1;">
+              <div style="font-weight:800;color:white;font-size:0.88rem;margin-bottom:0.3rem;" id="imgPreviewName"></div>
+              <div style="color:rgba(255,255,255,0.5);font-size:0.78rem;" id="imgPreviewDesc">Klar til analyse</div>
+            </div>
+            <button onclick="clearImg()" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);font-size:1rem;padding:2px 6px;" title="Fjern bilde">✕</button>
+          </div>
+          <div style="display:flex;gap:0.5rem;margin-top:0.75rem;flex-wrap:wrap;">
+            <button class="btn-ai" onclick="generateFromImage()" style="font-size:0.85rem;padding:9px 16px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span>Generer fra bilde</span>
+              <div class="ai-spinner" id="imgAiSpinner"></div>
+            </button>
+          </div>
+        </div>
+        <div class="ai-result" id="imgAiResult" style="margin-top:0.5rem;"></div>
       </div>
 
       <!-- Main AI generate button -->
@@ -1145,6 +1205,66 @@
 
       <div id="announcementPreview" style="display:none;border-radius:10px;padding:0.875rem 1.1rem;font-weight:700;font-size:0.9rem;margin-top:1rem;border:1px solid var(--border-2);background:var(--s3);color:var(--text);"></div>
       <div id="announcementStatus" style="font-size:0.82rem;font-weight:700;color:var(--text-2);margin-top:0.6rem;"></div>
+    </div>
+  </div>
+
+  <div class="tr-pane" id="trpane-spill">
+    <div class="teacher-panel" style="max-width:700px;">
+      <h2 style="display:flex;align-items:center;gap:10px;margin-bottom:0.3rem;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="m17 12-3-2v4l3-2z"/><path d="M7 10v4"/><path d="M5 12h4"/></svg>
+        Spilløkter
+      </h2>
+      <p style="color:var(--text-2);font-size:0.85rem;margin-bottom:1.5rem;padding-left:28px;">Opprett en spilløkt med kode og tid – elevene logger inn med koden.</p>
+
+      <!-- SQL note -->
+      <div style="background:var(--accent-g);border:1px solid var(--accent);border-radius:10px;padding:0.875rem 1.1rem;margin-bottom:1.25rem;font-size:0.83rem;color:var(--text-2);">
+        <strong style="color:var(--accent-h);">Første gang?</strong> Kjør SQL-skjema for spillmodulen i Supabase SQL Editor.
+        <button onclick="copyGameSQL()" style="margin-left:0.75rem;padding:4px 12px;background:var(--accent);color:white;border:none;border-radius:6px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">Kopier SQL</button>
+      </div>
+
+      <!-- Create session -->
+      <div style="margin-bottom:1.5rem;">
+        <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Øktens navn</label>
+        <input type="text" id="gsName" placeholder="F.eks. Norgeshistorie-fredag" style="margin-bottom:0.875rem;" />
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.875rem;">
+          <div>
+            <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Starter</label>
+            <input type="datetime-local" id="gsStart" />
+          </div>
+          <div>
+            <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Slutter</label>
+            <input type="datetime-local" id="gsEnd" />
+          </div>
+        </div>
+
+        <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Aktive spill</label>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+          <label style="display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:0.88rem;"><input type="checkbox" id="gsWordle" checked> Wordle</label>
+          <label style="display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:0.88rem;"><input type="checkbox" id="gsWorldle" checked> Worldle</label>
+          <label style="display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:0.88rem;"><input type="checkbox" id="gsWhoami" checked> Who Am I</label>
+        </div>
+
+        <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Egendefinerte Wordle-ord (5 bokstaver, kommaseparert – valgfri)</label>
+        <input type="text" id="gsCustomWords" placeholder="SKOLE, FJORD, BUNAD, NORSK" style="margin-bottom:0.875rem;" />
+
+        <button onclick="gsCreate()" style="display:flex;align-items:center;gap:7px;padding:11px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.93rem;cursor:pointer;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Opprett økt og generer kode
+        </button>
+      </div>
+
+      <!-- Active sessions -->
+      <div>
+        <div style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.875rem;padding-top:1rem;border-top:1px solid var(--border);">Aktive og kommende økter</div>
+        <div id="gsSessionList"><div style="color:var(--text-3);font-size:0.88rem;">Laster...</div></div>
+      </div>
+
+      <!-- Leaderboard for selected session -->
+      <div id="gsLeaderboardWrap" style="display:none;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border);">
+        <div style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.875rem;">Toppliste</div>
+        <div id="gsLeaderboardTable"></div>
+      </div>
     </div>
   </div>
 </div><!-- /view-teacher -->
@@ -1476,6 +1596,149 @@
 
 </div><!-- /view-wc -->
 
+
+
+<!-- GAME ZONE VIEW -->
+<div class="view" id="view-spill">
+
+  <!-- LOGIN (no active session) -->
+  <div id="gz-login">
+    <div style="max-width:420px;margin:3rem auto 0;text-align:center;">
+      <div style="width:72px;height:72px;background:var(--accent-g);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-h)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="m17 12-3-2v4l3-2z"/><path d="M7 10v4"/><path d="M5 12h4"/></svg>
+      </div>
+      <h2 style="font-family:'Fredoka One',cursive;font-size:1.75rem;margin-bottom:0.5rem;">Spillsone</h2>
+      <p style="color:var(--text-2);font-size:0.95rem;margin-bottom:2rem;">Skriv inn koden du fikk av læreren</p>
+      <input type="text" id="gz-code-input" placeholder="KODE"
+        maxlength="6" autocomplete="off"
+        style="text-transform:uppercase;text-align:center;font-size:2.2rem;font-family:'Fredoka One',cursive;letter-spacing:0.3em;padding:1rem;border-radius:14px;border:2px solid var(--border-2);background:var(--s2);color:var(--text);width:100%;outline:none;transition:border-color 0.2s;display:block;margin-bottom:0.875rem;"
+        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'"
+        onkeydown="if(event.key==='Enter')gzLogin()"
+      />
+      <button onclick="gzLogin()" style="width:100%;padding:14px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1.05rem;cursor:pointer;transition:background 0.18s;" onmouseover="this.style.background='var(--accent-h)'" onmouseout="this.style.background='var(--accent)'">Logg inn</button>
+      <div id="gz-login-error" style="display:none;margin-top:0.75rem;padding:10px 14px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#f87171;font-weight:700;font-size:0.88rem;"></div>
+    </div>
+  </div>
+
+  <!-- LOBBY (active session) -->
+  <div id="gz-lobby" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.75rem;">
+      <div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--text);" id="gz-session-name">Spillsone</div>
+        <div style="font-size:0.82rem;color:var(--text-3);font-weight:700;margin-top:0.2rem;" id="gz-session-timer"></div>
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <div style="background:var(--accent-g);border:1px solid var(--accent);border-radius:8px;padding:6px 14px;font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--accent-h);letter-spacing:0.1em;" id="gz-lobby-code"></div>
+        <button onclick="gzShowLeaderboard()" style="padding:8px 14px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;color:var(--text-2);cursor:pointer;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Toppliste
+        </button>
+        <button onclick="gzLogout()" style="padding:8px 14px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;color:var(--text-3);cursor:pointer;">Logg ut</button>
+      </div>
+    </div>
+
+    <!-- My scores row -->
+    <div id="gz-my-scores" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;"></div>
+
+    <!-- Game cards -->
+    <div id="gz-game-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;"></div>
+  </div>
+
+  <!-- WORDLE GAME -->
+  <div id="gz-wordle" style="display:none;">
+    <div style="max-width:440px;margin:0 auto;">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+        <button onclick="gzBackToLobby()" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">← Tilbake</button>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;">Wordle</div>
+        <div id="wordle-score-badge" style="margin-left:auto;background:var(--accent-g);border:1px solid var(--accent);border-radius:8px;padding:5px 12px;font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--accent-h);display:none;"></div>
+      </div>
+      <div id="wordle-msg" style="text-align:center;min-height:28px;font-weight:800;font-size:0.92rem;margin-bottom:0.75rem;color:var(--text-2);"></div>
+      <div id="wordle-board" style="display:flex;flex-direction:column;gap:6px;align-items:center;margin-bottom:1.25rem;"></div>
+      <div id="wordle-keyboard" style="display:flex;flex-direction:column;gap:6px;align-items:center;"></div>
+      <div id="wordle-result" style="display:none;text-align:center;margin-top:1.25rem;padding:1.25rem;background:var(--s1);border:1px solid var(--border);border-radius:14px;">
+        <div id="wordle-result-msg" style="font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:0.5rem;"></div>
+        <div id="wordle-result-word" style="color:var(--text-2);font-size:0.9rem;margin-bottom:1rem;"></div>
+        <button onclick="gzBackToLobby()" style="padding:10px 24px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORLDLE GAME -->
+  <div id="gz-worldle" style="display:none;">
+    <div style="max-width:500px;margin:0 auto;">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+        <button onclick="gzBackToLobby()" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">← Tilbake</button>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;">Worldle</div>
+        <div style="margin-left:auto;font-size:0.82rem;color:var(--text-3);font-weight:700;" id="worldle-attempts-left">6 forsøk igjen</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.25rem;text-align:center;margin-bottom:1.25rem;">
+        <div style="font-size:0.75rem;color:var(--text-3);font-weight:800;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;">Hvilket land er dette?</div>
+        <svg id="worldle-svg" viewBox="0 0 100 100" style="width:220px;height:220px;fill:var(--accent-h);opacity:0.85;" xmlns="http://www.w3.org/2000/svg">
+          <path id="worldle-path" d=""/>
+        </svg>
+        <div id="worldle-hint" style="margin-top:0.75rem;font-size:0.85rem;color:var(--text-2);font-weight:700;min-height:20px;"></div>
+      </div>
+      <div id="worldle-guesses" style="margin-bottom:0.875rem;display:flex;flex-direction:column;gap:6px;"></div>
+      <div style="display:flex;gap:0.5rem;position:relative;">
+        <input type="text" id="worldle-input" placeholder="Skriv landets navn..." autocomplete="off"
+          style="flex:1;padding:12px 14px;border:2px solid var(--border-2);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s;"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'"
+          oninput="worldleAutocomplete(this.value)"
+          onkeydown="if(event.key==='Enter')worldleGuess()"
+        />
+        <div id="worldle-autocomplete" style="display:none;position:absolute;bottom:54px;left:0;right:56px;background:var(--s2);border:1px solid var(--border-2);border-radius:10px;overflow:hidden;z-index:10;"></div>
+        <button onclick="worldleGuess()" style="padding:12px 18px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Gjett</button>
+      </div>
+      <div id="worldle-result" style="display:none;text-align:center;margin-top:1.25rem;padding:1.25rem;background:var(--s1);border:1px solid var(--border);border-radius:14px;">
+        <div id="worldle-result-msg" style="font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:0.5rem;"></div>
+        <div id="worldle-result-country" style="color:var(--text-2);font-size:0.9rem;margin-bottom:1rem;"></div>
+        <button onclick="gzBackToLobby()" style="padding:10px 24px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHO AM I GAME -->
+  <div id="gz-whoami" style="display:none;">
+    <div style="max-width:520px;margin:0 auto;">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+        <button onclick="gzBackToLobby()" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">← Tilbake</button>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;">Who Am I?</div>
+        <div style="margin-left:auto;font-size:0.82rem;color:var(--accent-h);font-weight:800;" id="whoami-points-left">500 poeng mulig</div>
+      </div>
+      <div id="whoami-hints-container" style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.25rem;"></div>
+      <div id="whoami-reveal-btn-wrap" style="text-align:center;margin-bottom:1rem;">
+        <button onclick="whoamiRevealHint()" id="whoami-reveal-btn" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">
+          Vis neste hint (−100 poeng)
+        </button>
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <input type="text" id="whoami-input" placeholder="Hvem er jeg?" autocomplete="off"
+          style="flex:1;padding:12px 14px;border:2px solid var(--border-2);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s;"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'"
+          onkeydown="if(event.key==='Enter')whoamiGuess()"
+        />
+        <button onclick="whoamiGuess()" style="padding:12px 18px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Gjett</button>
+      </div>
+      <div id="whoami-result" style="display:none;text-align:center;margin-top:1.25rem;padding:1.25rem;background:var(--s1);border:1px solid var(--border);border-radius:14px;">
+        <div id="whoami-result-msg" style="font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:0.5rem;"></div>
+        <div id="whoami-result-name" style="color:var(--text-2);font-size:0.9rem;margin-bottom:1rem;"></div>
+        <button onclick="gzBackToLobby()" style="padding:10px 24px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div id="gz-leaderboard" style="display:none;">
+    <div style="max-width:520px;margin:0 auto;">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+        <button onclick="gzBackToLobby()" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">← Tilbake</button>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;">Toppliste</div>
+      </div>
+      <div id="gz-leaderboard-content"></div>
+    </div>
+  </div>
+
+</div><!-- /view-spill -->
 
 <div class="view" id="view-join">
 
@@ -1856,13 +2119,14 @@ function showView(name) {
   if (name === 'join' && state.isTeacher) crPopulateModules();
   if (name === 'arbeid') { arbState.moduleIdx = null; arbRenderModuleGrid(); }
   if (name === 'wc') wcInit();
+  if (name === 'spill') gzInit();
   setProgress(name === 'home' ? 20 : name === 'tasks' ? 60 : 90);
   syncMobileNav(name);
 }
 
 function syncMobileNav(name) {
   document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
-  const map = {home:'mob-home',tasks:'mob-tasks',arbeid:'mob-arbeid',join:'mob-join',teacher:'mob-teacher',wc:'mob-wc'};
+  const map = {home:'mob-home',tasks:'mob-tasks',arbeid:'mob-arbeid',join:'mob-join',teacher:'mob-teacher',wc:'mob-wc',spill:'mob-spill'};
   const btn = document.getElementById(map[name]);
   if (btn) btn.classList.add('active');
 }
@@ -2225,7 +2489,7 @@ function msLogin(clientId) {
 // ====== TEACHER ROOM TABS ======
 function trTab(name) {
   document.querySelectorAll('.tr-tabs .tr-tab').forEach(t => t.classList.remove('active'));
-  ['trpane-new','trpane-emner','trpane-results','trpane-klasser','trpane-kunngjoring'].forEach(id => {
+  ['trpane-new','trpane-emner','trpane-results','trpane-klasser','trpane-kunngjoring','trpane-spill'].forEach(id => {
     const el = document.getElementById(id); if (el) el.classList.remove('active');
   });
   const btn = document.getElementById('trtab-' + name);
@@ -2236,6 +2500,7 @@ function trTab(name) {
   if (name === 'results') renderResults();
   if (name === 'klasser') renderClassRoster();
   if (name === 'kunngjoring') loadAnnouncementEditor();
+  if (name === 'spill') gsLoadSessions();
 }
 
 function tcTab(name) {
@@ -3549,6 +3814,186 @@ async function processFile(file){
   }catch(e){if(statusEl){statusEl.style.background='#fee2e2';statusEl.style.color='#991b1b';statusEl.textContent='❌ Feil ved lesing: '+e.message;}}
 }
 
+
+// ====== URL ANALYSE ======
+let uploadedImageBase64 = '';
+let uploadedImageMime = '';
+let uploadedImageName = '';
+
+async function generateFromUrl() {
+  const urlInput = document.getElementById('aiUrlInput');
+  const url = urlInput?.value.trim();
+  if (!url || !url.startsWith('http')) { showToast('Lim inn en gyldig URL (https://...)'); return; }
+  const spinner = document.getElementById('urlAiSpinner');
+  const statusEl = document.getElementById('urlStatus');
+  const resultEl = document.getElementById('urlAiResult');
+  if (spinner) spinner.style.display = 'inline-block';
+  if (statusEl) { statusEl.style.display = 'block'; statusEl.style.background = 'rgba(255,255,255,0.08)'; statusEl.style.color = 'rgba(255,255,255,0.7)'; statusEl.textContent = '⏳ Henter innhold fra ' + url + '...'; }
+  if (resultEl) resultEl.style.display = 'none';
+
+  const key = getApiKey();
+  if (!key) { showToast('Ingen API-nøkkel!'); if (spinner) spinner.style.display = 'none'; return; }
+
+  try {
+    const s = getAiSettings();
+    // Use Claude directly with the URL - it will use web_search/fetch capability
+    // We send the URL as context and ask Claude to generate tasks
+    const prompt = `Gå til denne nettsiden og les innholdet: ${url}
+
+Basert på innholdet på siden, lag følgende oppgaver for ${s.klasse} (${s.vanske}):
+- ${s.quizCount} flervalg quiz-spørsmål (4 alternativer, ett riktig)
+- ${s.discCount} drøftingsspørsmål
+- ${s.fcCount} flashcards med begrep og forklaring
+
+${s.fag ? 'Fag: ' + s.fag + '.' : ''} ${s.customPrompt ? 'Ekstra instruksjon: ' + s.customPrompt : ''}
+
+Svar KUN med JSON (ingen annen tekst):
+{"quiz":[{"question":"...","a":"riktig svar","b":"feil","c":"feil","d":"feil","explain":"..."}],"discussion":["..."],"flashcards":[{"front":"Begrep","back":"Forklaring"}]}
+
+Alt på ${s.language}.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    // Extract text from potentially mixed content blocks
+    const fullText = (data.content || []).map(b => b.type === 'text' ? b.text : '').join('');
+    const clean = fullText.replace(/```json|```/g, '').trim();
+    // Find the JSON object in the response
+    const jsonMatch = clean.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Fikk ikke gyldig svar fra AI');
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    let added = 0;
+    if (parsed.quiz?.length) { parsed.quiz.forEach(q => state.tempQuiz.push(q)); added += parsed.quiz.length; }
+    if (parsed.discussion?.length) { parsed.discussion.forEach(d => state.tempDisc.push(d)); added += parsed.discussion.length; }
+    if (parsed.flashcards?.length) { parsed.flashcards.forEach(f => state.tempFlashcards.push(f)); added += parsed.flashcards.length; }
+
+    if (statusEl) { statusEl.style.background = 'rgba(34,197,94,0.15)'; statusEl.style.color = '#4ade80'; statusEl.textContent = `✅ Hentet innhold og genererte ${added} oppgaver fra ${url}`; }
+    renderPreviewPanel(); updatePublishBarHint();
+    showToast('✅ ' + added + ' oppgaver generert fra URL!');
+  } catch (e) {
+    if (statusEl) { statusEl.style.background = 'rgba(239,68,68,0.15)'; statusEl.style.color = '#f87171'; statusEl.textContent = '❌ Feil: ' + e.message; }
+    showToast('❌ ' + e.message);
+  } finally {
+    if (spinner) spinner.style.display = 'none';
+  }
+}
+
+// ====== BILDE OPPLASTING ======
+function handleImgDrop(e) {
+  e.preventDefault();
+  document.getElementById('imgDropZone').style.borderColor = 'rgba(255,255,255,0.2)';
+  const file = e.dataTransfer.files[0];
+  if (file) processImage(file);
+}
+function handleImgSelect(e) {
+  const file = e.target.files[0];
+  if (file) processImage(file);
+}
+function clearImg() {
+  uploadedImageBase64 = ''; uploadedImageMime = ''; uploadedImageName = '';
+  const pb = document.getElementById('imgPreviewBox'); if (pb) pb.style.display = 'none';
+  const dl = document.getElementById('imgDropLabel'); if (dl) dl.textContent = 'Last opp bilde';
+  const inp = document.getElementById('imgUploadInput'); if (inp) inp.value = '';
+  const res = document.getElementById('imgAiResult'); if (res) res.style.display = 'none';
+}
+
+async function processImage(file) {
+  if (!file.type.startsWith('image/')) { showToast('Kun bildefiler støttes'); return; }
+  if (file.size > 5 * 1024 * 1024) { showToast('Bildet er for stort (maks 5 MB)'); return; }
+  uploadedImageMime = file.type;
+  uploadedImageName = file.name;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    uploadedImageBase64 = dataUrl.split(',')[1];
+
+    // Show preview
+    const pb = document.getElementById('imgPreviewBox'); if (pb) pb.style.display = 'block';
+    const thumb = document.getElementById('imgPreviewThumb'); if (thumb) thumb.src = dataUrl;
+    const name = document.getElementById('imgPreviewName'); if (name) name.textContent = file.name;
+    const desc = document.getElementById('imgPreviewDesc'); if (desc) desc.textContent = `${(file.size/1024).toFixed(0)} KB · ${file.type.split('/')[1].toUpperCase()}`;
+    const dl = document.getElementById('imgDropLabel'); if (dl) dl.textContent = '✅ ' + file.name;
+    showToast('✅ Bilde lastet inn – klar til analyse');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function generateFromImage() {
+  if (!uploadedImageBase64) { showToast('Last opp et bilde først'); return; }
+  const spinner = document.getElementById('imgAiSpinner');
+  const resultEl = document.getElementById('imgAiResult');
+  const descEl = document.getElementById('imgPreviewDesc');
+  if (spinner) spinner.style.display = 'inline-block';
+  if (descEl) descEl.textContent = '⏳ Analyserer bilde...';
+
+  const key = getApiKey();
+  if (!key) { showToast('Ingen API-nøkkel!'); if (spinner) spinner.style.display = 'none'; return; }
+
+  try {
+    const s = getAiSettings();
+    const prompt = `Se på dette bildet og lag undervisningsoppgaver for ${s.klasse} (${s.vanske}) basert på hva du ser.${s.fag ? ' Fag: ' + s.fag + '.' : ''}${s.customPrompt ? ' ' + s.customPrompt : ''}
+
+Lag: ${s.quizCount} flervalg quiz-spørsmål, ${s.discCount} drøftingsspørsmål, ${s.fcCount} flashcards.
+
+Svar KUN med JSON:
+{"quiz":[{"question":"...","a":"riktig","b":"feil","c":"feil","d":"feil","explain":"..."}],"discussion":["..."],"flashcards":[{"front":"Begrep","back":"Forklaring"}],"bildebeskrivelse":"Kort beskrivelse av bildet"}
+
+Alt på ${s.language}.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: uploadedImageMime, data: uploadedImageBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content || []).map(b => b.type === 'text' ? b.text : '').join('');
+    const jsonMatch = text.replace(/```json|```/g, '').trim().match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Fikk ikke gyldig JSON fra AI');
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    let added = 0;
+    if (parsed.quiz?.length) { parsed.quiz.forEach(q => state.tempQuiz.push(q)); added += parsed.quiz.length; }
+    if (parsed.discussion?.length) { parsed.discussion.forEach(d => state.tempDisc.push(d)); added += parsed.discussion.length; }
+    if (parsed.flashcards?.length) { parsed.flashcards.forEach(f => state.tempFlashcards.push(f)); added += parsed.flashcards.length; }
+
+    if (descEl) descEl.textContent = `✅ ${parsed.bildebeskrivelse || 'Analysert'}`;
+    if (resultEl) {
+      resultEl.style.display = 'block';
+      resultEl.innerHTML = `<div style="background:rgba(34,197,94,0.12);border-radius:10px;padding:0.875rem;border:1px solid rgba(34,197,94,0.3);font-weight:700;color:#4ade80;font-size:0.88rem;">
+        ✅ Genererte ${added} oppgaver fra bildet${parsed.bildebeskrivelse ? '<br><span style="color:rgba(255,255,255,0.5);font-weight:600;">'+escHtml(parsed.bildebeskrivelse)+'</span>' : ''}
+      </div>`;
+    }
+    renderPreviewPanel(); updatePublishBarHint();
+    showToast('✅ ' + added + ' oppgaver fra bilde!');
+  } catch (e) {
+    if (descEl) descEl.textContent = '❌ Feil: ' + e.message;
+    showToast('❌ ' + e.message);
+  } finally {
+    if (spinner) spinner.style.display = 'none';
+  }
+}
+// ====== END URL/IMAGE ======
+
 // ====== TOAST ======
 function showToast(msg,duration=2800){
   let t=document.getElementById('globalToast');
@@ -4546,6 +4991,617 @@ function wcExport(fmt) {
   }
 }
 // ====== END WORDCLOUD ENGINE ======
+
+
+
+// ====== GAME ZONE ENGINE ======
+let GZ = {
+  session: null,
+  player: null,
+  view: 'login',
+  scores: {}, // {game: score}
+  timerInterval: null
+};
+let WORDLE_ST = {}, WORLDLE_ST = {}, WHOAMI_ST = {};
+
+// ── DB helpers for game sessions ──
+async function dbGameReq(method, table, query, body) {
+  return DB._req(method, table, query, body);
+}
+
+// ── Session management ──
+async function gzLogin() {
+  const code = document.getElementById('gz-code-input')?.value.trim().toUpperCase();
+  const errEl = document.getElementById('gz-login-error');
+  if (!code || code.length < 4) { gzError('Skriv inn koden du fikk av læreren'); return; }
+  if (errEl) errEl.style.display = 'none';
+  // Try Supabase
+  try {
+    const rows = await dbGameReq('GET','os_game_sessions',`code=eq.${code}&select=*`);
+    if (rows && rows.length > 0) {
+      const sess = rows[0];
+      const now = Date.now();
+      const start = sess.starts_at ? new Date(sess.starts_at).getTime() : 0;
+      const end = sess.ends_at ? new Date(sess.ends_at).getTime() : Infinity;
+      if (now < start) { gzError('Spilløkten har ikke startet ennå'); return; }
+      if (now > end)   { gzError('Spilløkten er avsluttet'); return; }
+      GZ.session = sess.config ? {...sess, ...sess.config} : sess;
+      GZ.session.code = code;
+      gzEnterLobby();
+      return;
+    }
+  } catch(e) {}
+  // Fallback: localStorage
+  try {
+    const raw = localStorage.getItem('os_game_session_' + code);
+    if (raw) {
+      const sess = JSON.parse(raw);
+      const now = Date.now();
+      if (sess.endsAt && now > sess.endsAt) { gzError('Spilløkten er avsluttet'); return; }
+      if (sess.startsAt && now < sess.startsAt) { gzError('Spilløkten har ikke startet ennå'); return; }
+      GZ.session = sess;
+      gzEnterLobby();
+      return;
+    }
+  } catch(e) {}
+  gzError('Ugyldig kode – sjekk at du har skrevet riktig');
+}
+
+function gzError(msg) {
+  const el = document.getElementById('gz-login-error');
+  if (el) { el.style.display = 'block'; el.textContent = '❌ ' + msg; }
+}
+
+function gzEnterLobby() {
+  GZ.view = 'lobby';
+  GZ.scores = {};
+  gzShowPanel('gz-lobby');
+  const nameEl = document.getElementById('gz-session-name');
+  if (nameEl) nameEl.textContent = GZ.session.name || 'Spillsone';
+  const codeEl = document.getElementById('gz-lobby-code');
+  if (codeEl) codeEl.textContent = GZ.session.code;
+  gzRenderGameCards();
+  gzStartTimer();
+  gzLoadMyScores();
+}
+
+function gzRenderGameCards() {
+  const grid = document.getElementById('gz-game-cards');
+  if (!grid) return;
+  const games = [
+    { id:'wordle',  label:'Wordle',   icon:'🅦', desc:'Gjett det skjulte ordet på 6 forsøk', color:'#22c55e', fn:'gzStartWordle()' },
+    { id:'worldle', label:'Worldle',  icon:'🌍', desc:'Gjett landet fra silhuetten', color:'#4f6ef7', fn:'gzStartWorldle()' },
+    { id:'whoami',  label:'Who Am I?',icon:'❓', desc:'Bruk hint til å gjette hvem jeg er', color:'#a855f7', fn:'gzStartWhoami()' },
+  ].filter(g => !GZ.session.games || GZ.session.games.includes(g.id));
+
+  grid.innerHTML = games.map(g => {
+    const myScore = GZ.scores[g.id];
+    return `<div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.5rem;cursor:pointer;transition:all 0.18s;position:relative;" onclick="${g.fn}" onmouseover="this.style.borderColor='${g.color}';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">${g.icon}</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--text);margin-bottom:0.3rem;">${g.label}</div>
+      <div style="font-size:0.83rem;color:var(--text-2);">${g.desc}</div>
+      ${myScore!=null ? `<div style="position:absolute;top:12px;right:12px;background:${g.color}22;border:1px solid ${g.color}55;border-radius:8px;padding:4px 10px;font-family:'Fredoka One',cursive;font-size:1rem;color:${g.color};">${myScore}p</div>` : '<div style="position:absolute;top:12px;right:12px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:4px 10px;font-size:0.75rem;font-weight:800;color:var(--text-3);">Ikke spilt</div>'}
+    </div>`;
+  }).join('');
+}
+
+function gzStartTimer() {
+  if (GZ.timerInterval) clearInterval(GZ.timerInterval);
+  const update = () => {
+    const el = document.getElementById('gz-session-timer');
+    if (!el) return;
+    const end = GZ.session.ends_at || GZ.session.endsAt;
+    if (!end) { el.textContent = ''; return; }
+    const left = new Date(end).getTime() - Date.now();
+    if (left <= 0) { el.textContent = 'Økten er avsluttet'; clearInterval(GZ.timerInterval); return; }
+    const h = Math.floor(left/3600000), m = Math.floor((left%3600000)/60000), s = Math.floor((left%60000)/1000);
+    el.textContent = `Slutter om ${h>0?h+'t ':''} ${m}m ${s}s`;
+  };
+  update();
+  GZ.timerInterval = setInterval(update, 1000);
+}
+
+function gzShowPanel(id) {
+  ['gz-login','gz-lobby','gz-wordle','gz-worldle','gz-whoami','gz-leaderboard'].forEach(p => {
+    const el = document.getElementById(p);
+    if (el) el.style.display = p === id ? 'block' : 'none';
+  });
+}
+
+function gzBackToLobby() {
+  gzShowPanel('gz-lobby');
+  gzRenderGameCards();
+}
+
+function gzLogout() {
+  GZ.session = null; GZ.player = null; GZ.scores = {};
+  if (GZ.timerInterval) clearInterval(GZ.timerInterval);
+  gzShowPanel('gz-login');
+  const inp = document.getElementById('gz-code-input'); if(inp) inp.value='';
+}
+
+function gzInit() {
+  gzShowPanel(GZ.session ? 'gz-lobby' : 'gz-login');
+  if (GZ.session) { gzRenderGameCards(); gzLoadMyScores(); }
+}
+
+async function gzSaveScore(game, score) {
+  GZ.scores[game] = score;
+  gzRenderMyScores();
+  const player = state.student ? (state.student.name || state.student) : 'Anonym';
+  const id = (GZ.session.code||'x') + '_' + game + '_' + player.replace(/\s/g,'_');
+  try {
+    await dbGameReq('POST','os_game_scores','',{ id, session_code: GZ.session.code, player_name: player, game, score });
+  } catch(e) {}
+  localStorage.setItem('oz_score_'+GZ.session.code+'_'+game, score);
+}
+
+function gzLoadMyScores() {
+  if (!GZ.session) return;
+  ['wordle','worldle','whoami'].forEach(g => {
+    const s = localStorage.getItem('oz_score_'+GZ.session.code+'_'+g);
+    if (s !== null) GZ.scores[g] = parseInt(s)||0;
+  });
+  gzRenderMyScores();
+}
+
+function gzRenderMyScores() {
+  const el = document.getElementById('gz-my-scores');
+  if (!el) return;
+  const colors = {wordle:'#22c55e', worldle:'#4f6ef7', whoami:'#a855f7'};
+  const labels = {wordle:'Wordle', worldle:'Worldle', whoami:'Who Am I'};
+  el.innerHTML = Object.entries(GZ.scores).map(([g,s]) =>
+    `<div style="background:${colors[g]}22;border:1px solid ${colors[g]}55;border-radius:8px;padding:6px 14px;font-family:'Fredoka One',cursive;font-size:1.05rem;color:${colors[g]};">${labels[g]}: ${s}p</div>`
+  ).join('');
+}
+
+async function gzShowLeaderboard() {
+  gzShowPanel('gz-leaderboard');
+  const el = document.getElementById('gz-leaderboard-content');
+  if (!el) return;
+  el.innerHTML = '<div style="color:var(--text-3);">Laster toppliste...</div>';
+  try {
+    const rows = await dbGameReq('GET','os_game_scores',`session_code=eq.${GZ.session.code}&select=*&order=score.desc`);
+    if (!rows || !rows.length) { el.innerHTML='<div style="color:var(--text-3);">Ingen poeng registrert ennå</div>'; return; }
+    const totals = {};
+    rows.forEach(r => { totals[r.player_name] = (totals[r.player_name]||0) + r.score; });
+    const sorted = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+    const medals = ['🥇','🥈','🥉'];
+    el.innerHTML = sorted.map(([name,total],i) => `
+      <div style="display:flex;align-items:center;gap:0.875rem;padding:0.875rem 1.1rem;background:var(--s1);border:1px solid var(--border);border-radius:12px;margin-bottom:0.5rem;">
+        <div style="font-size:1.4rem;width:32px;text-align:center;">${medals[i]||'#'+(i+1)}</div>
+        <div style="flex:1;font-weight:800;">${escHtml(name)}</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--accent-h);">${total}p</div>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML='<div style="color:var(--red);">Kunne ikke laste toppliste</div>';
+  }
+}
+
+// ── WORDLE ──
+function gzStartWordle() {
+  gzShowPanel('gz-wordle');
+  const custom = (GZ.session.customWords||[]).filter(w=>w.length===5);
+  const pool = custom.length ? [...GZ_WORDS_NO,...custom] : GZ_WORDS_NO;
+  const word = pool[Math.floor(Math.random()*pool.length)];
+  WORDLE_ST = { word, guesses:[], cur:'', over:false, maxTries:6 };
+  wordleRender();
+  wordleRenderKeyboard();
+}
+
+function wordleRender() {
+  const board = document.getElementById('wordle-board');
+  if (!board) return;
+  board.innerHTML = '';
+  for (let r=0; r<WORDLE_ST.maxTries; r++) {
+    const row = document.createElement('div');
+    row.style.cssText='display:flex;gap:6px;';
+    const guess = WORDLE_ST.guesses[r];
+    const isCurrent = r === WORDLE_ST.guesses.length && !WORDLE_ST.over;
+    for (let c=0; c<5; c++) {
+      const cell = document.createElement('div');
+      cell.style.cssText='width:54px;height:54px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:\'Fredoka One\',cursive;font-size:1.6rem;font-weight:800;transition:all 0.18s;';
+      if (guess) {
+        const letter = guess[c] || '';
+        const color = wordleColor(WORDLE_ST.word, guess, c);
+        cell.textContent = letter.toUpperCase();
+        cell.style.background = color; cell.style.color='white'; cell.style.border='2px solid '+color;
+      } else if (isCurrent) {
+        cell.textContent = (WORDLE_ST.cur[c]||'').toUpperCase();
+        cell.style.background='var(--s2)'; cell.style.border='2px solid '+(WORDLE_ST.cur[c]?'var(--accent)':'var(--border-2)');
+        cell.style.color='var(--text)';
+      } else {
+        cell.style.background='var(--s2)'; cell.style.border='2px solid var(--border)';
+      }
+      row.appendChild(cell);
+    }
+    board.appendChild(row);
+  }
+}
+
+function wordleColor(word, guess, idx) {
+  if (guess[idx]===word[idx]) return '#22c55e';
+  if (word.includes(guess[idx])) return '#f59e0b';
+  return '#55566e';
+}
+
+function wordleRenderKeyboard() {
+  const kb = document.getElementById('wordle-keyboard');
+  if (!kb) return;
+  const rows = ['QWERTYUIOPÅ','ASDFGHJKLØÆ','ZXCVBNM⌫↵'];
+  // Build letter → best color map
+  const colors = {};
+  WORDLE_ST.guesses.forEach(g => {
+    for(let i=0;i<5;i++) {
+      const l=g[i], c=wordleColor(WORDLE_ST.word,g,i);
+      const priority = {'#22c55e':3,'#f59e0b':2,'#55566e':1};
+      if ((priority[c]||0) > (priority[colors[l]]||0)) colors[l]=c;
+    }
+  });
+  kb.innerHTML = rows.map(row => `<div style="display:flex;gap:5px;">${[...row].map(k => {
+    const bg = colors[k] || 'var(--s3)';
+    const tc = colors[k] ? 'white' : 'var(--text)';
+    const w = (k==='⌫'||k==='↵') ? '52px' : '36px';
+    return `<button onclick="wordleKey('${k}')" style="width:${w};height:46px;border-radius:7px;border:none;background:${bg};color:${tc};font-family:'Nunito',sans-serif;font-weight:800;font-size:${k.length>1?'0.7':'0.95'}rem;cursor:pointer;transition:background 0.2s;">${k}</button>`;
+  }).join('')}</div>`).join('');
+}
+
+function wordleKey(k) {
+  if (WORDLE_ST.over) return;
+  if (k==='⌫') { WORDLE_ST.cur=WORDLE_ST.cur.slice(0,-1); }
+  else if (k==='↵') { wordleSubmit(); return; }
+  else if (WORDLE_ST.cur.length<5) { WORDLE_ST.cur+=k.toLowerCase(); }
+  wordleRender();
+}
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('gz-wordle')?.style.display==='none') return;
+  if (e.key==='Enter') wordleSubmit();
+  else if (e.key==='Backspace') { WORDLE_ST.cur=WORDLE_ST.cur.slice(0,-1); wordleRender(); }
+  else if (/^[a-zA-ZæøåÆØÅ]$/.test(e.key) && WORDLE_ST.cur.length<5) {
+    WORDLE_ST.cur+=e.key.toLowerCase(); wordleRender();
+  }
+});
+
+function wordleSubmit() {
+  if (WORDLE_ST.over || WORDLE_ST.cur.length!==5) return;
+  WORDLE_ST.guesses.push(WORDLE_ST.cur);
+  const won = WORDLE_ST.cur === WORDLE_ST.word;
+  WORDLE_ST.cur='';
+  wordleRender(); wordleRenderKeyboard();
+  if (won) {
+    const tries = WORDLE_ST.guesses.length;
+    const score = Math.max(100, 600-(tries-1)*100);
+    WORDLE_ST.over=true;
+    document.getElementById('wordle-result').style.display='block';
+    document.getElementById('wordle-result-msg').textContent='🎉 Riktig på '+tries+(tries===1?' forsøk!':' forsøk!');
+    document.getElementById('wordle-result-word').textContent='Ordet var: '+WORDLE_ST.word.toUpperCase()+' · '+score+' poeng';
+    document.getElementById('wordle-score-badge').style.display='block';
+    document.getElementById('wordle-score-badge').textContent=score+'p';
+    gzSaveScore('wordle', score);
+  } else if (WORDLE_ST.guesses.length>=WORDLE_ST.maxTries) {
+    WORDLE_ST.over=true;
+    document.getElementById('wordle-result').style.display='block';
+    document.getElementById('wordle-result-msg').textContent='😔 Ikke denne gangen!';
+    document.getElementById('wordle-result-word').textContent='Ordet var: '+WORDLE_ST.word.toUpperCase()+' · 0 poeng';
+    gzSaveScore('wordle', 0);
+  }
+  const msgEl=document.getElementById('wordle-msg');
+  if(msgEl && !WORDLE_ST.over) msgEl.textContent='';
+}
+
+// ── WORLDLE ──
+function gzStartWorldle() {
+  gzShowPanel('gz-worldle');
+  const country = GZ_COUNTRIES[Math.floor(Math.random()*GZ_COUNTRIES.length)];
+  WORLDLE_ST = { country, guesses:[], over:false, maxTries:6 };
+  document.getElementById('worldle-path')?.setAttribute('d', country.d);
+  document.getElementById('worldle-hint').textContent='Kontinent: '+country.c;
+  document.getElementById('worldle-guesses').innerHTML='';
+  document.getElementById('worldle-result').style.display='none';
+  document.getElementById('worldle-input').value='';
+  document.getElementById('worldle-attempts-left').textContent=country.hints[0];
+  document.getElementById('worldle-autocomplete').style.display='none';
+}
+
+function worldleAutocomplete(val) {
+  const ac = document.getElementById('worldle-autocomplete');
+  if (!ac) return;
+  if (!val || val.length<2) { ac.style.display='none'; return; }
+  const matches = GZ_COUNTRIES.filter(c=>c.n.toLowerCase().startsWith(val.toLowerCase())).slice(0,6);
+  if (!matches.length) { ac.style.display='none'; return; }
+  ac.style.display='block';
+  ac.innerHTML=matches.map(c=>`<div onclick="worldleSelectCountry('${c.n}')" style="padding:9px 14px;cursor:pointer;font-weight:700;font-size:0.9rem;border-bottom:1px solid var(--border);" onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">${c.f} ${c.n}</div>`).join('');
+}
+
+function worldleSelectCountry(name) {
+  const inp=document.getElementById('worldle-input'); if(inp) inp.value=name;
+  const ac=document.getElementById('worldle-autocomplete'); if(ac) ac.style.display='none';
+}
+
+function worldleGuess() {
+  if (WORLDLE_ST.over) return;
+  const inp=document.getElementById('worldle-input');
+  const guess=(inp?.value||'').trim();
+  if (!guess) return;
+  inp.value=''; document.getElementById('worldle-autocomplete').style.display='none';
+  const correct = guess.toLowerCase()===WORLDLE_ST.country.n.toLowerCase();
+  WORLDLE_ST.guesses.push(guess);
+  // Show guess row
+  const gl=document.getElementById('worldle-guesses');
+  if(gl) {
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:0.5rem;padding:8px 12px;border-radius:8px;background:'+(correct?'rgba(34,197,94,0.12)':'rgba(239,68,68,0.08)')+';border:1px solid '+(correct?'#22c55e44':'#ef444433')+';font-weight:700;font-size:0.9rem;';
+    row.innerHTML=(correct?'✅':'❌')+' '+escHtml(guess);
+    gl.appendChild(row);
+  }
+  if (correct) {
+    const tries=WORLDLE_ST.guesses.length;
+    const score=Math.max(50,500-(tries-1)*80);
+    WORLDLE_ST.over=true;
+    document.getElementById('worldle-result').style.display='block';
+    document.getElementById('worldle-result-msg').textContent='🌍 Riktig! '+WORLDLE_ST.country.f;
+    document.getElementById('worldle-result-country').textContent=WORLDLE_ST.country.n+' · Kontinent: '+WORLDLE_ST.country.c+' · '+score+' poeng';
+    gzSaveScore('worldle', score);
+  } else if (WORLDLE_ST.guesses.length>=WORLDLE_ST.maxTries) {
+    WORLDLE_ST.over=true;
+    document.getElementById('worldle-result').style.display='block';
+    document.getElementById('worldle-result-msg').textContent='😔 Det var '+WORLDLE_ST.country.n+' '+WORLDLE_ST.country.f;
+    document.getElementById('worldle-result-country').textContent='Kontinent: '+WORLDLE_ST.country.c+' · 0 poeng';
+    gzSaveScore('worldle', 0);
+  } else {
+    // Show next hint
+    const hintIdx=Math.min(WORLDLE_ST.guesses.length, WORLDLE_ST.country.hints.length-1);
+    const attEl=document.getElementById('worldle-attempts-left');
+    if(attEl) attEl.textContent='Hint: '+WORLDLE_ST.country.hints[hintIdx];
+    const hintEl=document.getElementById('worldle-hint');
+    if(hintEl) hintEl.textContent='Kontinent: '+WORLDLE_ST.country.c+' · Befolkning: '+WORLDLE_ST.country.p;
+  }
+}
+
+// ── WHO AM I ──
+function gzStartWhoami() {
+  gzShowPanel('gz-whoami');
+  const person = GZ_PERSONS[Math.floor(Math.random()*GZ_PERSONS.length)];
+  WHOAMI_ST = { person, revealed:0, over:false, maxHints:5, maxScore:500 };
+  document.getElementById('whoami-hints-container').innerHTML='';
+  document.getElementById('whoami-result').style.display='none';
+  document.getElementById('whoami-input').value='';
+  document.getElementById('whoami-reveal-btn').style.display='inline-flex';
+  document.getElementById('whoami-points-left').textContent='500 poeng mulig';
+  whoamiRevealHint(); // auto-show first hint
+}
+
+function whoamiRevealHint() {
+  const st=WHOAMI_ST;
+  if (st.over || st.revealed>=st.maxHints) return;
+  const hint=st.person.hints[st.revealed];
+  st.revealed++;
+  const container=document.getElementById('whoami-hints-container');
+  if(container) {
+    const el=document.createElement('div');
+    el.style.cssText='padding:0.875rem 1.1rem;background:var(--s1);border:1px solid var(--border);border-radius:12px;font-weight:700;font-size:0.92rem;animation:fadeIn 0.3s ease;';
+    el.innerHTML=`<span style="color:var(--accent-h);font-family:'Fredoka One',cursive;margin-right:8px;">Hint ${st.revealed}:</span>${escHtml(hint)}`;
+    container.appendChild(el);
+  }
+  const score=(st.maxHints-st.revealed+1)*100;
+  const ptsEl=document.getElementById('whoami-points-left');
+  if(ptsEl) ptsEl.textContent=(st.revealed<st.maxHints?score+' poeng mulig':'Siste hint!');
+  const btn=document.getElementById('whoami-reveal-btn');
+  if(btn) {
+    if(st.revealed>=st.maxHints) btn.style.display='none';
+    else btn.textContent=`Vis neste hint (−100 poeng)`;
+  }
+}
+
+function whoamiGuess() {
+  if (WHOAMI_ST.over) return;
+  const inp=document.getElementById('whoami-input');
+  const guess=(inp?.value||'').trim().toLowerCase();
+  if (!guess) return;
+  const correct=WHOAMI_ST.person.n.toLowerCase().includes(guess) || guess.includes(WHOAMI_ST.person.n.toLowerCase().split(' ')[1]||'XXXXXXX');
+  if (correct) {
+    const score=Math.max(100,(WHOAMI_ST.maxHints-WHOAMI_ST.revealed+1)*100);
+    WHOAMI_ST.over=true;
+    document.getElementById('whoami-result').style.display='block';
+    document.getElementById('whoami-result-msg').textContent='🎉 Riktig!';
+    document.getElementById('whoami-result-name').textContent=WHOAMI_ST.person.n+' · '+score+' poeng';
+    gzSaveScore('whoami', score);
+  } else {
+    if (inp) { inp.value=''; inp.style.borderColor='#ef4444'; setTimeout(()=>inp.style.borderColor='var(--border-2)',800); }
+    showToast('Ikke riktig – prøv igjen!');
+  }
+}
+
+// ── TEACHER SESSION MANAGEMENT ──
+function gsCreate() {
+  const name=document.getElementById('gsName')?.value.trim();
+  const startVal=document.getElementById('gsStart')?.value;
+  const endVal=document.getElementById('gsEnd')?.value;
+  if (!name) { showToast('Gi økten et navn'); return; }
+  if (!endVal) { showToast('Sett en sluttid'); return; }
+  const code = Math.random().toString(36).substring(2,8).toUpperCase();
+  const games=[];
+  if(document.getElementById('gsWordle')?.checked) games.push('wordle');
+  if(document.getElementById('gsWorldle')?.checked) games.push('worldle');
+  if(document.getElementById('gsWhoami')?.checked) games.push('whoami');
+  const customWordsRaw=document.getElementById('gsCustomWords')?.value||'';
+  const customWords=customWordsRaw.split(',').map(w=>w.trim().toUpperCase()).filter(w=>w.length===5);
+  const sess = {
+    id: code, code,
+    name, games, customWords,
+    starts_at: startVal ? new Date(startVal).toISOString() : new Date().toISOString(),
+    ends_at: new Date(endVal).toISOString(),
+    config: { name, games, customWords, code }
+  };
+  // Save to Supabase
+  dbGameReq('POST','os_game_sessions','',sess).then(()=>{
+    showToast('✅ Økt opprettet! Kode: '+code);
+    gsLoadSessions();
+  }).catch(e=>{
+    // Fallback: localStorage
+    localStorage.setItem('os_game_session_'+code, JSON.stringify({
+      name, games, customWords, code,
+      startsAt: startVal ? new Date(startVal).getTime() : Date.now(),
+      endsAt: new Date(endVal).getTime()
+    }));
+    showToast('✅ Økt lagret lokalt! Kode: '+code);
+    gsLoadSessions();
+  });
+  // Clear form
+  document.getElementById('gsName').value='';
+  document.getElementById('gsStart').value='';
+  document.getElementById('gsEnd').value='';
+  document.getElementById('gsCustomWords').value='';
+}
+
+async function gsLoadSessions() {
+  const el=document.getElementById('gsSessionList');
+  if(!el) return;
+  el.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;">Laster...</div>';
+  try {
+    const rows=await dbGameReq('GET','os_game_sessions','select=*&order=created_at.desc&limit=10');
+    if(!rows||!rows.length) { el.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;">Ingen aktive økter.</div>'; return; }
+    const now=Date.now();
+    el.innerHTML=rows.map(s=>{
+      const end=new Date(s.ends_at||s.endsAt||0).getTime();
+      const active=end>now;
+      const cfg=s.config||s;
+      return `<div style="display:flex;align-items:center;gap:0.875rem;padding:0.875rem 1.1rem;background:var(--s2);border:1px solid var(--border);border-radius:12px;margin-bottom:0.5rem;flex-wrap:wrap;">
+        <div style="flex:1;">
+          <div style="font-weight:800;font-size:0.95rem;">${escHtml(cfg.name||s.id)}</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--accent-h);letter-spacing:0.15em;">${s.code||s.id}</div>
+          <div style="font-size:0.78rem;color:var(--text-3);margin-top:2px;">Slutter: ${s.ends_at?new Date(s.ends_at).toLocaleString('no'):'-'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.35rem;">
+          <span style="padding:3px 10px;border-radius:50px;font-size:0.72rem;font-weight:800;background:${active?'rgba(34,197,94,0.12)':'rgba(239,68,68,0.1)'};color:${active?'#22c55e':'#ef4444'};border:1px solid ${active?'#22c55e44':'#ef444433'};">${active?'AKTIV':'AVSLUTTET'}</span>
+          <button onclick="gsViewLeaderboard('${s.code||s.id}')" style="padding:5px 12px;background:var(--s3);border:1px solid var(--border-2);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-2);cursor:pointer;">Toppliste</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;">Ikke tilkoblet Supabase – kjør SQL-skjemaet</div>';
+  }
+}
+
+async function gsViewLeaderboard(code) {
+  const wrap=document.getElementById('gsLeaderboardWrap');
+  const table=document.getElementById('gsLeaderboardTable');
+  if(!wrap||!table) return;
+  wrap.style.display='block';
+  table.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;">Laster...</div>';
+  try {
+    const rows=await dbGameReq('GET','os_game_scores',`session_code=eq.${code}&select=*&order=score.desc`);
+    if(!rows||!rows.length) { table.innerHTML='<div style="color:var(--text-3);">Ingen poeng ennå</div>'; return; }
+    const totals={};
+    rows.forEach(r=>{ totals[r.player_name]=(totals[r.player_name]||0)+r.score; });
+    const sorted=Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+    const medals=['🥇','🥈','🥉'];
+    table.innerHTML=sorted.map(([name,total],i)=>`
+      <div style="display:flex;gap:0.875rem;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:0.4rem;align-items:center;">
+        <span style="font-size:1.2rem;">${medals[i]||i+1+'.'}</span>
+        <span style="flex:1;font-weight:800;">${escHtml(name)}</span>
+        <span style="font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--accent-h);">${total}p</span>
+      </div>`).join('');
+  } catch(e) { table.innerHTML='<div style="color:var(--red);">Feil ved lasting</div>'; }
+}
+
+function copyGameSQL() {
+  const sql=`-- OlaSkole Spillmodul SQL
+create table if not exists os_game_sessions (
+  id text primary key,
+  code text unique not null,
+  config jsonb,
+  starts_at timestamptz,
+  ends_at timestamptz,
+  created_at timestamptz default now()
+);
+create table if not exists os_game_scores (
+  id text primary key,
+  session_code text not null,
+  player_name text not null,
+  game text not null,
+  score int default 0,
+  created_at timestamptz default now()
+);
+drop policy if exists "allow_game_sessions" on os_game_sessions;
+create policy "allow_game_sessions" on os_game_sessions for all using (true) with check (true);
+alter table os_game_sessions enable row level security;
+drop policy if exists "allow_game_scores" on os_game_scores;
+create policy "allow_game_scores" on os_game_scores for all using (true) with check (true);
+alter table os_game_scores enable row level security;`;
+  navigator.clipboard.writeText(sql).then(()=>showToast('✅ SQL kopiert!')).catch(()=>showToast('Kopier manuelt fra konsollen'));
+}
+// ====== END GAME ZONE ENGINE ======
+
+// ====== GAME ZONE DATA ======
+const GZ_WORDS_NO = [
+  'SKOLE','FJORD','SNØEN','HYTTE','ELVEN','HAVET','SPILL','ORDEN','GRØNN','SVART',
+  'HVITT','KALDT','VARMT','SOLEN','MÅNEN','NESEN','HUSET','BOKEN','VEIEN','LIVET',
+  'TREET','BARNA','RISEN','TIMEN','BRANN','KRAFT','SKYER','STEIN','REISE','KILDE',
+  'KLIMA','NORSK','ALENE','FOSSE','DAGER','NESTE','GLEDE','STOPP','GRUNN','MINNE',
+  'TENKE','LESTE','TRINN','BILDE','SKINN','TUREN','STIGE','STYGG','SNILL','STERK',
+  'KJØRE','HOPPE','SYNGE','SETTE','FUGLE','FARGE','HELGE','FLYTT','BLAND','PLAGE',
+  'ANGER','KNUST','DRØMT','GAVEN','ARENE','SPRAK','SVAKE','GANGE','FESTE','BRINGT'
+];
+
+const GZ_COUNTRIES = [
+  {n:'Norge',      f:'🇳🇴', c:'Europa',   p:'~5 mill',  d:'M60,5L70,8L73,14L68,20L74,26L70,33L76,40L72,48L66,58L59,68L51,78L43,85L36,83L31,76L33,68L37,61L32,54L36,47L33,40L38,32L35,25L39,18L44,12L50,8Z', hints:['Nordisk land med fjorder','Grenser til Sverige og Finland','Oljenasjon i Nordsjøen','Vikingenes hjemland','Laks og midnattsol']},
+  {n:'Sverige',    f:'🇸🇪', c:'Europa',   p:'~10 mill', d:'M46,5L58,7L66,12L70,20L67,28L71,36L68,44L63,52L65,60L62,68L55,74L47,78L40,74L36,66L38,58L40,50L37,42L39,34L37,26L40,18L44,12Z', hints:['Nordisk land','Naboer med Norge og Finland','IKEA og ABBA','Grenser til Danmark via bro','Kongedømme med kongehuset Bernadotte']},
+  {n:'Danmark',    f:'🇩🇰', c:'Europa',   p:'~6 mill',  d:'M42,25L52,20L60,25L62,35L58,45L50,52L42,50L36,43L35,33Z', hints:['Nordisk land, halvøya','Grenser til Tyskland i sør','LEGO og H.C. Andersen','Kongedømme','Kjent for smørrebrød']},
+  {n:'Finland',    f:'🇫🇮', c:'Europa',   p:'~5,5 mill',d:'M46,10L58,6L68,10L74,18L72,28L65,36L72,44L68,54L61,62L52,67L43,64L36,55L33,44L35,33L37,22Z', hints:['Nordisk land','Tusen innsjøer','Naboer med Sverige, Norge og Russland','Sauna er fra dette landet','Helsinki er hovedstaden']},
+  {n:'Island',     f:'🇮🇸', c:'Europa',   p:'~370 000', d:'M22,38L38,28L58,26L74,32L80,44L74,56L58,64L38,62L22,52Z', hints:['Øystat i Nordatlanteren','Kjent for geysirer og nordlys','En av verdens nordligste stater','Reykjavik er hovedstad','Vikingætt']},
+  {n:'Frankrike',  f:'🇫🇷', c:'Europa',   p:'~67 mill', d:'M38,15L60,15L72,28L72,48L60,62L40,62L28,50L28,28Z', hints:['Vesteuropeisk land','Eiffeltårnet er kjent ikon','Vin og baguetter','Grenser til Spania, Italia og Tyskland','Paris er verdens mest besøkte by']},
+  {n:'Tyskland',   f:'🇩🇪', c:'Europa',   p:'~84 mill', d:'M38,12L62,12L70,20L72,32L68,42L65,52L55,58L45,58L35,52L30,42L28,30L32,20Z', hints:['Midteuropeisk land','Grenser til 9 land','Kjent for øl, pølser og biler','Berlin er hovedstad','Delt i øst og vest under den kalde krigen']},
+  {n:'Spania',     f:'🇪🇸', c:'Europa',   p:'~47 mill', d:'M25,20L72,18L82,30L80,50L72,62L50,68L30,65L18,55L15,38Z', hints:['Sørvest i Europa','Grenser til Portugal og Frankrike','Flamenco og tyre kampspill','Real Madrid og FC Barcelona','Madrid er hovedstad']},
+  {n:'Italia',     f:'🇮🇹', c:'Europa',   p:'~60 mill', d:'M42,8L55,10L62,18L58,28L62,38L58,48L60,55L65,62L70,68L68,76L60,80L54,74L48,68L44,74L36,76L32,70L38,62L40,54L36,46L36,35L38,25L40,15Z', hints:['Ser ut som en støvel','Middelhavland','Pizza og pasta','Roma er evig by og hovedstad','Hjem til Vatikanet']},
+  {n:'Storbritannia',f:'🇬🇧',c:'Europa',  p:'~67 mill', d:'M42,12L56,10L64,18L62,28L66,36L62,46L56,54L50,58L44,56L38,50L36,40L38,30L36,22Z', hints:['Øystat vest for Europa','Kjent for te og høflig vær','Hjemsted for Beatles og Rolling Stones','London er en av verdens største byer','Monarki med kong Charles']},
+  {n:'Nederland',  f:'🇳🇱', c:'Europa',   p:'~17 mill', d:'M35,30L62,28L70,36L68,50L55,56L38,54L28,45Z', hints:['Vesteuropeisk lavland','Kjent for tulipaner og vindmøller','Amsterdam er hovedstad','Mye land er under havnivå','Sykkelparadis']},
+  {n:'Polen',      f:'🇵🇱', c:'Europa',   p:'~38 mill', d:'M28,25L72,22L78,32L76,48L64,58L48,60L30,56L20,45L22,33Z', hints:['Midtøsteuropeisk land','Grenser til Russland, Ukraina og Tyskland','Warszawa er hovedstad','Kjent for Chopin','Katolsk og stolt nasjon']},
+  {n:'Sveits',     f:'🇨🇭', c:'Europa',   p:'~8,7 mill',d:'M30,36L65,34L72,46L65,58L40,60L28,50Z', hints:['Lite alpeland i Europa','Kjent for sjokolade og ost','Nøytralt land','Ingen kystlinje','Genève er FNs europeiske sete']},
+  {n:'USA',        f:'🇺🇸', c:'Amerika',  p:'~330 mill',d:'M10,28L32,22L55,20L72,22L88,28L90,40L85,50L75,52L70,60L62,62L55,58L45,55L36,52L28,55L22,50L12,45L8,36Z', hints:['Supermakt i Nord-Amerika','50 delstater','Washington D.C. er hovedstad','Kjent for Hollywood og NASA','Kaldkrig-rival med Sovjet']},
+  {n:'Canada',     f:'🇨🇦', c:'Amerika',  p:'~38 mill', d:'M5,20L25,15L45,12L65,10L85,15L95,25L95,40L85,45L70,48L55,45L40,48L28,45L15,42L5,35Z', hints:['Nordamerikansk land med lengst kystlinje','Grenser kun til USA','Ahorn-løvet på flagget','Ottawa er hovedstad','Kjent for ishockey og grizzlybjørn']},
+  {n:'Mexico',     f:'🇲🇽', c:'Amerika',  p:'~130 mill',d:'M15,28L45,22L65,25L78,35L80,48L72,58L60,65L48,68L38,62L28,55L18,45Z', hints:['Søramerikansk stat i Mellom-Amerika','Grenser til USA i nord','Tortillas og tacos','Tenochtitlan (Mexico City) var aztekernes by','Turistmål med pyramider']},
+  {n:'Brasil',     f:'🇧🇷', c:'Amerika',  p:'~214 mill',d:'M30,10L70,8L85,18L90,32L88,48L80,60L70,70L58,78L45,78L32,70L20,58L15,42L18,26Z', hints:['Søramerikansk gigant','Verdens største regnskog','Fotballnasjon','Rio de Janeiro og karneval','Snakker portugisisk']},
+  {n:'Argentina',  f:'🇦🇷', c:'Amerika',  p:'~45 mill', d:'M38,5L60,5L68,15L65,28L60,42L56,55L58,68L55,80L50,90L45,95L40,88L36,75L32,60L30,45L30,28L32,15Z', hints:['Smalest i sør i Sør-Amerika','Buenos Aires er europeisklignende storby','Tango og biff','Grenser til Chile langs Andesfjellene','Messi er herfra']},
+  {n:'Chile',      f:'🇨🇱', c:'Amerika',  p:'~19 mill', d:'M44,8L56,10L60,20L58,35L56,50L58,63L56,76L52,88L47,95L42,88L40,75L40,60L38,45L38,30L40,18Z', hints:['Verdens lengste og smaleste land','Langs vestkysten av Sør-Amerika','Andesfjellene i øst','Atacama-ørkenen er verdens tørreste','Santiago er hovedstad']},
+  {n:'Russland',   f:'🇷🇺', c:'Asia/Europa',p:'~144 mill',d:'M5,28L30,20L55,18L75,20L92,25L96,35L90,45L75,50L55,52L38,50L20,52L8,47L4,37Z', hints:['Verdens største land','Strekker seg over 11 tidssoner','Moskva er hovedstad','Grenser til 14 land','Var Sovjetunionens kjerne']},
+  {n:'Tyrkia',     f:'🇹🇷', c:'Asia/Europa',p:'~84 mill',d:'M15,33L45,28L68,30L88,35L92,44L85,53L68,56L45,55L22,53L12,45Z', hints:['Bro mellom Europa og Asia','Istanbul er byens historiske perle','Grenser til Hellas og Syria','Ankara er faktisk hovedstad','Kjent for kebab og baklava']},
+  {n:'Saudi-Arabia',f:'🇸🇦',c:'Asia',     p:'~35 mill', d:'M25,22L68,20L78,30L82,45L75,60L60,70L45,72L30,65L20,52L18,36Z', hints:['Den arabiske halvøya','Verdens største oljeprodusent','Mekka og Medina er hellige steder','Monarkiet al-Saud','Riyadh er hovedstad']},
+  {n:'Egypt',      f:'🇪🇬', c:'Afrika',   p:'~100 mill',d:'M22,20L73,18L80,28L78,55L68,65L48,65L28,60L18,48L16,32Z', hints:['Nordøstafrikansk land','Nilen renner gjennom','Pyramidene i Giza','Grenser til Libya og Sudan','Kairo er Afrikas største by']},
+  {n:'India',      f:'🇮🇳', c:'Asia',     p:'~1,4 mrd', d:'M32,12L68,12L78,22L80,35L75,48L68,58L60,68L52,76L48,80L44,76L36,68L28,58L22,46L20,32Z', hints:['Verdens mest folkerike land','Ganges er hellig elv','Cricket er nasjonalsporten','Delhi er landets hovedstad','Gandhi og Taj Mahal er herfra']},
+  {n:'Kina',       f:'🇨🇳', c:'Asia',     p:'~1,4 mrd', d:'M22,18L55,10L80,15L92,28L90,42L78,55L60,62L42,60L26,52L15,40L15,28Z', hints:['Verdens nest mest folkerike land','Den kinesiske muren','Grenser til 14 land','Beijing er hovedstad','Den store stupa og ris-terrasser']},
+  {n:'Japan',      f:'🇯🇵', c:'Asia',     p:'~125 mill',d:'M58,12L72,14L80,22L78,35L70,44L60,50L50,52L42,48L38,40L40,30L48,20Z', hints:['Øystat i Stillehavet','Soloppgangens land','Sushi, anime og samuraier','Tokyo er verdens mest folkerike by','Kjent for teknologi og Fuji-fjellet']},
+  {n:'Sør-Korea',  f:'🇰🇷', c:'Asia',     p:'~52 mill', d:'M32,30L65,28L74,38L70,52L58,62L42,62L30,55L26,44Z', hints:['Østasiatisk halvøyland','K-pop og K-drama','Seoul er en gigantby','Grenser til Nord-Korea','Kjent for Samsung og Hyundai']},
+  {n:'Australia',  f:'🇦🇺', c:'Oseania',  p:'~26 mill', d:'M20,28L48,18L75,20L90,32L92,48L82,60L65,68L48,68L32,60L18,48Z', hints:['Kontinent og land i ett','Sydney Opera House','Kenguru og koala','Canberra er faktisk hovedstad (ikke Sydney)','Great Barrier Reef']},
+  {n:'Sør-Afrika', f:'🇿🇦', c:'Afrika',   p:'~60 mill', d:'M22,18L72,18L82,30L80,48L68,62L55,70L48,74L42,70L28,60L18,44L16,30Z', hints:['Sørspissen av Afrika','Nelson Mandela var herfra','Kjent for diamanter og safari','Tre hovedsteder','Apartheidregimet avsluttes i 1994']},
+  {n:'Marokko',    f:'🇲🇦', c:'Afrika',   p:'~37 mill', d:'M24,18L62,15L75,22L80,36L75,52L60,60L40,60L22,52L16,38Z', hints:['Nordvestafrikansk land','Grenser til Algerie og Vest-Sahara','Marrakesh og Casablanca','Sahara i sør','Arabisk-berberisk kultur']},
+  {n:'Nigeria',    f:'🇳🇬', c:'Afrika',   p:'~220 mill',d:'M24,20L72,18L80,28L80,45L70,58L52,64L34,62L20,52L18,36Z', hints:['Afrikas mest folkerike land','Niger-deltaet er oljerik','Lagos er gigantby','Naboer med Niger og Kamerun','Abuja er hovedstad']},
+];
+
+const GZ_PERSONS = [
+  {n:'Nelson Mandela',    hints:['Sørafrikansk politiker','Sonet 27 år i fengsel for sine overbevisninger','Kjempet mot apartheid med ikkevold','Fikk Nobels fredspris i 1993','Ble Sør-Afrikas første svarte president i 1994']},
+  {n:'Marie Curie',       hints:['Polsk-fransk forsker (1867–1934)','Første kvinne til å vinne Nobelprisen','Oppdaget grunnstoffene polonium og radium','Eneste person til å vinne to Nobelpriser i ulike naturvitenskaplige fag','Forsket på radioaktivitet – døde av det']},
+  {n:'Albert Einstein',   hints:['Tysk-sveitsisk-amerikansk vitenskapsmann','Levde fra 1879 til 1955','Kjent for relativitetsteorien','Utviklet formelen E=mc²','Fikk Nobels fysikkpris i 1921']},
+  {n:'Leonardo da Vinci', hints:['Italiensk renessansekunstner (1452–1519)','Malte Mona Lisa og Det siste måltid','Var også ingeniør og oppfinner','Tegnet skisser av fly og tankliknende maskiner 400 år for tidlig','Regnes som verdenshistoriens mest allsidige geni']},
+  {n:'Mahatma Gandhi',    hints:['Indisk frihetsleder (1869–1948)','Kjent for ikkevoldelig motstand (satyagraha)','Ledet India mot frigjøring fra Storbritannia','Kallenavn betyr «stor sjel»','Ble skutt og drept i januar 1948']},
+  {n:'Martin Luther King',hints:['Amerikansk borgerrettighetsleder','Baptistpastor som kjempet for rasemessig likhet','Holdt talen «I Have a Dream» i 1963','Mottok Nobels fredspris i 1964','Ble skutt og drept i Memphis i april 1968']},
+  {n:'Anne Frank',        hints:['Tysk-nederlandsk jødisk jente (1929–1945)','Flyktet med familien til Amsterdam for nazistene','Gjemte seg i et skjulested i Amsterdam i to år','Dagboken hennes ble en av historiens mest leste bøker','Ble deportert og døde i Bergen-Belsen']},
+  {n:'Fridtjof Nansen',   hints:['Norsk polarforsker og diplomat (1861–1930)','Krysset Grønlands innlandsis på ski i 1888','Ledet Fram-ekspedisjonen mot Nordpolen','Fikk Nobels fredspris i 1922 for flyktningarbeid','Nansen-passet er oppkalt etter ham']},
+  {n:'Cleopatra',         hints:['Hersket over Egypt for ca. 2000 år siden','Siste farao av ptolemeisk ætt','Var faktisk av gresk opprinnelse, ikke egyptisk','Hadde romantiske forhold til Julius Caesar og Marcus Antonius','Tok livet av seg etter at Marcus Antonius døde']},
+  {n:'William Shakespeare',hints:['Engelsk forfatter (1564–1616)','Levde og virket i London under dronning Elizabeth I','Skrev 37 skuespill og 154 sonetter','Kjent for Romeo og Julie, Hamlet og Macbeth','Regnes som verdenslitteraturens mest innflytelsesrike forfatter']},
+  {n:'Barack Obama',      hints:['Amerikansk politiker (f. 1961)','Advokat og senator fra Illinois','USAs 44. president (2009–2017)','Første afroamerikanske president i USA','Mottok Nobels fredspris i 2009']},
+  {n:'Greta Thunberg',    hints:['Svensk klimaaktivist (f. 2003)','Begynte å streike utenfor det svenske parlamentet i august 2018','Grunnla bevegelsen Fridays for Future','Har diagnosen Aspergers syndrom','Ble Times person of the year i 2019']},
+  {n:'Isaac Newton',      hints:['Engelsk vitenskapsmann (1643–1727)','Formulerte gravitasjonsloven','Utviklet klassisk mekanikk','En eple-anekdote er knyttet til oppdagelsen hans','Bidro til calculus og optikk']},
+  {n:'Nikola Tesla',      hints:['Serbisk-amerikansk oppfinner (1856–1943)','Kjent for å utvikle vekselstrøm (AC)','Rivaliserte med Thomas Edison','Oppfant blant annet Tesla-spolen','Elbilselskapet Tesla er oppkalt etter ham']},
+  {n:'Malala Yousafzai',  hints:['Pakistansk utdanningssaktivist (f. 1997)','Ble skutt i hodet av Taliban som 15-åring','Overlevde og fortsatte kampen for jenters skolegang','Yngste mottaker av Nobels fredspris (2014)','Studerte ved Oxford og grunnla Malala Fund']},
+  {n:'Christopher Columbus',hints:['Italiensk sjøfarer (1451–1506)','Seilte på vegne av den spanske kronen','Krysset Atlanterhavet i 1492','Mente han hadde nådd Asia – fant Amerika','Gjorde fire reiser til den nye verden']},
+  {n:'Frida Kahlo',       hints:['Meksikansk kunstner (1907–1954)','Kjent for selvportretter med surrealistisk preg','Levde med kroniske smerter etter en bussulykke som ung','Gift med mureren Diego Rivera','Symbol for feminisme og mexicansk kultur']},
+  {n:'Roald Dahl',        hints:['Halvnorsk-britisk forfatter (1916–1990)','Faren hans var norsk fra Sarpsborg','Tjenestegjorde i RAF under 2. verdenskrig','Kjent for Charlie og sjokoladefabrikken og Matilda','Også forfatter av voksenlitteratur og noveller']},
+  {n:'Elon Musk',         hints:['Sør-afrikansk-amerikanerskaper (f. 1971)','Grunnla PayPal, SpaceX og var med å grunnlegge Tesla','Kjøpte og omdøpte Twitter til X','En av verdens rikeste personer','Drømmer om å kolonisere Mars']},
+  {n:'Winston Churchill',  hints:['Britisk statsleder (1874–1965)','Ledet Storbritannia gjennom 2. verdenskrig','Kjent for inspirerende taler («We shall fight on the beaches»)','Fikk Nobelprisen i litteratur i 1953','Statsminister i to perioder']},
+];
+// ====== END GAME ZONE DATA ======
 
 // ====== INIT ======
 (async () => {
