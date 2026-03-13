@@ -602,6 +602,10 @@
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
       Lærer
     </button>
+    <button id="teacherLogoutBtn" onclick="logoutTeacher()" style="display:none;align-items:center;gap:6px;padding:7px 12px;background:transparent;border:1px solid var(--border-2);color:var(--text-3);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;transition:all 0.18s;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='var(--border-2)';this.style.color='var(--text-3)'">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logg ut
+    </button>
   </div>
 </nav>
 
@@ -628,6 +632,9 @@
     </button>
     <button class="mob-nav-btn teacher-tab" id="mob-teacher" onclick="checkTeacher()" style="display:none">
       <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Lærer
+    </button>
+    <button class="mob-nav-btn teacher-tab" id="mob-logout-teacher" onclick="logoutTeacher()" style="display:none;color:#ef4444;">
+      <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>Logg ut
     </button>
   </div>
 </nav>
@@ -678,7 +685,14 @@
         <div style="font-size:0.88rem;opacity:0.8;" id="welcomeClass"></div>
         <div id="studentProgressWrap" style="margin-top:0.75rem;background:rgba(255,255,255,0.2);border-radius:50px;height:8px;overflow:hidden;"><div id="studentProgressBar" style="height:100%;background:var(--c2);border-radius:50px;width:0%;transition:width 0.6s ease;"></div></div>
         <div id="studentProgressLabel" style="font-size:0.75rem;opacity:0.75;margin-top:0.3rem;font-weight:700;"></div>
-        <button onclick="studentLogout()" style="margin-top:0.75rem;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);color:white;padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">Bytt bruker</button>
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.75rem;">
+  <button onclick="studentLogout()" style="background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);color:white;padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">
+    Bytt bruker
+  </button>
+  <button onclick="studentLogout(true)" style="background:rgba(239,68,68,0.25);border:2px solid rgba(239,68,68,0.5);color:white;padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">
+    Logg ut
+  </button>
+</div>
       </div>
     </div>
   </div>
@@ -2384,10 +2398,38 @@ async function loadState() {
   initDark();
   initMsToken();
   const dbMods = await DB.loadModules();
-  // Erstatt demo-moduler med ekte moduler fra Supabase
   if (dbMods.length > 0) {
     state.modules = dbMods;
   }
+
+  // Restore teacher session
+  const teacherSession = localStorage.getItem('os_teacher_session');
+  if (teacherSession) {
+    try {
+      const ts = JSON.parse(teacherSession);
+      // Session expires after 7 days
+      if (ts.loggedInAt && (Date.now() - ts.loggedInAt) < 7 * 24 * 3600 * 1000) {
+        state.isTeacher = true;
+        document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'inline-flex');
+        const btn = document.getElementById('teacherLoginBtn');
+        if (btn) btn.style.display = 'none';
+        const logoutBtn = document.getElementById('teacherLogoutBtn');
+        if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+        const mobLogout2 = document.getElementById('mob-logout-teacher');
+        if (mobLogout2) mobLogout2.style.display = 'flex';
+        const rb = document.getElementById('roleBadge');
+        if (rb) { rb.textContent = 'Lærer'; rb.style.color = 'var(--accent-h)'; rb.style.borderColor = 'var(--accent)'; }
+        if (document.getElementById('teacherQuizSection')) {
+          document.getElementById('teacherQuizSection').style.display = 'block';
+          document.getElementById('studentQuizSection').style.display = 'none';
+        }
+      } else {
+        localStorage.removeItem('os_teacher_session');
+      }
+    } catch(e) { localStorage.removeItem('os_teacher_session'); }
+  }
+
+  // Restore student session
   const savedStudent = localStorage.getItem('lh_student');
   if (savedStudent) {
     try { state.student = JSON.parse(savedStudent); } catch(e) { localStorage.removeItem('lh_student'); }
@@ -2436,10 +2478,11 @@ async function studentLogin() {
   showView('tasks');
 }
 
-function studentLogout() {
+function studentLogout(fullLogout) {
   state.student = null;
   _progressCache = {};
   localStorage.removeItem('lh_student');
+  if (fullLogout) showToast('Logget ut');
   const loginBox = document.getElementById('studentLoginBox');
   const wb = document.getElementById('welcomeBack');
   if (loginBox) loginBox.style.display = 'block';
@@ -2559,18 +2602,27 @@ function loginTeacher() {
   const correct = window._teacherPassOverride || TEACHER_PASS;
   if (pass === correct) {
     state.isTeacher = true;
+    // Persist teacher session
+    localStorage.setItem('os_teacher_session', JSON.stringify({ loggedInAt: Date.now(), passHash: btoa(pass).slice(0,8) }));
     document.getElementById('teacherQuizSection').style.display = 'block';
     document.getElementById('studentQuizSection').style.display = 'none';
     showDbStatus();
     closeTeacherModal();
     document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'inline-flex');
     document.getElementById('teacherLoginBtn').style.display = 'none';
-    document.getElementById('roleBadge').textContent = '🖊️ Lærer';
+    const rb = document.getElementById('roleBadge');
+    if (rb) { rb.textContent = 'Lærer'; rb.style.color = 'var(--accent-h)'; rb.style.borderColor = 'var(--accent)'; }
+    // Show logout button
+    const logoutBtn = document.getElementById('teacherLogoutBtn');
+    if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+    const mobLogout = document.getElementById('mob-logout-teacher');
+    if (mobLogout) mobLogout.style.display = 'flex';
     showView('teacher');
     renderManageModules();
     renderResults();
     renderHomeModules();
     renderTaskModules();
+    showToast('✅ Logget inn som lærer');
   } else {
     const err = document.getElementById('teacherError');
     if (err) { err.style.display='block'; setTimeout(()=>err.style.display='none',2500); }
@@ -2586,15 +2638,22 @@ function checkTeacher() {
 }
 function logoutTeacher() {
   state.isTeacher = false;
+  localStorage.removeItem('os_teacher_session');
   document.getElementById('teacherQuizSection').style.display = 'none';
   document.getElementById('studentQuizSection').style.display = 'block';
   document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'none');
   document.getElementById('teacherLoginBtn').style.display = 'inline-flex';
-  document.getElementById('roleBadge').textContent = '👤 Gjest';
+  const rb = document.getElementById('roleBadge');
+  if (rb) { rb.textContent = 'Gjest'; rb.style.color = ''; rb.style.borderColor = ''; }
+  const logoutBtn = document.getElementById('teacherLogoutBtn');
+  if (logoutBtn) logoutBtn.style.display = 'none';
+  const mobLogout = document.getElementById('mob-logout-teacher');
+  if (mobLogout) mobLogout.style.display = 'none';
   renderHomeModules();
   renderTaskModules();
   updateContinueCard();
   showView('home');
+  showToast('Logget ut');
 }
 
 // ====== SETTINGS ======
