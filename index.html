@@ -1802,7 +1802,10 @@
       <div id="wordle-result" style="display:none;text-align:center;margin-top:1.25rem;padding:1.25rem;background:var(--s1);border:1px solid var(--border);border-radius:14px;">
         <div id="wordle-result-msg" style="font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:0.5rem;"></div>
         <div id="wordle-result-word" style="color:var(--text-2);font-size:0.9rem;margin-bottom:1rem;"></div>
-        <button onclick="gzBackToLobby()" style="padding:10px 24px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>
+        <div style="display:flex;gap:0.75rem;justify-content:center;">
+          <button onclick="gzStartWordle()" style="padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Spill igjen</button>
+          <button onclick="gzBackToLobby()" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1836,7 +1839,10 @@
       <div id="worldle-result" style="display:none;text-align:center;margin-top:1.25rem;padding:1.25rem;background:var(--s1);border:1px solid var(--border);border-radius:14px;">
         <div id="worldle-result-msg" style="font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:0.5rem;"></div>
         <div id="worldle-result-country" style="color:var(--text-2);font-size:0.9rem;margin-bottom:1rem;"></div>
-        <button onclick="gzBackToLobby()" style="padding:10px 24px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>
+        <div style="display:flex;gap:0.75rem;justify-content:center;">
+          <button onclick="gzStartWorldle()" style="padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Spill igjen</button>
+          <button onclick="gzBackToLobby()" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1866,7 +1872,10 @@
       <div id="whoami-result" style="display:none;text-align:center;margin-top:1.25rem;padding:1.25rem;background:var(--s1);border:1px solid var(--border);border-radius:14px;">
         <div id="whoami-result-msg" style="font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:0.5rem;"></div>
         <div id="whoami-result-name" style="color:var(--text-2);font-size:0.9rem;margin-bottom:1rem;"></div>
-        <button onclick="gzBackToLobby()" style="padding:10px 24px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>
+        <div style="display:flex;gap:0.75rem;justify-content:center;">
+          <button onclick="gzStartWhoami()" style="padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Spill igjen</button>
+          <button onclick="gzBackToLobby()" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>
+        </div>
       </div>
     </div>
   </div>
@@ -5237,20 +5246,54 @@ function gzRenderGameCards() {
   const grid = document.getElementById('gz-game-cards');
   if (!grid) return;
   const games = [
-    { id:'wordle',  label:'Wordle',   icon:'🅦', desc:'Gjett det skjulte ordet på 6 forsøk', color:'#22c55e', fn:'gzStartWordle()' },
-    { id:'worldle', label:'Worldle',  icon:'🌍', desc:'Gjett landet fra silhuetten', color:'#4f6ef7', fn:'gzStartWorldle()' },
-    { id:'whoami',  label:'Who Am I?',icon:'❓', desc:'Bruk hint til å gjette hvem jeg er', color:'#a855f7', fn:'gzStartWhoami()' },
+    { id:'wordle',  label:'Wordle',   icon:'W', desc:'Gjett det skjulte ordet', color:'#22c55e', startFn:'gzStartWordle' },
+    { id:'worldle', label:'Worldle',  icon:'🌍', desc:'Gjett landet fra silhuetten', color:'#4f6ef7', startFn:'gzStartWorldle' },
+    { id:'whoami',  label:'Who Am I?',icon:'?', desc:'Gjett personen fra hint', color:'#a855f7', startFn:'gzStartWhoami' },
   ].filter(g => !GZ.session.games || GZ.session.games.includes(g.id));
 
   grid.innerHTML = games.map(g => {
     const myScore = GZ.scores[g.id];
-    return `<div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.5rem;cursor:pointer;transition:all 0.18s;position:relative;" onclick="${g.fn}" onmouseover="this.style.borderColor='${g.color}';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
-      <div style="font-size:2rem;margin-bottom:0.5rem;">${g.icon}</div>
-      <div style="font-family:'Fredoka One',cursive;font-size:1.25rem;color:var(--text);margin-bottom:0.3rem;">${g.label}</div>
-      <div style="font-size:0.83rem;color:var(--text-2);">${g.desc}</div>
-      ${myScore!=null ? `<div style="position:absolute;top:12px;right:12px;background:${g.color}22;border:1px solid ${g.color}55;border-radius:8px;padding:4px 10px;font-family:'Fredoka One',cursive;font-size:1rem;color:${g.color};">${myScore}p</div>` : '<div style="position:absolute;top:12px;right:12px;background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:4px 10px;font-size:0.75rem;font-weight:800;color:var(--text-3);">Ikke spilt</div>'}
+    const sess = GZ.session;
+    // Get session-level difficulty as default
+    const defDiff = g.id==='wordle' ? (sess.wordleDiff||'normal') : g.id==='worldle' ? (sess.worldleDiff||'normal') : (sess.whoamiDiff||'normal');
+    return `<div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.5rem;transition:all 0.18s;position:relative;" id="game-card-${g.id}">
+      <div style="display:flex;align-items:center;gap:0.875rem;margin-bottom:0.875rem;">
+        <div style="width:48px;height:48px;border-radius:12px;background:${g.color}22;border:2px solid ${g.color}44;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:1.4rem;color:${g.color};">${g.icon}</div>
+        <div>
+          <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--text);">${g.label}</div>
+          <div style="font-size:0.8rem;color:var(--text-2);">${g.desc}</div>
+        </div>
+        ${myScore!=null ? `<div style="margin-left:auto;background:${g.color}22;border:1px solid ${g.color}55;border-radius:8px;padding:4px 10px;font-family:'Fredoka One',cursive;font-size:1rem;color:${g.color};">${myScore}p</div>` : ''}
+      </div>
+      <div style="display:flex;gap:0.4rem;margin-bottom:0.875rem;">
+        ${['easy','normal','hard'].map(d=>`<button onclick="gzSetDiff('${g.id}','${d}')" id="diff-${g.id}-${d}" style="flex:1;padding:7px 4px;border-radius:8px;border:2px solid ${d===defDiff?g.color:'var(--border-2)'};background:${d===defDiff?g.color+'22':'transparent'};color:${d===defDiff?g.color:'var(--text-2)'};font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;transition:all 0.15s;">${{easy:'Lett',normal:'Normal',hard:'Vanskelig'}[d]}</button>`).join('')}
+      </div>
+      <button onclick="${g.startFn}()" style="width:100%;padding:11px;background:${g.color};color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;transition:background 0.18s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Spill nå</button>
     </div>`;
   }).join('');
+
+  // Init difficulty buttons state
+  games.forEach(g => {
+    const sess = GZ.session;
+    const defDiff = g.id==='wordle' ? (sess.wordleDiff||'normal') : g.id==='worldle' ? (sess.worldleDiff||'normal') : (sess.whoamiDiff||'normal');
+    GZ._gameDiff = GZ._gameDiff || {};
+    GZ._gameDiff[g.id] = defDiff;
+  });
+}
+
+function gzSetDiff(gameId, diff) {
+  GZ._gameDiff = GZ._gameDiff || {};
+  GZ._gameDiff[gameId] = diff;
+  const colors = {wordle:'#22c55e', worldle:'#4f6ef7', whoami:'#a855f7'};
+  const c = colors[gameId] || 'var(--accent)';
+  ['easy','normal','hard'].forEach(d => {
+    const btn = document.getElementById(`diff-${gameId}-${d}`);
+    if (!btn) return;
+    const active = d === diff;
+    btn.style.borderColor = active ? c : 'var(--border-2)';
+    btn.style.background = active ? c+'22' : 'transparent';
+    btn.style.color = active ? c : 'var(--text-2)';
+  });
 }
 
 function gzStartTimer() {
@@ -5353,9 +5396,15 @@ function gzStartWordle() {
   const wLen = sess.wordleLen || 5;
   const custom = (sess.customWords||[]).filter(w=>w.length===wLen).map(w=>w.toLowerCase());
   const base = GZ_WORDS_NO.filter(w=>w.length===wLen).map(w=>w.toLowerCase());
-  const pool = custom.length > 0 ? custom : base.length > 0 ? base : GZ_WORDS_NO.map(w=>w.toLowerCase());
-  const word = pool[Math.floor(Math.random()*pool.length)];
-  const diff = sess.wordleDiff || 'normal';
+  // Track played words to avoid repeats
+  if (!GZ._playedWordle) GZ._playedWordle = new Set();
+  let pool = custom.length > 0 ? custom : base.length > 0 ? base : GZ_WORDS_NO.map(w=>w.toLowerCase());
+  // Filter out already played words (unless all exhausted)
+  let unplayed = pool.filter(w => !GZ._playedWordle.has(w));
+  if (unplayed.length === 0) { GZ._playedWordle.clear(); unplayed = pool; }
+  const word = unplayed[Math.floor(Math.random()*unplayed.length)];
+  GZ._playedWordle.add(word);
+  const diff = (GZ._gameDiff && GZ._gameDiff.wordle) || sess.wordleDiff || 'normal';
   const maxTries = diff==='easy' ? 8 : diff==='hard' ? 4 : 6;
   WORDLE_ST = { word, guesses:[], cur:'', over:false, maxTries, wLen:word.length };
   // Update board display
@@ -5395,7 +5444,6 @@ function wordleRender() {
         cell.style.background='var(--s2)';
         cell.style.border='2px solid '+(WORDLE_ST.cur[c]?'var(--accent)':'var(--border-2)');
         cell.style.color='var(--text)';
-        if (WORDLE_ST.cur[c]) cell.style.transform='scale(1.08)';
       } else {
         cell.style.background='var(--s2)'; cell.style.border='2px solid var(--border)';
       }
@@ -5472,17 +5520,76 @@ document.addEventListener('keydown', e => {
   }
 });
 
-function wordleSubmit() {
+
+// Word dictionaries per language (common words cache to avoid repeated API calls)
+const WORDLE_VALID_CACHE = new Set();
+const WORDLE_INVALID_CACHE = new Set();
+
+async function wordleCheckWord(word) {
+  if (!word) return false;
+  const w = word.toLowerCase();
+  if (WORDLE_VALID_CACHE.has(w)) return true;
+  if (WORDLE_INVALID_CACHE.has(w)) return false;
+
+  const lang = GZ.session.wordleLang || 'no';
+
+  // For Norwegian - check against our built-in list first
+  if (lang === 'no') {
+    const inBuiltin = GZ_WORDS_NO.some(bw => bw.toLowerCase() === w);
+    if (inBuiltin) { WORDLE_VALID_CACHE.add(w); return true; }
+    // Try Norsk Ordbok API (free)
+    try {
+      const res = await fetch(`https://ordbokapi.org/ordbokapi/api/v1/articles?wordForm=${encodeURIComponent(w)}&dict=bm,nn&scope=e`, {signal: AbortSignal.timeout(2000)});
+      if (res.ok) {
+        const data = await res.json();
+        const valid = (data.bm && data.bm.length > 0) || (data.nn && data.nn.length > 0);
+        valid ? WORDLE_VALID_CACHE.add(w) : WORDLE_INVALID_CACHE.add(w);
+        return valid;
+      }
+    } catch(e) {}
+    // Fallback: accept if it uses Norwegian alphabet characters
+    const noChars = /^[a-zæøå]+$/.test(w);
+    if (noChars) WORDLE_VALID_CACHE.add(w);
+    return noChars;
+  }
+
+  // For English - use Free Dictionary API
+  if (lang === 'en') {
+    try {
+      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(w)}`, {signal: AbortSignal.timeout(2000)});
+      if (res.ok) { WORDLE_VALID_CACHE.add(w); return true; }
+      if (res.status === 404) { WORDLE_INVALID_CACHE.add(w); return false; }
+    } catch(e) {}
+    return /^[a-z]+$/.test(w); // fallback
+  }
+
+  // For other languages / no validation - accept any alphabetic
+  return /^[a-zæøåäöü]+$/.test(w);
+}
+
+function wordleShakeRow() {
+  const board = document.getElementById('wordle-board');
+  const rows = board?.children;
+  const curRow = rows?.[WORDLE_ST.guesses.length];
+  if (curRow) { curRow.style.animation='wordleShake 0.4s'; setTimeout(()=>curRow.style.animation='',500); }
+}
+
+async function wordleSubmit() {
   const wLen = WORDLE_ST.word.length;
   if (WORDLE_ST.over || WORDLE_ST.cur.length!==wLen) {
-    if (WORDLE_ST.cur.length > 0 && WORDLE_ST.cur.length < wLen) {
-      // Shake animation
-      const board = document.getElementById('wordle-board');
-      const rows = board?.querySelectorAll('div');
-      const curRow = rows?.[WORDLE_ST.guesses.length];
-      if (curRow) { curRow.style.animation='wordleShake 0.4s'; setTimeout(()=>curRow.style.animation='',400); }
-    }
+    if (WORDLE_ST.cur.length > 0) wordleShakeRow();
     return;
+  }
+  // Validate word unless it's a custom word or session skips validation
+  const isCustom = (GZ.session.customWords||[]).map(w=>w.toLowerCase()).includes(WORDLE_ST.cur);
+  if (!isCustom && GZ.session.wordleValidate !== false) {
+    const valid = await wordleCheckWord(WORDLE_ST.cur);
+    if (!valid) {
+      const msgEl = document.getElementById('wordle-msg');
+      if (msgEl) { msgEl.textContent='Ikke et gyldig ord'; msgEl.style.color='#ef4444'; setTimeout(()=>{msgEl.textContent='';msgEl.style.color='';},1800); }
+      wordleShakeRow();
+      return;
+    }
   }
   WORDLE_ST.guesses.push(WORDLE_ST.cur);
   const won = WORDLE_ST.cur === WORDLE_ST.word;
@@ -5519,8 +5626,12 @@ function gzStartWorldle() {
     const filtered = GZ_COUNTRIES.filter(c=>c.c===sess.worldleContinent);
     if (filtered.length > 0) pool = filtered;
   }
-  const country = pool[Math.floor(Math.random()*pool.length)];
-  const diff = sess.worldleDiff || 'normal';
+  if (!GZ._playedWorldle) GZ._playedWorldle = new Set();
+  let unplayedW = pool.filter(c => !GZ._playedWorldle.has(c.n));
+  if (unplayedW.length === 0) { GZ._playedWorldle.clear(); unplayedW = pool; }
+  const country = unplayedW[Math.floor(Math.random()*unplayedW.length)];
+  GZ._playedWorldle.add(country.n);
+  const diff = (GZ._gameDiff && GZ._gameDiff.worldle) || sess.worldleDiff || 'normal';
   const maxTries = diff==='easy' ? 8 : diff==='hard' ? 4 : 6;
   WORLDLE_ST = { country, guesses:[], over:false, maxTries };
   document.getElementById('worldle-path')?.setAttribute('d', country.d);
@@ -5582,20 +5693,31 @@ function worldleGuess() {
   const gl=document.getElementById('worldle-guesses');
   if (gl && !correct) {
     const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:0.5rem;padding:8px 12px;border-radius:8px;background:rgba(239,68,68,0.08);border:1px solid #ef444433;font-weight:700;font-size:0.88rem;';
-    // Distance + direction
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:10px 14px;border-radius:10px;background:rgba(239,68,68,0.08);border:1px solid #ef444433;font-weight:700;font-size:0.9rem;animation:fadeIn 0.3s ease;';
     const target=WORLDLE_ST.country;
     const guessCountry=GZ_COUNTRIES.find(c=>c.n.toLowerCase()===guess.toLowerCase());
-    let distStr = '';
-    if (guessCountry && guessCountry.lat && target.lat) {
+    let rightSide = '';
+    if (guessCountry && guessCountry.lat!=null && target.lat!=null) {
       const dist=worldleHaversine(guessCountry.lat,guessCountry.lon,target.lat,target.lon);
       const bearing=worldleBearing(guessCountry.lat,guessCountry.lon,target.lat,target.lon);
-      const arrow=worldleArrow(bearing);
       const pct=Math.max(0,Math.round((1-dist/20000)*100));
-      distStr=` <span style="color:var(--text-3);font-size:0.8rem;">${arrow} ${dist.toLocaleString('no')} km · ${pct}%</span>`;
+      // SVG directional arrow (rotated based on bearing)
+      const arrowSvg=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(${Math.round(bearing)}deg);flex-shrink:0;"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`;
+      const pctColor = pct>70?'#22c55e':pct>40?'#f59e0b':'#ef4444';
+      rightSide=`<div style="display:flex;align-items:center;gap:0.75rem;">
+        <span style="color:${pctColor};font-family:'Fredoka One',cursive;font-size:1rem;">${pct}%</span>
+        <span style="color:var(--text-3);font-size:0.82rem;">${dist.toLocaleString('no-NO')} km</span>
+        <span style="color:var(--accent-h);">${arrowSvg}</span>
+      </div>`;
+      // Accumulate revealed info
+      if (!WORLDLE_ST.revealedInfo) WORLDLE_ST.revealedInfo = {};
+      WORLDLE_ST.revealedInfo.lastDist = dist;
+      WORLDLE_ST.revealedInfo.lastBearing = bearing;
     }
-    row.innerHTML='❌ '+escHtml(guess)+distStr;
+    row.innerHTML=`<span>❌ ${escHtml(guessCountry ? guessCountry.f+' ' : '')}${escHtml(guess)}</span>${rightSide}`;
     gl.appendChild(row);
+    // Scroll to latest
+    gl.scrollTop = gl.scrollHeight;
   }
   if (correct) {
     const tries=WORLDLE_ST.guesses.length;
@@ -5612,19 +5734,27 @@ function worldleGuess() {
     document.getElementById('worldle-result-country').textContent='Kontinent: '+WORLDLE_ST.country.c+' · 0 poeng';
     gzSaveScore('worldle', 0);
   } else {
-    // Progressive hints
+    // Progressive hints - build up as guesses accumulate
     const sess = GZ.session;
-    const hintParts = [];
-    if (sess.worldleShowContinent !== false) hintParts.push('Kontinent: '+WORLDLE_ST.country.c);
-    if (sess.worldleShowPop !== false && WORLDLE_ST.guesses.length >= 2) hintParts.push('Befolkning: '+WORLDLE_ST.country.p);
-    if (WORLDLE_ST.guesses.length >= 3) {
-      const hintIdx=Math.min(WORLDLE_ST.guesses.length-1, WORLDLE_ST.country.hints.length-1);
-      hintParts.push(WORLDLE_ST.country.hints[hintIdx]);
+    const hintEl = document.getElementById('worldle-hint');
+    const attEl = document.getElementById('worldle-attempts-left');
+    const numGuesses = WORLDLE_ST.guesses.length;
+    const remaining = WORLDLE_ST.maxTries - numGuesses;
+
+    // Build up revealed info line
+    const infoChips = [];
+    if (sess.worldleShowContinent !== false) infoChips.push('🌍 '+WORLDLE_ST.country.c);
+    if (sess.worldleShowPop !== false && numGuesses >= 2) infoChips.push('👥 '+WORLDLE_ST.country.p);
+    if (numGuesses >= 3) {
+      const hi = Math.min(numGuesses-2, WORLDLE_ST.country.hints.length-1);
+      infoChips.push('💡 '+WORLDLE_ST.country.hints[hi]);
     }
-    const attEl=document.getElementById('worldle-attempts-left');
-    if(attEl) attEl.textContent = hintParts.join(' · ') || (WORLDLE_ST.maxTries - WORLDLE_ST.guesses.length)+' forsøk igjen';
-    const hintEl=document.getElementById('worldle-hint');
-    if(hintEl) hintEl.textContent = sess.worldleShowContinent!==false ? 'Kontinent: '+WORLDLE_ST.country.c : '';
+    if (numGuesses >= 4 && WORLDLE_ST.country.hints.length > 1) {
+      infoChips.push('💡 '+WORLDLE_ST.country.hints[Math.min(numGuesses-1, WORLDLE_ST.country.hints.length-1)]);
+    }
+
+    if (hintEl) hintEl.innerHTML = infoChips.map(c=>`<span style="display:inline-block;background:var(--s2);border:1px solid var(--border-2);border-radius:6px;padding:3px 10px;font-size:0.8rem;font-weight:700;margin:2px;">${c}</span>`).join('');
+    if (attEl) attEl.textContent = remaining+' forsøk igjen';
   }
 }
 
@@ -5642,9 +5772,13 @@ function gzStartWhoami() {
   if (sess.whoamiCustom && sess.whoamiCustom.length > 0) {
     pool = sess.whoamiCustom;
   }
-  const person = pool[Math.floor(Math.random()*pool.length)];
+  if (!GZ._playedWhoami) GZ._playedWhoami = new Set();
+  let unplayedP = pool.filter(p => !GZ._playedWhoami.has(p.n));
+  if (unplayedP.length === 0) { GZ._playedWhoami.clear(); unplayedP = pool; }
+  const person = unplayedP[Math.floor(Math.random()*unplayedP.length)];
+  GZ._playedWhoami.add(person.n);
   // Difficulty
-  const diff = sess.whoamiDiff || 'normal';
+  const diff = (GZ._gameDiff && GZ._gameDiff.whoami) || sess.whoamiDiff || 'normal';
   const autoReveal = diff==='easy' ? 2 : diff==='hard' ? 0 : 1; // auto-reveal hints
   const maxScore = diff==='easy' ? 300 : diff==='hard' ? 700 : 500;
   const maxHints = person.hints.length;
