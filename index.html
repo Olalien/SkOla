@@ -31,7 +31,7 @@
     --card:#ffffff;
   }
   body.light nav { background:rgba(244,245,251,0.92); border-bottom-color:var(--border); }
-  body.light .mobile-nav { background:rgba(255,255,255,0.96); border-top-color:var(--border); }
+  body.light .mobile-nav { top:auto !important; background:rgba(255,255,255,0.96); border-top-color:var(--border); }
   body.light input, body.light select, body.light textarea {
     background:var(--s1); color:var(--text); border-color:var(--border-2);
   }
@@ -64,7 +64,7 @@
   .dark-toggle{background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:1rem;transition:all 0.18s;display:flex;align-items:center;}
   .dark-toggle:hover{background:var(--s3);color:var(--text);}
 
-  .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(13,14,24,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+  .mobile-nav{display:none;position:fixed;top:auto;bottom:0;left:0;right:0;background:rgba(13,14,24,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:400;padding-bottom:env(safe-area-inset-bottom);}
   .mobile-nav-inner{display:flex;justify-content:flex-start;align-items:stretch;height:60px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
   .mobile-nav-inner::-webkit-scrollbar{display:none;}
   .mob-nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px;background:none;border:none;color:var(--text-3);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.62rem;cursor:pointer;flex:1;transition:color 0.18s;min-height:unset;}
@@ -4005,7 +4005,7 @@ Alt på ${s.language}.`;
 // ====== END URL/IMAGE ======
 
 // ====== TOAST ======
-function showToast(msg,duration=2800){
+function showToast(msg, duration=3200){
   let t=document.getElementById('globalToast');
   if(!t){t=document.createElement('div');t.id='globalToast';t.className='toast';document.body.appendChild(t);}
   t.textContent=msg;t.classList.add('show');
@@ -5027,35 +5027,42 @@ async function gzLogin() {
   if (!code || code.length < 3) { gzError('Skriv inn koden du fikk av læreren'); return; }
   if (errEl) errEl.style.display = 'none';
 
-  // Try Supabase first (works cross-device)
-  try {
-    const rows = await dbGameReq('GET','os_game_sessions',`code=eq.${encodeURIComponent(code)}&select=*`);
-    if (rows && rows.length > 0) {
-      const raw = rows[0];
-      const cfg = raw.config || {};
-      const sess = {
-        id: raw.id, code: raw.code || code,
-        name: cfg.name || raw.name || raw.id,
-        games: cfg.games || raw.games || ['wordle','worldle','whoami'],
-        customWords: cfg.customWords || raw.customWords || [],
-        starts_at: raw.starts_at,
-        ends_at: raw.ends_at
-      };
-      const now = Date.now();
-      const start = sess.starts_at ? new Date(sess.starts_at).getTime() : 0;
-      const end = sess.ends_at ? new Date(sess.ends_at).getTime() : Infinity;
-      if (now < start) { gzError('Spilløkten starter ' + new Date(sess.starts_at).toLocaleString('no')); return; }
-      if (now > end)   { gzError('Spilløkten er avsluttet'); return; }
-      GZ.session = sess;
-      gzEnterLobby();
-      return;
-    }
-  } catch(e) { console.warn('[GZ] Supabase lookup failed:', e.message); }
+  // Vis loading-state
+  const btn = document.querySelector('#gz-login button');
+  if (btn) { btn.textContent = 'Sjekker...'; btn.disabled = true; }
 
-  // Fallback: localStorage (same device only)
-  try {
-    const raw = localStorage.getItem('os_game_session_' + code);
-    if (raw) {
+  // Try Supabase (works cross-device)
+  const rows = await DB._q('GET','os_game_sessions','code=eq.'+encodeURIComponent(code)+'&select=*');
+  if (rows === null) {
+    // Supabase unreachable - try localStorage
+    console.warn('[GZ] Supabase unreachable, trying localStorage');
+  } else if (rows.length > 0) {
+    if (btn) { btn.textContent = 'Logg inn'; btn.disabled = false; }
+    const raw = rows[0];
+    const cfg = (typeof raw.config === 'object' && raw.config) ? raw.config : {};
+    const sess = {
+      id: raw.id, code: raw.code || code,
+      name: cfg.name || raw.name || raw.id,
+      games: cfg.games || raw.games || ['wordle','worldle','whoami'],
+      customWords: cfg.customWords || raw.customWords || [],
+      starts_at: raw.starts_at,
+      ends_at: raw.ends_at
+    };
+    const now = Date.now();
+    const start = sess.starts_at ? new Date(sess.starts_at).getTime() : 0;
+    const end   = sess.ends_at   ? new Date(sess.ends_at).getTime()   : Infinity;
+    if (now < start) { gzError('Spilløkten starter ' + new Date(sess.starts_at).toLocaleString('no-NO')); return; }
+    if (now > end)   { gzError('Spilløkten er avsluttet'); return; }
+    GZ.session = sess;
+    gzEnterLobby();
+    return;
+  }
+
+  // Supabase had no result or was unreachable → try localStorage (same device)
+  if (btn) { btn.textContent = 'Logg inn'; btn.disabled = false; }
+  const raw = localStorage.getItem('os_game_session_' + code);
+  if (raw) {
+    try {
       const sess = JSON.parse(raw);
       const now = Date.now();
       if (sess.endsAt && now > sess.endsAt) { gzError('Spilløkten er avsluttet'); return; }
@@ -5063,10 +5070,15 @@ async function gzLogin() {
       GZ.session = { ...sess, code };
       gzEnterLobby();
       return;
-    }
-  } catch(e) {}
+    } catch(e) {}
+  }
 
-  gzError('Ugyldig kode – sjekk at du har skrevet riktig');
+  // Nothing found
+  if (rows === null) {
+    gzError('Kan ikke nå serveren. Be læreren sjekke at SQL-skjema er kjørt.');
+  } else {
+    gzError('Ugyldig kode – sjekk at du har skrevet riktig');
+  }
 }
 
 function gzError(msg) {
@@ -5436,7 +5448,7 @@ function whoamiGuess() {
 }
 
 // ── TEACHER SESSION MANAGEMENT ──
-function gsCreate() {
+async function gsCreate() {
   const name=document.getElementById('gsName')?.value.trim();
   const startVal=document.getElementById('gsStart')?.value;
   const endVal=document.getElementById('gsEnd')?.value;
@@ -5461,12 +5473,20 @@ function gsCreate() {
     endsAt:   new Date(ends).getTime()
   }));
 
-  // Also save to Supabase for cross-device
-  DB._q('POST','os_game_sessions','',sess)
-    .then(() => { showToast('✅ Økt opprettet! Kode: ' + code); })
-    .catch(() => { showToast('✅ Økt lagret lokalt. Kode: ' + code); });
+  // Save to Supabase for cross-device - show result
+  let supabaseOk = false;
+  try {
+    await DB._q('POST','os_game_sessions','',sess);
+    supabaseOk = true;
+  } catch(e) {
+    console.warn('[GS] Supabase save failed:', e.message);
+  }
+  if (supabaseOk) {
+    showToast('✅ Økt lagret i sky! Kode: ' + code);
+  } else {
+    showToast('⚠️ Kun lokalt! Kjør SQL-skjema for tverr-enhet. Kode: ' + code, 5000);
+  }
 
-  // Show active session banner immediately
   gsShowActiveBanner({ code, name, ends_at: ends, games });
   gsLoadSessions();
 
