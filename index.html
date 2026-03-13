@@ -65,7 +65,8 @@
   .dark-toggle:hover{background:var(--s3);color:var(--text);}
 
   .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(13,14,24,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100;padding-bottom:env(safe-area-inset-bottom);}
-  .mobile-nav-inner{display:flex;justify-content:space-around;align-items:stretch;height:60px;}
+  .mobile-nav-inner{display:flex;justify-content:flex-start;align-items:stretch;height:60px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .mobile-nav-inner::-webkit-scrollbar{display:none;}
   .mob-nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px;background:none;border:none;color:var(--text-3);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.62rem;cursor:pointer;flex:1;transition:color 0.18s;min-height:unset;}
   .mob-nav-btn.active{color:var(--accent-h);}
   .mob-nav-btn .mob-icon{display:flex;align-items:center;justify-content:center;}
@@ -432,7 +433,7 @@
   @media(max-width:360px){
     .logo{font-size:1.1rem;}
     .teacher-btn{font-size:0.68rem;padding:6px 8px;}
-    .mob-nav-btn{font-size:0.5rem;}
+    .mob-nav-btn{font-size:0.58rem;flex:0 0 64px;min-width:64px;}
     .mob-icon svg{width:18px;height:18px;}
     .cr-answer-btn{padding:1.1rem 0.35rem;font-size:0.85rem;}
     .modules-grid{grid-template-columns:1fr 1fr;gap:0.5rem;}
@@ -1484,7 +1485,7 @@
           maxlength="4"
           autocomplete="off"
           style="text-transform:uppercase;text-align:center;font-size:2.5rem;font-family:'Fredoka One',cursive;letter-spacing:0.35em;padding:1rem;border-radius:14px;border:2px solid var(--border-2);background:var(--s2);color:var(--text);width:100%;outline:none;transition:border-color 0.2s;display:block;margin-bottom:0.875rem;"
-          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
           onfocus="this.style.borderColor='var(--accent)'"
           onblur="this.style.borderColor='var(--border-2)'"
         />
@@ -5016,7 +5017,7 @@ let WORDLE_ST = {}, WORLDLE_ST = {}, WHOAMI_ST = {};
 
 // ── DB helpers for game sessions ──
 async function dbGameReq(method, table, query, body) {
-  return DB._req(method, table, query, body);
+  return DB._q(method, table, query, body);
 }
 
 // ── Session management ──
@@ -5152,7 +5153,7 @@ async function gzSaveScore(game, score) {
   const player = state.student ? (state.student.name || state.student) : 'Anonym';
   const id = (GZ.session.code||'x') + '_' + game + '_' + player.replace(/\s/g,'_');
   try {
-    await dbGameReq('POST','os_game_scores','',{ id, session_code: GZ.session.code, player_name: player, game, score });
+    await DB._q('POST','os_game_scores','',{ id, session_code: GZ.session.code, player_name: player, game, score });
   } catch(e) {}
   localStorage.setItem('oz_score_'+GZ.session.code+'_'+game, score);
 }
@@ -5461,9 +5462,9 @@ function gsCreate() {
   }));
 
   // Also save to Supabase for cross-device
-  dbGameReq('POST','os_game_sessions','',sess)
+  DB._q('POST','os_game_sessions','',sess)
     .then(() => { showToast('✅ Økt opprettet! Kode: ' + code); })
-    .catch(() => { showToast('✅ Økt lagret (kun lokalt). Kode: ' + code); });
+    .catch(() => { showToast('✅ Økt lagret lokalt. Kode: ' + code); });
 
   // Show active session banner immediately
   gsShowActiveBanner({ code, name, ends_at: ends, games });
@@ -5484,7 +5485,7 @@ async function gsLoadSessions() {
 
   // Merge Supabase + localStorage sessions
   try {
-    const rows = await dbGameReq('GET','os_game_sessions','select=*&order=created_at.desc&limit=20');
+    const rows = await DB._q('GET','os_game_sessions','select=*&order=created_at.desc&limit=20');
     if (rows && rows.length) sessions = rows.map(s => ({
       code: s.code||s.id,
       name: (s.config&&s.config.name)||s.name||s.id,
@@ -5550,6 +5551,8 @@ async function gsLoadSessions() {
           ${active ? `<button onclick="gsCopyCode('${s.code}')" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:5px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Kopier kode</button>` : ''}
           <button onclick="gsViewLeaderboard('${s.code}')" style="padding:6px 12px;background:var(--s2);border:1px solid var(--border-2);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-2);cursor:pointer;">Toppliste</button>
           <button onclick="gsEditSession('${s.code}')" style="padding:6px 12px;background:var(--s2);border:1px solid var(--border-2);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-2);cursor:pointer;">Rediger</button>
+          <button onclick="gsDeleteSession('${s.code}')"
+            style="padding:6px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:#ef4444;cursor:pointer;">Slett</button>
           <button onclick="gsEndSession('${s.code}')" style="padding:6px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:#ef4444;cursor:pointer;">Avslutt</button>
         </div>
       </div>
@@ -5564,7 +5567,7 @@ async function gsViewLeaderboard(code) {
   wrap.style.display='block';
   table.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;">Laster...</div>';
   try {
-    const rows=await dbGameReq('GET','os_game_scores',`session_code=eq.${code}&select=*&order=score.desc`);
+    const rows=await DB._q('GET','os_game_scores',`session_code=eq.${code}&select=*&order=score.desc`);
     if(!rows||!rows.length) { table.innerHTML='<div style="color:var(--text-3);">Ingen poeng ennå</div>'; return; }
     const totals={};
     rows.forEach(r=>{ totals[r.player_name]=(totals[r.player_name]||0)+r.score; });
@@ -5633,11 +5636,19 @@ function gsCopyCode(code) {
   navigator.clipboard.writeText(code).then(()=>showToast('✅ Kode kopiert: ' + code)).catch(()=>showToast('Koden er: ' + code));
 }
 
+async function gsDeleteSession(code) {
+  if (!confirm('Slette spilløkt ' + code + ' permanent? Dette kan ikke angres.')) return;
+  try { await DB._q('DELETE','os_game_sessions','id=eq.'+encodeURIComponent(code)); } catch(e) {}
+  localStorage.removeItem('os_game_session_'+code);
+  showToast('Økt slettet');
+  gsLoadSessions();
+}
+
 async function gsEndSession(code) {
   if (!confirm('Avslutte spilløkt ' + code + '? Elevene kan ikke lenger logge inn.')) return;
   // Set ends_at to now in Supabase
   try {
-    await dbGameReq('PATCH','os_game_sessions',`code=eq.${code}`,{ ends_at: new Date().toISOString() });
+    await DB._q('PATCH','os_game_sessions','id=eq.'+encodeURIComponent(code),{ ends_at: new Date().toISOString() });
   } catch(e) {}
   // Update localStorage
   const raw = localStorage.getItem('os_game_session_'+code);
