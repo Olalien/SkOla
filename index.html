@@ -2346,7 +2346,7 @@ function showView(name) {
   });
   if (name === 'home') renderHomeModules();
   if (name === 'tasks') { DB.loadModules().then(m => { state.modules = m; renderTaskModules(); }); }
-  if (name === 'teacher') { renderResults(); renderManageModules(); }
+  if (name === 'teacher') { renderResults(); renderManageModules(); teacherUpdateActivity(); }
   if (name === 'join' && state.isTeacher) crPopulateModules();
   if (name === 'arbeid') { arbState.moduleIdx = null; arbRenderModuleGrid(); }
   if (name === 'wc') wcInit();
@@ -2410,6 +2410,7 @@ async function loadState() {
       // Session expires after 7 days
       if (ts.loggedInAt && (Date.now() - ts.loggedInAt) < 7 * 24 * 3600 * 1000) {
         state.isTeacher = true;
+        teacherUpdateActivity();
         document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'inline-flex');
         const btn = document.getElementById('teacherLoginBtn');
         if (btn) btn.style.display = 'none';
@@ -2603,7 +2604,7 @@ function loginTeacher() {
   if (pass === correct) {
     state.isTeacher = true;
     // Persist teacher session
-    localStorage.setItem('os_teacher_session', JSON.stringify({ loggedInAt: Date.now(), passHash: btoa(pass).slice(0,8) }));
+    localStorage.setItem('os_teacher_session', JSON.stringify({ loggedInAt: Date.now(), lastActive: Date.now(), passHash: btoa(pass).slice(0,8) }));
     document.getElementById('teacherQuizSection').style.display = 'block';
     document.getElementById('studentQuizSection').style.display = 'none';
     showDbStatus();
@@ -2633,8 +2634,52 @@ function closeTeacherModal() {
   if (modal) modal.classList.remove('open');
 }
 function checkTeacher() {
-  if (state.isTeacher) showView('teacher');
-  else openTeacherModal();
+  if (state.isTeacher) { showView('teacher'); return; }
+  // Check if session within 1-hour grace period
+  try {
+    const ts = JSON.parse(localStorage.getItem('os_teacher_session') || '{}');
+    const lastActive = ts.lastActive || ts.loggedInAt || 0;
+    if (lastActive && (Date.now() - lastActive) < 60 * 60 * 1000) {
+      // Within 1 hour - restore without password
+      loginTeacherAuto();
+      return;
+    }
+  } catch(e) {}
+  openTeacherModal();
+}
+
+function teacherUpdateActivity() {
+  try {
+    const raw = localStorage.getItem('os_teacher_session');
+    if (!raw) return;
+    const ts = JSON.parse(raw);
+    ts.lastActive = Date.now();
+    localStorage.setItem('os_teacher_session', JSON.stringify(ts));
+  } catch(e) {}
+}
+
+function loginTeacherAuto() {
+  state.isTeacher = true;
+  teacherUpdateActivity();
+  document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'inline-flex');
+  const btn = document.getElementById('teacherLoginBtn');
+  if (btn) btn.style.display = 'none';
+  const logoutBtn = document.getElementById('teacherLogoutBtn');
+  if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+  const mobLogout = document.getElementById('mob-logout-teacher');
+  if (mobLogout) mobLogout.style.display = 'flex';
+  const rb = document.getElementById('roleBadge');
+  if (rb) { rb.textContent = 'Lærer'; rb.style.color = 'var(--accent-h)'; rb.style.borderColor = 'var(--accent)'; }
+  if (document.getElementById('teacherQuizSection')) {
+    document.getElementById('teacherQuizSection').style.display = 'block';
+    document.getElementById('studentQuizSection').style.display = 'none';
+  }
+  showDbStatus();
+  showView('teacher');
+  renderManageModules();
+  renderResults();
+  renderHomeModules();
+  renderTaskModules();
 }
 function logoutTeacher() {
   state.isTeacher = false;
