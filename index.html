@@ -1916,13 +1916,18 @@
           Vis neste hint (−100 poeng)
         </button>
       </div>
-      <div style="display:flex;gap:0.5rem;">
-        <input type="text" id="whoami-input" placeholder="Hvem er jeg?" autocomplete="off"
-          style="flex:1;padding:12px 14px;border:2px solid var(--border-2);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s;"
-          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'"
-          onkeydown="if(event.key==='Enter')whoamiGuess()"
-        />
-        <button onclick="whoamiGuess()" style="padding:12px 18px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Gjett</button>
+      <div style="position:relative;">
+        <div style="display:flex;gap:0.5rem;">
+          <input type="text" id="whoami-input" placeholder="Skriv navn her..." autocomplete="off"
+            style="flex:1;padding:12px 14px;border:2px solid var(--border-2);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='var(--accent)'"
+            onblur="setTimeout(()=>{const ac=document.getElementById('whoami-autocomplete');if(ac)ac.style.display='none';},200)"
+            oninput="whoamiAutocomplete(this.value)"
+            onkeydown="whoamiInputKeydown(event)"
+          />
+          <button onclick="whoamiGuess()" style="padding:12px 18px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Gjett</button>
+        </div>
+        <div id="whoami-autocomplete" style="display:none;position:absolute;top:calc(100% + 3px);left:0;right:72px;background:var(--s1);border:1px solid var(--border-2);border-radius:10px;overflow:hidden;z-index:20;box-shadow:0 8px 30px rgba(0,0,0,0.35);max-height:220px;overflow-y:auto;"></div>
       </div>
       <div id="whoami-result" style="display:none;text-align:center;margin-top:1.25rem;padding:1.25rem;background:var(--s1);border:1px solid var(--border);border-radius:14px;">
         <div id="whoami-result-msg" style="font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:0.5rem;"></div>
@@ -5244,7 +5249,20 @@ async function gzLogin() {
       games: cfg.games || raw.games || ['wordle','worldle','whoami'],
       customWords: cfg.customWords || raw.customWords || [],
       starts_at: raw.starts_at,
-      ends_at: raw.ends_at
+      ends_at: raw.ends_at,
+      // Spread ALL config fields so game settings are passed through
+      wordleLang: cfg.wordleLang || 'no',
+      wordleDiff: cfg.wordleDiff || 'normal',
+      wordleLen: cfg.wordleLen || 5,
+      wordleShowColors: cfg.wordleShowColors !== false,
+      wordleShowKeyboard: cfg.wordleShowKeyboard !== false,
+      worldleDiff: cfg.worldleDiff || 'normal',
+      worldleContinent: cfg.worldleContinent || 'all',
+      worldleShowContinent: cfg.worldleShowContinent !== false,
+      worldleShowPop: cfg.worldleShowPop !== false,
+      whoamiDiff: cfg.whoamiDiff || 'normal',
+      whoamiCategory: cfg.whoamiCategory || 'alle',
+      whoamiCustom: cfg.whoamiCustom || null,
     };
     const now = Date.now();
     const start = sess.starts_at ? new Date(sess.starts_at).getTime() : 0;
@@ -5265,7 +5283,11 @@ async function gzLogin() {
       const now = Date.now();
       if (sess.endsAt && now > sess.endsAt) { gzError('Spilløkten er avsluttet'); return; }
       if (sess.startsAt && now < sess.startsAt) { gzError('Spilløkten starter snart'); return; }
-      GZ.session = { ...sess, code };
+      // Also spread any config fields from localStorage
+      GZ.session = { wordleLang:'no', wordleDiff:'normal', worldleDiff:'normal', whoamiDiff:'normal',
+        worldleContinent:'all', worldleShowContinent:true, worldleShowPop:true,
+        wordleShowColors:true, wordleShowKeyboard:true, whoamiCategory:'alle',
+        ...sess, code };
       gzEnterLobby();
       return;
     } catch(e) {}
@@ -5323,7 +5345,33 @@ function gzRenderGameCards() {
       <div style="display:flex;gap:0.4rem;margin-bottom:0.875rem;">
         ${['easy','normal','hard'].map(d=>`<button onclick="gzSetDiff('${g.id}','${d}')" id="diff-${g.id}-${d}" style="flex:1;padding:7px 4px;border-radius:8px;border:2px solid ${d===defDiff?g.color:'var(--border-2)'};background:${d===defDiff?g.color+'22':'transparent'};color:${d===defDiff?g.color:'var(--text-2)'};font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;transition:all 0.15s;">${{easy:'Lett',normal:'Normal',hard:'Vanskelig'}[d]}</button>`).join('')}
       </div>
-      <button onclick="${g.startFn}()" style="width:100%;padding:11px;background:${g.color};color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;transition:background 0.18s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Spill nå</button>
+      ${g.id === 'worldle' && (sess.worldleContinent === 'all' || !sess.worldleContinent) ? `
+      <div style="margin-bottom:0.875rem;">
+        <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Verdensdel</label>
+        <select id="student-worldle-continent" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
+          <option value="all">🌍 Alle land</option>
+          <option value="Europa">🇪🇺 Europa</option>
+          <option value="Asia">🌏 Asia</option>
+          <option value="Afrika">🌍 Afrika</option>
+          <option value="Amerika">🌎 Amerika</option>
+          <option value="Oseania">🏝 Oseania</option>
+        </select>
+      </div>` : ''}
+      ${g.id === 'whoami' && (!sess.whoamiCategory || sess.whoamiCategory === 'alle') ? `
+      <div style="margin-bottom:0.875rem;">
+        <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Kategori</label>
+        <select id="student-whoami-cat" style="width:100%;padding:8px 10px;border:1px solid var(--border-2);border-radius:8px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;">
+          <option value="alle">🎭 Alle kategorier</option>
+          <option value="politiker">🏛 Politikere</option>
+          <option value="vitenskapsmann">🔬 Vitenskapsmenn</option>
+          <option value="kunstner">🎨 Kunstnere</option>
+          <option value="idrett">⚽ Idrettsutøvere</option>
+          <option value="historisk">📜 Historiske</option>
+          <option value="aktivist">✊ Aktivister</option>
+          <option value="gründer">💡 Gründere</option>
+        </select>
+      </div>` : ''}
+      <button onclick="${g.startFn}()" style="width:100%;padding:11px;background:${g.color};color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;transition:opacity 0.18s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Spill nå</button>
     </div>`;
   }).join('');
 
@@ -5702,8 +5750,11 @@ function gzStartWorldle() {
   const sess = GZ.session;
   // Filter by continent if specified
   let pool = GZ_COUNTRIES;
-  if (sess.worldleContinent && sess.worldleContinent !== 'all') {
-    const filtered = GZ_COUNTRIES.filter(c=>c.c===sess.worldleContinent);
+  // Student may have picked a continent in the lobby
+  const studentContinent = document.getElementById('student-worldle-continent')?.value;
+  const activeContinent = studentContinent || sess.worldleContinent;
+  if (activeContinent && activeContinent !== 'all') {
+    const filtered = GZ_COUNTRIES.filter(c=>c.c===activeContinent || c.c.includes(activeContinent));
     if (filtered.length > 0) pool = filtered;
   }
   if (!GZ._playedWorldle) GZ._playedWorldle = new Set();
@@ -5763,7 +5814,10 @@ function worldleAutocomplete(val) {
   // Get filtered pool based on continent
   const sess = GZ.session;
   let pool = GZ_COUNTRIES;
-  if (sess.worldleContinent && sess.worldleContinent !== 'all') {
+  // Student may have picked a continent in the lobby
+  const studentContinent = document.getElementById('student-worldle-continent')?.value;
+  const activeContinent = studentContinent || sess.worldleContinent;
+  if (activeContinent && activeContinent !== 'all') {
     pool = GZ_COUNTRIES.filter(c=>c.c===sess.worldleContinent);
   }
 
@@ -6001,8 +6055,10 @@ function gzStartWhoami() {
   const sess = GZ.session;
   // Filter by category
   let pool = GZ_PERSONS;
-  if (sess.whoamiCategory && sess.whoamiCategory !== 'alle') {
-    const filtered = GZ_PERSONS.filter(p=>p.cat===sess.whoamiCategory);
+  const studentCat = document.getElementById('student-whoami-cat')?.value;
+  const activeCat = studentCat || sess.whoamiCategory;
+  if (activeCat && activeCat !== 'alle') {
+    const filtered = GZ_PERSONS.filter(p=>p.cat===activeCat);
     if (filtered.length > 0) pool = filtered;
   }
   // Use custom persons if set
@@ -6057,15 +6113,138 @@ function whoamiRevealHint(silent) {
   }
 }
 
+
+let whoamiAcIdx = -1;
+
+function whoamiAutocomplete(val) {
+  const ac = document.getElementById('whoami-autocomplete');
+  if (!ac) return;
+  whoamiAcIdx = -1;
+  if (!val || val.length < 1) { ac.style.display='none'; return; }
+  const v = val.toLowerCase().trim();
+
+  // Pool: custom persons or all persons
+  const sess = GZ.session;
+  let pool = sess.whoamiCustom?.length ? sess.whoamiCustom : GZ_PERSONS;
+  const studentCat = document.getElementById('student-whoami-cat')?.value;
+  const activeCat = studentCat || sess.whoamiCategory;
+  if (activeCat && activeCat !== 'alle') {
+    const filtered = pool.filter(p=>p.cat===activeCat);
+    if (filtered.length) pool = filtered;
+  }
+
+  // Score each person
+  const scored = pool.map(p => {
+    const name = p.n.toLowerCase();
+    const parts = name.split(' ');
+    let score = 0;
+    if (name === v) score = 100;
+    else if (name.startsWith(v)) score = 90;
+    else if (parts.some(part => part.startsWith(v))) score = 80;
+    else if (name.includes(v)) score = 60;
+    else {
+      // Fuzzy: Levenshtein on first word
+      const firstWord = parts[0];
+      const dist = worldleLevenshtein(v, firstWord.substring(0, Math.max(v.length, firstWord.length)));
+      if (dist <= 2) score = Math.max(0, 40 - dist*10);
+    }
+    return { p, score };
+  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,8);
+
+  if (!scored.length) { ac.style.display='none'; return; }
+  ac.style.display='block';
+
+  const catColors = {politiker:'#4f6ef7',vitenskapsmann:'#22c55e',kunstner:'#a855f7',
+    idrett:'#f59e0b',historisk:'#ef4444',aktivist:'#06b6d4',gründer:'#f59e0b',oppdagelsesreisende:'#22c55e'};
+
+  ac.innerHTML = scored.map((x,i) => {
+    const catColor = catColors[x.p.cat] || 'var(--text-3)';
+    const catLabel = {politiker:'Politiker',vitenskapsmann:'Vitenskap',kunstner:'Kunst',
+      idrett:'Idrett',historisk:'Historisk',aktivist:'Aktivist',gründer:'Gründer',
+      oppdagelsesreisende:'Utforsker'}[x.p.cat] || x.p.cat||'';
+    // Highlight matching part
+    const highlighted = whoamiHighlight(x.p.n, val);
+    return `<div onclick="whoamiSelectPerson('${x.p.n.replace(/'/g,"\\'")}',event)"
+      data-idx="${i}" data-name="${x.p.n.replace(/"/g,'&quot;')}"
+      style="padding:9px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;border-bottom:1px solid var(--border);font-size:0.9rem;font-weight:700;"
+      onmouseover="whoamiAcHover(${i})" onmouseout="">
+      <span>${highlighted}</span>
+      <span style="font-size:0.72rem;color:${catColor};background:${catColor}22;border-radius:4px;padding:2px 7px;white-space:nowrap;">${catLabel}</span>
+    </div>`;
+  }).join('');
+}
+
+function whoamiHighlight(name, query) {
+  const q = query.toLowerCase();
+  const n = name.toLowerCase();
+  if (n.startsWith(q)) return `<strong>${name.substring(0,q.length)}</strong>${name.substring(q.length)}`;
+  // Highlight first matching word
+  const parts = name.split(' ');
+  return parts.map(p => p.toLowerCase().startsWith(q) ? `<strong>${p}</strong>` : p).join(' ');
+}
+
+function whoamiAcHover(idx) {
+  whoamiAcIdx = idx;
+  document.querySelectorAll('#whoami-autocomplete > div').forEach((el,i) => {
+    el.style.background = i===idx ? 'var(--accent-g)' : '';
+  });
+}
+
+function whoamiSelectPerson(name, e) {
+  if (e) e.preventDefault();
+  const inp = document.getElementById('whoami-input');
+  if (inp) { inp.value = name; inp.focus(); }
+  const ac = document.getElementById('whoami-autocomplete');
+  if (ac) ac.style.display = 'none';
+  whoamiAcIdx = -1;
+  // Don't auto-submit - let student confirm
+}
+
+function whoamiInputKeydown(e) {
+  const ac = document.getElementById('whoami-autocomplete');
+  const items = ac?.querySelectorAll('div');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    whoamiAcIdx = Math.min(whoamiAcIdx+1, (items?.length||1)-1);
+    whoamiAcHover(whoamiAcIdx);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    whoamiAcIdx = Math.max(0, whoamiAcIdx-1);
+    whoamiAcHover(whoamiAcIdx);
+  } else if (e.key === 'Enter') {
+    if (whoamiAcIdx >= 0 && items?.[whoamiAcIdx]) {
+      const name = items[whoamiAcIdx].dataset?.name || '';
+      const inp = document.getElementById('whoami-input');
+      if (inp && name) inp.value = name;
+      if (ac) ac.style.display = 'none';
+      whoamiAcIdx = -1;
+    }
+    whoamiGuess();
+  } else if (e.key === 'Escape') {
+    if (ac) ac.style.display = 'none';
+    whoamiAcIdx = -1;
+  }
+}
+
 function whoamiGuess() {
   if (WHOAMI_ST.over) return;
   const inp=document.getElementById('whoami-input');
   const guess=(inp?.value||'').trim().toLowerCase();
   if (!guess) return;
-  // Accept last name or full name match
+  // Fuzzy matching: accept if close enough to any part of the name
   const fullName = WHOAMI_ST.person.n.toLowerCase();
-  const lastName = fullName.split(' ').slice(-1)[0];
-  const correct = fullName.includes(guess) || guess.includes(lastName) || guess.length > 3 && fullName.includes(guess.split(' ')[0]);
+  const nameParts = fullName.split(' ');
+  const lastName = nameParts.slice(-1)[0];
+  const firstName = nameParts[0];
+  // Direct match
+  let correct = fullName === guess || fullName.includes(guess) || guess.includes(lastName);
+  // Fuzzy: allow 1-2 character typos on last name or first name
+  if (!correct && guess.length >= 3) {
+    const distLast = worldleLevenshtein(guess, lastName);
+    const distFirst = worldleLevenshtein(guess, firstName);
+    const distFull = worldleLevenshtein(guess, fullName);
+    correct = distLast <= 2 || distFirst <= 2 || distFull <= 3;
+  }
   if (correct) {
     const pointsPerHint = Math.floor((WHOAMI_ST.maxScore||500)/WHOAMI_ST.maxHints);
     const score=Math.max(100,(WHOAMI_ST.maxScore||500) - (WHOAMI_ST.revealed-1)*pointsPerHint);
@@ -6788,6 +6967,72 @@ const GZ_COUNTRIES = [
   // ── OSEANIA ──
   {n:'New Zealand', f:'🇳🇿', c:'Oseania',  p:'~5 mill',  lat:-40.9,lon:174.9,d:'M35,15L65,12L72,25L65,45L52,58L35,62L25,48L22,32Z', hints:['Øystat ved Australia','Wellington er verdens sydligste main­land-hoved­stad','Filmlokasjon for Ringenes Herre','Maori-kulturen er levende','Kjent for kiwi (fugl og frukt)']},
   {n:'Papua Ny-Guinea',f:'🇵🇬',c:'Oseania',p:'~10 mill', lat:-6.3, lon:143.9,d:'M15,28L55,22L80,28L88,40L80,52L55,58L25,55L10,42Z', hints:['Oseania','Port Moresby er landets hoved­stad','En av verdens mest kulturelt mangfoldige land (800+ språk)','Deler øy med Indonesia (Papua)','Kjent for stammekulturer og rite­riter']},
+
+  // ── SENTRAL-ASIA ──
+  {n:'Tadsjikistan',  f:'🇹🇯',c:'Asia',     p:'~10 mill', lat:38.9, lon:71.0, d:'M22,28L68,25L75,38L68,50L28,52L18,40Z', hints:['Sentralasiatisk land','Dushanbe er landets rolige hoved­stad','Pamir-fjellene er «verdens tak»','Grenser til Afghanistan og Kina','Tidl. Sovjet-stat']},
+  {n:'Kirgisistan',   f:'🇰🇬',c:'Asia',     p:'~7 mill',  lat:41.2, lon:74.8, d:'M18,28L70,25L76,36L70,50L22,52L12,40Z', hints:['Sentralasiatisk land','Bisjkek er landets hoved­stad','Tian Shan-fjellene dominerer','Nomade-kultur og filthus (yurt)','Tidl. Sovjet-stat']},
+  {n:'Turkmenistan',  f:'🇹🇲',c:'Asia',     p:'~6 mill',  lat:39.0, lon:59.6, d:'M12,22L75,18L85,28L82,45L65,55L22,55L10,40Z', hints:['Sentralasiatisk land','Askhabad er overdådig marmor-by','Karakum-ørken dekker 80%','«Dødens Port» er en brennende kratergass','Tidl. Sovjet-stat']},
+  {n:'Mongolia',      f:'🇲🇳',c:'Asia',     p:'~3,4 mill',lat:46.9, lon:103.8,d:'M15,20L78,15L90,25L88,45L72,55L25,58L10,42Z', hints:['Verdenshistoriens største landimperium','Ulaanbaatar er kald hoved­stad','Gobi-ørkenen i sør','Djengis Khan er herfra','Grenser til Kina og Russland']},
+  {n:'Nord-Korea',    f:'🇰🇵',c:'Asia',     p:'~26 mill', lat:40.3, lon:127.5,d:'M25,22L70,18L78,28L72,45L52,55L28,55L18,42Z', hints:['Lukket diktatur i Asia','Pyongyang er nattmørk hoved­stad','Delt fra Sør-Korea ved 38. breddegrad','Kim-dynastiet har regjert siden 1948','Kjernekraft-prøvesprengninger']},
+  {n:'Laos',          f:'🇱🇦',c:'Asia',     p:'~7 mill',  lat:17.6, lon:102.5,d:'M30,15L65,12L72,25L68,40L55,52L38,55L25,42Z', hints:['Sørøst-Asia uten kyst','Vientiane er en stille hoved­stad','Mekongfloden renner gjennom','Sterkt bombet under Vietnam-krigen','Buddhistisk kommuniststat']},
+  {n:'Kambodsja',     f:'🇰🇭',c:'Asia',     p:'~17 mill', lat:12.6, lon:104.9,d:'M22,18L65,15L72,28L65,45L42,52L18,45Z', hints:['Sørøst-Asia','Phnom Penh er hoved­staden','Angkor Wat er verdens største religiøse monument','Røde Khmer drepte 2 mill (1975–79)','Grenser til Vietnam og Thailand']},
+  {n:'Sri Lanka',     f:'🇱🇰',c:'Asia',     p:'~22 mill', lat:7.9,  lon:80.8, d:'M30,15L62,12L68,28L62,48L42,55L25,45Z', hints:['Øystat sør for India','Colombo og Sri Jayawardenepura Kotte er byer','Kjent for te og kanel','26 år borgerkrig avsluttet 2009','Elefanter og leoparder']},
+  {n:'Jordan',        f:'🇯🇴',c:'Asia',     p:'~10 mill', lat:31.2, lon:36.8, d:'M22,18L68,15L75,28L70,45L48,52L22,45Z', hints:['Midtøsten','Amman er en bakke-hoved­stad','Petra er nabateisk rosestad','Jordalv­dalen og Dødehavet','Grenser til Israel, Saudi-Arabia og Syria']},
+  {n:'Libanon',       f:'🇱🇧',c:'Asia',     p:'~6,8 mill',lat:33.9, lon:35.9, d:'M28,25L65,22L70,38L58,52L35,50Z', hints:['Lite Midtøsten-land','Beirut er «Midtøstens Paris»','Libanesisk mat er verdensberømt','Krigs­herjet siden 1975','Grenser til Israel og Syria']},
+  {n:'Jemen',         f:'🇾🇪',c:'Asia',     p:'~34 mill', lat:16.0, lon:47.6, d:'M15,20L72,15L85,25L88,40L72,52L35,55L12,42Z', hints:['Sørvest på Den arabiske halvøya','Sanaa er verdens eldste bebodde by','Humanitær katastrofe pga krig fra 2015','Mocha-kaffe herfra','Socotra-øya kalles «Galapagos i Midtøsten»']},
+  {n:'Oman',          f:'🇴🇲',c:'Asia',     p:'~4,5 mill',lat:21.5, lon:57.0, d:'M22,18L70,12L82,20L85,38L72,50L45,55L22,45Z', hints:['Sørvest på Den arabiske halvøya','Muscat er moderne havn-hoved­stad','Kjent for røkelse og dadler','Stable monarki','Grenser til Saudi-Arabia og Jemen']},
+  {n:'De forente arabiske emirater',f:'🇦🇪',c:'Asia',p:'~10 mill',lat:24.0,lon:54.0,d:'M22,25L62,22L68,35L62,50L35,52L18,42Z', hints:['7 emirater','Dubai er verdens høyeste skyskraper-by','Abu Dhabi er hoved­stad og rikest','Oljepenger + turisme','Grenser til Saudi-Arabia og Oman']},
+  {n:'Kuwait',        f:'🇰🇼',c:'Asia',     p:'~4,3 mill',lat:29.3, lon:47.7, d:'M30,25L62,22L68,38L55,52L32,50Z', hints:['Lite emirat','Kuwait City er hoved­stad','Irak invaderte i 1990','Stor oljeformue per innbygger','Grenser til Irak og Saudi-Arabia']},
+  {n:'Qatar',         f:'🇶🇦',c:'Asia',     p:'~2,9 mill',lat:25.4, lon:51.2, d:'M35,22L58,20L65,35L58,52L35,50Z', hints:['Halvøy i Persiabukta','Doha er ultramoderne hoved­stad','Rikeste land i verden per innbygger','VM i fotball 2022','Al Jazeera er herfra']},
+  {n:'Bahrain',       f:'🇧🇭',c:'Asia',     p:'~1,5 mill',lat:26.1, lon:50.6, d:'M38,30L58,28L65,42L55,52L38,50Z', hints:['Liten øystat i Persiabukta','Manama er hoved­stad','F1 Grand Prix-bane','Kjent for perler og olje','Bro til Saudi-Arabia']},
+  {n:'Filippinene',   f:'🇵🇭',c:'Asia',     p:'~114 mill',lat:12.9, lon:121.8,d:'M25,12L55,10L72,18L78,32L72,45L58,55L38,58L18,45L15,28Z', hints:['Øy-arkipel i Stillehavet','Manila er tett storbyen','Over 7000 øyer','Katolsk etter spansk kolonisering','Tagalog og Cebuano er hovedspråk']},
+  {n:'Taiwan',        f:'🇹🇼',c:'Asia',     p:'~23 mill', lat:23.7, lon:120.9,d:'M30,15L62,12L70,28L62,50L38,55L25,38Z', hints:['Øy i Det kinesiske hav','Taipei er en dynamisk by','Omstridt status ifht. Kina','TSMC produserer halvparten av verdens chips','Demokrati siden 1996']},
+  // ── MELLOM-Amerika / KARIBIA ──
+  {n:'Honduras',      f:'🇭🇳',c:'Amerika',  p:'~10 mill', lat:15.2, lon:-86.2,d:'M18,22L62,18L70,30L65,48L40,55L15,48Z', hints:['Mellom-Amerika','Tegucigalpa er uvanlig hoved­stadsnavn','Maya-ruiner i Copán','Grenser til Nicaragua og Guatemala','«Bananrepublikk»-begrepet oppsto her']},
+  {n:'Nicaragua',     f:'🇳🇮',c:'Amerika',  p:'~7 mill',  lat:12.9, lon:-85.2,d:'M18,20L62,17L70,28L65,48L38,55L15,42Z', hints:['Mellom-Amerika','Managua er hoved­stad','Störst land i Mellom-Amerika','Sandinistar-revolusjon i 1979','Store sjøer som Nicaragua-sjøen']},
+  {n:'Costa Rica',    f:'🇨🇷',c:'Amerika',  p:'~5,2 mill',lat:9.9,  lon:-84.2,d:'M18,22L62,18L68,30L60,50L38,55L18,45Z', hints:['Mellom-Amerika','San José er hoved­stad','Ingen hær siden 1949','Fremragende øko-turisme','25% av landet er vernet natur']},
+  {n:'Haiti',         f:'🇭🇹',c:'Amerika',  p:'~11 mill', lat:18.9, lon:-72.3,d:'M22,25L58,22L65,35L58,52L28,55Z', hints:['Vest-Karibia','Port-au-Prince er hoved­stad','Deler øya Hispaniola med Dominikanske republikk','Første sorte fri stat (1804)','Hardt rammet av jordskjelv i 2010']},
+  {n:'Jamaica',       f:'🇯🇲',c:'Amerika',  p:'~2,9 mill',lat:18.1, lon:-77.3,d:'M18,35L55,30L78,38L72,52L35,55Z', hints:['Karibiøy','Kingston er hoved­stad','Hjemland for reggae og Bob Marley','Usain Bolt er herfra','Blue Mountains-kaffe']},
+  {n:'Trinidad og Tobago',f:'🇹🇹',c:'Amerika',p:'~1,4 mill',lat:10.7,lon:-61.2,d:'M25,32L65,28L72,42L60,55L25,52Z', hints:['Karibi-øy-stat','Port of Spain er hoved­stad','Rikelig olje og naturgass','Carneval er verdens beste','Stålband-musikk ble oppfunnet her']},
+  {n:'Guyana',        f:'🇬🇾',c:'Amerika',  p:'~0,8 mill',lat:5.0,  lon:-59.0,d:'M18,18L62,15L70,28L65,48L40,55L15,42Z', hints:['Nordøst-Sør-Amerika','Georgetown er hoved­stad','Eneste engelsktalende land i Sør-Amerika','Angel Falls er i nabolandet','Grenser til Venezuela og Brasil']},
+  {n:'Surinam',       f:'🇸🇷',c:'Amerika',  p:'~0,6 mill',lat:3.9,  lon:-56.0,d:'M18,18L62,15L70,28L65,48L40,55L15,42Z', hints:['Minste land i Sør-Amerika','Paramaribo er hoved­stad','Eneste nederlandsktalende i Sør-Amerika','Jungel dekker 90%','Grenser til Brasil og Guyana']},
+  {n:'Uruguay',       f:'🇺🇾',c:'Amerika',  p:'~3,5 mill',lat:-33.0,lon:-56.0,d:'M22,25L65,22L72,35L65,52L38,55L18,45Z', hints:['Sørøst Sør-Amerika','Montevideo er hoved­stad','Et av Sør-Amerikas mest stabile demokratier','Kjent for mate-drikke og gaucho','Verdens høyeste cannabis-forbruk per innbygger']},
+  {n:'Paraguay',      f:'🇵🇾',c:'Amerika',  p:'~7 mill',  lat:-23.4,lon:-58.4,d:'M18,22L65,18L72,32L65,50L38,55L15,42Z', hints:['Sentralt i Sør-Amerika uten kyst','Asunción er hoved­stad','Guaraní er offisielt språk','Itaipu-dammen er en av verdens største','Grenser til Brasil, Argentina og Bolivia']},
+  {n:'Liberia',       f:'🇱🇷',c:'Afrika',   p:'~5,2 mill',lat:6.5,  lon:-9.4, d:'M25,22L62,18L68,32L62,50L38,55L22,45Z', hints:['Vestafrikansk land','Monrovia er hoved­stad (oppkalt etter Monroe)','Grunnlagt av frigjorte amerikanske slaver i 1822','Grenser til Sierra Leone og Guinea','Borgerkrig 1989–2003']},
+  {n:'Sierra Leone',  f:'🇸🇱',c:'Afrika',   p:'~8,1 mill',lat:8.5,  lon:-11.8,d:'M25,20L60,18L65,32L58,50L35,52L18,38Z', hints:['Vestafrikansk land','Freetown er hoved­stad','Kjent for diamanter og strander','Borgerkrig 1991–2002','Grenser til Guinea og Liberia']},
+  {n:'Guinea',        f:'🇬🇳',c:'Afrika',   p:'~13 mill', lat:11.0, lon:-10.9,d:'M15,18L60,15L68,28L60,45L35,52L12,38Z', hints:['Vestafrikansk land','Conakry er hoved­stad','Rikt på bauxitt','Grenser til 6 land','Ikke å forveksle med Ekvatorial-Guinea']},
+  {n:'Mali',          f:'🇲🇱',c:'Afrika',   p:'~22 mill', lat:17.6, lon:-4.0, d:'M10,15L75,12L85,22L82,45L68,58L22,58L8,42Z', hints:['Vestafrikansk land','Bamako er hoved­stad','Timbuktu var middelalderens lærdomssentrum','Stor del er Sahara','Grenser til Algerie og Niger']},
+  {n:'Niger',         f:'🇳🇪',c:'Afrika',   p:'~25 mill', lat:17.6, lon:8.1,  d:'M10,15L78,10L88,18L88,38L72,52L32,55L10,40Z', hints:['Vestafrikansk land','Niamey er hoved­stad','Størst land i Vest-Afrika','Sahara dekker mesteparten','Grenser til 7 land inkl. Nigeria og Mali']},
+  {n:'Tsjad',         f:'🇹🇩',c:'Afrika',   p:'~17 mill', lat:15.5, lon:18.7, d:'M15,12L75,10L85,20L82,42L68,55L28,58L12,42Z', hints:['Sentralafrikansk land','NDjamena er hoved­stad','Tsjad-sjøen er svinnende','Grenser til Libya, Sudan og Nigeria','Blant verdens fattigste land']},
+  {n:'Sudan',         f:'🇸🇩',c:'Afrika',   p:'~45 mill', lat:12.9, lon:30.2, d:'M18,12L72,10L82,20L80,42L65,55L38,58L15,42Z', hints:['Nordøstafrikansk land','Khartoum er hoved­stad','Nilen renner gjennom','Delt fra Sør-Sudan i 2011','Pyramider fra det nubiske kongedømmet']},
+  {n:'Sør-Sudan',     f:'🇸🇸',c:'Afrika',   p:'~11 mill', lat:6.9,  lon:31.3, d:'M18,18L70,15L78,25L75,42L55,55L28,58L15,42Z', hints:['Verdens yngste land (2011)','Juba er hoved­stad','Uavhengig fra Sudan','Borgerkrig siden 2013','Nilen er viktig']},
+  {n:'Somalia',       f:'🇸🇴',c:'Afrika',   p:'~17 mill', lat:5.2,  lon:46.2, d:'M35,10L75,12L85,22L82,45L68,60L38,62L20,45L22,25Z', hints:['Afrikashornet','Mogadishu er hoved­stad','Piratvirksomhet i Det indiske hav','Langst kystlinje i fastlands-Afrika','Ingen effektiv sentralregjering siden 1991']},
+  {n:'Rwanda',        f:'🇷🇼',c:'Afrika',   p:'~13 mill', lat:-2.0, lon:30.0, d:'M28,28L65,25L70,40L62,52L32,52L20,40Z', hints:['Lite øst-afrikansk land','Kigali er velordnet hoved­stad','Folkemord i 1994: 800 000 drept på 100 dager','Nå et av Afrikas raskest voksende økonomi','«Tusen haugers land»']},
+  {n:'Burundi',       f:'🇧🇮',c:'Afrika',   p:'~13 mill', lat:-3.4, lon:30.0, d:'M28,25L62,22L68,38L60,50L30,52L20,40Z', hints:['Lite sentralafrikansk land','Bujumbura er hoved­stad','Et av verdens fattigste land','Grenser til Rwanda, Tanzania og DR Kongo','Kjent for Tanganyika-sjøen']},
+  {n:'Uganda',        f:'🇺🇬',c:'Afrika',   p:'~48 mill', lat:1.4,  lon:32.3, d:'M18,18L72,15L80,28L75,45L55,55L22,52L12,38Z', hints:['Østafrikansk land','Kampala er hoved­stad','Perlen av Afrika','Viktoria-sjøen deles med Tanzania','Grenser til Kenya, DR Kongo og Tanzania']},
+  {n:'Ekvatorial-Guinea',f:'🇬🇶',c:'Afrika',p:'~1,5 mill',lat:1.6, lon:10.3, d:'M28,30L62,28L68,42L55,52L32,52Z', hints:['Liten stat i Sentral-Afrika','Malabo er hoved­stad på en øy','Eneste Spansk-talende land i Afrika','Olje har gitt rikdom til elitene','Grenser til Kamerun og Gabon']},
+  {n:'Gabon',         f:'🇬🇦',c:'Afrika',   p:'~2,3 mill',lat:-0.8, lon:11.6, d:'M18,18L65,15L72,28L65,48L38,52L15,40Z', hints:['Sentralafrikansk land','Libreville er hoved­stad','80% tropisk regnskog','Kjent for olje','Grenser til Kamerun og Kongo']},
+  {n:'Kongo',         f:'🇨🇬',c:'Afrika',   p:'~5,8 mill',lat:-0.2, lon:15.8, d:'M18,15L65,12L72,25L68,45L38,50L15,35Z', hints:['Brazzaville-Kongo (ikke DR Kongo)','Brazzaville er hoved­stad','Grenser til DR Kongo over elven','Kongofloden er grense','Tropisk regnskog']},
+  {n:'Djibouti',      f:'🇩🇯',c:'Afrika',   p:'~0,9 mill',lat:11.8, lon:42.6, d:'M32,28L62,25L68,38L58,52L35,52Z', hints:['Lite horn-af­rika-land','Djibouti er hoved­stad','Strategisk havn ved Adensbukta','Verdens varmeste land','Franske og amerikanske baser']},
+  {n:'Komoros',       f:'🇰🇲',c:'Afrika',   p:'~0,8 mill',lat:-11.6,lon:43.3, d:'M28,30L62,28L68,42L52,55Z', hints:['Øy-stat i Det indiske hav','Moroni er hoved­stad','Nesten daglige militærkupp','Kjent for ylang-ylang parfyme','Grenser til Madagaskar og Mosambik']},
+  {n:'Seychellene',   f:'🇸🇨',c:'Afrika',   p:'~98 000',  lat:-4.7, lon:55.5, d:'M30,28L62,25L68,38L52,50Z', hints:['Øy-stat i Det indiske hav','Victoria er verdens minste hoved­stad','Paradisøyer med korallrev','Hvite strender og palmetrær','Utenfor kysten av Øst-Afrika']},
+  {n:'Madagaskar',    f:'🇲🇬',c:'Afrika',   p:'~28 mill', lat:-18.8,lon:46.9, d:'M28,12L65,10L72,22L68,45L55,60L32,62L18,50L15,32Z', hints:['Fjerde største øy i verden','Antananarivo er hoved­stad','80% av dyre- og plantelivet er unikt','Lemurer lever bare her','Utenfor sørøstkysten av Afrika']},
+  // ── OSEANIA ──
+  {n:'Fiji',          f:'🇫🇯',c:'Oseania',  p:'~0,9 mill',lat:-17.7,lon:178.1,d:'M25,30L62,28L68,42L55,55Z', hints:['Øy-stat i Stillehavet','Suva er hoved­stad','Over 300 øyer','Rugby-nasjon','Turisme er viktigste næring']},
+  {n:'Vanuatu',       f:'🇻🇺',c:'Oseania',  p:'~0,3 mill',lat:-15.4,lon:166.9,d:'M32,22L58,20L62,35L52,50Z', hints:['Øy-arkipel i Stillehavet','Port Vila er hoved­stad','80 øyer','Aktivt vulkanliv','Grunnlagt av Storbritannia og Frankrike sammen']},
+  {n:'Samoa',         f:'🇼🇸',c:'Oseania',  p:'~0,2 mill',lat:-13.8,lon:-172.1,d:'M25,30L60,28L65,42L50,55Z', hints:['Polynesisk øy-stat','Apia er hoved­stad','Ikke å forveksle med Amerikansk Samoa','Rugby-spillere','Robert Louis Stevenson bodde her']},
+  {n:'Tonga',         f:'🇹🇴',c:'Oseania',  p:'~0,1 mill',lat:-21.2,lon:-175.2,d:'M28,28L60,26L65,40L52,52Z', hints:['Polynesisk kongeriket','Nukualofa er hoved­stad','Eneste gjenværende monarki i Stillehavet','Kjent for rubgy','Ble del av Storbritannias innflytelsessfære']},
+  // ── EUROPA (EKSTRA) ──
+  {n:'Malta',         f:'🇲🇹',c:'Europa',   p:'~0,5 mill',lat:35.9, lon:14.5, d:'M32,30L62,28L68,42L52,55Z', hints:['Liten øy­stat i Middelhavet','Valletta er verdens minste EU-hoved­stad','Ridderne av Malta','Strategisk under 2. verdenskrig','Nordens sørligste engelsktalende land']},
+  {n:'Kypros',        f:'🇨🇾',c:'Europa',   p:'~1,2 mill',lat:35.1, lon:33.4, d:'M15,35L55,28L80,35L82,48L55,55L18,52Z', hints:['Middelhavsøy','Nicosia er delt hoved­stad','Delt mellom Kypros og Tyrkiske nord-Kypros','Gresk og tyrkisk kultur','Tredje største øy i Middelhavet']},
+  {n:'Andorra',       f:'🇦🇩',c:'Europa',   p:'~77 000',  lat:42.5, lon:1.5,  d:'M38,30L62,28L65,42L48,52Z', hints:['Lilleputtstaten i Pyreneene','Andorra la Vella er hoved­stad','Co-prinsipat mellom Frankrike og Spania','Kjent for duty-free shopping','Ingen flyplass og ingen jernbane']},
+  {n:'San Marino',    f:'🇸🇲',c:'Europa',   p:'~34 000',  lat:43.9, lon:12.5, d:'M38,30L60,28L63,42L45,50Z', hints:['Omgitt av Italia','Verdens minste og eldste republikk','Grunnlagt i år 301','En av Europas rikeste land','Monte Titano er ikonisk fjell']},
+  {n:'Monaco',        f:'🇲🇨',c:'Europa',   p:'~37 000',  lat:43.7, lon:7.4,  d:'M38,32L58,30L62,42L45,48Z', hints:['Verdens nest minste land','Monte Carlo er kjent for casino','Omgitt av Frankrike og Middelhavet','Formel 1-løp gjennom bygatene','Fyrstehuset Grimaldi']},
+  {n:'Vatikanstaten', f:'🇻🇦',c:'Europa',   p:'~800',     lat:41.9, lon:12.5, d:'M42,32L58,30L60,40L44,45Z', hints:['Verdens minste land','Hoved­stad: Vatikanstaten','Pavestolens sete','Peterskirken er verdens største katedrale','Omgitt av Roma, Italia']},
+  {n:'Liechtenstein', f:'🇱🇮',c:'Europa',   p:'~38 000',  lat:47.1, lon:9.6,  d:'M38,28L62,26L65,40L48,52Z', hints:['Lilleputtstaten mellom Sveits og Østerrike','Vaduz er hoved­stad','Ikke OECD-medlem','Kjent for postfrimerkene','Dobbelt innlandet: omgitt av innlandsstater']},
+  {n:'Georgia (landet)',f:'🇬🇪',c:'Asia/Europa',p:'~3,7 mill',lat:42.3,lon:43.4,d:'M18,22L68,18L78,28L72,45L35,50L15,38Z', hints:['Kaukasus-land','Tbilisi er en fargerik gammel by','Grenser til Russland, Tyrkia og Armenia','Georgisk alfabet er unikt','Kjent for vin og khachapuri']},
+  {n:'Armenia',       f:'🇦🇲',c:'Asia/Europa',p:'~3 mill', lat:40.1, lon:45.0, d:'M25,22L65,20L72,32L65,48L35,50L20,38Z', hints:['Kaukasus-land','Jerevan er eldgammel hoved­stad','Første kristne nasjon (år 301)','Folkemord i 1915 av osmanerne','Grenser til Tyrkia, Iran og Aserbajdsjan']},
+  {n:'Aserbajdsjan',  f:'🇦🇿',c:'Asia/Europa',p:'~10 mill',lat:40.1, lon:47.6, d:'M22,20L70,17L78,28L72,45L38,50L18,38Z', hints:['Kaukasus-land','Baku er moderne hoved­stad','Stor oljeprodusent','Grenser til Russland, Georgia og Iran','Kjent for ild – «Brannenes land»']},
 
 ];
 
