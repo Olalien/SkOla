@@ -35,6 +35,8 @@
   body.light input, body.light select, body.light textarea {
     background:var(--s1); color:var(--text); border-color:var(--border-2);
   }
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor:pointer; }
+  body.light input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.3); }
   body.light .module-card { box-shadow:0 2px 12px rgba(0,0,0,0.06); }
   body.light .modal { box-shadow:0 8px 40px rgba(0,0,0,0.12); }
 
@@ -1217,10 +1219,13 @@
       <p style="color:var(--text-2);font-size:0.85rem;margin-bottom:1.5rem;padding-left:28px;">Opprett en spilløkt med kode og tid – elevene logger inn med koden.</p>
 
       <!-- SQL note -->
-      <div style="background:var(--accent-g);border:1px solid var(--accent);border-radius:10px;padding:0.875rem 1.1rem;margin-bottom:1.25rem;font-size:0.83rem;color:var(--text-2);">
-        <strong style="color:var(--accent-h);">Første gang?</strong> Kjør SQL-skjema for spillmodulen i Supabase SQL Editor.
-        <button onclick="copyGameSQL()" style="margin-left:0.75rem;padding:4px 12px;background:var(--accent);color:white;border:none;border-radius:6px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">Kopier SQL</button>
+      <div style="background:var(--accent-g);border:1px solid var(--accent);border-radius:10px;padding:0.875rem 1.1rem;margin-bottom:1rem;font-size:0.83rem;color:var(--text-2);display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+        <span><strong style="color:var(--accent-h);">Første gang?</strong> Kjør SQL-skjema i Supabase for å aktivere tverr-enhet støtte.</span>
+        <button onclick="copyGameSQL()" style="padding:6px 14px;background:var(--accent);color:white;border:none;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;">Kopier SQL</button>
       </div>
+
+      <!-- Active session banner -->
+      <div id="gs-active-banner" style="display:none;background:linear-gradient(135deg,rgba(79,110,247,0.12),rgba(168,85,247,0.08));border:1px solid rgba(79,110,247,0.35);border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;"></div>
 
       <!-- Create session -->
       <div style="margin-bottom:1.5rem;">
@@ -1229,12 +1234,16 @@
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.875rem;">
           <div>
-            <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Starter</label>
-            <input type="datetime-local" id="gsStart" />
+            <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Starter (valgfri)</label>
+            <input type="datetime-local" id="gsStart"
+              style="width:100%;padding:10px 12px;border:1px solid var(--border-2);border-radius:10px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;cursor:pointer;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
           </div>
           <div>
-            <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Slutter</label>
-            <input type="datetime-local" id="gsEnd" />
+            <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Slutter <span style="color:var(--red);">*</span></label>
+            <input type="datetime-local" id="gsEnd"
+              style="width:100%;padding:10px 12px;border:1px solid var(--border-2);border-radius:10px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;cursor:pointer;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
           </div>
         </div>
 
@@ -2500,7 +2509,7 @@ function trTab(name) {
   if (name === 'results') renderResults();
   if (name === 'klasser') renderClassRoster();
   if (name === 'kunngjoring') loadAnnouncementEditor();
-  if (name === 'spill') gsLoadSessions();
+  if (name === 'spill') { gsLoadSessions(); gsLoadActiveBanner(); }
 }
 
 function tcTab(name) {
@@ -4038,6 +4047,7 @@ const DB = {
       'Content-Type':  'application/json',
       'Prefer':        (method === 'POST') ? 'resolution=merge-duplicates,return=minimal'
                      : (method === 'DELETE') ? 'return=minimal'
+                     : (method === 'PATCH')  ? 'return=minimal'
                      : ''
     };
     try {
@@ -5011,39 +5021,50 @@ async function dbGameReq(method, table, query, body) {
 
 // ── Session management ──
 async function gzLogin() {
-  const code = document.getElementById('gz-code-input')?.value.trim().toUpperCase();
+  const code = (document.getElementById('gz-code-input')?.value||'').trim().toUpperCase();
   const errEl = document.getElementById('gz-login-error');
-  if (!code || code.length < 4) { gzError('Skriv inn koden du fikk av læreren'); return; }
+  if (!code || code.length < 3) { gzError('Skriv inn koden du fikk av læreren'); return; }
   if (errEl) errEl.style.display = 'none';
-  // Try Supabase
+
+  // Try Supabase first (works cross-device)
   try {
-    const rows = await dbGameReq('GET','os_game_sessions',`code=eq.${code}&select=*`);
+    const rows = await dbGameReq('GET','os_game_sessions',`code=eq.${encodeURIComponent(code)}&select=*`);
     if (rows && rows.length > 0) {
-      const sess = rows[0];
+      const raw = rows[0];
+      const cfg = raw.config || {};
+      const sess = {
+        id: raw.id, code: raw.code || code,
+        name: cfg.name || raw.name || raw.id,
+        games: cfg.games || raw.games || ['wordle','worldle','whoami'],
+        customWords: cfg.customWords || raw.customWords || [],
+        starts_at: raw.starts_at,
+        ends_at: raw.ends_at
+      };
       const now = Date.now();
       const start = sess.starts_at ? new Date(sess.starts_at).getTime() : 0;
       const end = sess.ends_at ? new Date(sess.ends_at).getTime() : Infinity;
-      if (now < start) { gzError('Spilløkten har ikke startet ennå'); return; }
+      if (now < start) { gzError('Spilløkten starter ' + new Date(sess.starts_at).toLocaleString('no')); return; }
       if (now > end)   { gzError('Spilløkten er avsluttet'); return; }
-      GZ.session = sess.config ? {...sess, ...sess.config} : sess;
-      GZ.session.code = code;
+      GZ.session = sess;
       gzEnterLobby();
       return;
     }
-  } catch(e) {}
-  // Fallback: localStorage
+  } catch(e) { console.warn('[GZ] Supabase lookup failed:', e.message); }
+
+  // Fallback: localStorage (same device only)
   try {
     const raw = localStorage.getItem('os_game_session_' + code);
     if (raw) {
       const sess = JSON.parse(raw);
       const now = Date.now();
       if (sess.endsAt && now > sess.endsAt) { gzError('Spilløkten er avsluttet'); return; }
-      if (sess.startsAt && now < sess.startsAt) { gzError('Spilløkten har ikke startet ennå'); return; }
-      GZ.session = sess;
+      if (sess.startsAt && now < sess.startsAt) { gzError('Spilløkten starter snart'); return; }
+      GZ.session = { ...sess, code };
       gzEnterLobby();
       return;
     }
   } catch(e) {}
+
   gzError('Ugyldig kode – sjekk at du har skrevet riktig');
 }
 
@@ -5427,27 +5448,27 @@ function gsCreate() {
   if(document.getElementById('gsWhoami')?.checked) games.push('whoami');
   const customWordsRaw=document.getElementById('gsCustomWords')?.value||'';
   const customWords=customWordsRaw.split(',').map(w=>w.trim().toUpperCase()).filter(w=>w.length===5);
-  const sess = {
-    id: code, code,
-    name, games, customWords,
-    starts_at: startVal ? new Date(startVal).toISOString() : new Date().toISOString(),
-    ends_at: new Date(endVal).toISOString(),
-    config: { name, games, customWords, code }
-  };
-  // Save to Supabase
-  dbGameReq('POST','os_game_sessions','',sess).then(()=>{
-    showToast('✅ Økt opprettet! Kode: '+code);
-    gsLoadSessions();
-  }).catch(e=>{
-    // Fallback: localStorage
-    localStorage.setItem('os_game_session_'+code, JSON.stringify({
-      name, games, customWords, code,
-      startsAt: startVal ? new Date(startVal).getTime() : Date.now(),
-      endsAt: new Date(endVal).getTime()
-    }));
-    showToast('✅ Økt lagret lokalt! Kode: '+code);
-    gsLoadSessions();
-  });
+  const starts = startVal ? new Date(startVal).toISOString() : new Date().toISOString();
+  const ends   = new Date(endVal).toISOString();
+  const config = { name, games, customWords, code };
+  const sess = { id: code, code, name, starts_at: starts, ends_at: ends, config };
+
+  // Always save to localStorage so same-device works instantly
+  localStorage.setItem('os_game_session_'+code, JSON.stringify({
+    name, games, customWords, code,
+    startsAt: new Date(starts).getTime(),
+    endsAt:   new Date(ends).getTime()
+  }));
+
+  // Also save to Supabase for cross-device
+  dbGameReq('POST','os_game_sessions','',sess)
+    .then(() => { showToast('✅ Økt opprettet! Kode: ' + code); })
+    .catch(() => { showToast('✅ Økt lagret (kun lokalt). Kode: ' + code); });
+
+  // Show active session banner immediately
+  gsShowActiveBanner({ code, name, ends_at: ends, games });
+  gsLoadSessions();
+
   // Clear form
   document.getElementById('gsName').value='';
   document.getElementById('gsStart').value='';
@@ -5458,30 +5479,82 @@ function gsCreate() {
 async function gsLoadSessions() {
   const el=document.getElementById('gsSessionList');
   if(!el) return;
-  el.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;">Laster...</div>';
+  el.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;padding:0.5rem;">Laster...</div>';
+  let sessions = [];
+
+  // Merge Supabase + localStorage sessions
   try {
-    const rows=await dbGameReq('GET','os_game_sessions','select=*&order=created_at.desc&limit=10');
-    if(!rows||!rows.length) { el.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;">Ingen aktive økter.</div>'; return; }
-    const now=Date.now();
-    el.innerHTML=rows.map(s=>{
-      const end=new Date(s.ends_at||s.endsAt||0).getTime();
-      const active=end>now;
-      const cfg=s.config||s;
-      return `<div style="display:flex;align-items:center;gap:0.875rem;padding:0.875rem 1.1rem;background:var(--s2);border:1px solid var(--border);border-radius:12px;margin-bottom:0.5rem;flex-wrap:wrap;">
-        <div style="flex:1;">
-          <div style="font-weight:800;font-size:0.95rem;">${escHtml(cfg.name||s.id)}</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:1.3rem;color:var(--accent-h);letter-spacing:0.15em;">${s.code||s.id}</div>
-          <div style="font-size:0.78rem;color:var(--text-3);margin-top:2px;">Slutter: ${s.ends_at?new Date(s.ends_at).toLocaleString('no'):'-'}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.35rem;">
-          <span style="padding:3px 10px;border-radius:50px;font-size:0.72rem;font-weight:800;background:${active?'rgba(34,197,94,0.12)':'rgba(239,68,68,0.1)'};color:${active?'#22c55e':'#ef4444'};border:1px solid ${active?'#22c55e44':'#ef444433'};">${active?'AKTIV':'AVSLUTTET'}</span>
-          <button onclick="gsViewLeaderboard('${s.code||s.id}')" style="padding:5px 12px;background:var(--s3);border:1px solid var(--border-2);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-2);cursor:pointer;">Toppliste</button>
-        </div>
-      </div>`;
-    }).join('');
-  } catch(e) {
-    el.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;">Ikke tilkoblet Supabase – kjør SQL-skjemaet</div>';
+    const rows = await dbGameReq('GET','os_game_sessions','select=*&order=created_at.desc&limit=20');
+    if (rows && rows.length) sessions = rows.map(s => ({
+      code: s.code||s.id,
+      name: (s.config&&s.config.name)||s.name||s.id,
+      games: (s.config&&s.config.games)||s.games||['wordle','worldle','whoami'],
+      customWords: (s.config&&s.config.customWords)||[],
+      starts_at: s.starts_at,
+      ends_at: s.ends_at,
+      _source:'supabase'
+    }));
+  } catch(e) {}
+
+  // Also include localStorage sessions not yet in list
+  for (let i=0; i<localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k || !k.startsWith('os_game_session_')) continue;
+    try {
+      const s = JSON.parse(localStorage.getItem(k));
+      if (!sessions.find(r=>r.code===s.code)) {
+        sessions.push({ code:s.code, name:s.name||s.code, games:s.games||[], customWords:s.customWords||[],
+          starts_at: s.startsAt ? new Date(s.startsAt).toISOString() : null,
+          ends_at: s.endsAt ? new Date(s.endsAt).toISOString() : null, _source:'local' });
+      }
+    } catch(e) {}
   }
+
+  if (!sessions.length) {
+    el.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;padding:0.5rem;">Ingen spilløkter opprettet ennå.</div>';
+    return;
+  }
+
+  // Sort: active first
+  const now = Date.now();
+  sessions.sort((a,b) => {
+    const aEnd = a.ends_at ? new Date(a.ends_at).getTime() : 0;
+    const bEnd = b.ends_at ? new Date(b.ends_at).getTime() : 0;
+    const aActive = aEnd > now, bActive = bEnd > now;
+    if (aActive !== bActive) return aActive ? -1 : 1;
+    return bEnd - aEnd;
+  });
+
+  el.innerHTML = sessions.map(s => {
+    const endTs = s.ends_at ? new Date(s.ends_at).getTime() : 0;
+    const startTs = s.starts_at ? new Date(s.starts_at).getTime() : 0;
+    const active = endTs > now && (startTs===0 || startTs <= now);
+    const upcoming = startTs > now;
+    const statusColor = active ? '#22c55e' : upcoming ? '#f59e0b' : '#ef4444';
+    const statusLabel = active ? 'AKTIV' : upcoming ? 'SNART' : 'AVSLUTTET';
+    const gameLabels = (s.games||[]).map(g=>({wordle:'Wordle',worldle:'Worldle',whoami:'Who Am I'}[g]||g)).join(' · ');
+    const localBadge = s._source==='local' ? '<span style="font-size:0.65rem;background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);border-radius:4px;padding:1px 6px;margin-left:6px;">LOKALT</span>' : '';
+    return `<div style="background:var(--s1);border:1px solid ${active?'rgba(79,110,247,0.4)':'var(--border)'};border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:0.75rem;${active?'box-shadow:0 0 0 1px rgba(79,110,247,0.15)':''}" id="gs-card-${s.code}">
+      <div style="display:flex;align-items:flex-start;gap:0.875rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:160px;">
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem;">
+            <span style="font-weight:800;font-size:1rem;">${escHtml(s.name)}</span>
+            <span style="padding:2px 9px;border-radius:50px;font-size:0.68rem;font-weight:800;background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44;">${statusLabel}</span>
+            ${localBadge}
+          </div>
+          <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--accent-h);letter-spacing:0.2em;line-height:1.1;">${s.code}</div>
+          <div style="font-size:0.78rem;color:var(--text-3);margin-top:0.3rem;">${gameLabels||'Alle spill'}</div>
+          ${s.ends_at ? `<div style="font-size:0.75rem;color:var(--text-3);margin-top:0.2rem;">Slutter: ${new Date(s.ends_at).toLocaleString('no-NO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.4rem;align-items:flex-end;">
+          ${active ? `<button onclick="gsCopyCode('${s.code}')" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:5px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Kopier kode</button>` : ''}
+          <button onclick="gsViewLeaderboard('${s.code}')" style="padding:6px 12px;background:var(--s2);border:1px solid var(--border-2);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-2);cursor:pointer;">Toppliste</button>
+          <button onclick="gsEditSession('${s.code}')" style="padding:6px 12px;background:var(--s2);border:1px solid var(--border-2);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-2);cursor:pointer;">Rediger</button>
+          <button onclick="gsEndSession('${s.code}')" style="padding:6px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:#ef4444;cursor:pointer;">Avslutt</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 async function gsViewLeaderboard(code) {
@@ -5504,6 +5577,99 @@ async function gsViewLeaderboard(code) {
         <span style="font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--accent-h);">${total}p</span>
       </div>`).join('');
   } catch(e) { table.innerHTML='<div style="color:var(--red);">Feil ved lasting</div>'; }
+}
+
+
+
+async function gsLoadActiveBanner() {
+  const now = Date.now();
+  // Check Supabase for active sessions
+  try {
+    const rows = await dbGameReq('GET','os_game_sessions','select=*&order=created_at.desc&limit=5');
+    if (rows && rows.length) {
+      const active = rows.find(s => {
+        const end = s.ends_at ? new Date(s.ends_at).getTime() : Infinity;
+        const start = s.starts_at ? new Date(s.starts_at).getTime() : 0;
+        return end > now && start <= now;
+      });
+      if (active) { gsShowActiveBanner({...(active.config||{}), ...active}); return; }
+    }
+  } catch(e) {}
+  // Check localStorage
+  for (let i=0; i<localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k || !k.startsWith('os_game_session_')) continue;
+    try {
+      const s = JSON.parse(localStorage.getItem(k));
+      if (s.endsAt > now && (!s.startsAt || s.startsAt <= now)) {
+        gsShowActiveBanner(s); return;
+      }
+    } catch(e) {}
+  }
+  document.getElementById('gs-active-banner')?.style && (document.getElementById('gs-active-banner').style.display='none');
+}
+
+function gsShowActiveBanner(sess) {
+  const banner = document.getElementById('gs-active-banner');
+  if (!banner) return;
+  if (!sess) { banner.style.display='none'; return; }
+  banner.style.display = 'block';
+  banner.innerHTML = `
+    <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+      <div style="flex:1;">
+        <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">Aktiv spilløkt</div>
+        <div style="font-weight:800;font-size:0.95rem;color:var(--text);">${escHtml(sess.name||sess.code)}</div>
+        <div style="font-size:0.78rem;color:var(--text-2);margin-top:0.15rem;">Slutter: ${sess.ends_at?new Date(sess.ends_at).toLocaleString('no-NO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'-'}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.2rem;">Kode til elevene</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--accent-h);letter-spacing:0.25em;line-height:1;">${sess.code}</div>
+      </div>
+      <button onclick="gsCopyCode('${sess.code}')" style="padding:10px 18px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">Kopier kode</button>
+    </div>`;
+}
+
+function gsCopyCode(code) {
+  navigator.clipboard.writeText(code).then(()=>showToast('✅ Kode kopiert: ' + code)).catch(()=>showToast('Koden er: ' + code));
+}
+
+async function gsEndSession(code) {
+  if (!confirm('Avslutte spilløkt ' + code + '? Elevene kan ikke lenger logge inn.')) return;
+  // Set ends_at to now in Supabase
+  try {
+    await dbGameReq('PATCH','os_game_sessions',`code=eq.${code}`,{ ends_at: new Date().toISOString() });
+  } catch(e) {}
+  // Update localStorage
+  const raw = localStorage.getItem('os_game_session_'+code);
+  if (raw) {
+    try { const s=JSON.parse(raw); s.endsAt=Date.now(); localStorage.setItem('os_game_session_'+code,JSON.stringify(s)); } catch(e){}
+  }
+  showToast('Økt avsluttet');
+  gsLoadSessions();
+}
+
+function gsEditSession(code) {
+  // Load session data into form for editing
+  const raw = localStorage.getItem('os_game_session_'+code);
+  let sess = null;
+  try { sess = raw ? JSON.parse(raw) : null; } catch(e) {}
+  if (!sess) { showToast('Kan ikke laste øktdata – rediger i Supabase'); return; }
+  // Fill form
+  const nameEl = document.getElementById('gsName'); if(nameEl) nameEl.value = sess.name||'';
+  const endEl = document.getElementById('gsEnd');
+  if (endEl && sess.endsAt) {
+    const d = new Date(sess.endsAt);
+    endEl.value = d.toISOString().slice(0,16);
+  }
+  if (sess.games) {
+    document.getElementById('gsWordle')?.closest('label') && (document.getElementById('gsWordle').checked = sess.games.includes('wordle'));
+    document.getElementById('gsWorldle')?.closest('label') && (document.getElementById('gsWorldle').checked = sess.games.includes('worldle'));
+    document.getElementById('gsWhoami')?.closest('label') && (document.getElementById('gsWhoami').checked = sess.games.includes('whoami'));
+  }
+  const cwEl = document.getElementById('gsCustomWords'); if(cwEl) cwEl.value = (sess.customWords||[]).join(', ');
+  // Scroll to form
+  document.getElementById('gsName')?.scrollIntoView({behavior:'smooth', block:'center'});
+  showToast('Rediger og klikk «Opprett økt» for å lagre ny versjon');
 }
 
 function copyGameSQL() {
