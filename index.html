@@ -1219,10 +1219,14 @@
       </h2>
       <p style="color:var(--text-2);font-size:0.85rem;margin-bottom:1.5rem;padding-left:28px;">Opprett en spilløkt med kode og tid – elevene logger inn med koden.</p>
 
-      <!-- SQL note -->
-      <div style="background:var(--accent-g);border:1px solid var(--accent);border-radius:10px;padding:0.875rem 1.1rem;margin-bottom:1rem;font-size:0.83rem;color:var(--text-2);display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
-        <span><strong style="color:var(--accent-h);">Første gang?</strong> Kjør SQL-skjema i Supabase for å aktivere tverr-enhet støtte.</span>
-        <button onclick="copyGameSQL()" style="padding:6px 14px;background:var(--accent);color:white;border:none;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;">Kopier SQL</button>
+      <!-- Diagnostics -->
+      <div style="background:var(--s2);border:1px solid var(--border-2);border-radius:10px;padding:0.875rem 1.1rem;margin-bottom:1rem;font-size:0.83rem;color:var(--text-2);">
+        <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+          <span><strong style="color:var(--text);">Supabase-oppsett</strong> — kjør SQL-skjema i Supabase SQL Editor for tverr-enhet støtte.</span>
+          <button onclick="copyGameSQL()" style="padding:6px 14px;background:var(--accent);color:white;border:none;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;">Kopier SQL</button>
+          <button id="gs-diag-btn" onclick="gsDiagnose()" style="padding:6px 14px;background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);border:none;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;">🔍 Test tilkobling</button>
+        </div>
+        <div id="gs-diag-result" style="display:none;margin-top:0.5rem;font-size:0.8rem;font-family:monospace;background:var(--bg);border-radius:6px;padding:0.6rem 0.875rem;color:var(--text-2);white-space:pre-wrap;line-height:1.6;"></div>
       </div>
 
       <!-- Active session banner -->
@@ -5058,7 +5062,7 @@ async function gzLogin() {
     return;
   }
 
-  // Supabase had no result or was unreachable → try localStorage (same device)
+  // Supabase unreachable or no result → try localStorage (same device only)
   if (btn) { btn.textContent = 'Logg inn'; btn.disabled = false; }
   const raw = localStorage.getItem('os_game_session_' + code);
   if (raw) {
@@ -5473,18 +5477,15 @@ async function gsCreate() {
     endsAt:   new Date(ends).getTime()
   }));
 
-  // Save to Supabase for cross-device - show result
-  let supabaseOk = false;
-  try {
-    await DB._q('POST','os_game_sessions','',sess);
-    supabaseOk = true;
-  } catch(e) {
-    console.warn('[GS] Supabase save failed:', e.message);
-  }
-  if (supabaseOk) {
+  // Save to Supabase - DB._q returns null on failure, [] or array on success
+  const sbResult = await DB._q('POST','os_game_sessions','',sess);
+  if (sbResult !== null) {
     showToast('✅ Økt lagret i sky! Kode: ' + code);
   } else {
-    showToast('⚠️ Kun lokalt! Kjør SQL-skjema for tverr-enhet. Kode: ' + code, 5000);
+    // Show diagnostic info
+    const diagBtn = document.getElementById('gs-diag-btn');
+    if (diagBtn) diagBtn.style.display = 'inline-block';
+    showToast('⚠️ Sky-lagring feilet. Bruk diagnoseverktøyet. Kode: ' + code, 6000);
   }
 
   gsShowActiveBanner({ code, name, ends_at: ends, games });
@@ -5504,9 +5505,8 @@ async function gsLoadSessions() {
   let sessions = [];
 
   // Merge Supabase + localStorage sessions
-  try {
-    const rows = await DB._q('GET','os_game_sessions','select=*&order=created_at.desc&limit=20');
-    if (rows && rows.length) sessions = rows.map(s => ({
+  const rows = await DB._q('GET','os_game_sessions','select=*&order=created_at.desc&limit=20');
+  if (rows && rows.length) sessions = rows.map(s => ({
       code: s.code||s.id,
       name: (s.config&&s.config.name)||s.name||s.id,
       games: (s.config&&s.config.games)||s.games||['wordle','worldle','whoami'],
@@ -5515,7 +5515,6 @@ async function gsLoadSessions() {
       ends_at: s.ends_at,
       _source:'supabase'
     }));
-  } catch(e) {}
 
   // Also include localStorage sessions not yet in list
   for (let i=0; i<localStorage.length; i++) {
@@ -5531,6 +5530,10 @@ async function gsLoadSessions() {
     } catch(e) {}
   }
 
+  if (rows === null && !sessions.length) {
+    el.innerHTML='<div style="color:#f59e0b;font-size:0.85rem;padding:0.5rem;"><strong>⚠️ Kan ikke nå Supabase.</strong> Kjør SQL-skjema og klikk «Test tilkobling».</div>';
+    return;
+  }
   if (!sessions.length) {
     el.innerHTML='<div style="color:var(--text-3);font-size:0.88rem;padding:0.5rem;">Ingen spilløkter opprettet ennå.</div>';
     return;
@@ -5703,31 +5706,117 @@ function gsEditSession(code) {
   showToast('Rediger og klikk «Opprett økt» for å lagre ny versjon');
 }
 
+
+async function gsDiagnose() {
+  const el = document.getElementById('gs-diag-result');
+  if (!el) return;
+  el.style.display = 'block';
+  el.textContent = '⏳ Tester tilkobling...';
+
+  const lines = [];
+  lines.push('Supabase URL: ' + SB_URL);
+  lines.push('API-nøkkel: ' + (SB_KEY ? SB_KEY.substring(0,20)+'...' : 'MANGLER'));
+  lines.push('');
+
+  // Test 1: Can we reach Supabase at all?
+  try {
+    const res = await fetch(SB_URL + '/rest/v1/', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    });
+    lines.push('✅ Supabase nåbar (HTTP ' + res.status + ')');
+  } catch(e) {
+    lines.push('❌ KAN IKKE NÅ SUPABASE: ' + e.message);
+    lines.push('   → Sjekk at prosjektet ikke er på pause på supabase.com');
+    el.textContent = lines.join('\n');
+    return;
+  }
+
+  // Test 2: Does os_game_sessions table exist?
+  const rows = await DB._q('GET', 'os_game_sessions', 'limit=1&select=id,code');
+  if (rows === null) {
+    lines.push('❌ TABELL os_game_sessions MANGLER');
+    lines.push('   → Klikk "Kopier SQL" og kjør det i Supabase SQL Editor');
+  } else {
+    lines.push('✅ Tabell os_game_sessions finnes (' + rows.length + ' rader lest)');
+  }
+
+  // Test 3: Can we write to it?
+  const testCode = 'ZZZTEST';
+  const writeRes = await DB._q('POST', 'os_game_sessions', '', {
+    id: testCode, code: testCode, name: 'test', starts_at: new Date().toISOString(),
+    ends_at: new Date(Date.now() + 60000).toISOString(), config: { test: true }
+  });
+  if (writeRes === null) {
+    lines.push('❌ KAN IKKE SKRIVE til os_game_sessions');
+    lines.push('   → Sjekk at RLS-policy "allow_game_sessions" er aktiv');
+  } else {
+    lines.push('✅ Skrivetilgang OK');
+    // Cleanup
+    await DB._q('DELETE', 'os_game_sessions', 'code=eq.ZZZTEST');
+    lines.push('✅ Slettetilgang OK');
+  }
+
+  // Test 4: os_game_scores
+  const scores = await DB._q('GET', 'os_game_scores', 'limit=1&select=id');
+  if (scores === null) {
+    lines.push('❌ TABELL os_game_scores MANGLER');
+  } else {
+    lines.push('✅ Tabell os_game_scores finnes');
+  }
+
+  lines.push('');
+  const allOk = !lines.some(l => l.startsWith('❌'));
+  lines.push(allOk ? '🎉 ALT OK – spilløkter skal nå fungere på tvers av enheter!' : '⚠️ Fikset alle feil? Klikk "Test tilkobling" på nytt.');
+  el.textContent = lines.join('\n');
+}
+
 function copyGameSQL() {
-  const sql=`-- OlaSkole Spillmodul SQL
+  const sql = `-- OlaSkole Spillmodul – Kjør dette i Supabase SQL Editor
+-- Trygt å kjøre flere ganger
+
+-- Tabell for spilløkter
 create table if not exists os_game_sessions (
-  id text primary key,
-  code text unique not null,
-  config jsonb,
-  starts_at timestamptz,
-  ends_at timestamptz,
-  created_at timestamptz default now()
+  id           text primary key,
+  code         text unique not null,
+  name         text,
+  config       jsonb,
+  starts_at    timestamptz,
+  ends_at      timestamptz,
+  created_at   timestamptz default now()
 );
+
+-- Tabell for poeng
 create table if not exists os_game_scores (
-  id text primary key,
+  id           text primary key,
   session_code text not null,
-  player_name text not null,
-  game text not null,
-  score int default 0,
-  created_at timestamptz default now()
+  player_name  text not null,
+  game         text not null,
+  score        int  default 0,
+  created_at   timestamptz default now()
 );
-drop policy if exists "allow_game_sessions" on os_game_sessions;
-create policy "allow_game_sessions" on os_game_sessions for all using (true) with check (true);
+
+-- Aktiver row-level security
 alter table os_game_sessions enable row level security;
+alter table os_game_scores   enable row level security;
+
+-- Tillat alle operasjoner (åpen tilgang – passer for skole-intern bruk)
+drop policy if exists "allow_game_sessions" on os_game_sessions;
+create policy "allow_game_sessions"
+  on os_game_sessions for all
+  using (true) with check (true);
+
 drop policy if exists "allow_game_scores" on os_game_scores;
-create policy "allow_game_scores" on os_game_scores for all using (true) with check (true);
-alter table os_game_scores enable row level security;`;
-  navigator.clipboard.writeText(sql).then(()=>showToast('✅ SQL kopiert!')).catch(()=>showToast('Kopier manuelt fra konsollen'));
+create policy "allow_game_scores"
+  on os_game_scores for all
+  using (true) with check (true);
+
+-- Indeks for raskere oppslag på kode
+create index if not exists idx_game_sessions_code on os_game_sessions(code);
+create index if not exists idx_game_scores_session on os_game_scores(session_code);
+`;
+  navigator.clipboard.writeText(sql)
+    .then(() => showToast('✅ SQL kopiert! Lim inn i Supabase SQL Editor og klikk RUN'))
+    .catch(() => { document.getElementById('gs-diag-result').style.display='block'; document.getElementById('gs-diag-result').textContent = sql; });
 }
 // ====== END GAME ZONE ENGINE ======
 
