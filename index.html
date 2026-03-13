@@ -35,8 +35,18 @@
   body.light input, body.light select, body.light textarea {
     background:var(--s1); color:var(--text); border-color:var(--border-2);
   }
-  input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor:pointer; }
-  body.light input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.3); }
+  input[type="datetime-local"] {
+    color-scheme: dark;
+    cursor:pointer;
+  }
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.75) brightness(1.2);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+  }
+  body.light input[type="datetime-local"] { color-scheme: light; }
+  body.light input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: none; }
   body.light .module-card { box-shadow:0 2px 12px rgba(0,0,0,0.06); }
   body.light .modal { box-shadow:0 8px 40px rgba(0,0,0,0.12); }
 
@@ -1250,15 +1260,21 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.875rem;">
           <div>
             <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Starter (valgfri)</label>
-            <input type="datetime-local" id="gsStart"
-              style="width:100%;padding:10px 12px;border:1px solid var(--border-2);border-radius:10px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;cursor:pointer;"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
+            <div style="position:relative;">
+              <input type="datetime-local" id="gsStart"
+                style="width:100%;padding:10px 40px 10px 12px;border:1px solid var(--border-2);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;cursor:pointer;appearance:none;-webkit-appearance:none;"
+                onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
+              <svg style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-3);" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
           </div>
           <div>
             <label style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:0.4rem;">Slutter <span style="color:var(--red);">*</span></label>
-            <input type="datetime-local" id="gsEnd"
-              style="width:100%;padding:10px 12px;border:1px solid var(--border-2);border-radius:10px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;cursor:pointer;"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
+            <div style="position:relative;">
+              <input type="datetime-local" id="gsEnd"
+                style="width:100%;padding:10px 40px 10px 12px;border:1px solid var(--border-2);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;cursor:pointer;appearance:none;-webkit-appearance:none;"
+                onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
+              <svg style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-3);" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
           </div>
         </div>
 
@@ -1308,7 +1324,10 @@
             </div>
             <div style="margin-bottom:0.75rem;">
               <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">Egne ord (kommaseparert, 5–7 bokstaver)</label>
-              <input type="text" id="gsCustomWords" placeholder="SKOLE, FJORD, BUNAD, NORSK" />
+              <input type="text" id="gsCustomWords" placeholder="SKOLE, FJORD, BUNAD, NORSK"
+                style="width:100%;padding:10px 12px;border:1px solid var(--border-2);border-radius:8px;background:var(--s3);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;font-transform:uppercase;letter-spacing:0.05em;"
+                oninput="this.value=this.value.toUpperCase()"
+              />
             </div>
             <div>
               <label style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:0.3rem;">AI-generer ordpakke fra tema</label>
@@ -5440,10 +5459,10 @@ function gzStartWordle() {
   if (unplayed.length === 0) { GZ._playedWordle.clear(); unplayed = pool; }
   const word = unplayed[Math.floor(Math.random()*unplayed.length)];
   GZ._playedWordle.add(word);
+  const lang = sess.wordleLang || 'no';
   const diff = (GZ._gameDiff && GZ._gameDiff.wordle) || sess.wordleDiff || 'normal';
   const maxTries = diff==='easy' ? 8 : diff==='hard' ? 4 : 6;
   WORDLE_ST = { word, guesses:[], cur:'', over:false, maxTries, wLen:word.length };
-  // Update board display
   const diffEl = document.getElementById('wordle-diff-badge');
   if (diffEl) diffEl.textContent = {easy:'Lett',normal:'Normal',hard:'Vanskelig'}[diff] || '';
   const langBadge = document.getElementById('wordle-lang-badge');
@@ -6071,20 +6090,24 @@ async function gsGenerateWordleWords() {
   if (spinner) spinner.style.display = 'inline-block';
   if (resultEl) resultEl.style.display = 'none';
   const wLen = parseInt(document.getElementById('gsWordleLen')?.value||'5');
+  const lang = document.getElementById('gsWordleLang')?.value || 'no';
   const key = getApiKey();
   if (!key) { showToast('Ingen API-nøkkel – sjekk Innstillinger'); if(spinner)spinner.style.display='none'; return; }
+  const langPrompt = lang === 'en'
+    ? `Create a list of exactly 20 English words with exactly ${wLen} letters about the topic: "${topic}". Only real English words. Reply ONLY with a comma-separated list of words in UPPERCASE, no other text. Example: STORM,OCEAN,FLAME`
+    : `Lag en liste med nøyaktig 20 ${lang==='no'?'norske':'ord på valgt språk'} med nøyaktig ${wLen} bokstaver som handler om temaet: "${topic}". Bare gyldige ord. Svar KUN med en kommaseparert liste over ordene med store bokstaver, ingen annen tekst. Eksempel: FJORD,STEIN,SNØEN`;
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body: JSON.stringify({
         model:'claude-sonnet-4-20250514', max_tokens:500,
-        messages:[{role:'user',content:`Lag en liste med nøyaktig 20 norske ord med nøyaktig ${wLen} bokstaver som handler om temaet: "${topic}". Bare norske ord, ingen engelske. Svar KUN med en kommaseparert liste over ordene med store bokstaver, ingen annen tekst. Eksempel: FJORD,STEIN,SNØEN`}]
+        messages:[{role:'user',content:langPrompt}]
       })
     });
     const data = await res.json();
     const text = (data.content?.[0]?.text||'').trim().toUpperCase();
-    const words = text.split(/[,\s]+/).map(w=>w.replace(/[^A-ZÆØÅ]/g,'')).filter(w=>w.length===wLen);
+    const words = text.split(/[,\s]+/).map(w=>w.replace(/[^A-ZÆØÅÄÖÜ]/g,'')).filter(w=>w.length===wLen);
     if (!words.length) throw new Error('Ingen gyldige ord generert');
     // Put in the custom words field
     const inp = document.getElementById('gsCustomWords');
@@ -6694,6 +6717,78 @@ const GZ_COUNTRIES = [
   {n:'Sør-Afrika', f:'🇿🇦', c:'Afrika',   p:'~60 mill', d:'M22,18L72,18L82,30L80,48L68,62L55,70L48,74L42,70L28,60L18,44L16,30Z', lat:-29,lon:25, hints:['Sørspissen av Afrika','Nelson Mandela var herfra','Kjent for diamanter og safari','Tre hovedsteder','Apartheidregimet avsluttes i 1994']},
   {n:'Marokko',    f:'🇲🇦', c:'Afrika',   p:'~37 mill', d:'M24,18L62,15L75,22L80,36L75,52L60,60L40,60L22,52L16,38Z', lat:32,lon:-5, hints:['Nordvestafrikansk land','Grenser til Algerie og Vest-Sahara','Marrakesh og Casablanca','Sahara i sør','Arabisk-berberisk kultur']},
   {n:'Nigeria',    f:'🇳🇬', c:'Afrika',   p:'~220 mill',d:'M24,20L72,18L80,28L80,45L70,58L52,64L34,62L20,52L18,36Z', lat:10,lon:8, hints:['Afrikas mest folkerike land','Niger-deltaet er oljerik','Lagos er gigantby','Naboer med Niger og Kamerun','Abuja er hovedstad']},
+  // ── EUROPA ──
+  {n:'Østerrike',   f:'🇦🇹', c:'Europa',   p:'~9 mill',  lat:47.5, lon:14.5, d:'M38,30L62,28L68,36L65,48L55,52L42,50L32,44Z', hints:['Alpe-land i Sentral-Europa','Grenser til 8 land','Wien er en av Europas kulturhovedsteder','Hjemland til Mozart','Kjent for skiing og Schnitzel']},
+  {n:'Belgia',      f:'🇧🇪', c:'Europa',   p:'~11 mill', lat:50.8, lon:4.5,  d:'M35,28L65,26L70,38L60,50L40,52L28,42Z', hints:['Vesteuropeisk land','Grenser til Frankrike, Nederland og Luxembourg','Brussel er EU-hovedkvarter','Kjent for sjokolade og vafler','Har tre offisielle språk']},
+  {n:'Portugal',    f:'🇵🇹', c:'Europa',   p:'~10 mill', lat:39.5, lon:-8.0, d:'M30,15L55,12L60,25L55,42L48,55L38,60L28,50L25,35Z', hints:['Vestligste land i Fastlands-Europa','Lisboa er historisk havneby','Grenser kun til Spania','Kjent for Fado-musikk','Hadde et av historiens største kolonialimperier']},
+  {n:'Hellas',      f:'🇬🇷', c:'Europa',   p:'~11 mill', lat:39.0, lon:22.0, d:'M25,20L58,15L72,25L75,40L65,52L50,60L35,55L22,45Z', hints:['Søreuropeisk land','Sivilisasjonens vugge i Vesten','Athen er landets hovedstad','Kjent for olympiske leker og mytologi','Tusenvis av øyer i Middelhavet']},
+  {n:'Ungarn',      f:'🇭🇺', c:'Europa',   p:'~10 mill', lat:47.0, lon:19.5, d:'M25,30L70,28L75,40L68,52L30,55L20,45Z', hints:['Midteuropeisk land omgitt av land','Budapest er europeisk kulturperle','Kjent for gulasj og Tokay-vin','Donau renner gjennom hovedstaden','Del av Østerrike-Ungarn inntil 1918']},
+  {n:'Tsjekkia',    f:'🇨🇿', c:'Europa',   p:'~11 mill', lat:49.8, lon:15.5, d:'M22,28L70,25L75,35L70,48L28,50L18,40Z', hints:['Midteuropeisk innlandsstat','Praha er en av Europas vakreste byer','Grenser til Polen, Østerrike, Slovakia og Tyskland','Hjemland til Kafka','Øl-land nummer én i verden per innbygger']},
+  {n:'Romania',     f:'🇷🇴', c:'Europa',   p:'~19 mill', lat:45.9, lon:25.0, d:'M22,22L72,20L80,32L78,48L65,58L40,58L22,45Z', hints:['Sørøst-Europa','Karpatene krysser landet','Transylvania og Dracula-legenden','Bukarest er landets store by','Grenser til Svartehavet']},
+  {n:'Serbia',      f:'🇷🇸', c:'Europa',   p:'~7 mill',  lat:44.0, lon:21.0, d:'M30,25L68,22L72,35L68,50L52,58L32,55L22,42Z', hints:['Balkan-land på Balkanhalvøya','Beograd er en av Europas eldste byer','Grenser til 8 land','Kjent for kaffekultur','Gavrilo Princip skjøt erkehertug Franz Ferdinand her']},
+  {n:'Kroatia',     f:'🇭🇷', c:'Europa',   p:'~4 mill',  lat:45.1, lon:15.5, d:'M18,20L55,18L72,28L65,40L55,50L40,55L25,48L15,35Z', hints:['Adriaterhavskysten i Europa','Zagreb er innlands-hovedstaden','Dubrovnik er kjent fra Game of Thrones','Grenser til Slovenia, Ungarn og Bosnia','Del av Jugoslavia til 1991']},
+  {n:'Bulgaria',    f:'🇧🇬', c:'Europa',   p:'~7 mill',  lat:42.7, lon:25.5, d:'M20,28L72,25L78,38L72,52L42,55L18,45Z', hints:['Balkan-land ved Svartehavet','Sofia er landets moderne hovedstad','Grenser til Tyrkia, Hellas og Romania','Kyrillisk alfabet ble utviklet her','Kjent for yoghurt og rose-essensolje']},
+  {n:'Slovakia',    f:'🇸🇰', c:'Europa',   p:'~5,5 mill',lat:48.7, lon:19.5, d:'M20,35L72,30L78,40L65,52L22,55L15,45Z', hints:['Lite midteuropeisk land','Bratislava er hovedstad','Grenser til Tsjekkia, Polen, Ungarn og Østerrike','Del av Tsjekkoslovakia til 1993','Kjent for slott og fjelllandskap']},
+  {n:'Slovenia',    f:'🇸🇮', c:'Europa',   p:'~2 mill',  lat:46.1, lon:14.8, d:'M25,30L62,28L68,38L60,50L35,52L20,42Z', hints:['Lite alpeland i Sentral-Europa','Ljubljana er en sjarmerende hovedstad','Grenser til Italia, Østerrike, Ungarn og Kroatia','Del av Jugoslavia til 1991','Kjent for Julian-Alpene og Soča-elven']},
+  {n:'Hviterussland',f:'🇧🇾',c:'Europa',   p:'~9,5 mill',lat:53.7, lon:27.9, d:'M22,20L72,18L78,30L75,45L62,55L28,55L15,42Z', hints:['Østeuropeisk land','Minsk er landets staselige hovedstad','Grenser til Russland, Ukraina og Polen','Kalles "Europas siste diktatur"','Viktig kampsted under 2. verdenskrig']},
+  {n:'Ukraina',     f:'🇺🇦', c:'Europa',   p:'~44 mill', lat:49.0, lon:31.5, d:'M18,20L78,18L88,28L85,45L70,55L32,58L15,45Z', hints:['Størst land i Europa (unntatt Russland)','Kijevrusʼ var middelalderlig stormakt','Grenser til Russland, Polen og Romania','Svartehavet i sør','Kjent for solsikkeolje og hvete']},
+  {n:'Litauen',     f:'🇱🇹', c:'Europa',   p:'~2,8 mill',lat:55.2, lon:23.9, d:'M30,28L65,25L70,38L62,52L32,55L22,42Z', hints:['Baltisk stat','Vilnius er en vakker barokkby','Grenser til Latvia, Hviterussland og Polen','Var Europas siste land til å bli kristent','Del av Sovjet fra 1940 til 1991']},
+  {n:'Latvia',      f:'🇱🇻', c:'Europa',   p:'~1,9 mill',lat:56.9, lon:24.6, d:'M28,28L68,25L72,38L60,50L28,52L18,40Z', hints:['Baltisk stat','Riga er en storslått art nouveau-by','Grenser til Estland, Litauen og Russland','Dina er et kjent landemerke','Del av Sovjet 1940–1991']},
+  {n:'Estland',     f:'🇪🇪', c:'Europa',   p:'~1,3 mill',lat:58.6, lon:25.0, d:'M28,25L70,22L75,35L65,48L30,50L18,38Z', hints:['Baltisk stat og digital foregangsnasjon','Tallinn er en middelalderperle','Grenser til Latvia og Russland','Skypen ble grunnlagt her','Frihet fra Sovjet i 1991']},
+  {n:'Albania',     f:'🇦🇱', c:'Europa',   p:'~2,8 mill',lat:41.2, lon:20.2, d:'M35,20L60,18L65,32L60,50L48,58L32,48L25,35Z', hints:['Lite balkanland','Tirana er livlig og fargerik by','Grenser til Montenegro, Kosovo og Hellas','Muslimsk flertall i Europa','Bunker-land: Hoxha bygde 750 000 bunkere']},
+  {n:'Nord-Makedonia',f:'🇲🇰',c:'Europa', p:'~2,1 mill',lat:41.6, lon:21.7, d:'M28,28L65,25L70,40L60,52L32,52L22,40Z', hints:['Lite balkanland','Skopje er en moderne by etter jordskjelv 1963','Grenser til Serbia, Bulgaria og Hellas','Tvister om navn med Hellas løst i 2019','Hjemsted for Mor Teresa']},
+  {n:'Bosnia-Hercegovina',f:'🇧🇦',c:'Europa',p:'~3,3 mill',lat:44.2, lon:17.9, d:'M22,22L65,18L72,32L65,48L45,58L25,50L16,38Z', hints:['Balkan-land i Sørøst-Europa','Sarajevo var vertsby for Vinter-OL 1984','Franz Ferdinands attentat utløste 1. verdenskrig','Del av Jugoslavia til 1991–1995','Neobyen er UNESCOs verdensarv']},
+  {n:'Montenegro',  f:'🇲🇪', c:'Europa',   p:'~620 000', lat:42.7, lon:19.4, d:'M28,25L65,22L70,38L60,52L35,55L20,42Z', hints:['Lite balkanland','Kjent for Kotor-bukten og Adriaterhavskysten','Grenser til Kroatia, Bosnia og Albania','Uavhengig fra Serbia i 2006','Populær turistdestinasjon']},
+  {n:'Moldova',     f:'🇲🇩', c:'Europa',   p:'~2,6 mill',lat:47.0, lon:28.4, d:'M30,22L68,20L72,35L65,50L32,52L22,38Z', hints:['Lite østeuropeisk land','Chisinau er landets viktigste by','Grenser kun til Romania og Ukraina','Vin-produserende land','Transnistria er en ikke-anerkjent stat innenfor Moldova']},
+  {n:'Kosovo',      f:'🇽🇰', c:'Europa',   p:'~1,8 mill',lat:42.6, lon:20.9, d:'M28,28L65,25L70,38L62,50L32,52L22,40Z', hints:['Ungt land i Europa (uavhengig 2008)','Pristina er landets rastløse by','Omstridt selvstendighet fra Serbia','Grenser til Albania og Nord-Makedonia','Størst muslimsk andel i Europa']},
+  {n:'Irland',      f:'🇮🇪', c:'Europa',   p:'~5 mill',  lat:53.4, lon:-8.0, d:'M22,18L58,15L68,28L65,48L50,58L30,55L18,38Z', hints:['Øystat vest for Storbritannia','Dublin er kjent for pub-kultur og Guinness','Deler øya med Nord-Irland','Keltisk arv og grønt landskap','Kjent for U2 og Riverdance']},
+  {n:'Luxemburg',   f:'🇱🇺', c:'Europa',   p:'~660 000', lat:49.8, lon:6.1,  d:'M35,28L62,25L68,42L55,55L32,52Z', hints:['Et av Europas minste land','Ett av verdens rikeste land per innbygger','Grenser til Frankrike, Belgia og Tyskland','Luxembourg City er en festningshovedstad','Finanssentrum i Europa']},
+  // ── AFRIKA ──
+  {n:'Eritrea',     f:'🇪🇷', c:'Afrika',   p:'~3,5 mill',lat:15.2, lon:39.8, d:'M28,18L68,15L78,28L72,42L55,50L35,45L20,35Z', hints:['Nordøstafrikansk land ved Rødehavet','Asmara er bygget av italienerne og er UNESCO-arv','Uavhengig fra Etiopia i 1993','Eritreere er en av Europas største flyktninggrupper','En av verdens mest lukkede stater']},
+  {n:'Etiopia',     f:'🇪🇹', c:'Afrika',   p:'~120 mill',lat:9.1,  lon:40.5, d:'M18,18L75,12L88,25L85,42L70,55L45,60L20,50Z', hints:['Nest mest folkerike land i Afrika','Addis Abeba er AU-hovedkvarter','Eneste afrikanske land som aldri ble kolonialisert (unntatt Mussolini)','Kaffeens hjemland','Hailé Sélassié hersket her frem til 1974']},
+  {n:'Kenya',       f:'🇰🇪', c:'Afrika',   p:'~55 mill', lat:0.0,  lon:38.0, d:'M22,20L72,18L80,30L75,48L58,58L35,55L18,40Z', hints:['Østafrikansk land ved Indiahavet','Nairobi er østafrikansk business-hub','Masai Mara er kjent for Great Migration','Langdistanseløpere i verdensklasse','Grenser til Tanzania, Uganda og Somalia']},
+  {n:'Tanzania',    f:'🇹🇿', c:'Afrika',   p:'~63 mill', lat:-6.4, lon:35.0, d:'M18,18L72,15L80,28L78,48L62,60L30,62L15,48Z', hints:['Østafrikansk land','Kilimanjaro er Afrikas høyeste fjell','Zanzibar er en vakker øy utenfor kysten','Serengeti nasjonalpark er berømt','Grenser til Kenya, Uganda og Mosambik']},
+  {n:'Ghana',       f:'🇬🇭', c:'Afrika',   p:'~32 mill', lat:7.9,  lon:-1.0, d:'M25,18L65,15L72,28L68,45L52,58L30,55L18,40Z', hints:['Vestafrikansk land','Accra er en moderne afrikansk by','Første sub-saharisk land til å bli uavhengig (1957)','Kakaoprodusent','Kofi Annan fra Ghana var FN-generalsekretær']},
+  {n:'DR Kongo',    f:'🇨🇩', c:'Afrika',   p:'~100 mill',lat:-4.0, lon:21.8, d:'M15,18L72,12L85,22L88,40L78,55L55,65L25,62L10,48Z', hints:['Nest største land i Afrika','Kongofloden er verdens dypeste elv','Kinshasa er verdens nest største fransktalende by','Grenser til 9 land','Kobolt- og diamantrike']},
+  {n:'Mosambik',    f:'🇲🇿', c:'Afrika',   p:'~32 mill', lat:-18.7,lon:35.5, d:'M28,15L65,12L72,25L68,48L55,65L35,68L20,55L18,35Z', hints:['Sørøstafrikansk land','Maputo er en art deco-by','Har en av Afrikas lengste kystlinjer','Tidligere portugisisk koloni','Grenser til Tanzania, Malawi og Zimbabwe']},
+  {n:'Angola',      f:'🇦🇴', c:'Afrika',   p:'~34 mill', lat:-11.2,lon:17.9, d:'M18,18L68,15L78,28L72,50L55,65L30,65L15,50Z', hints:['Sørvestafrikansk land','Luanda er en av Afrikas dyreste byer','Rik på olje og diamanter','Lang borgerkrig avsluttes i 2002','Tidligere portugisisk koloni']},
+  {n:'Zimbabwe',    f:'🇿🇼', c:'Afrika',   p:'~15 mill', lat:-20.0,lon:30.0, d:'M22,22L68,20L75,35L70,52L42,55L18,42Z', hints:['Sørlig Afrika','Harare er landets viktigste by','Viktoriafallene deles med Zambia','Hyperinflasjon tidlig 2000-tall','Uavhengig fra Rhodesia i 1980']},
+  {n:'Zambia',      f:'🇿🇲', c:'Afrika',   p:'~19 mill', lat:-13.1,lon:27.8, d:'M18,18L72,15L80,28L75,45L55,55L25,55L12,40Z', hints:['Innlandsstat i Sørlige Afrika','Lusaka er landets nye by','Viktoriafallene er på grensen til Zimbabwe','Koboltprodusent','Grenser til 8 land']},
+  {n:'Senegal',     f:'🇸🇳', c:'Afrika',   p:'~17 mill', lat:14.5, lon:-14.5,d:'M22,18L62,15L68,28L60,45L40,52L18,45L12,32Z', hints:['Vestafrikansk land','Dakar er Afrikas vestligste punkt','Grenser til Mauritania, Mali og Guinea','Kjent for wrestling og Teranga','Gambia er et smalt land inne i Senegal']},
+  {n:'Kamerun',     f:'🇨🇲', c:'Afrika',   p:'~27 mill', lat:3.8,  lon:11.5, d:'M22,15L68,12L78,22L75,40L60,55L38,58L18,45Z', hints:['Vestafrikansk land','Yaoundé og Douala er de to store byene','Kalles "Afrika i miniatyr" pga naturmangfold','Mounts Kamerun er aktiv vulkan','Grenser til Nigeria og DR Kongo']},
+  {n:'Elfenbenskysten',f:'🇨🇮',c:'Afrika', p:'~27 mill', lat:7.5,  lon:-5.5, d:'M22,18L65,15L72,28L65,45L45,55L22,50L12,35Z', hints:['Vestafrikansk land','Abidjan er den mest folkerike byen','Verdens største kakaoprodusent','Kjent for fotball (Didier Drogba)','Yamoussoukro er formell hovedstad']},
+  {n:'Algerie',     f:'🇩🇿', c:'Afrika',   p:'~44 mill', lat:28.0, lon:2.6,  d:'M12,18L78,12L88,20L88,45L75,58L30,60L10,48Z', hints:['Afrikas største land','Det meste er Sahara','Algier er en hvit middelhavsby','Franske 1830–1962','Stor gassleverandør til Europa']},
+  {n:'Libya',       f:'🇱🇾', c:'Afrika',   p:'~7 mill',  lat:26.3, lon:17.2, d:'M12,18L78,15L85,25L82,45L70,55L25,58L10,42Z', hints:['Nordafrikansk land','Tripoli er havnebyen og hovedstad','Mest Sahara-ørkен','Gaddafi styrte fra 1969–2011','Grenser til Egypt, Chad og Tunesiaer']},
+  {n:'Tunesiaer',   f:'🇹🇳', c:'Afrika',   p:'~12 mill', lat:33.9, lon:9.6,  d:'M30,18L62,15L68,28L65,45L50,55L32,52L22,38Z', hints:['Nordafrikansk land','Tunis er en arabisk og europeisk by','Karthago var romersk rival','Middelhavet i nord','Kjent for Matmata-huler og Star Wars-innspillinger']},
+  // ── ASIA ──
+  {n:'Indonesia',   f:'🇮🇩', c:'Asia',     p:'~277 mill',lat:-0.8, lon:113.9,d:'M10,38L40,30L70,32L90,38L88,48L65,52L35,52L10,48Z', hints:['Verdens 4. mest folkerike land','Over 17 000 øyer','Jakarta er i ferd med å synke – ny hoved­stad Nusantara','Bali er verdensberømt ferieøy','Har flest muslimer i verden']},
+  {n:'Pakistan',    f:'🇵🇰', c:'Asia',     p:'~225 mill',lat:30.4, lon:69.3, d:'M18,18L72,15L82,25L80,42L65,55L38,58L18,45Z', hints:['Sørasia','Islamabad er planlagt som ny hovedstad','K2 er verdens nest høyeste fjell','Delt fra India i 1947','Grenser til Afghanistan, India og Kina']},
+  {n:'Bangladesh',  f:'🇧🇩', c:'Asia',     p:'~170 mill',lat:23.7, lon:90.4, d:'M25,20L65,18L70,32L65,48L48,55L28,52L18,38Z', hints:['Tett befolket land i Sør-Asia','Dhaka er en av verdens raskest voksende byer','Gangesdeltaet er verdens største','Delt fra Pakistan i 1971','Risiko for flom pga lavt terreng']},
+  {n:'Vietnam',     f:'🇻🇳', c:'Asia',     p:'~97 mill', lat:14.1, lon:108.3,d:'M48,10L62,12L68,22L65,35L60,50L52,65L40,72L35,60L38,45L35,30L40,18Z', hints:['Langstrakt land i Sørøst-Asia','Hanoi er hovedstad, Ho Chi Minh City er størst','Kjent for Vietnamkrigen','Riksnudler (pho) og ris-langt','Grenser til Kina, Laos og Kambodsja']},
+  {n:'Thailand',    f:'🇹🇭', c:'Asia',     p:'~70 mill', lat:15.9, lon:100.9,d:'M30,15L65,12L75,22L72,38L60,50L52,62L42,55L30,45L25,30Z', hints:['Sørøst-Asia','Bangkok er Asia-hub for fly','Aldri kolonisert','Kjent for tempel, strand og mat','Bhuddistisk kongedømme']},
+  {n:'Malaysia',    f:'🇲🇾', c:'Asia',     p:'~33 mill', lat:4.2,  lon:108.0,d:'M15,35L48,30L65,32L80,38L78,48L62,52L35,52L12,45Z', hints:['Sørøst-Asia','Kuala Lumpur er kjent for Petronas-tårnene','Grenser til Thailand, Indonesia og Brunei','Produserer palmeolје og gummi','Muslimsk majoritet men multietnisk']},
+  {n:'Myanmar',     f:'🇲🇲', c:'Asia',     p:'~54 mill', lat:19.2, lon:96.7, d:'M28,12L65,10L75,20L72,38L60,52L48,60L35,52L22,38L20,22Z', hints:['Sørøst-Asia','Naypyidaw er mystisk ny regjeringshovedstad','Rangoon (Yangon) er gammel kolonihavn','Aung San Suu Kyi fikk fredsprisen i 1991','Militærkupp i 2021']},
+  {n:'Nepal',       f:'🇳🇵', c:'Asia',     p:'~30 mill', lat:28.4, lon:84.1, d:'M18,35L72,30L78,42L65,52L22,55L12,45Z', hints:['Himalaya-land mellom India og Kina','Katmandu er en mystisk by','Mount Everest er på grensen til Kina','Sherpaene er verdens beste fjellklatrere','Aldri kolonisert']},
+  {n:'Iran',        f:'🇮🇷', c:'Asia',     p:'~85 mill', lat:32.4, lon:53.7, d:'M15,20L72,15L88,25L88,45L75,58L45,62L18,50Z', hints:['Midtøsten','Teheran er en megaby','Persisk sivilisasjon er blant verdens eldste','Islamsk revolusjon i 1979','Grenser til Irak, Tyrkia og Afghanistan']},
+  {n:'Irak',        f:'🇮🇶', c:'Asia',     p:'~41 mill', lat:33.2, lon:43.7, d:'M18,18L68,15L80,25L78,42L60,55L35,58L18,45Z', hints:['Midtøsten','Mesopotamia – sivilisasjonens vugge','Bagdad er en av historiens viktigste byer','Tigris og Eufrat renner gjennom landet','USA invaderte i 2003']},
+  {n:'Israel',      f:'🇮🇱', c:'Asia',     p:'~9,5 mill',lat:31.1, lon:34.9, d:'M35,15L58,12L65,22L62,38L55,50L42,52L30,42L28,28Z', hints:['Midtøsten','Jerusalem er hellig by for tre religioner','Grunnlagt i 1948','Tel Aviv er tech-hub','Grenser til Libanon, Syria, Jordan og Egypt']},
+  {n:'Kasakhstan',  f:'🇰🇿', c:'Asia',     p:'~19 mill', lat:48.0, lon:66.9, d:'M12,22L78,18L88,28L88,50L72,62L30,65L10,52Z', hints:['Verdens 9. største land','Steppe og steppe','Nursultan (Astana) ble ny hoved­stad i 1997','Oljerik tidligere Sovjet-stat','Gagarin ble skutt opp fra Baikonur her']},
+  {n:'Usbekistan',  f:'🇺🇿', c:'Asia',     p:'~35 mill', lat:41.4, lon:64.6, d:'M18,25L72,22L78,35L72,50L28,52L12,40Z', hints:['Sentralasiatisk land','Samarkand er legendarisk silkeveisby','Tashkent er største by i Sentral-Asia','Bistand fra bomullsproduksjon','Aralsøen er nesten borte']},
+  {n:'Afghanistan', f:'🇦🇫', c:'Asia',     p:'~40 mill', lat:33.9, lon:67.7, d:'M15,20L70,15L82,25L80,42L65,55L38,58L15,45Z', hints:['Sentral-Asia','Kabul er fjellhovedstad','Ingen kystlinje','Taliban kontrollerer etter 2021','Kryssested for sivilisasjoner i årtusener']},
+  {n:'Syria',       f:'🇸🇾', c:'Asia',     p:'~22 mill', lat:35.0, lon:38.0, d:'M18,22L68,18L78,28L72,45L45,52L18,48Z', hints:['Midtøsten','Damaskus er en av verdens eldste byer','Ødelagt av borgerkrig siden 2011','Grenser til Tyrkia, Irak og Israel','Hjemsted for begynnende jordbruk for 10 000 år siden']},
+  // ── AMERIKAS ──
+  {n:'Colombia',    f:'🇨🇴', c:'Amerika',  p:'~51 mill', lat:4.0,  lon:-72.0,d:'M18,15L62,12L72,22L70,38L55,50L35,52L18,40Z', hints:['Nordvestlig Sør-Amerika','Bogotá er høytliggende millionby','Kjent for kaffe og umulig biodiversitet','Grenser til Venezuela, Brasil og Peru','Tidligere narkostat nå turistvennlig']},
+  {n:'Venezuela',   f:'🇻🇪', c:'Amerika',  p:'~28 mill', lat:8.0,  lon:-66.0,d:'M18,18L68,12L78,22L75,38L55,50L25,52L10,38Z', hints:['Nordlig Sør-Amerika','Caracas er farlig megaby','Angel Falls er verdens høyeste foss','Rik på olje men dypt i krise','Grenser til Colombia, Brasil og Guyana']},
+  {n:'Peru',        f:'🇵🇪', c:'Amerika',  p:'~33 mill', lat:-9.2, lon:-75.0,d:'M15,15L62,10L72,22L70,42L55,58L28,60L12,45Z', hints:['Vest-Sør-Amerika','Lima er en av Amerikas eldste byer','Machu Picchu og inkasivilisasjonen','Amazonas har sine kilder her','Grenser til Ecuador, Colombia og Brasil']},
+  {n:'Bolivia',     f:'🇧🇴', c:'Amerika',  p:'~12 mill', lat:-16.3,lon:-63.6,d:'M18,18L65,15L72,28L68,48L45,55L18,50Z', hints:['Sør-Amerika uten kystlinje','La Paz er verdens høyestliggende regjerings­hoved­stad','Salar de Uyuni er verdens største saltøde','To ho­ved­steder: La Paz og Sucre','Grenser til Brasil, Peru og Argentina']},
+  {n:'Ecuador',     f:'🇪🇨', c:'Amerika',  p:'~18 mill', lat:-1.8, lon:-78.2,d:'M22,20L62,18L68,32L62,48L40,52L22,45Z', hints:['Navnets land på ekvator','Galapagos-øyene er her','Quito er på nesten 3000 moh','Bananeksportør','Grenser til Colombia og Peru']},
+  {n:'Cuba',        f:'🇨🇺', c:'Amerika',  p:'~11 mill', lat:21.5, lon:-80.0,d:'M10,38L40,30L70,32L90,38L85,46L65,52L35,50L10,46Z', hints:['Karibiøy','Havana er fargerik kolonialby','Kommunistisk revolusjon i 1959','Kjent for sigarer og rum','Under USA-embargo siden 1960']},
+  {n:'Guatemala',   f:'🇬🇹', c:'Amerika',  p:'~17 mill', lat:15.8, lon:-90.2,d:'M20,22L62,20L68,32L62,50L40,55L18,48Z', hints:['Mellom-Amerika','Guatemala City er regionens minst kjente stor­by','Maya-sivilisasjonens hjemland','Tikal er en imponerende ruin­by','Grenser til Mexico, Belize og Honduras']},
+  {n:'Panama',      f:'🇵🇦', c:'Amerika',  p:'~4,5 mill',lat:8.4,  lon:-80.1,d:'M15,35L55,30L75,35L80,48L60,55L30,52L12,45Z', hints:['Mellom-Amerika','Panama-kanalen forbinder Atlanteren og Stillehavet','Panama City er en moderne finansby','Smaleste land mellom Nord- og Sør-Amerika','Hat er oppkalt etter landet']},
+  // ── OSEANIA ──
+  {n:'New Zealand', f:'🇳🇿', c:'Oseania',  p:'~5 mill',  lat:-40.9,lon:174.9,d:'M35,15L65,12L72,25L65,45L52,58L35,62L25,48L22,32Z', hints:['Øystat ved Australia','Wellington er verdens sydligste main­land-hoved­stad','Filmlokasjon for Ringenes Herre','Maori-kulturen er levende','Kjent for kiwi (fugl og frukt)']},
+  {n:'Papua Ny-Guinea',f:'🇵🇬',c:'Oseania',p:'~10 mill', lat:-6.3, lon:143.9,d:'M15,28L55,22L80,28L88,40L80,52L55,58L25,55L10,42Z', hints:['Oseania','Port Moresby er landets hoved­stad','En av verdens mest kulturelt mangfoldige land (800+ språk)','Deler øy med Indonesia (Papua)','Kjent for stammekulturer og rite­riter']},
+
 ];
 
 const GZ_PERSONS = [
