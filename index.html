@@ -5010,25 +5010,28 @@ function showDbStatus() {
 
 
 async function arbExportAnswers() {
-  if (arbState.moduleIdx === null || !state.student) return;
+  if (arbState.moduleIdx === null || !state.student) { showToast('⚠️ Ingen elev eller emne valgt'); return; }
   const m = state.modules[arbState.moduleIdx];
-  if (!m) return;
-  let txt = 'OlaSkole – Svar fra ' + state.student.name + '\n';
-  txt += 'Emne: ' + m.name + '\n' + '='.repeat(40) + '\n\n';
-  (m.discussion||[]).forEach((d,di) => {
-    const val = arbLoad('disc_'+di);
-    if (val) txt += '💬 ' + d + '\n→ ' + val + '\n\n';
-  });
-  (m.write||[]).forEach((w,wi) => {
-    const val = arbLoad('write_'+wi);
-    if (val) txt += '✍️ ' + (w.title||'Skriveoppgave') + '\n→ ' + val + '\n\n';
-  });
-  const blob = await generateDocx('OlaSkole – ' + m.name, txt);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = (state.student.name + '_' + (m.name||'svar')).replace(/[^a-z0-9_]/gi,'_') + '.docx';
-  a.click(); URL.revokeObjectURL(a.href);
-  showToast('📄 Svar eksportert til Word!');
+  if (!m) { showToast('⚠️ Fant ikke emnet'); return; }
+  showToast('⏳ Genererer Word-fil…');
+  try {
+    let txt = 'OlaSkole – Svar fra ' + state.student.name + '\n';
+    txt += 'Emne: ' + m.name + '\n' + '='.repeat(40) + '\n\n';
+    (m.discussion||[]).forEach((d,di) => {
+      const val = arbLoad('disc_'+di);
+      if (val) txt += '💬 ' + d + '\n→ ' + val + '\n\n';
+    });
+    (m.write||[]).forEach((w,wi) => {
+      const val = arbLoad('write_'+wi);
+      if (val) txt += '✍️ ' + (w.title||'Skriveoppgave') + '\n→ ' + val + '\n\n';
+    });
+    const blob = await generateDocx('OlaSkole – ' + m.name, txt);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (state.student.name + '_' + (m.name||'svar')).replace(/[^a-z0-9_]/gi,'_') + '.docx';
+    a.click(); URL.revokeObjectURL(a.href);
+    showToast('📄 Svar eksportert til Word!');
+  } catch(e) { showToast('❌ Feil ved Word-eksport: ' + e.message); }
 }
 
 // ====== DOCX GENERATOR ======
@@ -5107,7 +5110,7 @@ async function uploadToOneDrive(filename, blob) {
 }
 
 async function arbExportToOneNote() {
-  if (arbState.moduleIdx === null || !state.student) return;
+  if (arbState.moduleIdx === null || !state.student) { showToast('⚠️ Ingen elev eller emne valgt'); return; }
   const m = state.modules[arbState.moduleIdx]; if (!m) return;
   const escHtml = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   let html = '<h1>OlaSkole &ndash; ' + escHtml(m.name) + '</h1><p><b>Elev:</b> ' + escHtml(state.student.name) + '</p><hr/>';
@@ -5117,14 +5120,16 @@ async function arbExportToOneNote() {
 }
 
 async function arbExportToOneDrive() {
-  if (arbState.moduleIdx === null || !state.student) return;
-  const m = state.modules[arbState.moduleIdx]; if (!m) return;
-  let txt = 'OlaSkole – Svar fra ' + state.student.name + '\nEmne: ' + m.name + '\n' + '='.repeat(40) + '\n\n';
-  (m.discussion||[]).forEach((d,di) => { const val=arbLoad('disc_'+di); if(val) txt += '💬 '+d+'\n→ '+val+'\n\n'; });
-  (m.write||[]).forEach((w,wi) => { const val=arbLoad('write_'+wi); if(val) txt += '✍️ '+(w.title||'Skriveoppgave')+'\n→ '+val+'\n\n'; });
-  const fname = (state.student.name + '_' + (m.name||'svar')).replace(/[^a-z0-9_]/gi,'_') + '.docx';
-  const blob = await generateDocx('OlaSkole – ' + m.name, txt);
-  await uploadToOneDrive(fname, blob);
+  if (arbState.moduleIdx === null || !state.student) { showToast('⚠️ Ingen elev eller emne valgt'); return; }
+  const m = state.modules[arbState.moduleIdx]; if (!m) { showToast('⚠️ Fant ikke emnet'); return; }
+  try {
+    let txt = 'OlaSkole – Svar fra ' + state.student.name + '\nEmne: ' + m.name + '\n' + '='.repeat(40) + '\n\n';
+    (m.discussion||[]).forEach((d,di) => { const val=arbLoad('disc_'+di); if(val) txt += '💬 '+d+'\n→ '+val+'\n\n'; });
+    (m.write||[]).forEach((w,wi) => { const val=arbLoad('write_'+wi); if(val) txt += '✍️ '+(w.title||'Skriveoppgave')+'\n→ '+val+'\n\n'; });
+    const fname = (state.student.name + '_' + (m.name||'svar')).replace(/[^a-z0-9_]/gi,'_') + '.docx';
+    const blob = await generateDocx('OlaSkole – ' + m.name, txt);
+    await uploadToOneDrive(fname, blob);
+  } catch(e) { showToast('❌ Feil ved OneDrive-opplasting: ' + e.message); }
 }
 
 // ====== WORDCLOUD & VOTING ENGINE ======
