@@ -1558,6 +1558,56 @@
       </div>
     </div>
 
+    <!-- OFFICE INTEGRASJON HUB -->
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-bottom:0.875rem;">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:0.9rem;color:var(--text);margin-bottom:0.5rem;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Office-integrasjon – oversikt
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-2);margin-bottom:1rem;line-height:1.55;">
+        Sømløs toveisflyt mellom OlaSkole og Microsoft Office. Importer dokumenter og eksporter elevarbeid direkte.
+      </div>
+
+      <!-- 3-stegs guide -->
+      <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem;">
+        <div style="flex:1;min-width:140px;background:var(--s3);border-radius:9px;padding:0.75rem;border:1px solid var(--border-2);text-align:center;">
+          <div style="font-size:1.3rem;margin-bottom:0.3rem;">1️⃣</div>
+          <div style="font-size:0.75rem;font-weight:800;color:var(--text);margin-bottom:0.2rem;">Koble til</div>
+          <div style="font-size:0.72rem;color:var(--text-2);line-height:1.5;">Lim inn Azure App-ID ovenfor og klikk <b>Test innlogging</b></div>
+        </div>
+        <div style="flex:1;min-width:140px;background:var(--s3);border-radius:9px;padding:0.75rem;border:1px solid var(--border-2);text-align:center;">
+          <div style="font-size:1.3rem;margin-bottom:0.3rem;">2️⃣</div>
+          <div style="font-size:0.75rem;font-weight:800;color:var(--text);margin-bottom:0.2rem;">Importer</div>
+          <div style="font-size:0.72rem;color:var(--text-2);line-height:1.5;">Last opp .docx eller .pptx i en oppgave – innholdet hentes automatisk</div>
+        </div>
+        <div style="flex:1;min-width:140px;background:var(--s3);border-radius:9px;padding:0.75rem;border:1px solid var(--border-2);text-align:center;">
+          <div style="font-size:1.3rem;margin-bottom:0.3rem;">3️⃣</div>
+          <div style="font-size:0.75rem;font-weight:800;color:var(--text);margin-bottom:0.2rem;">Eksporter</div>
+          <div style="font-size:0.72rem;color:var(--text-2);line-height:1.5;">Elever sender svar til Word, OneNote eller OneDrive med ett klikk</div>
+        </div>
+      </div>
+
+      <!-- Støttede formater -->
+      <div style="background:var(--s3);border-radius:9px;padding:0.75rem;border:1px solid var(--border-2);margin-bottom:0.75rem;">
+        <div style="font-size:0.78rem;font-weight:800;color:var(--text-2);margin-bottom:0.5rem;">Støttede formater</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,120,212,0.1);border:1px solid rgba(0,120,212,0.2);color:#60a5fa;border-radius:6px;padding:3px 9px;font-size:0.75rem;font-weight:700;">📄 Word (.docx)</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(209,52,56,0.1);border:1px solid rgba(209,52,56,0.2);color:#f87171;border-radius:6px;padding:3px 9px;font-size:0.75rem;font-weight:700;">📊 PowerPoint (.pptx)</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(120,87,214,0.1);border:1px solid rgba(120,87,214,0.2);color:#a78bfa;border-radius:6px;padding:3px 9px;font-size:0.75rem;font-weight:700;">📓 OneNote</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,120,212,0.1);border:1px solid rgba(0,120,212,0.2);color:#60a5fa;border-radius:6px;padding:3px 9px;font-size:0.75rem;font-weight:700;">☁️ OneDrive</span>
+        </div>
+      </div>
+
+      <!-- Eksporter alle svar -->
+      <div style="background:var(--s3);border-radius:9px;padding:0.75rem;border:1px solid var(--border-2);">
+        <div style="font-size:0.78rem;font-weight:800;color:var(--text-2);margin-bottom:0.5rem;">Eksporter alle elevresultater</div>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <button onclick="exportAllAnswersDocx()" style="display:flex;align-items:center;gap:5px;background:rgba(0,120,212,0.12);border:1px solid rgba(0,120,212,0.25);color:#60a5fa;padding:7px 13px;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">📄 Last ned Word</button>
+          <button onclick="exportAllAnswersTxt()" style="display:flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:7px 13px;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">📋 Last ned tekst</button>
+        </div>
+      </div>
+    </div>
+
     <!-- DATABASE -->
     <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-bottom:1.1rem;">
       <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:0.9rem;color:var(--text);margin-bottom:0.75rem;">
@@ -2211,7 +2261,9 @@
       <!-- Header -->
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
         <button onclick="arbBackToList()" style="background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;">← Tilbake</button>
-        <button onclick="arbExportAnswers()" style="background:linear-gradient(135deg,#0078d4,#106ebe);color:white;border:none;padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.35rem;" title="Eksporter svar til Word/OneNote">📤 Eksporter</button>
+        <button onclick="arbExportAnswers()" style="background:linear-gradient(135deg,#0078d4,#106ebe);color:white;border:none;padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.35rem;" title="Last ned svar som Word-fil">📄 Word</button>
+        <button onclick="arbExportToOneNote()" style="background:rgba(120,87,214,0.15);border:1px solid rgba(120,87,214,0.3);color:#a78bfa;padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.35rem;" title="Send svar til OneNote">📓 OneNote</button>
+        <button onclick="arbExportToOneDrive()" style="background:rgba(0,120,212,0.12);border:1px solid rgba(0,120,212,0.25);color:#60a5fa;padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.35rem;" title="Last opp til OneDrive">☁️ OneDrive</button>
         <div style="flex:1;">
           <div style="font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--text);" id="arbDetailTitle">Emne</div>
           <div style="font-size:0.85rem;color:var(--text-2);" id="arbDetailStudent"></div>
@@ -4117,20 +4169,23 @@ async function processFile(file){
       uploadedFileText='[PDF-dokument lastet opp: '+file.name+']';
     }else if(file.name.endsWith('.docx')||file.name.endsWith('.doc')){
       const ab=await file.arrayBuffer();
-      const result=await mammoth.extractRawText({arrayBuffer:ab});
-      uploadedFileText=result.value;
+      const htmlResult=await mammoth.convertToHtml({arrayBuffer:ab});
+      const rawResult=await mammoth.extractRawText({arrayBuffer:ab});
+      uploadedFileText=rawResult.value;
+      if(previewText){previewText.innerHTML=htmlResult.value.substring(0,1200)+(htmlResult.value.length>1200?'…':'');previewText._isHtml=true;}
     }else if(file.name.endsWith('.pptx')){
       const ab=await file.arrayBuffer();
       const zip=await JSZip.loadAsync(ab);
       let text='';
       const slideFiles=Object.keys(zip.files).filter(f=>f.match(/ppt\/slides\/slide\d+\.xml/)).sort();
-      for(const sf of slideFiles){const xml=await zip.files[sf].async('text');const matches=xml.match(/<a:t>([^<]*)<\/a:t>/g)||[];text+=matches.map(m=>m.replace(/<[^>]+>/g,'')).join(' ')+'\n';}
+      for(let i=0;i<slideFiles.length;i++){const xml=await zip.files[slideFiles[i]].async('text');const matches=xml.match(/<a:t>([^<]*)<\/a:t>/g)||[];const content=matches.map(m=>m.replace(/<[^>]+>/g,'')).join(' ').trim();if(content)text+='--- Lysbilde '+(i+1)+' ---\n'+content+'\n\n';}
       uploadedFileText=text;
     }else{uploadedFileText=await file.text();}
     if(statusEl){statusEl.style.background='#dcfce7';statusEl.style.color='#166534';statusEl.textContent='✅ '+file.name+' lastet inn';}
     if(previewBox)previewBox.style.display='block';
     if(previewName)previewName.textContent=file.name;
-    if(previewText)previewText.textContent=uploadedFileText.substring(0,400)+(uploadedFileText.length>400?'...':'');
+    if(previewText&&!previewText._isHtml){previewText.textContent=uploadedFileText.substring(0,400)+(uploadedFileText.length>400?'...':'');}
+    if(previewText)previewText._isHtml=false;
     const dl=document.getElementById('dropLabel');if(dl)dl.textContent='📄 '+file.name;
   }catch(e){if(statusEl){statusEl.style.background='#fee2e2';statusEl.style.color='#991b1b';statusEl.textContent='❌ Feil ved lesing: '+e.message;}}
 }
@@ -4954,9 +5009,8 @@ function showDbStatus() {
 }
 
 
-function arbExportAnswers() {
-  if (!arbState.moduleIdx === null || !state.student) return;
-  const sKey = arbSKey();
+async function arbExportAnswers() {
+  if (arbState.moduleIdx === null || !state.student) return;
   const m = state.modules[arbState.moduleIdx];
   if (!m) return;
   let txt = 'OlaSkole – Svar fra ' + state.student.name + '\n';
@@ -4969,18 +5023,107 @@ function arbExportAnswers() {
     const val = arbLoad('write_'+wi);
     if (val) txt += '✍️ ' + (w.title||'Skriveoppgave') + '\n→ ' + val + '\n\n';
   });
-  const blob = new Blob([txt], {type:'text/plain'});
+  const blob = await generateDocx('OlaSkole – ' + m.name, txt);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = (state.student.name + '_' + (m.name||'svar')).replace(/[^a-z0-9_]/gi,'_') + '.txt';
+  a.download = (state.student.name + '_' + (m.name||'svar')).replace(/[^a-z0-9_]/gi,'_') + '.docx';
   a.click(); URL.revokeObjectURL(a.href);
-  showToast('📋 Svar eksportert!');
+  showToast('📄 Svar eksportert til Word!');
 }
 
-function exportAllAnswersDocx() {
-  // Simple fallback: export as txt
-  exportAllAnswersTxt();
-  showToast('📋 Eksportert som tekstfil');
+// ====== DOCX GENERATOR ======
+async function generateDocx(title, bodyText) {
+  const zip = new JSZip();
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const paras = bodyText.split('\n').map(line =>
+    `<w:p><w:r><w:t xml:space="preserve">${esc(line)}</w:t></w:r></w:p>`
+  ).join('');
+  zip.file('[Content_Types].xml',
+    '<?xml version="1.0" encoding="UTF-8"?>' +
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+    '</Types>');
+  zip.file('_rels/.rels',
+    '<?xml version="1.0" encoding="UTF-8"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+    '</Relationships>');
+  zip.file('word/document.xml',
+    '<?xml version="1.0" encoding="UTF-8"?>' +
+    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' +
+    '<w:p><w:pPr><w:rPr><w:b/><w:sz w:val="32"/></w:rPr></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t>' + esc(title) + '</w:t></w:r></w:p>' +
+    paras + '<w:sectPr/></w:body></w:document>');
+  zip.file('word/_rels/document.xml.rels',
+    '<?xml version="1.0" encoding="UTF-8"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>');
+  return await zip.generateAsync({type:'blob', mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+}
+
+async function exportAllAnswersDocx() {
+  const students=[...new Set(Object.keys(state.studentAnswers).map(k=>k.split('_m')[0]))];
+  const content=students.map(s=>getStudentAnswersText(s)).join('\n\n'+'='.repeat(50)+'\n\n');
+  const blob = await generateDocx('OlaSkole – Alle svar', content);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'alle_svar.docx';
+  a.click(); URL.revokeObjectURL(a.href);
+  showToast('📄 Eksportert til Word!');
+}
+
+// ====== MICROSOFT GRAPH API ======
+async function exportToOneNote(title, htmlContent) {
+  const token = localStorage.getItem('olaskole_ms_token');
+  if (!token) { showToast('⚠️ Ikke koblet til Microsoft 365 – gå til Innstillinger'); return; }
+  const boundary = 'OlaSkole_' + Date.now();
+  const body = '--' + boundary + '\r\n' +
+    'Content-Disposition: form-data; name="Presentation"\r\n' +
+    'Content-Type: text/html\r\n\r\n' +
+    '<!DOCTYPE html><html><head><title>' + title + '</title></head><body>' + htmlContent + '</body></html>\r\n' +
+    '--' + boundary + '--';
+  try {
+    const res = await fetch('https://graph.microsoft.com/v1.0/me/onenote/pages', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'multipart/form-data; boundary=' + boundary },
+      body
+    });
+    if (res.ok) { showToast('📓 Sendt til OneNote!'); }
+    else { const err = await res.json().catch(()=>({error:{message:res.status}})); showToast('❌ OneNote: ' + (err.error?.message || res.status)); }
+  } catch(e) { showToast('❌ Feil: ' + e.message); }
+}
+
+async function uploadToOneDrive(filename, blob) {
+  const token = localStorage.getItem('olaskole_ms_token');
+  if (!token) { showToast('⚠️ Ikke koblet til Microsoft 365 – gå til Innstillinger'); return; }
+  try {
+    const ab = await blob.arrayBuffer();
+    const res = await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/OlaSkole/' + encodeURIComponent(filename) + ':/content', {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
+      body: ab
+    });
+    if (res.ok) { showToast('☁️ Lastet opp til OneDrive!'); }
+    else { const err = await res.json().catch(()=>({error:{message:res.status}})); showToast('❌ OneDrive: ' + (err.error?.message || res.status)); }
+  } catch(e) { showToast('❌ Feil: ' + e.message); }
+}
+
+async function arbExportToOneNote() {
+  const m = state.modules[arbState.moduleIdx]; if (!m || !state.student) return;
+  let html = '<h1>OlaSkole – ' + m.name + '</h1><p><b>Elev:</b> ' + state.student.name + '</p><hr/>';
+  (m.discussion||[]).forEach((d,di) => { const val=arbLoad('disc_'+di); if(val) html += '<h3>💬 '+d+'</h3><p>'+val.replace(/\n/g,'<br/>')+'</p>'; });
+  (m.write||[]).forEach((w,wi) => { const val=arbLoad('write_'+wi); if(val) html += '<h3>✍️ '+(w.title||'Skriveoppgave')+'</h3><p>'+val.replace(/\n/g,'<br/>')+'</p>'; });
+  await exportToOneNote('OlaSkole – ' + m.name, html);
+}
+
+async function arbExportToOneDrive() {
+  const m = state.modules[arbState.moduleIdx]; if (!m || !state.student) return;
+  let txt = 'OlaSkole – Svar fra ' + state.student.name + '\nEmne: ' + m.name + '\n' + '='.repeat(40) + '\n\n';
+  (m.discussion||[]).forEach((d,di) => { const val=arbLoad('disc_'+di); if(val) txt += '💬 '+d+'\n→ '+val+'\n\n'; });
+  (m.write||[]).forEach((w,wi) => { const val=arbLoad('write_'+wi); if(val) txt += '✍️ '+(w.title||'Skriveoppgave')+'\n→ '+val+'\n\n'; });
+  const fname = (state.student.name + '_' + (m.name||'svar')).replace(/[^a-z0-9_]/gi,'_') + '.docx';
+  const blob = await generateDocx('OlaSkole – ' + m.name, txt);
+  await uploadToOneDrive(fname, blob);
 }
 
 // ====== WORDCLOUD & VOTING ENGINE ======
