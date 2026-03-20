@@ -57,10 +57,32 @@
   body.light input[type="datetime-local"] { color-scheme: light; }
   body.light input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: none; }
   body.light .module-card { box-shadow:var(--shadow); }
-  body.light .modal { box-shadow:var(--shadow-lg); }
+  body.light .modal { background:white !important; border-color:var(--border) !important; box-shadow:var(--shadow-lg); }
+  body.light .modal h2 { color:var(--text) !important; }
+  body.light .modal input { background:var(--s2) !important; }
   body.light .teacher-panel, body.light .text-block, body.light .quiz-card,
   body.light .discussion-card, body.light .video-card, body.light .write-card,
-  body.light .results-panel, body.light .student-login-box { box-shadow:var(--shadow); }
+  body.light .results-panel { box-shadow:var(--shadow); }
+  /* Fix: login box uses hardcoded dark bg → restore light in light mode */
+  body.light .student-login-box { background:white !important; border-color:var(--border) !important; box-shadow:var(--shadow-lg) !important; }
+  body.light .student-login-box::before { display:none; }
+  body.light .student-login-box h2 { color:var(--text) !important; }
+  /* Fix: home hero uses hardcoded dark bg → lighter in light mode */
+  body.light .home-hero { background:linear-gradient(135deg,#edf0ff 0%,#f0ecff 50%,#ede8ff 100%) !important; border-color:rgba(123,143,253,0.35) !important; box-shadow:0 4px 24px rgba(123,143,253,0.12),inset 0 1px 0 rgba(255,255,255,0.9) !important; }
+  body.light .home-hero-title { color:var(--text) !important; }
+  body.light .home-hero-sub { color:var(--text-2) !important; }
+  body.light .home-hero::before { background:radial-gradient(circle,rgba(123,143,253,0.18) 0%,transparent 70%) !important; }
+  body.light .home-hero::after { display:none; }
+  /* Fix: nav active tab has light color (#b0bfff) – needs darker in light mode */
+  body.light .nav-tab.active { color:#4a5add !important; background:rgba(123,143,253,0.1) !important; border-color:rgba(123,143,253,0.2) !important; }
+  body.light .nav-tab.active::after { box-shadow:none; }
+  /* Fix: mobile nav active btn */
+  body.light .mob-nav-btn.active { color:#4a5add !important; }
+  /* Fix: dark-toggle bg in light mode */
+  body.light .dark-toggle { background:var(--s2) !important; border-color:var(--border) !important; }
+  /* Fix: arb-module-card top gradient line in light mode – stays visible */
+  body.light .arb-module-card::before { opacity:0.7; }
+  /* Fix: color cards (color-1..5) always have dark hardcoded bg → force white text */
 
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
@@ -115,9 +137,9 @@
   .home-hero::after{content:'';position:absolute;bottom:-80px;left:-60px;width:280px;height:280px;background:radial-gradient(circle,rgba(34,197,94,0.12) 0%,rgba(6,182,212,0.06) 50%,transparent 70%);pointer-events:none;}
   @keyframes heroOrb1{0%{transform:translate(0,0) scale(1);}100%{transform:translate(-20px,-20px) scale(1.1);}}
   .home-hero-text{flex:1;min-width:150px;position:relative;z-index:1;}
-  .home-hero-title{font-family:'Fredoka One',cursive;font-size:clamp(1.3rem,4vw,2.1rem);color:var(--text);line-height:1.15;margin-bottom:0.3rem;}
-  .home-hero-title span{color:var(--accent-h);}
-  .home-hero-sub{font-size:0.88rem;color:var(--text-2);font-weight:600;}
+  .home-hero-title{font-family:'Fredoka One',cursive;font-size:clamp(1.3rem,4vw,2.1rem);color:rgba(255,255,255,0.97);line-height:1.15;margin-bottom:0.3rem;}
+  .home-hero-title span{color:#9aaaff;}
+  .home-hero-sub{font-size:0.88rem;color:rgba(255,255,255,0.65);font-weight:600;}
   .home-action-btns{display:flex;gap:0.6rem;flex-shrink:0;flex-wrap:wrap;position:relative;z-index:1;}
   .home-action-btn{display:flex;flex-direction:column;align-items:center;gap:0.3rem;padding:0.875rem 1.1rem;border:1px solid var(--border-2);border-radius:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.2s;color:var(--text-2);min-width:82px;min-height:72px;justify-content:center;background:var(--s2);}
   .home-action-btn:hover{background:var(--s3);color:var(--text);transform:translateY(-2px);}
@@ -130,7 +152,7 @@
 
   .student-login-box{background:linear-gradient(160deg,#0b0d20,#0e1024);border:1px solid rgba(123,143,253,0.25);border-radius:22px;padding:1.75rem;max-width:400px;margin:0 auto 1.5rem;box-shadow:0 8px 40px rgba(0,0,0,0.7),0 0 0 1px rgba(123,143,253,0.1);text-align:center;position:relative;overflow:hidden;}
   .student-login-box::before{content:'';position:absolute;top:-50px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(123,143,253,0.15) 0%,transparent 70%);pointer-events:none;}
-  .student-login-box h2{font-family:'Fredoka One',cursive;font-size:1.35rem;margin-bottom:0.875rem;color:var(--text);}
+  .student-login-box h2{font-family:'Fredoka One',cursive;font-size:1.35rem;margin-bottom:0.875rem;color:rgba(255,255,255,0.95);}
   .student-login-box input{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--border-2);font-family:'Nunito',sans-serif;font-size:1rem;margin-bottom:0.65rem;outline:none;transition:border 0.2s;background:var(--s2);color:var(--text);}
   .student-login-box input:focus{border-color:var(--accent);box-shadow:var(--glow-sm);}
 
@@ -167,6 +189,27 @@
   .color-4:hover{border-color:rgba(123,143,253,0.5)!important;box-shadow:0 16px 48px rgba(123,143,253,0.12),0 4px 16px rgba(0,0,0,0.5)!important;}
   .color-5{background:linear-gradient(160deg,#120a18,#14091a)!important;border-color:rgba(168,85,247,0.3)!important;}.color-5::before{background:linear-gradient(90deg,#a855f7,#c084fc)!important;}
   .color-5:hover{border-color:rgba(168,85,247,0.5)!important;box-shadow:0 16px 48px rgba(168,85,247,0.12),0 4px 16px rgba(0,0,0,0.5)!important;}
+  /* Color cards always have dark hardcoded bg → always use white text */
+  .color-1 h3,.color-2 h3,.color-3 h3,.color-4 h3,.color-5 h3{color:rgba(255,255,255,0.95)!important;}
+  .color-1 p,.color-2 p,.color-3 p,.color-4 p,.color-5 p{color:rgba(255,255,255,0.6)!important;}
+  .color-1 .task-count,.color-2 .task-count,.color-3 .task-count,.color-4 .task-count,.color-5 .task-count{background:rgba(255,255,255,0.1)!important;border-color:rgba(255,255,255,0.2)!important;color:rgba(255,255,255,0.7)!important;}
+  .color-1 .mc-emoji,.color-2 .mc-emoji,.color-3 .mc-emoji,.color-4 .mc-emoji,.color-5 .mc-emoji{filter:none!important;}
+  /* Light mode color cards: use light tinted bg instead of dark */
+  body.light .color-1{background:linear-gradient(160deg,#fff1f1,#ffe4e4)!important;border-color:rgba(239,68,68,0.3)!important;}
+  body.light .color-1 h3{color:#b91c1c!important;}body.light .color-1 p{color:#ef4444!important;}
+  body.light .color-1 .task-count{background:rgba(239,68,68,0.08)!important;border-color:rgba(239,68,68,0.2)!important;color:#b91c1c!important;}
+  body.light .color-2{background:linear-gradient(160deg,#fffbeb,#fef3c7)!important;border-color:rgba(245,158,11,0.3)!important;}
+  body.light .color-2 h3{color:#b45309!important;}body.light .color-2 p{color:#d97706!important;}
+  body.light .color-2 .task-count{background:rgba(245,158,11,0.08)!important;border-color:rgba(245,158,11,0.2)!important;color:#b45309!important;}
+  body.light .color-3{background:linear-gradient(160deg,#f0fdf4,#dcfce7)!important;border-color:rgba(34,197,94,0.3)!important;}
+  body.light .color-3 h3{color:#15803d!important;}body.light .color-3 p{color:#16a34a!important;}
+  body.light .color-3 .task-count{background:rgba(34,197,94,0.08)!important;border-color:rgba(34,197,94,0.2)!important;color:#15803d!important;}
+  body.light .color-4{background:linear-gradient(160deg,#eef2ff,#e0e7ff)!important;border-color:rgba(123,143,253,0.3)!important;}
+  body.light .color-4 h3{color:#3730a3!important;}body.light .color-4 p{color:#4f46e5!important;}
+  body.light .color-4 .task-count{background:rgba(123,143,253,0.08)!important;border-color:rgba(123,143,253,0.2)!important;color:#3730a3!important;}
+  body.light .color-5{background:linear-gradient(160deg,#faf5ff,#f3e8ff)!important;border-color:rgba(168,85,247,0.3)!important;}
+  body.light .color-5 h3{color:#6b21a8!important;}body.light .color-5 p{color:#9333ea!important;}
+  body.light .color-5 .task-count{background:rgba(168,85,247,0.08)!important;border-color:rgba(168,85,247,0.2)!important;color:#6b21a8!important;}
 
   .task-header{display:flex;align-items:center;gap:0.65rem;margin-bottom:1.1rem;flex-wrap:wrap;}
   .back-btn{background:var(--s2);color:var(--text-2);border:1px solid var(--border-2);padding:9px 16px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;font-size:0.88rem;min-height:44px;transition:all 0.18s;}
@@ -253,7 +296,7 @@
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:999;align-items:flex-end;justify-content:center;}
   .modal-overlay.open{display:flex;}
   .modal{background:linear-gradient(160deg,#0b0d1e,#0f1126);border:1px solid rgba(123,143,253,0.2);border-radius:24px 24px 0 0;padding:1.75rem;width:100%;max-width:520px;box-shadow:0 -16px 64px rgba(0,0,0,0.8),0 -1px 0 rgba(255,255,255,0.06),0 0 0 1px rgba(123,143,253,0.08);max-height:92vh;overflow-y:auto;}
-  .modal h2{font-family:'Fredoka One',cursive;font-size:1.4rem;margin-bottom:0.9rem;color:var(--text);text-align:center;}
+  .modal h2{font-family:'Fredoka One',cursive;font-size:1.4rem;margin-bottom:0.9rem;color:rgba(255,255,255,0.95);text-align:center;}
   .modal input{width:100%;padding:12px 14px;border:1px solid var(--border-2);border-radius:11px;font-family:'Nunito',sans-serif;font-size:1rem;outline:none;margin-bottom:0.875rem;background:var(--s2);color:var(--text);transition:all 0.2s;}
   .modal input:focus{border-color:var(--accent);box-shadow:var(--glow-sm);}
   .modal-btns{display:flex;gap:0.65rem;}
@@ -1084,7 +1127,7 @@
     <div class="teacher-panel" style="padding:1.1rem 1.25rem;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
         <h2 style="margin:0;">Oppgaver</h2>
-        <span id="previewTotals" style="font-size:0.82rem;color:#aaa;font-weight:700;"></span>
+        <span id="previewTotals" style="font-size:0.82rem;color:var(--text-3);font-weight:700;"></span>
       </div>
 
       <!-- Task category tab bar -->
@@ -1204,7 +1247,7 @@
 
       <!-- FORHÅNDSVISNING TAB -->
       <div class="task-cat-pane" id="tcpane-preview">
-        <div id="previewContent"><p style="color:#aaa;font-size:0.95rem;padding:1rem 0;">Legg til oppgaver i fanene over – de vises her.</p></div>
+        <div id="previewContent"><p style="color:var(--text-3);font-size:0.95rem;padding:1rem 0;">Legg til oppgaver i fanene over – de vises her.</p></div>
       </div>
     </div>
 
@@ -1224,7 +1267,7 @@
   <div class="tr-pane" id="trpane-emner">
     <div class="teacher-panel">
       <h2>Publiserte emner</h2>
-      <div id="manageModulesList"><p style="color:#aaa;">Ingen emner publisert ennå.</p></div>
+      <div id="manageModulesList"><p style="color:var(--text-3);">Ingen emner publisert ennå.</p></div>
     </div>
   </div>
 
@@ -1241,7 +1284,7 @@
         <button onclick="exportAllAnswersTxt()" style="background:#22c55e;color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">📋 Eksporter tekst</button>
       </div>
       <div id="resultStatsRow" style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.25rem;"></div>
-      <div id="resultsContainer"><p style="color:#aaa;">Ingen svar registrert ennå.</p></div>
+      <div id="resultsContainer"><p style="color:var(--text-3);">Ingen svar registrert ennå.</p></div>
     </div>
   </div>
 
@@ -2107,7 +2150,7 @@
     <!-- Tabs -->
     <div style="display:flex;gap:1rem;margin-bottom:1.5rem;background:var(--s2);border-radius:12px;padding:4px;;max-width:420px;">
       <button id="crTab-quiz" onclick="crSwitchTab('quiz')" style="flex:1;padding:11px 16px;border-radius:14px;border:none;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;transition:all 0.2s;background:var(--c4);color:white;">🎮 Live Quiz</button>
-      <button id="crTab-hs" onclick="crSwitchTab('hs');loadHighscoreView()" style="flex:1;padding:11px 16px;border-radius:14px;border:none;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;transition:all 0.2s;background:#e0e0e0;color:var(--text-2);">🏆 High Scores</button>
+      <button id="crTab-hs" onclick="crSwitchTab('hs');loadHighscoreView()" style="flex:1;padding:11px 16px;border-radius:14px;border:none;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;transition:all 0.2s;background:var(--s3);color:var(--text-2);">🏆 High Scores</button>
     </div>
 
     <!-- ── Quiz pane ── -->
@@ -2145,7 +2188,7 @@
           <div class="cr-player-list" id="crPlayerList"></div>
           <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap;justify-content:center;">
             <button class="btn-primary" style="font-size:1.1rem;padding:14px 36px;" onclick="crStartQuiz()">▶️ Start quiz!</button>
-            <button onclick="crCancelGame()" style="background:#e0e0e0;color:var(--text-2);border:none;padding:14px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">❌ Avbryt</button>
+            <button onclick="crCancelGame()" style="background:var(--s3);color:var(--text-2);border:none;padding:14px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">❌ Avbryt</button>
           </div>
         </div>
       </div>
@@ -2202,7 +2245,7 @@
           </div>
         </div>
         <div id="hsTableContainer">
-          <div style="text-align:center;padding:3rem;color:#aaa;"><div style="font-size:3rem;">🏆</div><div>Laster...</div></div>
+          <div style="text-align:center;padding:3rem;color:var(--text-3);"><div style="font-size:3rem;">🏆</div><div>Laster...</div></div>
         </div>
       </div>
     </div><!-- /crPane-hs -->
@@ -2232,7 +2275,7 @@
         <button onclick="sjShow('enter')" style="background:var(--s2);border:1px solid var(--border-2);border-radius:8px;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">← Tilbake</button>
         <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--text);">🏆 High Scores</div>
       </div>
-      <div id="publicHsContainer"><div style="text-align:center;padding:2rem;color:#aaa;">⏳ Laster...</div></div>
+      <div id="publicHsContainer"><div style="text-align:center;padding:2rem;color:var(--text-3);">⏳ Laster...</div></div>
     </div>
     <!-- State: waiting in lobby -->
     <div id="sj-waiting" style="display:none;">
@@ -2241,7 +2284,7 @@
         <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--text);" id="sjUsername">Brukernavn</div>
         <div style="color:var(--text-2);margin-top:0.5rem;">Venter på at læreren starter...</div>
         <div style="margin-top:1.5rem;background:var(--card);border-radius:16px;padding:1rem 1.5rem;display:inline-block;box-shadow:var(--shadow);">
-          <div style="font-size:0.85rem;color:#aaa;font-weight:700;">Spillkode</div>
+          <div style="font-size:0.85rem;color:var(--text-3);font-weight:700;">Spillkode</div>
           <div style="font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--c4);letter-spacing:6px;" id="sjCodeShow"></div>
         </div>
       </div>
@@ -2251,7 +2294,7 @@
       <div style="max-width:500px;margin:0 auto;padding:1rem;">
         <div style="text-align:center;margin-bottom:1rem;">
           <div style="font-size:0.85rem;color:var(--text-2);font-weight:700;" id="sjQNum">Spørsmål 1</div>
-          <div style="width:100%;height:8px;background:#e0e0e0;border-radius:50px;margin-top:0.4rem;">
+          <div style="width:100%;height:8px;background:var(--s3);border-radius:50px;margin-top:0.4rem;">
             <div id="sjTimerBar" style="height:8px;background:var(--c2);border-radius:50px;transition:width 1s linear;width:100%;"></div>
           </div>
         </div>
@@ -2321,7 +2364,7 @@
 
       <!-- Module grid -->
       <div id="arbModuleGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem;"></div>
-      <div id="arbEmpty" style="display:none;text-align:center;padding:3rem;color:#aaa;">
+      <div id="arbEmpty" style="display:none;text-align:center;padding:3rem;color:var(--text-3);">
         <div style="font-size:3rem;margin-bottom:0.5rem;">📭</div>
         <div style="font-weight:700;">Ingen emner tilgjengelig ennå</div>
         <div style="font-size:0.9rem;margin-top:0.25rem;">Læreren har ikke publisert noen emner</div>
@@ -2373,7 +2416,7 @@
       <button class="btn-cancel" onclick="closeModal('teacherModal')">Avbryt</button>
       <button class="btn-primary" id="teacherLoginBtn" onclick="loginTeacher()">Logg inn</button>
     </div>
-    <p style="font-size:0.8rem;color:#aaa;text-align:center;margin-top:1rem;">Hint: <strong>...</strong></p>
+    <p style="font-size:0.8rem;color:var(--text-3);text-align:center;margin-top:1rem;">Hint: <strong>...</strong></p>
   </div>
 </div>
 
@@ -2394,7 +2437,7 @@
   <div class="modal" style="max-width:480px;width:95%;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
       <h2 style="margin:0;font-size:1.35rem;">Eksporter svar</h2>
-      <button onclick="closeModal('exportModal')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#aaa;">✕</button>
+      <button onclick="closeModal('exportModal')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text-3);">✕</button>
     </div>
     <div id="exportModalContent"></div>
   </div>
@@ -2405,7 +2448,7 @@
   <div class="modal" style="max-width:480px;width:95%;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
       <h2 style="margin:0;font-size:1.25rem;">💬 Gi tilbakemelding</h2>
-      <button onclick="closeModal('feedbackModal')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#aaa;">✕</button>
+      <button onclick="closeModal('feedbackModal')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text-3);">✕</button>
     </div>
     <div id="feedbackModalContent"></div>
   </div>
@@ -3113,7 +3156,7 @@ function renderModuleDetail(m) {
   if (m.write?.length) available.push({key:'write', label:'✍️ Skriveoppgave'});
   if (m.videos?.length) available.push({key:'video', label:'🎬 Video'});
   if (m.flashcards?.length) available.push({key:'fc', label:'🃏 Test deg selv'});
-  if (!available.length) { content.innerHTML='<p style="color:#aaa;padding:2rem;">Ingen innhold i dette emnet ennå.</p>'; tabs.innerHTML=''; return; }
+  if (!available.length) { content.innerHTML='<p style="color:var(--text-3);padding:2rem;">Ingen innhold i dette emnet ennå.</p>'; tabs.innerHTML=''; return; }
   tabs.innerHTML = available.map((t,i)=>`<button class="task-tab ${i===0?'active':''}" onclick="switchTaskTab('${t.key}',this)">${t.label}</button>`).join('');
   switchTaskType(available[0].key, m);
 }
@@ -3140,7 +3183,7 @@ function switchTaskType(type, m) {
 }
 
 function renderTextHTML(m) {
-  if (!m.text) return '<p style="color:#aaa;padding:2rem;">Ingen tekst ennå.</p>';
+  if (!m.text) return '<p style="color:var(--text-3);padding:2rem;">Ingen tekst ennå.</p>';
   const saved = state.student ? (state.studentAnswers[state.student.name+'_m'+state.currentModule+'_text_read']) : null;
   return `<div class="text-block">
     <div style="white-space:pre-wrap;line-height:1.8;font-size:0.98rem;">${escHtml(m.text)}</div>
@@ -3159,7 +3202,7 @@ function markTextRead() {
 }
 
 function renderQuizHTML(m) {
-  if (!m.quiz?.length) return '<p style="color:#aaa;padding:2rem;">Ingen quiz ennå.</p>';
+  if (!m.quiz?.length) return '<p style="color:var(--text-3);padding:2rem;">Ingen quiz ennå.</p>';
   const timerSec = m.quizTimer || 0;
   const shuffled = [...m.quiz].map((q,i) => ({...q, origIdx:i}));
   return `<div id="quizContainer">${shuffled.map((q, qi) => {
@@ -3230,7 +3273,7 @@ function checkAnswer(qi, isCorrect, explain, optIdx, correctMap) {
 }
 
 function renderDiscHTML(m) {
-  if (!m.discussion?.length) return '<p style="color:#aaa;padding:2rem;">Ingen drøftingsspørsmål ennå.</p>';
+  if (!m.discussion?.length) return '<p style="color:var(--text-3);padding:2rem;">Ingen drøftingsspørsmål ennå.</p>';
   return m.discussion.map((d,di) => {
     const savedKey = state.student ? (state.student.name+'_m'+state.currentModule+'_disc_'+di) : null;
     const saved = savedKey ? state.studentAnswers[savedKey] : null;
@@ -3254,7 +3297,7 @@ function saveDiscAnswer(di) {
 }
 
 function renderWriteHTML(m) {
-  if (!m.write?.length) return '<p style="color:#aaa;padding:2rem;">Ingen skriveoppgave ennå.</p>';
+  if (!m.write?.length) return '<p style="color:var(--text-3);padding:2rem;">Ingen skriveoppgave ennå.</p>';
   const lang = m.language || 'norsk bokmål';
   const langAttr = lang.includes('engelsk') ? 'en' : 'no';
   return m.write.map((w,wi) => {
@@ -3264,8 +3307,8 @@ function renderWriteHTML(m) {
       <h3 style="font-weight:800;margin-bottom:0.5rem;">✍️ ${escHtml(w.title||'Skriveoppgave')}</h3>
       <div style="background:var(--bg);border-radius:12px;padding:1rem;margin-bottom:1rem;border-left:4px solid var(--c2);font-size:0.95rem;color:var(--text-2);">${escHtml(w.desc||'')}</div>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;align-items:center;">
-        ${w.minWords?`<span style="font-size:0.82rem;color:#aaa;font-weight:700;background:#f0f0f0;padding:4px 10px;border-radius:50px;">Minimum ${w.minWords} ord</span>`:''}
-        <span style="font-size:0.78rem;color:#aaa;font-weight:700;">🌐 ${escHtml(lang)}</span>
+        ${w.minWords?`<span style="font-size:0.82rem;color:var(--text-3);font-weight:700;background:var(--s3);padding:4px 10px;border-radius:50px;">Minimum ${w.minWords} ord</span>`:''}
+        <span style="font-size:0.78rem;color:var(--text-3);font-weight:700;">🌐 ${escHtml(lang)}</span>
         <select onchange="applyWriteTemplate(${wi},this.value)" style="font-size:0.8rem;padding:4px 10px;border-radius:50px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;outline:none;color:var(--text-2);">
           <option value="">📝 Velg tekstmal...</option>
           <option value="argumenterende">📣 Argumenterende</option>
@@ -3281,8 +3324,8 @@ function renderWriteHTML(m) {
         onfocus="this.style.borderColor='var(--c4)'" onblur="this.style.borderColor='#e0e0e0'"
         oninput="countWords(${wi},${w.minWords||0})">${saved?escHtml(saved.val):''}</textarea>
       <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.6rem;flex-wrap:wrap;">
-        <span id="wcount-${wi}" style="font-size:0.82rem;color:#aaa;font-weight:700;">0 ord</span>
-        <span id="wreadability-${wi}" style="font-size:0.78rem;color:#aaa;font-weight:700;"></span>
+        <span id="wcount-${wi}" style="font-size:0.82rem;color:var(--text-3);font-weight:700;">0 ord</span>
+        <span id="wreadability-${wi}" style="font-size:0.78rem;color:var(--text-3);font-weight:700;"></span>
         <div style="flex:1;"></div>
         <button class="btn-save" onclick="saveWriteAnswer(${wi})">💾 Lagre</button>
         <span class="saved-badge" id="wsaved-${wi}" style="display:none;">✓ Lagret!</span>
@@ -3360,7 +3403,7 @@ function saveWriteAnswer(wi) {
 }
 
 function renderVideoHTML(m) {
-  if (!m.videos?.length) return '<p style="color:#aaa;padding:2rem;">Ingen videoer ennå.</p>';
+  if (!m.videos?.length) return '<p style="color:var(--text-3);padding:2rem;">Ingen videoer ennå.</p>';
   return m.videos.map((v,vi) => {
     const ytId = getYtId(v.url);
     let embedHtml = '';
@@ -3393,7 +3436,7 @@ function saveVidAnswer(vi) {
 }
 
 function renderFlashcardHTML(m) {
-  if (!m.flashcards?.length) return '<p style="color:#aaa;padding:2rem;">Ingen flashcards ennå.</p>';
+  if (!m.flashcards?.length) return '<p style="color:var(--text-3);padding:2rem;">Ingen flashcards ennå.</p>';
   return `<div class="selftest-card">
     <h3 style="font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:1rem;">🃏 Test deg selv</h3>
     <div id="fcHolder"></div>
@@ -3727,7 +3770,7 @@ function hideAnnouncementBanner() {
 function renderManageModules() {
   const container=document.getElementById('manageModulesList');
   if(!container)return;
-  if(!state.modules.length){container.innerHTML='<p style="color:#aaa;">Ingen emner publisert ennå.</p>';return;}
+  if(!state.modules.length){container.innerHTML='<p style="color:var(--text-3);">Ingen emner publisert ennå.</p>';return;}
   container.innerHTML=state.modules.map((m,i)=>`
     <div class="module-manage-card">
       <div style="font-size:2rem;flex-shrink:0;">${m.emoji||'📚'}</div>
@@ -3755,13 +3798,13 @@ function renderPreviewPanel() {
   const total=state.tempQuiz.length+state.tempDisc.length+state.tempWrite.length+state.tempVideos.length+state.tempFlashcards.length;
   const totEl=document.getElementById('previewTotals');
   if(totEl)totEl.textContent=total?`${total} oppgaver totalt`:'';
-  if(!total){panel.innerHTML='<p style="color:#aaa;font-size:0.95rem;padding:1rem 0;">Legg til oppgaver i fanene over – de vises her.</p>';return;}
+  if(!total){panel.innerHTML='<p style="color:var(--text-3);font-size:0.95rem;padding:1rem 0;">Legg til oppgaver i fanene over – de vises her.</p>';return;}
   let html='';
   if(state.tempQuiz.length){
     html+=`<div class="preview-section"><div class="preview-section-title">❓ Quiz (${state.tempQuiz.length})</div>`;
     state.tempQuiz.forEach((q,i)=>{html+=`<div class="preview-item" id="pvq-${i}">
       <div class="preview-item-content"><div style="font-weight:700;font-size:0.9rem;">${escHtml(q.question)}</div>
-      <div style="font-size:0.78rem;color:#aaa;margin-top:0.2rem;">✅ ${escHtml(q.a)} / ❌ ${escHtml(q.b)}</div></div>
+      <div style="font-size:0.78rem;color:var(--text-3);margin-top:0.2rem;">✅ ${escHtml(q.a)} / ❌ ${escHtml(q.b)}</div></div>
       <div class="preview-item-actions">
         <button class="pv-edit-btn" onclick="pvEditQuiz(${i})">✏️</button>
         <button class="pv-del-btn" onclick="pvDelQuiz(${i})">🗑</button>
@@ -3845,7 +3888,7 @@ function previewManualVideo(){
   if(ytId){
     previewDiv.style.display='block';
     previewDiv.innerHTML=`<div style="background:var(--s2);border-radius:10px;padding:0.75rem;border:2px solid var(--c3);"><div style="font-size:0.8rem;font-weight:800;color:var(--c3);margin-bottom:0.5rem;">✅ YouTube-video gjenkjent:</div><iframe width="100%" height="220" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:10px;display:block;"></iframe></div>`;
-  }else if(url&&url.length>8){previewDiv.style.display='block';previewDiv.innerHTML=`<div style="font-size:0.8rem;color:#aaa;padding:0.5rem;">🔗 Lenke registrert (ikke YouTube)</div>`;}
+  }else if(url&&url.length>8){previewDiv.style.display='block';previewDiv.innerHTML=`<div style="font-size:0.8rem;color:var(--text-3);padding:0.5rem;">🔗 Lenke registrert (ikke YouTube)</div>`;}
   else{previewDiv.style.display='none';}
 }
 function svToggleEmbed(divId,ytId){const el=document.getElementById(divId);if(el)el.style.display=el.style.display==='none'?'block':'none';}
@@ -3876,21 +3919,21 @@ function renderResults() {
       <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:12px;padding:0.875rem 1.25rem;flex:1;min-width:120px;"><div style="font-size:1.6rem;font-weight:800;color:var(--c3);">${state.modules.length}</div><div style="font-size:0.78rem;color:var(--text-2);font-weight:700;">Emner</div></div>
       <div style="background:linear-gradient(135deg,#fdf4ff,#fce7ff);border-radius:12px;padding:0.875rem 1.25rem;flex:1;min-width:120px;"><div style="font-size:1.6rem;font-weight:800;color:var(--c5);">${numAnswers}</div><div style="font-size:0.78rem;color:var(--text-2);font-weight:700;">Totale svar</div></div>`;
   }
-  if(!Object.keys(students).length){container.innerHTML='<p style="color:#aaa;">Ingen svar registrert ennå.</p>';return;}
+  if(!Object.keys(students).length){container.innerHTML='<p style="color:var(--text-3);">Ingen svar registrert ennå.</p>';return;}
   container.innerHTML=Object.entries(students).map(([name,answers])=>`
     <div style="border:2px solid #e8eaed;border-radius:14px;margin-bottom:0.75rem;overflow:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1rem;cursor:pointer;background:var(--s2);" onclick="toggleStudentResults('sr-${escHtml(name)}')">
         <div>
           <div style="font-weight:800;color:var(--text);">👤 ${escHtml(name)}</div>
-          <div style="font-size:0.78rem;color:#aaa;">${answers.length} svar</div>
+          <div style="font-size:0.78rem;color:var(--text-3);">${answers.length} svar</div>
         </div>
         <div style="display:flex;gap:0.4rem;align-items:center;">
           <button onclick="event.stopPropagation();exportStudentAnswersTxt('${escHtml(name)}')" style="background:var(--c4);color:white;border:none;padding:5px 10px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;">📋 txt</button>
-          <span style="color:#aaa;font-size:1rem;">▼</span>
+          <span style="color:var(--text-3);font-size:1rem;">▼</span>
         </div>
       </div>
       <div id="sr-${escHtml(name)}" style="display:none;padding:0.875rem 1rem;background:#fafafa;border-top:1px solid #f0f0f0;">
-        ${answers.length?answers.map(a=>`<div style="font-size:0.85rem;color:var(--text-2);padding:0.4rem 0;border-bottom:1px solid #f0f0f0;">${escHtml(a.key.split('_').slice(-2).join('_'))}: ${escHtml(String(a.val).substring(0,120))}</div>`).join(''):'<p style="color:#aaa;font-size:0.88rem;">Ingen svar ennå.</p>'}
+        ${answers.length?answers.map(a=>`<div style="font-size:0.85rem;color:var(--text-2);padding:0.4rem 0;border-bottom:1px solid #f0f0f0;">${escHtml(a.key.split('_').slice(-2).join('_'))}: ${escHtml(String(a.val).substring(0,120))}</div>`).join(''):'<p style="color:var(--text-3);font-size:0.88rem;">Ingen svar ennå.</p>'}
       </div>
     </div>`).join('');
 }
@@ -3902,7 +3945,7 @@ function renderClassRoster() {
   const container=document.getElementById('classRosterContainer');
   if(!container)return;
   const roster=getRosterSync();
-  if(!roster.length){container.innerHTML='<p style="color:#aaa;">Ingen elever registrert ennå.</p>';return;}
+  if(!roster.length){container.innerHTML='<p style="color:var(--text-3);">Ingen elever registrert ennå.</p>';return;}
   const byClass={};
   roster.forEach(s=>{const cls=s.cls||'Ukjent';if(!byClass[cls])byClass[cls]=[];byClass[cls].push(s);});
   container.innerHTML=Object.entries(byClass).map(([cls,students])=>`
@@ -3911,7 +3954,7 @@ function renderClassRoster() {
       <div style="padding:0.5rem 0;">
         ${students.map(s=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:0.4rem 1rem;border-bottom:1px solid #f5f5f5;">
           <span style="font-size:0.88rem;font-weight:700;">👤 ${escHtml(s.name)}</span>
-          <button onclick="removeStudent('${escHtml(s.name)}')" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:0.8rem;">🗑</button>
+          <button onclick="removeStudent('${escHtml(s.name)}')" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:0.8rem;">🗑</button>
         </div>`).join('')}
       </div>
     </div>`).join('');
@@ -4104,7 +4147,7 @@ async function aiGenerateWriteTask(){
   if(resultEl)resultEl.innerHTML=`<div style="background:var(--s1);border-radius:12px;padding:1rem;border:1px solid var(--c3);">
     <div style="font-weight:800;margin-bottom:0.3rem;">✍️ ${escHtml(res.title)}</div>
     <div style="font-size:0.88rem;color:var(--text-2);margin-bottom:0.5rem;">${escHtml(res.desc)}</div>
-    <div style="font-size:0.8rem;color:#aaa;">Min. ${res.minWords} ord</div>
+    <div style="font-size:0.8rem;color:var(--text-3);">Min. ${res.minWords} ord</div>
     <button class="btn-success" style="margin-top:0.75rem;padding:7px 16px;" onclick='useSwResult(${JSON.stringify(res).replace(/"/g,"&quot;")})'>➕ Bruk</button>
   </div>`;
 }
@@ -4136,11 +4179,11 @@ Svar KUN med JSON: {"videos":[{"title":"...","ytId":"11-tegns-ID eller null","se
         ${ytId?`<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" style="width:100%;border-radius:10px;margin-bottom:0.5rem;cursor:pointer;" onclick="svToggleEmbed('svembed-${i}','${ytId}')" /><div id="svembed-${i}" style="display:none;margin-bottom:0.5rem;"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe></div>`
         :`<div style="background:#f5f5f5;border-radius:10px;padding:1rem;text-align:center;margin-bottom:0.5rem;"><a href="${escHtml(v.searchUrl||'')}" target="_blank" style="color:var(--c4);font-weight:800;">🔍 Søk på YouTube</a></div>`}
         <div style="font-weight:800;font-size:0.92rem;margin-bottom:0.2rem;">🎬 ${escHtml(v.title)}</div>
-        ${v.channel?`<div style="font-size:0.75rem;color:#aaa;margin-bottom:0.3rem;">📺 ${escHtml(v.channel)}</div>`:''}
+        ${v.channel?`<div style="font-size:0.75rem;color:var(--text-3);margin-bottom:0.3rem;">📺 ${escHtml(v.channel)}</div>`:''}
         ${v.task?`<div style="font-size:0.82rem;color:var(--text-2);background:var(--s2);border-radius:8px;padding:0.5rem;margin:0.4rem 0;">📋 ${escHtml(v.task)}</div>`:''}
         <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.5rem;">
           ${ytId?`<button style="background:var(--c3);color:white;border:none;padding:6px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;" onclick="svToggleEmbed('svembed-${i}','${ytId}')">▶ Spill av</button>`:''}
-          <a href="${escHtml(v.searchUrl||finalUrl)}" target="_blank" style="background:#f0f0f0;color:var(--text-2);padding:6px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;text-decoration:none;">🔍 Søk</a>
+          <a href="${escHtml(v.searchUrl||finalUrl)}" target="_blank" style="background:var(--s3);color:var(--text-2);padding:6px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;text-decoration:none;">🔍 Søk</a>
           <button style="background:var(--c4);color:white;border:none;padding:6px 14px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;" onclick='useSvResult(${safeV})'>➕ Legg til</button>
         </div>
       </div>`;
@@ -7675,13 +7718,13 @@ function crPopulateModules() {
   const arbList = document.getElementById('crArbeidModuleList');
   if (arbList) {
     if (state.modules.length === 0) {
-      arbList.innerHTML = '<p style="color:#aaa;font-size:0.9rem;">Ingen emner publisert ennå.</p>';
+      arbList.innerHTML = '<p style="color:var(--text-3);font-size:0.9rem;">Ingen emner publisert ennå.</p>';
     } else {
       arbList.innerHTML = state.modules.map(m => `
         <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid #f0f0f0;">
           <span style="font-size:1.5rem;">${m.emoji||'📚'}</span>
           <span style="font-weight:700;font-size:0.92rem;color:var(--text);">${escHtml(m.name)}</span>
-          <span style="font-size:0.8rem;color:#aaa;margin-left:auto;">${countTasks(m)} oppgaver</span>
+          <span style="font-size:0.8rem;color:var(--text-3);margin-left:auto;">${countTasks(m)} oppgaver</span>
         </div>`).join('');
     }
   }
@@ -7695,10 +7738,10 @@ async function showPublicHighscores() {
   sjShow('highscores');
   const container = document.getElementById('publicHsContainer');
   if (!container) return;
-  container.innerHTML = '<div style="text-align:center;padding:2rem;color:#aaa;">⏳ Laster...</div>';
+  container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-3);">⏳ Laster...</div>';
   const rows = await DB.loadHighscores('');
   if (!rows.length) {
-    container.innerHTML = '<div style="text-align:center;padding:3rem;color:#aaa;"><div style="font-size:3rem;">🏆</div><div style="margin-top:0.5rem;">Ingen high scores ennå!</div></div>';
+    container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-3);"><div style="font-size:3rem;">🏆</div><div style="margin-top:0.5rem;">Ingen high scores ennå!</div></div>';
     return;
   }
   const byQuiz = {};
@@ -7713,7 +7756,7 @@ async function showPublicHighscores() {
         <span style="font-size:1.3rem;min-width:2rem;text-align:center;">${medals[i]||i+1}</span>
         <span style="font-weight:800;flex:1;">${r.player_name}</span>
         <span style="font-weight:900;color:var(--c4);">${r.score} pts</span>
-        <span style="font-size:0.78rem;color:#aaa;">${new Date(r.played_at).toLocaleDateString('no')}</span>
+        <span style="font-size:0.78rem;color:var(--text-3);">${new Date(r.played_at).toLocaleDateString('no')}</span>
       </div>`).join('')}
     </div>`;
   }
@@ -7724,11 +7767,11 @@ async function loadHighscoreView() {
   const container = document.getElementById('hsTableContainer');
   const filter = document.getElementById('hsQuizFilter');
   if (!container) return;
-  container.innerHTML = '<div style="text-align:center;padding:2rem;color:#aaa;">⏳ Laster...</div>';
+  container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-3);">⏳ Laster...</div>';
 
   const rows = await DB.loadHighscores('');
   if (!rows.length) {
-    container.innerHTML = '<div style="text-align:center;padding:3rem;color:#aaa;"><div style="font-size:3rem;">🏆</div><div style="margin-top:0.5rem;">Ingen high scores ennå.<br>Spill en Live Quiz for å komme på listen!</div></div>';
+    container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-3);"><div style="font-size:3rem;">🏆</div><div style="margin-top:0.5rem;">Ingen high scores ennå.<br>Spill en Live Quiz for å komme på listen!</div></div>';
     return;
   }
 
@@ -7765,7 +7808,7 @@ async function loadHighscoreView() {
             <div style="font-size:1.3rem;min-width:2rem;text-align:center;">${medals[i] || (i+1)}</div>
             <div style="font-weight:800;flex:1;">${r.player_name}</div>
             <div style="font-weight:900;color:var(--c4);font-size:1.05rem;">${r.score} pts</div>
-            <div style="font-size:0.78rem;color:#aaa;">${new Date(r.played_at).toLocaleDateString('no')}</div>
+            <div style="font-size:0.78rem;color:var(--text-3);">${new Date(r.played_at).toLocaleDateString('no')}</div>
             ${isTeacher ? `<button onclick="deleteHighscoreEntry('${r.id}')" title="Fjern fra listen" style="background:none;border:none;cursor:pointer;font-size:1rem;color:#ccc;padding:2px 6px;border-radius:6px;" onmouseover="this.style.color='var(--c1)'" onmouseout="this.style.color='#ccc'">🗑</button>` : ''}
           </div>`).join('')}
       </div>`;
@@ -7802,7 +7845,7 @@ async function arbOpen() {
   document.getElementById('tasksTab')?.classList.add('active');
   // Always fetch latest modules from DB so students see teacher's latest content
   const grid = document.getElementById('arbModuleGrid');
-  if (grid) grid.innerHTML = '<div style="text-align:center;padding:2rem;color:#aaa;"><div style="font-size:2rem;">⏳</div><div style="margin-top:0.5rem;font-weight:700;">Laster emner...</div></div>';
+  if (grid) grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-3);"><div style="font-size:2rem;">⏳</div><div style="margin-top:0.5rem;font-weight:700;">Laster emner...</div></div>';
   try {
     state.modules = await DB.loadModules();
   } catch(e) {
@@ -7854,7 +7897,7 @@ function arbRenderModuleGrid() {
       <p>${escHtml(m.desc||'')}</p>
       <div class="arb-module-meta">${chips.map(c=>`<span class="arb-meta-chip">${c}</span>`).join('')}</div>
       <div class="arb-progress-bar"><div class="arb-progress-fill" style="width:${pct}%"></div></div>
-      <div style="font-size:0.78rem;color:#aaa;font-weight:700;margin-top:0.3rem;">${pct > 0 ? pct+'% fullført' : 'Ikke startet'}</div>
+      <div style="font-size:0.78rem;color:var(--text-3);font-weight:700;margin-top:0.3rem;">${pct > 0 ? pct+'% fullført' : 'Ikke startet'}</div>
     </div>`;
   }).join('');
 }
@@ -8026,7 +8069,7 @@ function arbRenderWrite(m) {
       <div style="font-weight:800;font-size:1rem;color:var(--text);margin-bottom:0.4rem;">✍️ ${escHtml(w.title)}</div>
       ${w.desc ? `<div style="font-size:0.88rem;color:var(--text-2);margin-bottom:0.75rem;background:#f0f4ff;border-radius:8px;padding:8px 12px;">📋 ${escHtml(w.desc)}</div>` : ''}
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;">
-        <div style="font-size:0.82rem;color:#aaa;font-weight:700;">Minimum ${w.minWords||100} ord</div>
+        <div style="font-size:0.82rem;color:var(--text-3);font-weight:700;">Minimum ${w.minWords||100} ord</div>
         <div style="display:flex;align-items:center;gap:0.5rem;">
           <span id="arb-timer-${wi}" style="font-family:'Fredoka One',cursive;font-size:0.95rem;color:var(--c4);">⏱ 00:00</span>
           <button onclick="arbToggleTimer(${wi})" id="arb-timer-btn-${wi}" style="background:var(--c4);color:white;border:none;padding:4px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;">▶ Start</button>
@@ -8371,7 +8414,7 @@ async function crShowFinalScoreboard() {
       <div style="font-size:1.4rem">${p.avatar}</div>
       <div class="cr-name">${p.username}</div>
       <div class="cr-pts">${p.score||0} poeng</div>
-    </div>`).join('') || '<p style="color:#aaa;">Ingen spillere</p>';
+    </div>`).join('') || '<p style="color:var(--text-3);">Ingen spillere</p>';
 
   // Button to see full highscores
   const sb = document.getElementById('crScoreboard');
@@ -8780,9 +8823,9 @@ const SND = (() => {
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
       <span id="wordPopupWord" style="font-weight:900;font-size:1.1rem;color:var(--c4);"></span>
       <button onclick="document.getElementById('wordPopup').style.display='none'"
-        style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#aaa;padding:0 0 0 8px;">✕</button>
+        style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--text-3);padding:0 0 0 8px;">✕</button>
     </div>
-    <div id="wordPopupBody" style="font-size:0.92rem;line-height:1.65;color:#444;"></div>
+    <div id="wordPopupBody" style="font-size:0.92rem;line-height:1.65;color:var(--text);"></div>
   `;
   document.body.appendChild(popup);
 
@@ -8848,7 +8891,7 @@ const SND = (() => {
 
     document.getElementById('wordPopupWord').textContent = selectedWord;
     document.getElementById('wordPopupBody').innerHTML =
-      '<span style="color:#aaa;font-style:italic;">⏳ Slår opp...</span>';
+      '<span style="color:var(--text-3);font-style:italic;">⏳ Slår opp...</span>';
 
     const apiKey = getApiKey();
     if (!apiKey) {
