@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OlaSkole – Interaktiv læringsplattform</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+</script>
 <!-- Preload file-parsing libraries -->
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
@@ -697,6 +704,20 @@
 
   /* Toast glow */
   .toast{background:rgba(9,11,24,0.97)!important;border-color:rgba(123,143,253,0.3)!important;box-shadow:0 8px 40px rgba(0,0,0,0.7),0 0 0 1px rgba(123,143,253,0.15),0 1px 0 rgba(255,255,255,0.06) inset!important;}
+
+  /* ===== FOKUS-SYNLIGHET (tilgjengelighet) ===== */
+  *:focus{outline:none;}
+  *:focus-visible{outline:2px solid #7b8ffd;outline-offset:3px;border-radius:6px;box-shadow:0 0 0 4px rgba(123,143,253,0.2);}
+  button:focus-visible,a:focus-visible{border-radius:8px;}
+  input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #7b8ffd;outline-offset:0;box-shadow:var(--glow-sm);}
+  body.light *:focus-visible{outline-color:#4a5add;box-shadow:0 0 0 4px rgba(74,90,221,0.15);}
+
+  /* ===== BEDRE FARGEKONTRAST ===== */
+  :root{--text-3:#6572a8;}
+  body.light{--text-3:#5860a0;}
+
+  /* ===== SWIPE-INDIKATOR animasjon ===== */
+  @keyframes swipeHint{0%{opacity:0;transform:translateX(-8px);}50%{opacity:1;}100%{opacity:0;transform:translateX(8px);}}
 </style>
 </head>
 <body class="dark">
@@ -716,10 +737,10 @@
   </div>
   <div class="nav-right">
     <div class="role-badge" id="roleBadge">Gjest</div>
-    <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="Bytt til lyst modus">
+    <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="Bytt tema" aria-label="Bytt mellom lyst og mørkt tema">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     </button>
-    <button class="teacher-btn" onclick="openTeacherModal()">
+    <button class="teacher-btn" onclick="openTeacherModal()" aria-label="Lærertilgang">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
       Lærer
     </button>
@@ -733,25 +754,25 @@
 <!-- MOBILE BOTTOM NAV -->
 <nav class="mobile-nav" id="mobileNav">
   <div class="mobile-nav-inner">
-    <button class="mob-nav-btn active" id="mob-home" onclick="mobNav('home')">
+    <button class="mob-nav-btn active" id="mob-home" onclick="mobNav('home')" aria-label="Hjem">
       <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Hjem
     </button>
-    <button class="mob-nav-btn" id="mob-tasks" onclick="arbOpen()">
+    <button class="mob-nav-btn" id="mob-tasks" onclick="arbOpen()" aria-label="Oppgaver">
       <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>Oppgaver
     </button>
-    <button class="mob-nav-btn" id="mob-join" onclick="showView('join')">
+    <button class="mob-nav-btn" id="mob-join" onclick="showView('join')" aria-label="Bli med i quiz">
       <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>Quiz
     </button>
-    <button class="mob-nav-btn" id="mob-wc" onclick="showView('wc')">
+    <button class="mob-nav-btn" id="mob-wc" onclick="showView('wc')" aria-label="Ordsky">
       <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><circle cx="6" cy="8" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="6" cy="16" r="2"/><circle cx="18" cy="16" r="2"/><circle cx="12" cy="4" r="1.5"/><circle cx="12" cy="20" r="1.5"/></svg></span>Ordsky
     </button>
-    <button class="mob-nav-btn" id="mob-spill" onclick="showView('spill')">
+    <button class="mob-nav-btn" id="mob-spill" onclick="showView('spill')" aria-label="Spill">
       <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="m17 12-3-2v4l3-2z"/><path d="M7 10v4"/><path d="M5 12h4"/></svg></span>Spill
     </button>
-    <button class="mob-nav-btn teacher-tab" id="mob-teacher" onclick="checkTeacher()" style="display:none">
+    <button class="mob-nav-btn teacher-tab" id="mob-teacher" onclick="checkTeacher()" style="display:none" aria-label="Lærerpanel">
       <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Lærer
     </button>
-    <button class="mob-nav-btn teacher-tab" id="mob-logout-teacher" onclick="logoutTeacher()" style="display:none;color:#ef4444;">
+    <button class="mob-nav-btn teacher-tab" id="mob-logout-teacher" onclick="logoutTeacher()" style="display:none;color:#ef4444;" aria-label="Logg ut som lærer">
       <span class="mob-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>Logg ut
     </button>
   </div>
@@ -2507,7 +2528,6 @@ function showView(name) {
   const viewEl = document.getElementById('view-' + name);
   if (!viewEl) return;
   viewEl.classList.add('active');
-  // Highlight correct nav tab by matching onclick content
   document.querySelectorAll('.nav-tab').forEach(tab => {
     const oc = tab.getAttribute('onclick') || '';
     if (oc.includes("'"+name+"'") || oc.includes('"'+name+'"')) {
@@ -2523,6 +2543,8 @@ function showView(name) {
   if (name === 'spill') gzInit();
   setProgress(name === 'home' ? 20 : name === 'tasks' ? 60 : 90);
   syncMobileNav(name);
+  // Lagre siste visning (unntatt teacher-panel)
+  if (name !== 'teacher') localStorage.setItem('os_last_view', name);
 }
 
 function syncMobileNav(name) {
@@ -7565,6 +7587,15 @@ const GZ_PERSONS = [
   try {
     await checkAndShowAnnouncement();
   } catch(e) {}
+  // Gjenopprett siste visning (unntatt teacher-panel)
+  try {
+    const lastView = localStorage.getItem('os_last_view');
+    if (lastView && lastView !== 'teacher' && document.getElementById('view-' + lastView)) {
+      if (lastView === 'arbeid') arbOpen();
+      else showView(lastView);
+    }
+  } catch(e) {}
+
   // Autosave for lærer – lagre emne-skjema hvert 30 sek
   setInterval(() => {
     if (!state.isTeacher) return;
@@ -8067,7 +8098,7 @@ function arbRenderWrite(m) {
     const minOk = wordCount >= (w.minWords||100);
     html += `<div class="arb-write-card">
       <div style="font-weight:800;font-size:1rem;color:var(--text);margin-bottom:0.4rem;">✍️ ${escHtml(w.title)}</div>
-      ${w.desc ? `<div style="font-size:0.88rem;color:var(--text-2);margin-bottom:0.75rem;background:#f0f4ff;border-radius:8px;padding:8px 12px;">📋 ${escHtml(w.desc)}</div>` : ''}
+      ${w.desc ? `<div style="font-size:0.88rem;color:var(--text-2);margin-bottom:0.75rem;background:var(--s3);border-radius:8px;padding:8px 12px;">📋 ${escHtml(w.desc)}</div>` : ''}
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.5rem;">
         <div style="font-size:0.82rem;color:var(--text-3);font-weight:700;">Minimum ${w.minWords||100} ord</div>
         <div style="display:flex;align-items:center;gap:0.5rem;">
@@ -8075,7 +8106,7 @@ function arbRenderWrite(m) {
           <button onclick="arbToggleTimer(${wi})" id="arb-timer-btn-${wi}" style="background:var(--c4);color:white;border:none;padding:4px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;">▶ Start</button>
         </div>
       </div>
-      <textarea id="arb-write-${wi}" rows="8" style="width:100%;padding:12px 14px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.93rem;resize:vertical;outline:none;line-height:1.6;" placeholder="Skriv besvarelsen din her..." oninput="arbWriteCount(${wi},${w.minWords||100});arbAutoSave(${wi},${w.minWords||100})">${escHtml(saved)}</textarea>
+      <textarea id="arb-write-${wi}" rows="8" style="width:100%;padding:12px 14px;border:2px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.93rem;resize:vertical;outline:none;line-height:1.6;background:var(--s2);color:var(--text);transition:border-color 0.2s;" placeholder="Skriv besvarelsen din her..." oninput="arbWriteCount(${wi},${w.minWords||100});arbAutoSave(${wi},${w.minWords||100})" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'">${escHtml(saved)}</textarea>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;">
         <div style="display:flex;align-items:center;gap:0.5rem;"><div class="arb-wordcount${minOk?' ok':''}" id="arb-wc-${wi}">${wordCount} ord${minOk?' ✅':' (trenger '+(w.minWords||100)+' ord)'}</div><span id="arb-autosave-dot-${wi}" style="display:none;font-size:0.73rem;color:var(--c3);font-weight:700;">● Lagret automatisk</span></div>
         <div style="display:flex;align-items:center;gap:0.5rem;">
@@ -8937,6 +8968,70 @@ Svar BARE med selve forklaringen, ingen ekstra tekst.`
         '<span style="color:#e53e3e;">⚠️ Kunne ikke koble til AI. Sjekk internett og API-nøkkel.</span>';
     }
   });
+})();
+
+// ═══════════════════════════════════════════════════════
+// GLOBALE TASTATURSNARVEI
+// ═══════════════════════════════════════════════════════
+document.addEventListener('keydown', function(e) {
+  // Escape: lukk åpne modaler
+  if (e.key === 'Escape') {
+    const openModal = document.querySelector('.modal-overlay.open');
+    if (openModal) { openModal.classList.remove('open'); return; }
+  }
+  // Ctrl+S / Cmd+S: lagre om i lærerpanel
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    const teacherView = document.getElementById('view-teacher');
+    if (teacherView?.classList.contains('active') && state.isTeacher) {
+      e.preventDefault();
+      const publishBtn = document.querySelector('.publish-bar .btn-primary');
+      if (publishBtn) { publishBtn.click(); showToast('💾 Lagret!'); }
+    }
+  }
+}, true);
+
+// ═══════════════════════════════════════════════════════
+// SWIPE-NAVIGASJON PÅ MOBIL
+// ═══════════════════════════════════════════════════════
+(function() {
+  const NAV_ORDER = ['home', 'arbeid', 'join', 'wc', 'spill'];
+  let _tx = 0, _ty = 0;
+
+  function _currentView() {
+    const v = document.querySelector('.view.active');
+    return v ? v.id.replace('view-', '') : 'home';
+  }
+
+  document.addEventListener('touchstart', function(e) {
+    _tx = e.touches[0].clientX;
+    _ty = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e) {
+    const dx = e.changedTouches[0].clientX - _tx;
+    const dy = e.changedTouches[0].clientY - _ty;
+    // Ignorer vertikale scroll-bevegelser og korte swipes
+    if (Math.abs(dy) > Math.abs(dx) || Math.abs(dx) < 60) return;
+    // Ignorer swipe inne i tekstfelter, knapper og scrollbare elementer
+    const tag = e.target.tagName;
+    if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT') return;
+    const scrollable = e.target.closest('[data-no-swipe], .task-tabs, .nav-tabs, .mobile-nav, .modal-overlay');
+    if (scrollable) return;
+
+    const cur = _currentView();
+    const idx = NAV_ORDER.indexOf(cur);
+    if (idx === -1) return;
+
+    if (dx < -60 && idx < NAV_ORDER.length - 1) {
+      // Sveip venstre → neste fane
+      const next = NAV_ORDER[idx + 1];
+      if (next === 'arbeid') arbOpen(); else showView(next);
+    } else if (dx > 60 && idx > 0) {
+      // Sveip høyre → forrige fane
+      const prev = NAV_ORDER[idx - 1];
+      if (prev === 'arbeid') arbOpen(); else showView(prev);
+    }
+  }, { passive: true });
 })();
 </script>
 </body>
