@@ -49,91 +49,6 @@
     --glow:0 0 0 2px rgba(123,143,253,0.35), 0 4px 24px rgba(123,143,253,0.2);
     --glow-sm:0 0 0 2px rgba(123,143,253,0.3);
   }
-  body.light {
-    --bg:#eef0fb; --s1:#ffffff; --s2:#f4f5fc; --s3:#e8ebf7;
-    --border:#c8cde8; --border-2:#a8b0d8;
-    --text:#12143a; --text-2:#404270; --text-3:#8082b0;
-    --card:#ffffff;
-    --shadow:0 4px 20px rgba(20,24,80,0.08), 0 1px 4px rgba(20,24,80,0.05), inset 0 1px 0 rgba(255,255,255,0.9);
-    --shadow-md:0 8px 32px rgba(20,24,80,0.11), 0 2px 8px rgba(20,24,80,0.07);
-    --shadow-lg:0 16px 48px rgba(20,24,80,0.14), 0 4px 12px rgba(20,24,80,0.08);
-    --glow:0 0 0 2px rgba(123,143,253,0.35), 0 4px 16px rgba(123,143,253,0.15);
-    --accent:#4f63f0; --accent-h:#3d52e8; --accent-d:#3040d0;
-    --accent-g:rgba(79,99,240,0.12);
-    --c1:#dc2626; --c2:#d97706; --c3:#16a34a; --c4:#4f63f0; --c5:#9333ea;
-    --green:#16a34a; --red:#dc2626; --yellow:#d97706; --purple:#9333ea;
-    --glow-sm:0 0 0 2px rgba(79,99,240,0.3);
-  }
-  body.light nav { background:rgba(242,243,250,0.92); border-bottom-color:var(--border); box-shadow:0 1px 0 var(--border); }
-  body.light .mobile-nav { top:auto !important; background:rgba(255,255,255,0.97); border-top-color:var(--border); }
-  body.light input, body.light select, body.light textarea {
-    background:var(--s1); color:var(--text); border-color:var(--border-2);
-  }
-  input[type="datetime-local"] {
-    color-scheme: dark;
-    cursor:pointer;
-  }
-  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    filter: invert(0.75) brightness(1.2);
-    cursor: pointer;
-    padding: 2px;
-    border-radius: 4px;
-  }
-  body.light input[type="datetime-local"] { color-scheme: light; }
-  body.light input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: none; }
-  body.light .module-card { box-shadow:var(--shadow); }
-  body.light .modal { background:white !important; border-color:var(--border) !important; box-shadow:var(--shadow-lg); }
-  body.light .modal h2 { color:var(--text) !important; }
-  body.light .modal input { background:var(--s2) !important; }
-  body.light .teacher-panel, body.light .text-block, body.light .quiz-card,
-  body.light .discussion-card, body.light .video-card, body.light .write-card,
-  body.light .results-panel { box-shadow:var(--shadow); }
-  /* Fix: login box uses hardcoded dark bg → restore light in light mode */
-  body.light .student-login-box { background:white !important; border-color:var(--border) !important; box-shadow:var(--shadow-lg) !important; }
-  body.light .student-login-box::before { display:none; }
-  body.light .student-login-box h2 { color:var(--text) !important; }
-  /* Fix: home hero uses hardcoded dark bg → lighter in light mode */
-  body.light .home-hero { background:linear-gradient(135deg,#edf0ff 0%,#f0ecff 50%,#ede8ff 100%) !important; border-color:rgba(123,143,253,0.35) !important; box-shadow:0 4px 24px rgba(123,143,253,0.12),inset 0 1px 0 rgba(255,255,255,0.9) !important; }
-  body.light .home-hero-title { color:var(--text) !important; }
-  body.light .home-hero-sub { color:var(--text-2) !important; }
-  body.light .home-hero::before { background:radial-gradient(circle,rgba(123,143,253,0.18) 0%,transparent 70%) !important; }
-  body.light .home-hero::after { display:none; }
-  /* Fix: nav active tab has light color (#b0bfff) – needs darker in light mode */
-  body.light .nav-tab.active { color:#4a5add !important; background:rgba(123,143,253,0.1) !important; border-color:rgba(123,143,253,0.2) !important; }
-  body.light .nav-tab.active::after { box-shadow:none; }
-  /* Fix: mobile nav active btn */
-  body.light .mob-nav-btn.active { color:#4a5add !important; }
-  /* Fix: dark-toggle bg in light mode */
-  body.light .dark-toggle { background:var(--s2) !important; border-color:var(--border) !important; }
-  /* Fix: arb-module-card top gradient line in light mode – stays visible */
-  body.light .arb-module-card::before { opacity:0.7; }
-  /* Fix: flashcard faces have hardcoded color:white – keep that (gradient bg) */
-  /* Fix: tr-tab.active has gradient bg with color:white – override for legibility */
-  body.light .tr-tab.active { color: white !important; }
-  /* Fix: toast has hardcoded dark bg */
-  body.light .toast { background:rgba(20,22,50,0.95) !important; }
-  /* Fix: arb-feedback colors need override in light mode */
-  body.light .arb-feedback.ok { color:#15803d !important; }
-  body.light .arb-feedback.fail { color:#b91c1c !important; }
-  /* Fix: AI settings panel bg in light mode */
-  body.light #aiSettingsPanel { background:rgba(79,99,240,0.06) !important; border:1px solid var(--border) !important; }
-  /* Fix: AI settings selects/textareas with hardcoded dark bg */
-  body.light #aiSettingsPanel select,
-  body.light #aiSettingsPanel textarea,
-  body.light #aiSettingsPanel input[type=text] {
-    background:var(--s1) !important; color:var(--text) !important;
-    border:1px solid var(--border-2) !important;
-  }
-  body.light #aiSettingsToggle { background:rgba(79,99,240,0.12) !important; border-color:rgba(79,99,240,0.3) !important; color:var(--text) !important; }
-  /* Fix: subject chip active state color too light on light bg */
-  body.light .subject-chip.active { color:#3d52e8 !important; }
-  /* Fix: home action buttons hardcoded light colors */
-  body.light .home-action-quiz { color:#7c3aed !important; }
-  body.light .home-action-arbeid { color:#15803d !important; }
-  /* Fix: mob-nav-btn active color */
-  body.light .mob-nav-btn.active { color:#3d52e8 !important; }
-  /* Fix: color cards (color-1..5) always have dark hardcoded bg → force white text */
-
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
   ::-webkit-scrollbar{width:5px;height:5px;}
@@ -827,7 +742,7 @@
 
   /* ===== ORDFORKLARINGER (Glosar) ===== */
   .gloss-term{border-bottom:2px dotted var(--accent);cursor:help;position:relative;display:inline;}
-  .gloss-term::after{content:attr(data-def);position:absolute;bottom:calc(100% + 4px);left:0;background:var(--s1);border:1px solid var(--border-2);border-radius:8px;padding:6px 10px;font-size:0.8rem;font-weight:600;white-space:normal;max-width:260px;z-index:200;display:none;pointer-events:none;color:var(--text);box-shadow:var(--shadow-md);line-height:1.4;}
+  .gloss-term::after{content:attr(data-def);position:absolute;bottom:calc(100% + 4px);left:0;background:var(--s3);border:1px solid rgba(123,143,253,0.4);border-radius:8px;padding:6px 10px;font-size:0.8rem;font-weight:600;white-space:normal;max-width:260px;z-index:200;display:none;pointer-events:none;color:var(--text);box-shadow:0 4px 24px rgba(0,0,0,0.8),0 0 0 1px var(--border-2);line-height:1.4;}
   .gloss-term:hover::after,.gloss-term:focus::after{display:block;}
 
   /* ===== TEKST-TIL-TALE knapp ===== */
@@ -915,9 +830,6 @@
     <div class="role-badge" id="roleBadge">Gjest</div>
     <button id="userSettingsBtn" onclick="openUserSettings()" title="Innstillinger" aria-label="Åpne innstillinger" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:8px;padding:6px 10px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;min-height:30px;" onmouseover="this.style.color='var(--text)';this.style.background='var(--s3)'" onmouseout="this.style.color='var(--text-2)';this.style.background='var(--s2)'">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
-    <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="Bytt tema" aria-label="Bytt mellom lyst og mørkt tema">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     </button>
     <button class="teacher-btn" onclick="openTeacherModal()" aria-label="Lærertilgang">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
@@ -2231,24 +2143,6 @@
         Utseende
       </div>
 
-      <!-- Tema -->
-      <div style="margin-bottom:1rem;">
-        <div style="font-size:0.8rem;font-weight:700;color:var(--text-2);margin-bottom:0.5rem;">Tema</div>
-        <div style="display:flex;gap:0.5rem;">
-          <button id="usDarkBtn" onclick="usSetTheme('dark')" style="flex:1;padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            Mørkt
-          </button>
-          <button id="usLightBtn" onclick="usSetTheme('light')" style="flex:1;padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            Lyst
-          </button>
-          <button id="usAutoBtn" onclick="usSetTheme('auto')" style="flex:1;padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:6px;">
-            ⚙️ Auto
-          </button>
-        </div>
-      </div>
-
       <!-- Aksentfarge -->
       <div style="margin-bottom:1rem;">
         <div style="font-size:0.8rem;font-weight:700;color:var(--text-2);margin-bottom:0.5rem;">Aksentfarge</div>
@@ -3268,16 +3162,6 @@ function openUserSettings() {
 }
 
 function _usRefreshUI() {
-  // Theme buttons
-  const isLight = document.body.classList.contains('light');
-  const dBtn = document.getElementById('usDarkBtn');
-  const lBtn = document.getElementById('usLightBtn');
-  const isAuto = localStorage.getItem('olaskole_light') === null;
-  const aBtn = document.getElementById('usAutoBtn');
-  if (dBtn) { dBtn.style.borderColor = (!isAuto && !isLight) ? 'var(--accent)' : 'var(--border-2)'; dBtn.style.color = (!isAuto && !isLight) ? 'var(--text)' : 'var(--text-2)'; }
-  if (lBtn) { lBtn.style.borderColor = (!isAuto && isLight) ? 'var(--accent)' : 'var(--border-2)'; lBtn.style.color = (!isAuto && isLight) ? 'var(--text)' : 'var(--text-2)'; }
-  if (aBtn) { aBtn.style.borderColor = isAuto ? 'var(--accent)' : 'var(--border-2)'; aBtn.style.color = isAuto ? 'var(--text)' : 'var(--text-2)'; }
-
   // Accent picker
   const picker = document.getElementById('usAccentPicker');
   if (picker) {
@@ -3317,19 +3201,6 @@ function _usRefreshToggle(key, btnId, thumbId) {
   btn.style.background = on ? 'var(--accent)' : 'var(--border-2)';
   btn.setAttribute('aria-checked', on ? 'true' : 'false');
   thumb.style.transform = on ? 'translateX(20px)' : 'translateX(0)';
-}
-
-function usSetTheme(mode) {
-  if (mode === 'auto') {
-    localStorage.removeItem('olaskole_light');
-    const preferLight = window.matchMedia?.('(prefers-color-scheme: light)').matches;
-    document.body.classList.toggle('light', preferLight);
-  } else {
-    const isLight = document.body.classList.contains('light');
-    if (mode === 'light' && !isLight) toggleDark();
-    if (mode === 'dark'  &&  isLight) toggleDark();
-  }
-  _usRefreshUI();
 }
 
 function usSetAccent(idx) {
@@ -3428,39 +3299,11 @@ function resetNotepadUI() {
   if (chev) chev.style.transform = '';
 }
 
-function toggleDark() {
-  const isLight = document.body.classList.toggle('light');
-  localStorage.setItem('olaskole_light', isLight ? '1' : '');
-  const btn = document.getElementById('darkToggle');
-  if (btn) {
-    btn.innerHTML = isLight ? MOON_ICON : SUN_ICON;
-    btn.title = isLight ? 'Bytt til mørkt modus' : 'Bytt til lyst modus';
-  }
-}
-function initDark() {
-  const btn = document.getElementById('darkToggle');
-  const stored = localStorage.getItem('olaskole_light');
-  // Auto-detect: use system preference only if user has never set a preference
-  const preferLight = stored !== null ? stored === '1' : window.matchMedia?.('(prefers-color-scheme: light)').matches;
-  if (preferLight) {
-    document.body.classList.add('light');
-    if (btn) btn.innerHTML = MOON_ICON;
-  } else {
-    if (btn) btn.innerHTML = SUN_ICON;
-  }
-  // Listen for system changes when no explicit preference is stored
-  window.matchMedia?.('(prefers-color-scheme: light)').addEventListener('change', e => {
-    if (localStorage.getItem('olaskole_light') === null) {
-      document.body.classList.toggle('light', e.matches);
-      if (btn) btn.innerHTML = e.matches ? MOON_ICON : SUN_ICON;
-    }
-  });
-}
-
 // ====== LOAD / SAVE STATE ======
 async function loadState() {
   showDbStatus();
-  initDark();
+  localStorage.removeItem('olaskole_light');
+  document.body.classList.remove('light');
   initFontScale();
   initUserSettings();
   initMsToken();
