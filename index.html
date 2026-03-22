@@ -26,6 +26,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap');
+  @import url('https://fonts.cdnfonts.com/css/opendyslexic');
+  body.dyslexia-font, body.dyslexia-font * {
+    font-family: 'OpenDyslexic', sans-serif !important;
+    letter-spacing: 0.05em;
+    word-spacing: 0.1em;
+    line-height: 1.75 !important;
+  }
   :root {
     --bg:#04050d; --s1:#090b18; --s2:#0e1022; --s3:#141628;
     --border:#1f2240; --border-2:#2d3260;
@@ -735,6 +742,15 @@
   .font-size-btn{background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:8px;padding:4px 10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.18s;line-height:1;min-height:30px;}
   .font-size-btn:hover{background:var(--s3);color:var(--text);}
 
+  /* ===== PWA INSTALL BANNER ===== */
+  #pwaBanner{position:fixed;bottom:1.5rem;right:1.2rem;z-index:400;background:var(--s2);border:1px solid var(--border-2);border-radius:14px;padding:0.875rem 1rem;display:flex;align-items:center;gap:0.75rem;box-shadow:var(--shadow-md);font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:700;color:var(--text);animation:pwaBannerIn 0.35s cubic-bezier(.22,1,.36,1);max-width:320px;}
+  @keyframes pwaBannerIn{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+  #pwaBanner .pwa-text{flex:1;line-height:1.4;}
+  #pwaBanner .pwa-install-btn{background:var(--accent);color:white;border:none;border-radius:8px;padding:7px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;transition:background 0.18s;}
+  #pwaBanner .pwa-install-btn:hover{background:var(--accent-h);}
+  #pwaBanner .pwa-dismiss-btn{background:none;border:none;color:var(--text-3);cursor:pointer;font-size:1rem;padding:4px;line-height:1;transition:color 0.15s;flex-shrink:0;}
+  #pwaBanner .pwa-dismiss-btn:hover{color:var(--text);}
+
   /* ===== BRUKERINNSTILLINGER: TILGJENGELIGHET ===== */
   body.reduce-motion *,body.reduce-motion *::before,body.reduce-motion *::after{
     animation-duration:0.01ms!important;animation-iteration-count:1!important;
@@ -980,6 +996,7 @@
       <button class="tr-tab"        id="trtab-klasser" onclick="trTab('klasser')">Klasser</button>
       <button class="tr-tab"        id="trtab-kunngjoring" onclick="trTab('kunngjoring')">Kunngjøring</button>
       <button class="tr-tab"        id="trtab-spill" onclick="trTab('spill')">Spill</button>
+      <button class="tr-tab"        id="trtab-stats" onclick="trTab('stats')">📊 Statistikk</button>
     </div>
   </div>
 
@@ -1729,6 +1746,22 @@
     </div><!-- /two-column grid -->
   </div><!-- /trpane-spill -->
 
+  <!-- ═══════════════════════════════════════════
+       PANE 7 – STATISTIKK
+  ═══════════════════════════════════════════ -->
+  <div class="tr-pane" id="trpane-stats">
+    <div class="teacher-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
+        <h2 style="margin:0;">📊 Statistikk</h2>
+        <button onclick="renderTeacherStats()" style="display:flex;align-items:center;gap:5px;background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);padding:7px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-2)'">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Oppdater
+        </button>
+      </div>
+      <div id="statsContent"><p style="color:var(--text-3);">Klikk «Oppdater» eller bytt til denne fanen for å laste statistikk.</p></div>
+    </div>
+  </div>
+
 </div><!-- /view-teacher -->
 
 
@@ -2023,6 +2056,16 @@
           <button onclick="usSetFontScale(100)" style="font-size:0.72rem;color:var(--text-3);background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;padding:0;text-decoration:underline;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-3)'">Tilbakestill</button>
         </div>
       </div>
+
+      <!-- Skrifttype -->
+      <div style="margin-top:1rem;">
+        <div style="font-size:0.8rem;font-weight:700;color:var(--text-2);margin-bottom:0.5rem;">Skrifttype</div>
+        <div style="display:flex;gap:0.5rem;">
+          <button id="usFontNormalBtn" onclick="usSetFont('default')" style="flex:1;padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.18s;">Vanlig</button>
+          <button id="usFontDyslexiaBtn" onclick="usSetFont('dyslexia')" style="flex:1;padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'OpenDyslexic','Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;transition:all 0.18s;">OpenDyslexic</button>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-3);margin-top:0.4rem;">OpenDyslexic er designet for å gjøre lesing lettere for elever med dysleksi.</div>
+      </div>
     </div>
 
     <!-- TILGJENGELIGHET -->
@@ -2110,6 +2153,72 @@
       <button class="btn-primary" style="flex:1;justify-content:center;" onclick="closeModal('userSettingsModal')">Ferdig</button>
     </div>
 
+  </div>
+</div>
+
+
+<!-- HURTIGTASTER MODAL -->
+<div class="modal-overlay" id="shortcutsModal" onclick="if(event.target===this)closeModal('shortcutsModal')">
+  <div class="modal" style="max-width:420px;width:95%;background:var(--s1)!important;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+      <h2 style="margin:0;font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px;color:var(--text);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
+        Hurtigtaster
+      </h2>
+      <button onclick="closeModal('shortcutsModal')" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);width:30px;height:30px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:0;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-2)'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.4rem;">
+      <div style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.2rem;">Generelt</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;background:var(--s2);border-radius:8px;border:1px solid var(--border);">
+        <span style="font-size:0.85rem;color:var(--text);">Vis hurtigtaster</span>
+        <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">?</kbd>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;background:var(--s2);border-radius:8px;border:1px solid var(--border);">
+        <span style="font-size:0.85rem;color:var(--text);">Lukk modal / avslutt fokus-modus</span>
+        <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">Esc</kbd>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;background:var(--s2);border-radius:8px;border:1px solid var(--border);">
+        <span style="font-size:0.85rem;color:var(--text);">Søk etter emner (på Hjem)</span>
+        <div style="display:flex;gap:3px;align-items:center;">
+          <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">Ctrl</kbd>
+          <span style="color:var(--text-3);font-size:0.75rem;">+</span>
+          <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">K</kbd>
+        </div>
+      </div>
+      <div style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-top:0.6rem;margin-bottom:0.2rem;">Lærerrom</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;background:var(--s2);border-radius:8px;border:1px solid var(--border);">
+        <span style="font-size:0.85rem;color:var(--text);">Lagre emne (i Lærerrom)</span>
+        <div style="display:flex;gap:3px;align-items:center;">
+          <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">Ctrl</kbd>
+          <span style="color:var(--text-3);font-size:0.75rem;">+</span>
+          <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">S</kbd>
+        </div>
+      </div>
+      <div style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-top:0.6rem;margin-bottom:0.2rem;">Flashkort</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;background:var(--s2);border-radius:8px;border:1px solid var(--border);">
+        <span style="font-size:0.85rem;color:var(--text);">Forrige / neste flashkort</span>
+        <div style="display:flex;gap:3px;align-items:center;">
+          <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">←</kbd>
+          <span style="color:var(--text-3);font-size:0.75rem;">/</span>
+          <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">→</kbd>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;background:var(--s2);border-radius:8px;border:1px solid var(--border);">
+        <span style="font-size:0.85rem;color:var(--text);">Snu flashkort</span>
+        <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">Enter</kbd>
+      </div>
+    </div>
+    <button class="btn-primary" style="width:100%;justify-content:center;margin-top:1.1rem;" onclick="closeModal('shortcutsModal')">Lukk</button>
+  </div>
+</div>
+
+
+<!-- ELEVDETALJ MODAL -->
+<div class="modal-overlay" id="studentDetailModal" onclick="if(event.target===this)closeModal('studentDetailModal')">
+  <div class="modal" style="max-width:560px;width:95%;max-height:88vh;overflow-y:auto;background:var(--s1)!important;">
+    <div id="studentDetailContent"></div>
   </div>
 </div>
 
@@ -2911,6 +3020,7 @@ const US_ACCENTS = [
 
 let _usSettings = {
   accent: 0,
+  font: 'default',
   reduceMotion: false,
   compact: false,
   largeTargets: false,
@@ -2954,6 +3064,13 @@ function _usRefreshUI() {
   const label = document.getElementById('usFontLabel');
   if (slider) slider.value = Math.round(_fontScale * 100);
   if (label) label.textContent = Math.round(_fontScale * 100) + '%';
+
+  // Font buttons
+  const isDyslexia = _usSettings.font === 'dyslexia';
+  const fnBtn = document.getElementById('usFontNormalBtn');
+  const fdBtn = document.getElementById('usFontDyslexiaBtn');
+  if (fnBtn) { fnBtn.style.borderColor = isDyslexia ? 'var(--border-2)' : 'var(--accent)'; fnBtn.style.color = isDyslexia ? 'var(--text-2)' : 'var(--text)'; }
+  if (fdBtn) { fdBtn.style.borderColor = isDyslexia ? 'var(--accent)' : 'var(--border-2)'; fdBtn.style.color = isDyslexia ? 'var(--text)' : 'var(--text-2)'; }
 
   // Toggles
   _usRefreshToggle('reduceMotion', 'usReduceMotionToggle', 'usReduceMotionThumb');
@@ -3013,6 +3130,14 @@ function _usApplyAll() {
   document.body.classList.toggle('reduce-motion',  !!_usSettings.reduceMotion);
   document.body.classList.toggle('compact-mode',   !!_usSettings.compact);
   document.body.classList.toggle('large-targets',  !!_usSettings.largeTargets);
+  document.body.classList.toggle('dyslexia-font',  _usSettings.font === 'dyslexia');
+}
+
+function usSetFont(val) {
+  _usSettings.font = val;
+  _usSave();
+  _usApplyAll();
+  _usRefreshUI();
 }
 
 function usResetAll() {
@@ -3507,7 +3632,7 @@ function msLogin(clientId) {
 // ====== TEACHER ROOM TABS ======
 function trTab(name) {
   document.querySelectorAll('.tr-tabs .tr-tab').forEach(t => t.classList.remove('active'));
-  ['trpane-new','trpane-emner','trpane-results','trpane-klasser','trpane-kunngjoring','trpane-spill'].forEach(id => {
+  ['trpane-new','trpane-emner','trpane-results','trpane-klasser','trpane-kunngjoring','trpane-spill','trpane-stats'].forEach(id => {
     const el = document.getElementById(id); if (el) el.classList.remove('active');
   });
   const btn = document.getElementById('trtab-' + name);
@@ -3519,6 +3644,7 @@ function trTab(name) {
   if (name === 'klasser') renderClassRoster();
   if (name === 'kunngjoring') loadAnnouncementEditor();
   if (name === 'spill') { gsLoadSessions(); gsLoadActiveBanner(); }
+  if (name === 'stats') renderTeacherStats();
 }
 
 function tcTab(name) {
@@ -4541,6 +4667,96 @@ function renderResults() {
 
 function toggleStudentResults(id){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none';}
 
+// ====== TEACHER STATISTICS ======
+function renderTeacherStats() {
+  const container = document.getElementById('statsContent');
+  if (!container) return;
+  const answers = state.studentAnswers;
+  const allKeys = Object.keys(answers);
+
+  if (!allKeys.length && !state.modules.length) {
+    container.innerHTML = '<p style="color:var(--text-3);">Ingen data ennå. Elever må logge inn og svare på oppgaver.</p>';
+    return;
+  }
+
+  // Topp-statistikk
+  const allStudents = new Set(allKeys.map(k => k.split('_m')[0]).filter(Boolean));
+  const totalAnswers = allKeys.length;
+  const totalCorrect = allKeys.filter(k => { const v = answers[k]; return typeof v === 'object' ? v.correct : false; }).length;
+  const correctPct = totalAnswers ? Math.round(totalCorrect / totalAnswers * 100) : 0;
+
+  // Per-modul statistikk
+  const perModule = state.modules.map((m, mi) => {
+    const modEntries = allKeys.filter(k => k.includes('_m' + mi + '_'));
+    const students = new Set(modEntries.map(k => k.split('_m')[0]).filter(Boolean));
+    const correct = modEntries.filter(k => { const v = answers[k]; return typeof v === 'object' ? v.correct : false; }).length;
+    return { m, mi, students: students.size, answers: modEntries.length, correct };
+  }).filter(r => r.answers > 0).sort((a, b) => b.answers - a.answers);
+
+  const topModule = perModule[0];
+
+  container.innerHTML = `
+    <!-- Topp 3 stats -->
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.25rem;">
+      <div style="flex:1;min-width:110px;background:linear-gradient(135deg,var(--s2),var(--s3));border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;text-align:center;">
+        <div style="font-size:1.8rem;font-weight:800;color:var(--accent);">${allStudents.size}</div>
+        <div style="font-size:0.78rem;color:var(--text-2);font-weight:700;margin-top:0.15rem;">Elever</div>
+      </div>
+      <div style="flex:1;min-width:110px;background:linear-gradient(135deg,var(--s2),var(--s3));border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;text-align:center;">
+        <div style="font-size:1.8rem;font-weight:800;color:var(--green);">${totalAnswers}</div>
+        <div style="font-size:0.78rem;color:var(--text-2);font-weight:700;margin-top:0.15rem;">Totale svar</div>
+      </div>
+      <div style="flex:1;min-width:110px;background:linear-gradient(135deg,var(--s2),var(--s3));border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;text-align:center;">
+        <div style="font-size:1.8rem;font-weight:800;color:var(--yellow);">${correctPct}%</div>
+        <div style="font-size:0.78rem;color:var(--text-2);font-weight:700;margin-top:0.15rem;">Riktige svar</div>
+      </div>
+    </div>
+
+    ${topModule ? `
+    <!-- Mest aktive emne -->
+    <div style="background:linear-gradient(135deg,rgba(123,143,253,0.1),rgba(123,143,253,0.05));border:1px solid rgba(123,143,253,0.25);border-radius:12px;padding:0.875rem 1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:0.75rem;">
+      <span style="font-size:1.5rem;">${topModule.m.emoji||'📚'}</span>
+      <div>
+        <div style="font-size:0.75rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.1rem;">🏆 Mest aktive emne</div>
+        <div style="font-weight:800;color:var(--text);font-size:0.92rem;">${escHtml(topModule.m.name)}</div>
+        <div style="font-size:0.75rem;color:var(--text-2);">${topModule.students} elev${topModule.students===1?'':'er'} · ${topModule.answers} svar</div>
+      </div>
+    </div>` : ''}
+
+    ${perModule.length ? `
+    <!-- Per-modul tabell -->
+    <div style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.6rem;">Emner med aktivitet</div>
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:0;padding:0.5rem 1rem;background:var(--s3);border-bottom:1px solid var(--border);">
+        <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);">Emne</div>
+        <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-align:center;padding:0 0.75rem;">Elever</div>
+        <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-align:center;padding:0 0.75rem;">Svar</div>
+        <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-align:right;">Riktige</div>
+      </div>
+      ${perModule.map((r, i) => {
+        const cpct = r.answers ? Math.round(r.correct / r.answers * 100) : 0;
+        const cpctColor = cpct >= 70 ? 'var(--green)' : cpct >= 40 ? 'var(--yellow)' : 'var(--red)';
+        return `<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:0;padding:0.6rem 1rem;border-bottom:1px solid var(--border);background:${i%2===0?'transparent':'rgba(255,255,255,0.01)'};">
+          <div style="display:flex;align-items:center;gap:0.5rem;min-width:0;">
+            <span style="font-size:1rem;flex-shrink:0;">${r.m.emoji||'📚'}</span>
+            <span style="font-size:0.83rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(r.m.name)}</span>
+          </div>
+          <div style="font-size:0.85rem;font-weight:800;color:var(--text-2);text-align:center;padding:0 0.75rem;">${r.students}</div>
+          <div style="font-size:0.85rem;font-weight:800;color:var(--text-2);text-align:center;padding:0 0.75rem;">${r.answers}</div>
+          <div style="font-size:0.85rem;font-weight:800;color:${cpctColor};text-align:right;">${cpct}%</div>
+        </div>`;
+      }).join('')}
+    </div>` : '<p style="color:var(--text-3);margin-top:0.5rem;">Ingen emneaktivitet ennå.</p>'}
+
+    ${!perModule.length && allStudents.size === 0 ? `
+    <div style="text-align:center;padding:2rem 1rem;color:var(--text-3);">
+      <div style="font-size:2.5rem;margin-bottom:0.75rem;">📊</div>
+      <div style="font-weight:800;font-size:0.95rem;color:var(--text-2);">Ingen data ennå</div>
+      <div style="font-size:0.82rem;margin-top:0.3rem;">Statistikk vises når elever begynner å svare på oppgaver.</div>
+    </div>` : ''}
+  `;
+}
+
 // ====== CLASS ROSTER ======
 function renderClassRoster() {
   const container=document.getElementById('classRosterContainer');
@@ -4573,10 +4789,82 @@ function renderClassRoster() {
               <span style="width:24px;height:24px;border-radius:50%;background:var(--s3);border:1px solid var(--border-2);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;color:var(--text-3);">${i+1}</span>
               ${escHtml(s.name)}
             </span>
-            <button onclick="removeStudent('${escHtml(s.name)}')" title="Fjern elev" style="background:transparent;border:none;color:var(--text-3);cursor:pointer;font-size:0.85rem;padding:4px 6px;border-radius:6px;transition:all 0.15s;line-height:1;" onmouseover="this.style.background='rgba(239,68,68,0.12)';this.style.color='#f87171'" onmouseout="this.style.background='transparent';this.style.color='var(--text-3)'">🗑</button>
+            <div style="display:flex;gap:4px;">
+              <button onclick="viewStudentDetail('${escHtml(s.name)}')" title="Se svar" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);cursor:pointer;font-size:0.78rem;padding:4px 7px;border-radius:6px;transition:all 0.15s;line-height:1;font-family:'Nunito',sans-serif;font-weight:800;" onmouseover="this.style.background='var(--accent-g)';this.style.color='var(--accent-h)'" onmouseout="this.style.background='var(--s3)';this.style.color='var(--text-2)'">📋</button>
+              <button onclick="removeStudent('${escHtml(s.name)}')" title="Fjern elev" style="background:transparent;border:none;color:var(--text-3);cursor:pointer;font-size:0.85rem;padding:4px 6px;border-radius:6px;transition:all 0.15s;line-height:1;" onmouseover="this.style.background='rgba(239,68,68,0.12)';this.style.color='#f87171'" onmouseout="this.style.background='transparent';this.style.color='var(--text-3)'">🗑</button>
+            </div>
           </div>`).join('')}
       </div>
     </div>`).join('') + `</div>`;
+}
+
+function viewStudentDetail(studentName) {
+  const el = document.getElementById('studentDetailContent');
+  if (!el) return;
+  const roster = getRosterSync();
+  const studentInfo = roster.find(s => s.name === studentName) || {};
+  const cls = studentInfo.cls || '–';
+  const allAnswers = state.studentAnswers;
+
+  // Filtrer svar for denne eleven
+  const prefix = studentName + '_m';
+  const studentKeys = Object.entries(allAnswers).filter(([k]) => k.startsWith(prefix));
+  const totalAnswers = studentKeys.length;
+  const correctAnswers = studentKeys.filter(([,v]) => typeof v === 'object' ? v.correct : false).length;
+
+  // Bygg HTML
+  let html = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+      <div>
+        <h2 style="margin:0 0 0.25rem;font-size:1.05rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;">
+          <span style="font-size:1.4rem;">👤</span>${escHtml(studentName)}
+        </h2>
+        <div style="font-size:0.8rem;color:var(--text-2);">Klasse: <b style="color:var(--text);">${escHtml(cls)}</b> &nbsp;·&nbsp; ${totalAnswers} svar &nbsp;·&nbsp; ${totalAnswers?Math.round(correctAnswers/totalAnswers*100):0}% riktige</div>
+      </div>
+      <div style="display:flex;gap:0.4rem;align-items:center;">
+        <button onclick="exportStudentAnswersTxt('${escHtml(studentName)}')" style="display:flex;align-items:center;gap:5px;background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);padding:7px 12px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">📥 Eksporter</button>
+        <button onclick="closeModal('studentDetailModal')" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);width:30px;height:30px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:0;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-2)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>`;
+
+  if (!totalAnswers) {
+    html += `<div style="text-align:center;padding:2rem 1rem;color:var(--text-3);"><div style="font-size:2rem;margin-bottom:0.5rem;">📭</div><div>Ingen svar registrert ennå.</div></div>`;
+  } else {
+    state.modules.forEach((m, mi) => {
+      const modEntries = studentKeys.filter(([k]) => k.includes('_m' + mi + '_'));
+      if (!modEntries.length) return;
+      const modCorrect = modEntries.filter(([,v]) => typeof v === 'object' ? v.correct : false).length;
+      html += `
+        <div style="margin-bottom:0.875rem;background:var(--s2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <div style="padding:0.75rem 1rem;background:var(--s3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-weight:800;font-size:0.88rem;color:var(--text);display:flex;align-items:center;gap:6px;">${m.emoji||'📚'} ${escHtml(m.name)}</div>
+            <span style="font-size:0.75rem;font-weight:800;color:var(--text-3);">${modEntries.length} svar · ${modEntries.length?Math.round(modCorrect/modEntries.length*100):0}% riktige</span>
+          </div>
+          <div style="padding:0.5rem 0.75rem;">
+            ${modEntries.map(([k,v])=>{
+              const taskKey = k.split('_m'+mi+'_')[1] || k;
+              const val = typeof v === 'object' ? v.val : v;
+              const correct = typeof v === 'object' ? v.correct : null;
+              const time = typeof v === 'object' ? v.time : '';
+              return `<div style="padding:0.4rem 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:0.5rem;">
+                ${correct !== null ? `<span style="font-size:0.75rem;flex-shrink:0;margin-top:0.1rem;">${correct?'✅':'❌'}</span>` : ''}
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:0.72rem;color:var(--text-3);font-weight:700;margin-bottom:1px;">${escHtml(taskKey)}</div>
+                  <div style="font-size:0.82rem;color:var(--text);word-break:break-word;">${escHtml(String(val).substring(0,200))}${String(val).length>200?'…':''}</div>
+                  ${time?`<div style="font-size:0.68rem;color:var(--text-3);margin-top:1px;">${escHtml(time)}</div>`:''}
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    });
+  }
+
+  el.innerHTML = html;
+  const modal = document.getElementById('studentDetailModal');
+  if (modal) modal.classList.add('open');
 }
 
 async function removeStudent(name){
@@ -9608,7 +9896,57 @@ document.addEventListener('keydown', function(e) {
       if (publishBtn) { publishBtn.click(); showToast('💾 Lagret!'); }
     }
   }
+  // ?: vis hurtigtaster (ikke i input-felt)
+  if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+    const tag = document.activeElement?.tagName;
+    if (!['INPUT','TEXTAREA','SELECT'].includes(tag) && !document.activeElement?.isContentEditable) {
+      e.preventDefault();
+      openShortcutsModal();
+    }
+  }
 }, true);
+
+function openShortcutsModal() {
+  const m = document.getElementById('shortcutsModal');
+  if (m) m.classList.add('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// PWA INSTALL PROMPT
+// ═══════════════════════════════════════════════════════
+let _pwaPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  if (!localStorage.getItem('os_pwa_dismissed')) {
+    setTimeout(_pwaShowBanner, 3500);
+  }
+});
+window.addEventListener('appinstalled', () => { _pwaHideBanner(); });
+
+function _pwaShowBanner() {
+  if (document.getElementById('pwaBanner') || !_pwaPrompt) return;
+  const b = document.createElement('div');
+  b.id = 'pwaBanner';
+  b.innerHTML = `
+    <div class="pwa-text">📲 <strong>Legg til OlaSkole</strong><br><span style="font-size:0.78rem;font-weight:600;color:var(--text-2);">på hjemskjermen for raskere tilgang</span></div>
+    <button class="pwa-install-btn" onclick="_pwaInstall()">Legg til</button>
+    <button class="pwa-dismiss-btn" onclick="_pwaDismiss()" aria-label="Lukk">×</button>`;
+  document.body.appendChild(b);
+}
+function _pwaInstall() {
+  if (!_pwaPrompt) return;
+  _pwaPrompt.prompt();
+  _pwaPrompt.userChoice.then(() => { _pwaHideBanner(); _pwaPrompt = null; });
+}
+function _pwaDismiss() {
+  localStorage.setItem('os_pwa_dismissed', '1');
+  _pwaHideBanner();
+}
+function _pwaHideBanner() {
+  const b = document.getElementById('pwaBanner');
+  if (b) b.remove();
+}
 
 // ═══════════════════════════════════════════════════════
 // SWIPE-NAVIGASJON PÅ MOBIL
