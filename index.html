@@ -1313,6 +1313,35 @@
         </div>
         <button class="btn-success" style="margin-top:0.875rem;display:flex;align-items:center;gap:6px;" onclick="addQuizQuestion()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Legg til spørsmål</button>
         <div id="quizPreview" style="margin-top:0.875rem;"></div>
+
+        <details id="aiImportDetails" style="margin-top:1rem;border:1px solid var(--border-2);border-radius:12px;padding:0.875rem;">
+          <summary style="cursor:pointer;font-weight:800;font-size:0.88rem;color:var(--text);user-select:none;">✨ Generer quiz fra tekst (AI)</summary>
+          <div style="margin-top:0.75rem;">
+            <textarea id="aiImportText" placeholder="Lim inn en tekst og la AI lage spørsmål av den..." style="width:100%;min-height:100px;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;background:var(--s3);color:var(--text);resize:vertical;box-sizing:border-box;"></textarea>
+            <div style="display:flex;gap:0.6rem;align-items:center;margin-top:0.5rem;flex-wrap:wrap;">
+              <select id="aiImportCount" style="padding:8px 10px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.88rem;background:var(--s3);color:var(--text);outline:none;">
+                <option value="3">3 spørsmål</option>
+                <option value="5" selected>5 spørsmål</option>
+                <option value="8">8 spørsmål</option>
+                <option value="10">10 spørsmål</option>
+              </select>
+              <button class="btn-ai" onclick="aiImportQuizFromText()">
+                <span>✨ Generer</span><div class="ai-spinner" id="aiImportSpinner"></div>
+              </button>
+            </div>
+            <div id="aiImportFeedback" style="margin-top:0.5rem;font-size:0.85rem;"></div>
+          </div>
+        </details>
+
+        <details id="kahootImportDetails" style="margin-top:0.5rem;border:1px solid var(--border-2);border-radius:12px;padding:0.875rem;">
+          <summary style="cursor:pointer;font-weight:800;font-size:0.88rem;color:var(--text);user-select:none;">📥 Importer fra Kahoot (CSV)</summary>
+          <div style="margin-top:0.75rem;">
+            <div style="font-size:0.8rem;color:var(--text-3);margin-bottom:0.5rem;line-height:1.5;">Lim inn CSV-eksport fra Kahoot (kolonner: Question, Answer 1–4, Time, Correct answer)</div>
+            <textarea id="kahootCsvText" placeholder="Question, Answer 1, Answer 2, Answer 3, Answer 4, Time limit (seconds), Correct answer(s)&#10;Hva er 2+2?, 3, 4, 5, 6, 20, 2" style="width:100%;min-height:90px;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:monospace;font-size:0.82rem;outline:none;background:var(--s3);color:var(--text);resize:vertical;box-sizing:border-box;"></textarea>
+            <button class="btn-success" style="margin-top:0.5rem;display:flex;align-items:center;gap:6px;font-size:0.88rem;" onclick="importKahootCsv()">📥 Importer</button>
+            <div id="kahootFeedback" style="margin-top:0.5rem;font-size:0.85rem;"></div>
+          </div>
+        </details>
       </div>
 
       <!-- DRØFTING TAB -->
@@ -1462,6 +1491,35 @@
     <!-- INFO BOX -->
     <div style="margin-top:1.25rem;padding:0.875rem 1.1rem;background:rgba(99,102,241,0.08);border-radius:12px;border-left:3px solid var(--accent);font-size:0.85rem;color:var(--text-2);line-height:1.75;">
       💡 Elever sorteres automatisk etter klassen de oppgir ved innlogging. Elever uten klasse havner under «Ukjent».
+    </div>
+
+    <!-- ELEVGRUPPER -->
+    <div id="groupsSection" style="margin-top:2rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h3 style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--text);margin:0;">👥 Elevgrupper</h3>
+        <button onclick="openGroupModal()" style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:0.5rem 1rem;font-weight:800;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;gap:5px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Ny gruppe
+        </button>
+      </div>
+      <div id="groupsList"></div>
+    </div>
+  </div>
+
+  <!-- GROUP MODAL -->
+  <div id="groupModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeGroupModal()">
+    <div class="modal-box" style="max-width:480px;width:94vw;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+        <h3 id="groupModalTitle" style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--text);margin:0;">Ny gruppe</h3>
+        <button onclick="closeGroupModal()" style="background:none;border:none;cursor:pointer;font-size:1.4rem;color:var(--text-3);line-height:1;">×</button>
+      </div>
+      <input id="groupNameInput" type="text" placeholder="Gruppenavn, f.eks. «Gruppe A»" style="width:100%;padding:10px 14px;border:1px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;background:var(--s3);color:var(--text);box-sizing:border-box;margin-bottom:1rem;" />
+      <div style="font-weight:800;font-size:0.8rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem;">Velg elever</div>
+      <div id="groupMembersList" style="max-height:220px;overflow-y:auto;border:1px solid var(--border-2);border-radius:10px;padding:0.5rem;background:var(--s3);margin-bottom:1rem;"></div>
+      <input type="hidden" id="groupEditId" value="" />
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+        <button onclick="closeGroupModal()" style="background:var(--s2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:0.6rem 1.25rem;font-weight:700;cursor:pointer;">Avbryt</button>
+        <button onclick="saveGroup()" style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:0.6rem 1.25rem;font-weight:800;cursor:pointer;">💾 Lagre</button>
+      </div>
     </div>
   </div>
 
@@ -3299,6 +3357,10 @@ async function studentLogin() {
   if (btn) { btn.textContent = btn._orig; btn.disabled = false; }
   showStudentWelcome();
   showView('tasks');
+  // Vis lærerfeedback hvis det finnes
+  const fbKey = 'feedback_' + name;
+  const fbText = await DB.loadFeedback(fbKey);
+  if (fbText) setTimeout(() => showFeedbackNotice(fbText, fbKey), 600);
 }
 
 function studentLogout(fullLogout) {
@@ -4796,6 +4858,7 @@ function renderClassRoster() {
           </div>`).join('')}
       </div>
     </div>`).join('') + `</div>`;
+  renderGroups();
 }
 
 function viewStudentDetail(studentName) {
@@ -4862,7 +4925,22 @@ function viewStudentDetail(studentName) {
     });
   }
 
+  html += `<div style="margin-top:1.25rem;border-top:1px solid var(--border);padding-top:1rem;">
+    <div style="font-weight:800;font-size:0.88rem;color:var(--text);margin-bottom:0.5rem;">💬 Tilbakemelding til eleven</div>
+    <textarea id="teacherFeedbackInput" maxlength="500" placeholder="Skriv en personlig melding til eleven – vises ved neste innlogging..." style="width:100%;min-height:80px;padding:9px 12px;border:1px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;background:var(--s3);color:var(--text);resize:vertical;box-sizing:border-box;"></textarea>
+    <div style="display:flex;gap:0.5rem;margin-top:0.5rem;align-items:center;">
+      <button onclick="saveTeacherFeedback('${escHtml(studentName)}')" style="background:var(--accent);color:#fff;border:none;border-radius:9px;padding:0.5rem 1.1rem;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Lagre</button>
+      <span id="feedbackSavedMsg" style="display:none;color:var(--c3);font-weight:700;font-size:0.85rem;">✅ Lagret</span>
+    </div>
+  </div>`;
+
   el.innerHTML = html;
+  // Load existing feedback
+  (async () => {
+    const fbText = await DB.loadFeedback('feedback_' + studentName);
+    const ta = document.getElementById('teacherFeedbackInput');
+    if (ta && fbText) ta.value = fbText;
+  })();
   const modal = document.getElementById('studentDetailModal');
   if (modal) modal.classList.add('open');
 }
@@ -4873,6 +4951,117 @@ async function removeStudent(name){
   _rosterCache=roster;
   await DB.saveRoster(roster);
   renderClassRoster();
+}
+
+// ====== ELEVGRUPPER ======
+function _loadGroups() { try { return JSON.parse(localStorage.getItem('os_groups')||'[]'); } catch(e) { return []; } }
+function _saveGroups(groups) { localStorage.setItem('os_groups', JSON.stringify(groups)); }
+
+function openGroupModal(editId) {
+  const modal = document.getElementById('groupModal');
+  const titleEl = document.getElementById('groupModalTitle');
+  const nameInput = document.getElementById('groupNameInput');
+  const membersList = document.getElementById('groupMembersList');
+  const editIdInput = document.getElementById('groupEditId');
+  if (!modal) return;
+
+  const roster = getRosterSync();
+  const groups = _loadGroups();
+  const editing = editId ? groups.find(g => g.id === editId) : null;
+
+  if (titleEl) titleEl.textContent = editing ? 'Rediger gruppe' : 'Ny gruppe';
+  if (nameInput) nameInput.value = editing ? editing.name : '';
+  if (editIdInput) editIdInput.value = editId || '';
+
+  if (membersList) {
+    if (!roster.length) {
+      membersList.innerHTML = '<div style="padding:0.5rem;color:var(--text-3);font-size:0.85rem;">Ingen elever registrert</div>';
+    } else {
+      membersList.innerHTML = roster.map(s => {
+        const checked = editing && editing.members.includes(s.name) ? 'checked' : '';
+        return `<label style="display:flex;align-items:center;gap:0.6rem;padding:0.35rem 0.5rem;border-radius:7px;cursor:pointer;font-size:0.88rem;font-weight:700;color:var(--text);">
+          <input type="checkbox" value="${escHtml(s.name)}" ${checked} style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0;">
+          ${escHtml(s.name)}<span style="font-size:0.75rem;color:var(--text-3);margin-left:auto;">${escHtml(s.cls||'')}</span>
+        </label>`;
+      }).join('');
+    }
+  }
+  modal.style.display = 'flex';
+  if (nameInput) nameInput.focus();
+}
+function closeGroupModal() {
+  const modal = document.getElementById('groupModal');
+  if (modal) modal.style.display = 'none';
+}
+function saveGroup() {
+  const name = document.getElementById('groupNameInput')?.value.trim();
+  if (!name) { showToast('⚠️ Skriv inn et gruppenavn'); return; }
+  const members = [...document.querySelectorAll('#groupMembersList input[type=checkbox]:checked')].map(c => c.value);
+  const editId = document.getElementById('groupEditId')?.value;
+  const groups = _loadGroups();
+  if (editId) {
+    const idx = groups.findIndex(g => g.id === editId);
+    if (idx >= 0) { groups[idx].name = name; groups[idx].members = members; }
+  } else {
+    groups.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), name, members });
+  }
+  _saveGroups(groups);
+  renderGroups();
+  closeGroupModal();
+  showToast('👥 Gruppe lagret!');
+}
+function deleteGroup(id) {
+  if (!confirm('Slette denne gruppen?')) return;
+  _saveGroups(_loadGroups().filter(g => g.id !== id));
+  renderGroups();
+}
+function renderGroups() {
+  const container = document.getElementById('groupsList');
+  if (!container) return;
+  const groups = _loadGroups();
+  if (!groups.length) {
+    container.innerHTML = '<div style="text-align:center;padding:1.5rem 1rem;color:var(--text-3);font-size:0.88rem;">Ingen grupper opprettet ennå. Klikk «+ Ny gruppe» for å starte.</div>';
+    return;
+  }
+  container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.875rem;">` +
+    groups.map(g => `
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">
+        <div style="font-weight:800;font-size:0.95rem;color:var(--text);">👥 ${escHtml(g.name)}</div>
+        <div style="display:flex;gap:4px;">
+          <button onclick="openGroupModal('${g.id}')" title="Rediger" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);padding:4px 7px;border-radius:6px;cursor:pointer;font-size:0.78rem;font-family:'Nunito',sans-serif;font-weight:800;">✏️</button>
+          <button onclick="deleteGroup('${g.id}')" title="Slett" style="background:transparent;border:none;color:var(--text-3);padding:4px 6px;border-radius:6px;cursor:pointer;font-size:0.82rem;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--text-3)'">🗑</button>
+        </div>
+      </div>
+      <div style="font-size:0.78rem;color:var(--text-3);font-weight:700;margin-bottom:0.35rem;">${g.members.length} elev${g.members.length===1?'':'er'}</div>
+      <div style="font-size:0.82rem;color:var(--text-2);line-height:1.6;">${g.members.slice(0,8).map(m=>escHtml(m)).join(', ')}${g.members.length>8?` og ${g.members.length-8} til…`:''}</div>
+    </div>`).join('') + '</div>';
+}
+
+// ====== LÆRERFEEDBACK ======
+async function saveTeacherFeedback(studentName) {
+  const text = document.getElementById('teacherFeedbackInput')?.value.trim();
+  if (text) await DB.saveFeedback('feedback_' + studentName, text);
+  else await DB.deleteFeedback('feedback_' + studentName);
+  const msg = document.getElementById('feedbackSavedMsg');
+  if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2000); }
+}
+function showFeedbackNotice(text, key) {
+  const id = 'fbNoticeModal';
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = id;
+    el.className = 'modal-overlay';
+    document.body.appendChild(el);
+  }
+  el.style.display = 'flex';
+  el.innerHTML = `<div class="modal-box" style="max-width:440px;width:92vw;text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:0.75rem;">💬</div>
+    <h3 style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--text);margin:0 0 0.75rem;">Melding fra læreren</h3>
+    <div style="background:var(--s2);border-radius:12px;padding:1rem 1.25rem;text-align:left;font-size:0.92rem;color:var(--text);line-height:1.7;margin-bottom:1.25rem;border:1px solid var(--border);">${escHtml(text)}</div>
+    <button onclick="document.getElementById('${id}').style.display='none';DB.deleteFeedback('${key}');" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.65rem 2rem;font-weight:800;font-size:0.95rem;cursor:pointer;">OK 👍</button>
+  </div>`;
 }
 
 // ====== FEEDBACK ======
@@ -5022,6 +5211,53 @@ function useSqResult(res){
   document.getElementById('quizExplain').value=res.explain||'';
   const el=document.getElementById('sqResult');if(el)el.style.display='none';
   document.getElementById('aiQuizTopic').value='';
+}
+
+async function aiImportQuizFromText() {
+  const text = document.getElementById('aiImportText')?.value.trim();
+  const fb = document.getElementById('aiImportFeedback');
+  if (!text) { showToast('⚠️ Lim inn en tekst først'); return; }
+  const count = parseInt(document.getElementById('aiImportCount')?.value || '5');
+  if (fb) fb.innerHTML = '<span style="color:var(--text-2);">⏳ Genererer spørsmål...</span>';
+  const prompt = `Du er norsk lærer. Lag ${count} flervalgsspørsmål på norsk for ungdomsskoleelever basert på følgende tekst:\n"""\n${text.substring(0,3000)}\n"""\nSvar KUN med JSON: {"questions":[{"q":"...","opts":["A","B","C","D"],"correct":0,"explanation":"..."}]}`;
+  const res = await aiCallJSON(prompt, 'aiImportSpinner', 2500);
+  if (!res || res.error || !res.questions?.length) {
+    if (fb) fb.innerHTML = `<span style="color:var(--c1);">❌ ${res?.error || 'Ingen spørsmål generert'}</span>`;
+    return;
+  }
+  res.questions.forEach(item => {
+    state.tempQuiz.push({ q: item.q, opts: (item.opts||[]).slice(0,4),
+      correct: Math.min(item.correct ?? 0, (item.opts?.length||1)-1), explanation: item.explanation||'' });
+  });
+  renderQuizPreview();
+  if (fb) fb.innerHTML = `<span style="color:var(--c3);">✅ ${res.questions.length} spørsmål lagt til!</span>`;
+  showToast(`✨ ${res.questions.length} spørsmål generert!`);
+}
+function importKahootCsv() {
+  const raw = document.getElementById('kahootCsvText')?.value.trim();
+  const fb = document.getElementById('kahootFeedback');
+  if (!raw) { showToast('⚠️ Lim inn CSV-tekst'); return; }
+  const lines = raw.split('\n').filter(l => l.trim() && !/^Question/i.test(l.trim()));
+  let added = 0;
+  lines.forEach(line => {
+    const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g,''));
+    if (cols.length < 6) return;
+    const [q, a1, a2, a3, a4, , correctRaw] = cols;
+    const correct = parseInt(correctRaw) - 1;
+    if (!q || isNaN(correct)) return;
+    const opts = [a1, a2, a3, a4].filter(Boolean);
+    if (opts.length < 2) return;
+    state.tempQuiz.push({ q, opts, correct: Math.min(correct, opts.length-1), explanation: '' });
+    added++;
+  });
+  if (added) {
+    renderQuizPreview();
+    if (fb) fb.innerHTML = `<span style="color:var(--c3);">✅ ${added} spørsmål importert!</span>`;
+    showToast(`📥 ${added} spørsmål importert fra Kahoot!`);
+  } else {
+    if (fb) fb.innerHTML = `<span style="color:var(--c1);">⚠️ Ingen gyldige spørsmål funnet – sjekk formatet</span>`;
+    showToast('⚠️ Ingen gyldige spørsmål funnet – sjekk formatet');
+  }
 }
 
 async function aiGenerateSingleDisc(){
@@ -8755,7 +8991,7 @@ function crSwitchTab(tab) {
 }
 
 // ====== ARBEID (Student work mode) ======
-let arbState = { moduleIdx: null, fcIndex: 0, completedTasks: {} };
+let arbState = { moduleIdx: null, fcIndex: 0, completedTasks: {}, fcQueue: [], fcPhase: 'study' };
 
 async function arbOpen() {
   showView('arbeid');
@@ -9047,9 +9283,10 @@ function arbRenderVideo(m) {
 }
 
 function arbRenderFlashcards(m) {
-  arbState.fcIndex = 0;
+  arbState.fcQueue = (m.flashcards || []).map((_, i) => i);
+  arbState.fcPhase = 'study';
+  arbState.fcIndex = arbState.fcQueue[0] ?? 0;
   arbRenderFcCard(m);
-  arbMarkDone('fc');
 }
 
 function arbRenderFcCard(m) {
@@ -9057,9 +9294,11 @@ function arbRenderFcCard(m) {
   const cards = m.flashcards || [];
   const i = arbState.fcIndex;
   const card = cards[i];
+  const qLen = arbState.fcQueue.length;
+  const pos = cards.length - qLen + 1;
   container.innerHTML = `<div class="arb-content-card">
     <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin-bottom:0.5rem;">🃏 Flashcards</h2>
-    <div class="arb-fc-hint">Klikk på kortet for å snu det</div>
+    <div class="arb-fc-hint">Klikk på kortet for å snu det — vurder deg selv!</div>
     <div class="arb-fc-wrapper">
       <div class="arb-fc-inner" id="arbFcInner" onclick="document.getElementById('arbFcInner').classList.toggle('flipped')">
         <div class="arb-fc-face arb-fc-front">${escHtml(card.front)}</div>
@@ -9067,9 +9306,14 @@ function arbRenderFcCard(m) {
       </div>
     </div>
     <div class="arb-fc-nav">
-      <button onclick="arbFcPrev()" ${i===0?'disabled':''}>← Forrige</button>
-      <span class="arb-fc-counter">${i+1} / ${cards.length}</span>
-      <button onclick="arbFcNext()" ${i===cards.length-1?'disabled':''}>Neste →</button>
+      <span></span>
+      <span class="arb-fc-counter">${pos} / ${cards.length}</span>
+      <span></span>
+    </div>
+    <div id="arbFcRating" style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.75rem;flex-wrap:wrap;">
+      <button onclick="arbFcRate('hard')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;">❌ Vanskelig</button>
+      <button onclick="arbFcRate('ok')" style="background:#fef3c7;color:#92400e;border:none;border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;">🤔 Usikker</button>
+      <button onclick="arbFcRate('easy')" style="background:#d1fae5;color:#065f46;border:none;border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;">✅ Kunne det</button>
     </div>
   </div>`;
 }
@@ -9080,6 +9324,63 @@ function arbFcNext() {
 }
 function arbFcPrev() {
   if (arbState.fcIndex > 0) { arbState.fcIndex--; arbRenderFcCard(state.modules[arbState.moduleIdx]); }
+}
+function arbFcRate(rating) {
+  const m = state.modules[arbState.moduleIdx];
+  const idx = arbState.fcIndex;
+  arbSave('fc_' + idx + '_rating', rating);
+  arbState.fcQueue.shift();
+  if (rating === 'hard') {
+    const insertAt = Math.min(3, arbState.fcQueue.length);
+    arbState.fcQueue.splice(insertAt, 0, idx);
+  } else if (rating === 'ok' && arbState.fcPhase === 'study') {
+    arbState.fcQueue.push(idx);
+  }
+  if (!arbState.fcQueue.length) { _arbFcShowSummary(m); return; }
+  arbState.fcIndex = arbState.fcQueue[0];
+  arbRenderFcCard(m);
+}
+function _arbFcShowSummary(m) {
+  arbMarkDone('fc');
+  const cards = m.flashcards || [];
+  let hard = 0, ok = 0, easy = 0;
+  cards.forEach((_, i) => {
+    const r = arbLoad('fc_' + i + '_rating');
+    if (r === 'hard') hard++;
+    else if (r === 'ok') ok++;
+    else if (r === 'easy') easy++;
+  });
+  const repeatCount = hard + ok;
+  const container = document.getElementById('arbTaskContent');
+  container.innerHTML = `<div class="arb-content-card" style="text-align:center;">
+    <div style="font-size:3rem;margin-bottom:0.5rem;">🎉</div>
+    <h2 style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--text);margin-bottom:1rem;">Runden er ferdig!</h2>
+    <div style="display:flex;gap:1rem;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <div style="background:#fee2e2;border-radius:12px;padding:0.75rem 1.25rem;"><div style="font-size:1.5rem;font-weight:900;color:#991b1b;">${hard}</div><div style="font-size:0.8rem;color:#b91c1c;">Vanskelig</div></div>
+      <div style="background:#fef3c7;border-radius:12px;padding:0.75rem 1.25rem;"><div style="font-size:1.5rem;font-weight:900;color:#92400e;">${ok}</div><div style="font-size:0.8rem;color:#b45309;">Usikker</div></div>
+      <div style="background:#d1fae5;border-radius:12px;padding:0.75rem 1.25rem;"><div style="font-size:1.5rem;font-weight:900;color:#065f46;">${easy}</div><div style="font-size:0.8rem;color:#047857;">Kunne det</div></div>
+    </div>
+    <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+      ${repeatCount > 0 ? `<button onclick="_arbFcRestart('repeat')" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.7rem 1.25rem;font-weight:700;cursor:pointer;font-size:0.95rem;">🔄 Øv på ${repeatCount} kort til</button>` : ''}
+      <button onclick="_arbFcRestart('all')" style="background:var(--s2);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:0.7rem 1.25rem;font-weight:700;cursor:pointer;font-size:0.95rem;">🔁 Start på nytt</button>
+    </div>
+  </div>`;
+}
+function _arbFcRestart(mode) {
+  const m = state.modules[arbState.moduleIdx];
+  const cards = m.flashcards || [];
+  if (mode === 'repeat') {
+    arbState.fcQueue = cards.map((_, i) => i).filter(i => {
+      const r = arbLoad('fc_' + i + '_rating');
+      return r === 'hard' || r === 'ok';
+    });
+  } else {
+    arbState.fcQueue = cards.map((_, i) => i);
+  }
+  arbState.fcPhase = 'study';
+  if (!arbState.fcQueue.length) { showToast('Ingen kort å øve på!'); return; }
+  arbState.fcIndex = arbState.fcQueue[0];
+  arbRenderFcCard(m);
 }
 
 // ---- Storage helpers ----
