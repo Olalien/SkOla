@@ -735,6 +735,14 @@
   .font-size-btn{background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:8px;padding:4px 10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.18s;line-height:1;min-height:30px;}
   .font-size-btn:hover{background:var(--s3);color:var(--text);}
 
+  /* ===== FOKUS-MODUS ===== */
+  body.focus-mode nav,body.focus-mode .mobile-nav,body.focus-mode .progress-top{transform:translateY(-100%);opacity:0;pointer-events:none;transition:all 0.3s;}
+  body.focus-mode #main-content{padding-top:0.5rem!important;}
+  body.focus-mode .text-block{font-size:calc(1.05rem * var(--font-scale))!important;line-height:2!important;max-width:680px;margin:0 auto;}
+  #focusModeBtn{position:fixed;bottom:1.2rem;right:1.2rem;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.4);z-index:200;transition:all 0.2s;}
+  #focusModeBtn:hover{background:var(--accent);color:white;border-color:var(--accent);}
+  body.focus-mode #focusModeBtn{display:flex;background:var(--accent);color:white;border-color:var(--accent);}
+
   /* ===== PRINT-CSS ===== */
   @media print{
     nav,.mobile-nav,.progress-top,.skip-link,.dark-toggle,.teacher-btn,#teacherLogoutBtn,
@@ -794,6 +802,9 @@
     </button>
   </div>
 </nav>
+
+<!-- FOKUS-MODUS EXIT-KNAPP -->
+<button id="focusModeBtn" onclick="toggleFocusMode()" title="Avslutt fokus-modus" aria-label="Avslutt fokus-modus" style="display:none;">✕</button>
 
 <!-- MOBILE BOTTOM NAV -->
 <nav class="mobile-nav" id="mobileNav">
@@ -917,6 +928,8 @@
     <div class="task-header">
       <button class="back-btn" onclick="showModuleList()">← Tilbake</button>
       <div class="task-title" id="moduleDetailTitle"></div>
+      <button onclick="shareModule()" title="Del lenke til dette emnet" style="margin-left:auto;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 13px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;min-height:44px;" aria-label="Del emne">🔗 Del</button>
+      <button onclick="toggleFocusMode()" id="focusToggleBtn" title="Fokus-modus: skjuler navigasjon" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 13px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;min-height:44px;" aria-label="Fokus-modus">🎯 Fokus</button>
     </div>
 
     <div class="task-tabs" id="taskTypeTabs"></div>
@@ -2649,6 +2662,33 @@ function setProgress(pct) {
 const SUN_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
 const MOON_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
 
+/* ===== FOKUS-MODUS ===== */
+function toggleFocusMode() {
+  const on = document.body.classList.toggle('focus-mode');
+  const btn = document.getElementById('focusModeBtn');
+  const toggleBtn = document.getElementById('focusToggleBtn');
+  if (btn) btn.style.display = on ? 'flex' : 'none';
+  if (toggleBtn) { toggleBtn.textContent = on ? '✕ Avslutt fokus' : '🎯 Fokus'; toggleBtn.style.background = on ? 'var(--accent)' : ''; toggleBtn.style.color = on ? 'white' : ''; }
+  if (on) showToast('🎯 Fokus-modus aktivert — trykk ✕ for å avslutte');
+}
+function exitFocusMode() {
+  if (document.body.classList.contains('focus-mode')) toggleFocusMode();
+}
+
+/* ===== DELELENKE ===== */
+function shareModule() {
+  const m = state.modules[state.currentModule];
+  if (!m) return;
+  const url = window.location.origin + window.location.pathname + '?modul=' + encodeURIComponent(m._id || m.name);
+  if (navigator.share) {
+    navigator.share({ title: m.name, text: 'Sjekk ut dette emnet på OlaSkole: ' + m.name, url }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url)
+      .then(() => showToast('🔗 Lenke kopiert til utklippstavlen!'))
+      .catch(() => showToast('🔗 Lenke: ' + url));
+  }
+}
+
 /* ===== FAGFELT SYNC ===== */
 function syncModuleSubject(val) {
   const free = document.getElementById('moduleSubjectFree');
@@ -3239,6 +3279,7 @@ function renderHomeModules() {
       <h3>${escHtml(m.name)}</h3>
       <p>${escHtml(m.desc||'')}</p>
       <span class="task-count">${countTasks(m)} oppgaver</span>
+      ${(() => { const pct = getModuleProgress(realIdx); if (pct < 0) return ''; const color = pct===100?'#4ade80':'var(--accent)'; return `<div style="margin-top:0.6rem;"><div style="height:4px;background:rgba(255,255,255,0.1);border-radius:50px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${color};border-radius:50px;transition:width 0.4s;"></div></div><div style="font-size:0.68rem;font-weight:800;color:rgba(255,255,255,0.6);margin-top:3px;">${pct===100?'✓ Fullført':pct+'% gjennomført'}</div></div>`; })()}
       ${m.subject ? `<span style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.25);font-size:0.64rem;font-weight:800;padding:2px 7px;border-radius:50px;color:rgba(255,255,255,0.8);">${escHtml(m.subject)}</span>` : ''}
       ${isNewModule(m) ? '<span style="position:absolute;top:8px;left:8px;background:var(--c1);color:white;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;">NY</span>' : ''}
     </div>`;
@@ -3263,6 +3304,23 @@ function renderTaskModules() {
       <span class="task-count">${countTasks(m)} oppgaver</span>
     </div>`;
   }).join('');
+}
+
+function getModuleProgress(realIdx) {
+  if (!state.student) return -1;
+  const m = state.modules[realIdx];
+  if (!m) return -1;
+  const types = [];
+  if (m.text) types.push('text');
+  if (m.quiz?.length) types.push('quiz');
+  if (m.discussion?.length) types.push('disc');
+  if (m.write?.length) types.push('write');
+  if (m.videos?.length) types.push('video');
+  if (m.flashcards?.length) types.push('fc');
+  if (!types.length) return -1;
+  const sKey = arbSKey ? arbSKey() : (state.student?.name?.replace(/\s+/g,'_') || 'anon');
+  const done = types.filter(t => dbGetProgress(`arb_${sKey}_m${realIdx}_done_${t}`)).length;
+  return Math.round(done / types.length * 100);
 }
 
 function countTasks(m) {
@@ -3317,6 +3375,7 @@ function openModule(idx) {
 }
 
 function showModuleList() {
+  exitFocusMode();
   document.getElementById('moduleList').style.display = 'block';
   document.getElementById('moduleDetail').style.display = 'none';
 }
@@ -3846,6 +3905,40 @@ function editModule(idx) {
   showToast('✏️ Redigerer «'+m.name+'»');
 }
 
+async function duplicateModule(idx) {
+  const m = state.modules[idx];
+  const copy = JSON.parse(JSON.stringify(m));
+  copy._id = null;
+  copy.name = m.name + ' (kopi)';
+  copy.createdAt = new Date().toLocaleString('no');
+  copy.updatedAt = null;
+  copy.publishedAt = new Date().toISOString();
+  state.modules.splice(idx + 1, 0, copy);
+  await saveModulesToStorage();
+  renderManageModules();
+  renderHomeModules();
+  renderTaskModules();
+  showToast('📋 «' + m.name + '» er kopiert!');
+}
+
+async function moveModuleUp(idx) {
+  if (idx === 0) return;
+  [state.modules[idx-1], state.modules[idx]] = [state.modules[idx], state.modules[idx-1]];
+  await saveModulesToStorage();
+  renderManageModules();
+  renderHomeModules();
+  renderTaskModules();
+}
+
+async function moveModuleDown(idx) {
+  if (idx >= state.modules.length - 1) return;
+  [state.modules[idx+1], state.modules[idx]] = [state.modules[idx], state.modules[idx+1]];
+  await saveModulesToStorage();
+  renderManageModules();
+  renderHomeModules();
+  renderTaskModules();
+}
+
 async function deleteModule(idx) {
   const m=state.modules[idx];
   if(!confirm(`Slett emnet «${m.name}»? Dette kan ikke angres.`))return;
@@ -3969,8 +4062,13 @@ function renderManageModules() {
         </div>
       </div>
       <div class="module-manage-actions">
+        <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
+          <button onclick="moveModuleUp(${i})" title="Flytt opp" ${i===0?'disabled':''} style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:6px;width:28px;height:28px;font-size:0.75rem;cursor:pointer;font-family:'Nunito',sans-serif;${i===0?'opacity:0.3;':''}" aria-label="Flytt opp">▲</button>
+          <button onclick="moveModuleDown(${i})" title="Flytt ned" ${i===state.modules.length-1?'disabled':''} style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:6px;width:28px;height:28px;font-size:0.75rem;cursor:pointer;font-family:'Nunito',sans-serif;${i===state.modules.length-1?'opacity:0.3;':''}" aria-label="Flytt ned">▼</button>
+        </div>
         <button class="pv-edit-btn" style="font-size:0.85rem;padding:8px 14px;" onclick="editModule(${i})">✏️ Rediger</button>
-        <button onclick="toggleLock(${i})" style="background:${m.locked?'var(--c3)':'#f0f0f0'};color:${m.locked?'white':'#555'};border:none;padding:8px 12px;border-radius:7px;font-size:0.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">${m.locked?'🔓 Åpne':'🔒 Lås'}</button>
+        <button onclick="duplicateModule(${i})" title="Kopier emnet" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 12px;border-radius:7px;font-size:0.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">📋 Kopier</button>
+        <button onclick="toggleLock(${i})" style="background:${m.locked?'var(--c3)':'var(--s2)'};color:${m.locked?'white':'var(--text-2)'};border:1px solid var(--border-2);padding:8px 12px;border-radius:7px;font-size:0.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">${m.locked?'🔓 Åpne':'🔒 Lås'}</button>
         <button class="pv-del-btn" style="font-size:0.85rem;padding:8px 14px;" onclick="deleteModule(${i})">🗑 Slett</button>
       </div>
     </div>`).join('');
@@ -8399,6 +8497,13 @@ function arbUpdateProgress(moduleIdx) {
   const pctEl = document.getElementById('arbProgressPct');
   if (circle) { const offset = 138.2 * (1 - pct/100); circle.style.strokeDashoffset = offset; }
   if (pctEl) pctEl.textContent = pct + '%';
+  // Jubel ved 100%
+  const prevKey = `arb_${arbSKey()}_m${moduleIdx}_celebrated`;
+  if (pct === 100 && types.length > 0 && !sessionStorage.getItem(prevKey)) {
+    sessionStorage.setItem(prevKey, '1');
+    launchConfetti();
+    setTimeout(() => showToast('🎉 Supert! Du har fullført hele emnet!'), 300);
+  }
 }
 
 function crShow(phase) {
@@ -9141,6 +9246,20 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     const openModal = document.querySelector('.modal-overlay.open');
     if (openModal) { openModal.classList.remove('open'); return; }
+  }
+  // Ctrl+K / Cmd+K: hurtigsøk på hjemside
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    const homeView = document.getElementById('view-home');
+    if (homeView?.classList.contains('active')) {
+      e.preventDefault();
+      const search = document.getElementById('moduleSearch');
+      if (search) { search.focus(); search.select(); showToast('🔍 Søk etter emner...'); }
+      return;
+    }
+  }
+  // Escape: avslutt fokus-modus
+  if (e.key === 'Escape' && document.body.classList.contains('focus-mode')) {
+    exitFocusMode(); return;
   }
   // Ctrl+S / Cmd+S: lagre om i lærerpanel
   if ((e.ctrlKey || e.metaKey) && e.key === 's') {
