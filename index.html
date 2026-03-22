@@ -58,6 +58,11 @@
     --shadow-md:0 8px 32px rgba(20,24,80,0.11), 0 2px 8px rgba(20,24,80,0.07);
     --shadow-lg:0 16px 48px rgba(20,24,80,0.14), 0 4px 12px rgba(20,24,80,0.08);
     --glow:0 0 0 2px rgba(123,143,253,0.35), 0 4px 16px rgba(123,143,253,0.15);
+    --accent:#4f63f0; --accent-h:#3d52e8; --accent-d:#3040d0;
+    --accent-g:rgba(79,99,240,0.12);
+    --c1:#dc2626; --c2:#d97706; --c3:#16a34a; --c4:#4f63f0; --c5:#9333ea;
+    --green:#16a34a; --red:#dc2626; --yellow:#d97706; --purple:#9333ea;
+    --glow-sm:0 0 0 2px rgba(79,99,240,0.3);
   }
   body.light nav { background:rgba(242,243,250,0.92); border-bottom-color:var(--border); box-shadow:0 1px 0 var(--border); }
   body.light .mobile-nav { top:auto !important; background:rgba(255,255,255,0.97); border-top-color:var(--border); }
@@ -102,6 +107,31 @@
   body.light .dark-toggle { background:var(--s2) !important; border-color:var(--border) !important; }
   /* Fix: arb-module-card top gradient line in light mode – stays visible */
   body.light .arb-module-card::before { opacity:0.7; }
+  /* Fix: flashcard faces have hardcoded color:white – keep that (gradient bg) */
+  /* Fix: tr-tab.active has gradient bg with color:white – override for legibility */
+  body.light .tr-tab.active { color: white !important; }
+  /* Fix: toast has hardcoded dark bg */
+  body.light .toast { background:rgba(20,22,50,0.95) !important; }
+  /* Fix: arb-feedback colors need override in light mode */
+  body.light .arb-feedback.ok { color:#15803d !important; }
+  body.light .arb-feedback.fail { color:#b91c1c !important; }
+  /* Fix: AI settings panel bg in light mode */
+  body.light #aiSettingsPanel { background:rgba(79,99,240,0.06) !important; border:1px solid var(--border) !important; }
+  /* Fix: AI settings selects/textareas with hardcoded dark bg */
+  body.light #aiSettingsPanel select,
+  body.light #aiSettingsPanel textarea,
+  body.light #aiSettingsPanel input[type=text] {
+    background:var(--s1) !important; color:var(--text) !important;
+    border:1px solid var(--border-2) !important;
+  }
+  body.light #aiSettingsToggle { background:rgba(79,99,240,0.12) !important; border-color:rgba(79,99,240,0.3) !important; color:var(--text) !important; }
+  /* Fix: subject chip active state color too light on light bg */
+  body.light .subject-chip.active { color:#3d52e8 !important; }
+  /* Fix: home action buttons hardcoded light colors */
+  body.light .home-action-quiz { color:#7c3aed !important; }
+  body.light .home-action-arbeid { color:#15803d !important; }
+  /* Fix: mob-nav-btn active color */
+  body.light .mob-nav-btn.active { color:#3d52e8 !important; }
   /* Fix: color cards (color-1..5) always have dark hardcoded bg → force white text */
 
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -794,6 +824,65 @@
     #main-content{padding:0!important;}
     .print-hide{display:none!important;}
   }
+
+  /* ===== ORDFORKLARINGER (Glosar) ===== */
+  .gloss-term{border-bottom:2px dotted var(--accent);cursor:help;position:relative;display:inline;}
+  .gloss-term::after{content:attr(data-def);position:absolute;bottom:calc(100% + 4px);left:0;background:var(--s1);border:1px solid var(--border-2);border-radius:8px;padding:6px 10px;font-size:0.8rem;font-weight:600;white-space:normal;max-width:260px;z-index:200;display:none;pointer-events:none;color:var(--text);box-shadow:var(--shadow-md);line-height:1.4;}
+  .gloss-term:hover::after,.gloss-term:focus::after{display:block;}
+
+  /* ===== TEKST-TIL-TALE knapp ===== */
+  .tts-btn{display:inline-flex;align-items:center;gap:0.4rem;padding:6px 14px;border-radius:50px;border:1px solid var(--border-2);background:var(--s2);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.18s;flex-shrink:0;}
+  .tts-btn:hover{background:var(--s3);color:var(--text);}
+  .tts-btn.speaking{background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.4);color:#15803d;}
+  body.light .tts-btn.speaking{color:#15803d;}
+
+  /* ===== TEKSTMARKERING med notater ===== */
+  .mark-popover{position:fixed;background:var(--s1);border:1px solid var(--border-2);border-radius:10px;padding:6px 10px;box-shadow:var(--shadow-md);z-index:1000;display:flex;gap:0.4rem;align-items:center;animation:fadeIn 0.15s ease;}
+  .mark-color-btn{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform 0.15s;flex-shrink:0;}
+  .mark-color-btn:hover{transform:scale(1.2);}
+  .mark-color-btn.selected{border-color:var(--text);}
+  .text-mark{border-radius:2px;padding:0 1px;cursor:pointer;position:relative;}
+  .text-mark[data-color="yellow"]{background:rgba(253,224,71,0.5);}
+  .text-mark[data-color="green"]{background:rgba(134,239,172,0.5);}
+  .text-mark[data-color="pink"]{background:rgba(249,168,212,0.5);}
+  .marks-panel{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-top:1rem;}
+  .marks-panel h3{font-size:0.85rem;font-weight:800;color:var(--text-2);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.04em;}
+  .mark-item{display:flex;align-items:flex-start;gap:0.6rem;padding:7px 10px;border-radius:8px;background:var(--s1);border:1px solid var(--border);margin-bottom:0.4rem;font-size:0.82rem;}
+  .mark-item-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:2px;}
+  .mark-item-dot[data-color="yellow"]{background:rgba(234,179,8,0.8);}
+  .mark-item-dot[data-color="green"]{background:rgba(34,197,94,0.8);}
+  .mark-item-dot[data-color="pink"]{background:rgba(236,72,153,0.8);}
+  .mark-item-text{color:var(--text);font-weight:600;}
+  .mark-item-note{color:var(--text-3);font-size:0.78rem;font-style:italic;margin-top:2px;}
+  .mark-note-input{width:100%;margin-top:0.4rem;padding:5px 8px;border-radius:6px;border:1px solid var(--border-2);background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.82rem;outline:none;}
+
+  /* ===== EKSAMEN-MODUS ===== */
+  .exam-progress{height:6px;background:var(--s3);border-radius:50px;overflow:hidden;margin-bottom:1.25rem;}
+  .exam-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-h));border-radius:50px;transition:width 0.4s ease;}
+  .exam-result-card{text-align:center;padding:2rem 1.5rem;background:linear-gradient(135deg,var(--s1),var(--s2));border:1px solid var(--border);border-radius:18px;}
+  .exam-score-big{font-family:'Fredoka One',cursive;font-size:3rem;color:var(--accent);}
+  .exam-q-counter{font-size:0.78rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;}
+
+  /* ===== PLANLAGT PUBLISERING ===== */
+  .sched-badge{display:inline-flex;align-items:center;gap:0.3rem;background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.3);color:#92400e;padding:3px 10px;border-radius:50px;font-size:0.73rem;font-weight:800;}
+  body.light .sched-badge{color:#78350f;}
+
+  /* ===== STATISTIKK PER SPØRSMÅL ===== */
+  .q-stat-bar-wrap{height:8px;background:var(--s3);border-radius:50px;overflow:hidden;margin:4px 0;}
+  .q-stat-bar-fill{height:100%;border-radius:50px;transition:width 0.5s ease;}
+
+  /* ===== BILDESTØTTE ===== */
+  .task-img{max-width:100%;border-radius:10px;margin-bottom:0.75rem;display:block;}
+  .img-upload-row{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;}
+  .img-upload-row input[type=text]{flex:1;}
+  .img-preview-thumb{max-height:80px;border-radius:8px;border:1px solid var(--border);margin-top:0.4rem;display:block;}
+
+  /* ===== KOMMENTAR PÅ ELEVBESVARELSER ===== */
+  .af-box{background:rgba(79,99,240,0.07);border:1px solid rgba(79,99,240,0.2);border-radius:10px;padding:8px 12px;margin-top:0.6rem;font-size:0.82rem;color:var(--text-2);}
+  .af-box strong{color:var(--accent);font-weight:800;}
+  .af-inline-editor{width:100%;margin-top:0.5rem;padding:8px 10px;border-radius:8px;border:1px solid var(--border-2);background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.85rem;resize:vertical;outline:none;min-height:60px;}
+  .af-inline-save{background:var(--c3);color:white;border:none;border-radius:6px;padding:5px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;margin-top:0.4rem;}
+  .af-has-comment{color:var(--c3)!important;}
 </style>
 </head>
 <body class="dark">
@@ -1078,6 +1167,15 @@
         <label>Fagtekst / læringstekst</label>
         <textarea id="moduleText" rows="5" placeholder="Skriv fagteksten elevene skal lese, eller last opp et dokument nedenfor..."></textarea>
       </div>
+      <div class="form-row" style="margin:0;margin-top:0.75rem;">
+        <label>🔑 Nøkkelord og definisjoner (ordforklaringer)</label>
+        <div style="display:flex;gap:0.5rem;margin-top:0.35rem;flex-wrap:wrap;">
+          <input type="text" id="glossTerm" placeholder="Begrep, f.eks. «fotosyntese»" style="flex:1;min-width:120px;" />
+          <input type="text" id="glossDef" placeholder="Definisjon" style="flex:2;min-width:160px;" />
+          <button type="button" onclick="addGlossary()" style="background:var(--accent);color:white;border:none;border-radius:8px;padding:8px 14px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;font-size:0.85rem;white-space:nowrap;">+ Legg til</button>
+        </div>
+        <div id="glossPreview" style="margin-top:0.5rem;"></div>
+      </div>
     </div>
 
     <!-- AI + Filopplasting panel -->
@@ -1161,6 +1259,12 @@
         <div style="margin-bottom:1rem;">
           <label style="display:block;font-weight:800;font-size:0.78rem;opacity:0.7;margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:0.5px;">✏️ Fritekst-instruks (valgfritt)</label>
           <textarea id="aiCustomPrompt" placeholder="F.eks: «Fokuser på årsaker», «Bruk eksempler fra dagliglivet»..." style="width:100%;padding:10px 12px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-size:0.9rem;background:#2d2d44;color:white;resize:vertical;min-height:56px;outline:none;line-height:1.5;"></textarea>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:1rem;margin-bottom:1rem;">
+          <label style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;font-size:0.88rem;font-weight:700;color:rgba(255,255,255,0.85);">
+            <input type="checkbox" id="examModeToggle" style="width:16px;height:16px;accent-color:var(--accent-h);" />
+            🎓 Eksamen-modus (ett spørsmål om gangen, ingen tilbake, poengsum til slutt)
+          </label>
         </div>
         <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:1rem;">
           <label style="display:block;font-weight:800;font-size:0.78rem;opacity:0.7;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.5px;">📚 Fag / tema (valgfritt)</label>
@@ -1328,6 +1432,15 @@
           <div class="form-row" style="margin:0"><label>Svar C</label><input type="text" id="quizC" placeholder="Feil svar" /></div>
           <div class="form-row" style="margin:0"><label>Svar D</label><input type="text" id="quizD" placeholder="Feil svar" /></div>
           <div class="form-row" style="margin:0;grid-column:1/-1"><label>Forklaring ved riktig svar</label><input type="text" id="quizExplain" placeholder="Bra! Det er riktig fordi..." /></div>
+          <div class="form-row" style="margin:0;grid-column:1/-1">
+            <label>🖼 Bilde til spørsmål (valgfritt)</label>
+            <div class="img-upload-row">
+              <input type="text" id="quizImg" placeholder="https://... eller last opp →" oninput="previewQuizImg()" />
+              <button type="button" onclick="document.getElementById('quizImgFile').click()" style="background:var(--s3);border:1px solid var(--border-2);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:0.85rem;color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;white-space:nowrap;">📁 Last opp</button>
+              <input type="file" id="quizImgFile" accept="image/*" style="display:none" onchange="loadQuizImgFile(this)" />
+            </div>
+            <div id="quizImgPreview"></div>
+          </div>
         </div>
         <button class="btn-success" style="margin-top:0.875rem;display:flex;align-items:center;gap:6px;" onclick="addQuizQuestion()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Legg til spørsmål</button>
         <div id="quizPreview" style="margin-top:0.875rem;"></div>
@@ -1437,7 +1550,25 @@
         </div>
         <div class="or-divider">— eller legg til manuelt —</div>
         <div class="form-row"><label>Begrep / spørsmål (forside)</label><input type="text" id="fcFront" placeholder="Demokrati" /></div>
+        <div class="form-row">
+          <label>🖼 Bilde forside (valgfritt)</label>
+          <div class="img-upload-row">
+            <input type="text" id="fcImgFront" placeholder="https://... eller last opp" oninput="previewFcImg('front')" />
+            <button type="button" onclick="document.getElementById('fcImgFrontFile').click()" style="background:var(--s3);border:1px solid var(--border-2);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:0.82rem;color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;white-space:nowrap;">📁</button>
+            <input type="file" id="fcImgFrontFile" accept="image/*" style="display:none" onchange="loadFcImgFile(this,'front')" />
+          </div>
+          <div id="fcImgFrontPreview"></div>
+        </div>
         <div class="form-row"><label>Definisjon / svar (bakside)</label><input type="text" id="fcBack" placeholder="Et styresett der folket bestemmer..." /></div>
+        <div class="form-row">
+          <label>🖼 Bilde bakside (valgfritt)</label>
+          <div class="img-upload-row">
+            <input type="text" id="fcImgBack" placeholder="https://... eller last opp" oninput="previewFcImg('back')" />
+            <button type="button" onclick="document.getElementById('fcImgBackFile').click()" style="background:var(--s3);border:1px solid var(--border-2);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:0.82rem;color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;white-space:nowrap;">📁</button>
+            <input type="file" id="fcImgBackFile" accept="image/*" style="display:none" onchange="loadFcImgFile(this,'back')" />
+          </div>
+          <div id="fcImgBackPreview"></div>
+        </div>
         <button class="btn-success" style="display:flex;align-items:center;gap:6px;" onclick="addFlashcard()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Legg til flashcard</button>
         <div id="fcPreview" style="margin-top:0.875rem;"></div>
       </div>
@@ -2968,6 +3099,7 @@ let state = {
   tempWrite: [],
   tempVideos: [],
   tempFlashcards: [],
+  tempGlossary: [],
   studentAnswers: {},
   currentModule: null,
   currentTask: 'text',
@@ -3336,6 +3468,7 @@ async function loadState() {
   if (dbMods.length > 0) {
     state.modules = dbMods;
   }
+  _checkScheduled();
 
   // Restore teacher session
   const teacherSession = localStorage.getItem('os_teacher_session');
@@ -4356,11 +4489,56 @@ function addQuizQuestion() { setTimeout(updatePublishBarHint,50);
   const d=document.getElementById('quizD')?.value.trim();
   if (!q||!a||!b||!c||!d) { showToast('Fyll inn spørsmål og alle fire svaralternativer'); return; }
   const explain = document.getElementById('quizExplain')?.value.trim()||'';
-  state.tempQuiz.push({question:q,a,b,c,d,explain});
-  ['quizQ','quizA','quizB','quizC','quizD','quizExplain'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const img = document.getElementById('quizImg')?.value.trim()||'';
+  state.tempQuiz.push({question:q,a,b,c,d,explain,img});
+  ['quizQ','quizA','quizB','quizC','quizD','quizExplain','quizImg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const prev = document.getElementById('quizImgPreview'); if(prev) prev.innerHTML='';
   showToast('✅ Spørsmål lagt til!');
   const preview = document.getElementById('quizPreview');
   if (preview) preview.innerHTML = `<span style="color:var(--c3);font-weight:800;">✅ ${state.tempQuiz.length} spørsmål totalt</span>`;
+}
+
+function loadQuizImgFile(input) {
+  const file = input.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = e => { document.getElementById('quizImg').value = e.target.result; previewQuizImg(); };
+  r.readAsDataURL(file);
+}
+function previewQuizImg() {
+  const url = document.getElementById('quizImg')?.value;
+  const prev = document.getElementById('quizImgPreview');
+  if (prev) prev.innerHTML = url ? `<img src="${escHtml(url)}" class="img-preview-thumb" onerror="this.style.display='none'">` : '';
+}
+function loadFcImgFile(input, side) {
+  const file = input.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = e => { document.getElementById('fcImg'+side.charAt(0).toUpperCase()+side.slice(1)).value = e.target.result; previewFcImg(side); };
+  r.readAsDataURL(file);
+}
+function previewFcImg(side) {
+  const cap = side.charAt(0).toUpperCase()+side.slice(1);
+  const url = document.getElementById('fcImg'+cap)?.value;
+  const prev = document.getElementById('fcImg'+cap+'Preview');
+  if (prev) prev.innerHTML = url ? `<img src="${escHtml(url)}" class="img-preview-thumb" onerror="this.style.display='none'">` : '';
+}
+function addGlossary() {
+  const term = document.getElementById('glossTerm')?.value.trim();
+  const def = document.getElementById('glossDef')?.value.trim();
+  if (!term || !def) { showToast('Fyll inn begrep og definisjon'); return; }
+  state.tempGlossary.push({term, def});
+  document.getElementById('glossTerm').value = '';
+  document.getElementById('glossDef').value = '';
+  _renderGlossPreview();
+}
+function _renderGlossPreview() {
+  const p = document.getElementById('glossPreview'); if (!p) return;
+  if (!state.tempGlossary.length) { p.innerHTML=''; return; }
+  p.innerHTML = state.tempGlossary.map((g,i) =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--accent-g);border:1px solid var(--border-2);border-radius:50px;padding:3px 10px;font-size:0.78rem;font-weight:700;color:var(--text);margin:2px;">
+      <strong>${escHtml(g.term)}</strong>: ${escHtml(g.def)}
+      <button onclick="state.tempGlossary.splice(${i},1);_renderGlossPreview()" style="background:none;border:none;cursor:pointer;font-size:0.85rem;color:var(--text-3);padding:0 2px;" title="Fjern">✕</button>
+    </span>`
+  ).join('');
 }
 
 function addDiscussion() { setTimeout(updatePublishBarHint,50);
@@ -4398,9 +4576,12 @@ function addFlashcard() { setTimeout(updatePublishBarHint,50);
   const front=document.getElementById('fcFront')?.value.trim();
   const back=document.getElementById('fcBack')?.value.trim();
   if(!front||!back){showToast('Fyll inn begrep og definisjon');return;}
-  state.tempFlashcards.push({front,back});
-  const ff=document.getElementById('fcFront');const fb=document.getElementById('fcBack');
-  if(ff)ff.value='';if(fb)fb.value='';
+  const imgFront=document.getElementById('fcImgFront')?.value.trim()||'';
+  const imgBack=document.getElementById('fcImgBack')?.value.trim()||'';
+  state.tempFlashcards.push({front,back,imgFront,imgBack});
+  ['fcFront','fcBack','fcImgFront','fcImgBack'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const pfp=document.getElementById('fcImgFrontPreview');const pbp=document.getElementById('fcImgBackPreview');
+  if(pfp)pfp.innerHTML='';if(pbp)pbp.innerHTML='';
   showToast('✅ Flashcard lagt til!');
   const preview=document.getElementById('fcPreview');
   if(preview)preview.innerHTML=`<span style="color:var(--c3);font-weight:800;">✅ ${state.tempFlashcards.length} flashcards totalt</span>`;
@@ -4422,10 +4603,13 @@ async function saveModule() {
     subject: (document.getElementById('moduleSubjectFree')?.value.trim()) || (document.getElementById('moduleSubjectSelect')?.value) || (document.getElementById('aiSubject')?.value) || '',
     quizTimer: s.quizTimer || 0,
     language: s.language || 'norsk bokmål',
+    glossary: [...state.tempGlossary],
+    examMode: document.getElementById('examModeToggle')?.checked || false,
     createdAt: wasEditing?state.modules[editingModuleIdx].createdAt:new Date().toLocaleString('no'),
     updatedAt: wasEditing?new Date().toLocaleString('no'):null,
     publishedAt: wasEditing?state.modules[editingModuleIdx].publishedAt:new Date().toISOString(),
-    locked: wasEditing?state.modules[editingModuleIdx].locked:false
+    locked: wasEditing?state.modules[editingModuleIdx].locked:false,
+    scheduledFor: wasEditing?state.modules[editingModuleIdx].scheduledFor:null
   };
   if(wasEditing){state.modules[editingModuleIdx]=module;}
   else{state.modules.push(module);}
@@ -4440,7 +4624,9 @@ async function saveModule() {
 }
 
 function clearModuleForm() {
-  state.tempQuiz=[];state.tempDisc=[];state.tempWrite=[];state.tempVideos=[];state.tempFlashcards=[];
+  state.tempQuiz=[];state.tempDisc=[];state.tempWrite=[];state.tempVideos=[];state.tempFlashcards=[];state.tempGlossary=[];
+  const emTog=document.getElementById('examModeToggle');if(emTog)emTog.checked=false;
+  _renderGlossPreview();
   ['moduleName','moduleDesc','moduleText','moduleSubjectFree'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const emojiEl=document.getElementById('moduleEmoji');if(emojiEl)emojiEl.value='📚';
   const subjSel=document.getElementById('moduleSubjectSelect');if(subjSel)subjSel.value='';
@@ -4478,6 +4664,9 @@ function editModule(idx) {
   state.tempWrite=JSON.parse(JSON.stringify(m.write||[]));
   state.tempVideos=JSON.parse(JSON.stringify(m.videos||[]));
   state.tempFlashcards=JSON.parse(JSON.stringify(m.flashcards||[]));
+  state.tempGlossary=JSON.parse(JSON.stringify(m.glossary||[]));
+  const emTog=document.getElementById('examModeToggle');if(emTog)emTog.checked=m.examMode||false;
+  _renderGlossPreview();
   const saveLabel=document.getElementById('saveModuleLabel');if(saveLabel)saveLabel.textContent='💾 Lagre endringer';
   const cancelBtn=document.getElementById('cancelEditBtn');if(cancelBtn)cancelBtn.style.display='inline-flex';
   const banner=document.getElementById('editingBanner');
@@ -4549,12 +4738,36 @@ async function deleteModule(idx) {
 function toggleLock(idx) {
   if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   state.modules[idx].locked=!state.modules[idx].locked;
+  if (!state.modules[idx].locked) state.modules[idx].scheduledFor = null;
   saveModulesToStorage();
   renderManageModules();
   renderHomeModules();
   renderTaskModules();
   updateContinueCard();
   showToast(state.modules[idx].locked?'🔒 Emnet er låst':'🔓 Emnet er åpnet');
+}
+
+function setScheduled(idx, dtVal) {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
+  state.modules[idx].scheduledFor = dtVal || null;
+  state.modules[idx].locked = !!dtVal;
+  saveModulesToStorage();
+  renderManageModules();
+  renderHomeModules();
+  renderTaskModules();
+  if (dtVal) showToast('🕒 Planlagt: ' + new Date(dtVal).toLocaleString('no'));
+  else showToast('🗓 Planlegging fjernet');
+}
+
+function _checkScheduled() {
+  const now = Date.now();
+  let changed = false;
+  state.modules.forEach(m => {
+    if (m.scheduledFor && new Date(m.scheduledFor).getTime() <= now && m.locked) {
+      m.locked = false; changed = true;
+    }
+  });
+  if (changed) saveModulesToStorage();
 }
 
 function isNewModule(m){return m.publishedAt&&(Date.now()-new Date(m.publishedAt).getTime())<3*24*3600*1000;}
@@ -4649,8 +4862,13 @@ function renderManageModules() {
         <div class="module-manage-meta">
           ${m.quiz?.length||0} quiz · ${m.discussion?.length||0} drøfting · ${m.flashcards?.length||0} flashcards · ${m.write?.length||0} skriveoppgaver
           ${m.updatedAt?' · ✏️ Redigert '+m.updatedAt:''}
-          ${m.locked?' · 🔒 Låst':''}
+          ${m.locked&&m.scheduledFor?' · <span class="sched-badge">🕒 Publiseres '+new Date(m.scheduledFor).toLocaleString('no')+'</span>':m.locked?' · 🔒 Låst':''}
           ${isNewModule(m)?' · <span style="color:var(--c1);font-weight:800;">NY</span>':''}
+        </div>
+        <div style="margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+          <span style="font-size:0.72rem;font-weight:800;color:var(--text-3);">🕒 Planlegg publisering:</span>
+          <input type="datetime-local" id="sched-${i}" value="${m.scheduledFor||''}" onchange="setScheduled(${i},this.value)" style="font-family:'Nunito',sans-serif;font-size:0.75rem;border:1px solid var(--border-2);border-radius:7px;padding:3px 7px;background:var(--s2);color:var(--text);outline:none;" />
+          ${m.scheduledFor?`<button onclick="setScheduled(${i},'')" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:0.8rem;" title="Fjern planlegging">✕</button>`:''}
         </div>
       </div>
       <div class="module-manage-actions">
@@ -4902,7 +5120,59 @@ function renderTeacherStats() {
       <div style="font-weight:800;font-size:0.95rem;color:var(--text-2);">Ingen data ennå</div>
       <div style="font-size:0.82rem;margin-top:0.3rem;">Statistikk vises når elever begynner å svare på oppgaver.</div>
     </div>` : ''}
+
+    ${_buildQuizStatsHtml(answers)}
   `;
+}
+
+function _buildQuizStats(answers) {
+  const stats = {};
+  Object.entries(answers).forEach(([k, v]) => {
+    const m = k.match(/_m(\d+)_quiz_(\d+)$/);
+    if (!m) return;
+    const key = `${m[1]}_${m[2]}`;
+    if (!stats[key]) stats[key] = { correct:0, total:0, mi:+m[1], qi:+m[2] };
+    stats[key].total++;
+    if (typeof v === 'object' ? v.correct : v === 'correct') stats[key].correct++;
+  });
+  return stats;
+}
+
+function _buildQuizStatsHtml(answers) {
+  const stats = _buildQuizStats(answers);
+  const entries = Object.values(stats).sort((a,b) => a.mi - b.mi || a.qi - b.qi);
+  if (!entries.length) return '';
+  // Group by module
+  const byModule = {};
+  entries.forEach(e => {
+    if (!byModule[e.mi]) byModule[e.mi] = [];
+    byModule[e.mi].push(e);
+  });
+  const rows = Object.entries(byModule).map(([mi, qs]) => {
+    const mod = state.modules[+mi];
+    if (!mod) return '';
+    const qRows = qs.map(e => {
+      const q = (mod.quiz||[])[e.qi];
+      const qText = q ? escHtml(q.question) : `Spørsmål ${e.qi+1}`;
+      const pct = e.total ? Math.round(e.correct/e.total*100) : 0;
+      const barColor = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--red)';
+      return `<div style="padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
+          <div style="font-size:0.82rem;color:var(--text);font-weight:600;flex:1;">${pct<50?'⚠️ ':''}${qText}</div>
+          <div style="font-size:0.78rem;font-weight:800;color:${barColor};white-space:nowrap;">${pct}% (${e.correct}/${e.total})</div>
+        </div>
+        <div class="q-stat-bar-wrap"><div class="q-stat-bar-fill" style="width:${pct}%;background:${barColor};"></div></div>
+      </div>`;
+    }).join('');
+    return `<div style="margin-bottom:1rem;background:var(--s2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div style="padding:0.5rem 0.75rem;background:var(--s3);border-bottom:1px solid var(--border);font-size:0.8rem;font-weight:800;color:var(--text);">${mod.emoji||'📚'} ${escHtml(mod.name)}</div>
+      ${qRows}
+    </div>`;
+  }).join('');
+  return `<div style="margin-top:1.5rem;">
+    <div style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;">📊 Statistikk per spørsmål</div>
+    ${rows}
+  </div>`;
 }
 
 // ====== CLASS ROSTER ======
@@ -4997,13 +5267,17 @@ function viewStudentDetail(studentName) {
               const val = typeof v === 'object' ? v.val : v;
               const correct = typeof v === 'object' ? v.correct : null;
               const time = typeof v === 'object' ? v.time : '';
-              return `<div style="padding:0.4rem 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:0.5rem;">
-                ${correct !== null ? `<span style="font-size:0.75rem;flex-shrink:0;margin-top:0.1rem;">${correct?'✅':'❌'}</span>` : ''}
-                <div style="flex:1;min-width:0;">
-                  <div style="font-size:0.72rem;color:var(--text-3);font-weight:700;margin-bottom:1px;">${escHtml(taskKey)}</div>
-                  <div style="font-size:0.82rem;color:var(--text);word-break:break-word;">${escHtml(String(val).substring(0,200))}${String(val).length>200?'…':''}</div>
-                  ${time?`<div style="font-size:0.68rem;color:var(--text-3);margin-top:1px;" title="${escHtml(time)}">${relativeTime(time)}</div>`:''}
+              return `<div id="srow-${k.replace(/[^a-zA-Z0-9]/g,'_')}" style="padding:0.4rem 0;border-bottom:1px solid var(--border);">
+                <div style="display:flex;align-items:flex-start;gap:0.5rem;">
+                  ${correct !== null ? `<span style="font-size:0.75rem;flex-shrink:0;margin-top:0.1rem;">${correct?'✅':'❌'}</span>` : ''}
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:0.72rem;color:var(--text-3);font-weight:700;margin-bottom:1px;">${escHtml(taskKey)}</div>
+                    <div style="font-size:0.82rem;color:var(--text);word-break:break-word;">${escHtml(String(val).substring(0,200))}${String(val).length>200?'…':''}</div>
+                    ${time?`<div style="font-size:0.68rem;color:var(--text-3);margin-top:1px;" title="${escHtml(time)}">${relativeTime(time)}</div>`:''}
+                  </div>
+                  <button onclick="openAnswerFeedback('${escHtml(k)}','srow-${k.replace(/[^a-zA-Z0-9]/g,'_')}')" id="afbtn-${k.replace(/[^a-zA-Z0-9]/g,'_')}" title="Kommenter svar" style="background:none;border:none;cursor:pointer;font-size:0.9rem;flex-shrink:0;color:var(--text-3);" class="print-hide">💬</button>
                 </div>
+                <div id="afinline-${k.replace(/[^a-zA-Z0-9]/g,'_')}"></div>
               </div>`;
             }).join('')}
           </div>
@@ -5135,6 +5409,44 @@ async function saveTeacherFeedback(studentName) {
   else await DB.deleteFeedback('feedback_' + studentName);
   const msg = document.getElementById('feedbackSavedMsg');
   if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2000); }
+}
+
+function openAnswerFeedback(answerKey, rowId) {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
+  const slotId = 'afinline-' + answerKey.replace(/[^a-zA-Z0-9]/g,'_');
+  const slot = document.getElementById(slotId);
+  if (!slot) return;
+  if (slot.querySelector('.af-inline-editor')) { slot.innerHTML=''; return; }
+  const storageKey = 'af_' + answerKey;
+  const existing = localStorage.getItem(storageKey) || '';
+  slot.innerHTML = `<textarea class="af-inline-editor" id="afta-${slotId}" placeholder="Skriv en kommentar til dette svaret...">${escHtml(existing)}</textarea>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <button class="af-inline-save" onclick="_saveAnswerFeedback('${escHtml(answerKey)}','${slotId}')">💾 Lagre kommentar</button>
+      ${existing?`<button onclick="_deleteAnswerFeedback('${escHtml(answerKey)}','${slotId}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:0.78rem;font-weight:700;">🗑 Slett</button>`:''}
+    </div>`;
+}
+async function _saveAnswerFeedback(answerKey, slotId) {
+  const ta = document.getElementById('afta-' + slotId);
+  const text = ta?.value.trim()||'';
+  const storageKey = 'af_' + answerKey;
+  if (text) {
+    localStorage.setItem(storageKey, text);
+    await DB.saveFeedback(storageKey, text);
+  } else {
+    localStorage.removeItem(storageKey);
+    await DB.deleteFeedback(storageKey);
+  }
+  const slot = document.getElementById(slotId);
+  if (slot) {
+    if (text) slot.innerHTML = `<div class="af-box"><strong>💬 Kommentar:</strong> ${escHtml(text)}</div>`;
+    else slot.innerHTML='';
+  }
+  const btn = document.getElementById('afbtn-' + answerKey.replace(/[^a-zA-Z0-9]/g,'_'));
+  if (btn) btn.classList.toggle('af-has-comment', !!text);
+  showToast(text ? '✅ Kommentar lagret' : '🗑 Kommentar slettet');
+}
+async function _deleteAnswerFeedback(answerKey, slotId) {
+  await _saveAnswerFeedback(answerKey, slotId);
 }
 function showFeedbackNotice(text, key) {
   const id = 'fbNoticeModal';
@@ -5762,6 +6074,32 @@ function _showUndoToast(msg, onUndo, duration=5000) {
   t.appendChild(span); t.appendChild(btn);
   t.classList.add('show');
   clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ===== TEKST-TIL-TALE =====
+function ttsSpeak(text, btnEl) {
+  if (!window.speechSynthesis) { showToast('⚠️ Nettleseren din støtter ikke tale'); return; }
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    if (btnEl) { btnEl.textContent = '🔊 Les høyt'; btnEl.classList.remove('speaking'); }
+    return;
+  }
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'nb-NO'; utt.rate = 0.95; utt.pitch = 1;
+  const trySpeak = () => {
+    const voices = speechSynthesis.getVoices();
+    const no = voices.find(v => v.lang.startsWith('nb') || v.lang.startsWith('no'));
+    if (no) utt.voice = no;
+    utt.onend = () => { if (btnEl) { btnEl.textContent = '🔊 Les høyt'; btnEl.classList.remove('speaking'); } };
+    utt.onerror = () => { if (btnEl) { btnEl.textContent = '🔊 Les høyt'; btnEl.classList.remove('speaking'); } };
+    if (btnEl) { btnEl.textContent = '⏹ Stopp'; btnEl.classList.add('speaking'); }
+    speechSynthesis.speak(utt);
+  };
+  if (speechSynthesis.getVoices().length === 0) {
+    speechSynthesis.onvoiceschanged = () => { speechSynthesis.onvoiceschanged = null; trySpeak(); };
+  } else {
+    trySpeak();
+  }
 }
 
 // ====== CONFETTI ======
@@ -9239,14 +9577,112 @@ function _arbScrollTop() {
   if (panel) panel.scrollTo({ top: 0, behavior: 'smooth' });
   else window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+// ===== GLOSSARY HELPER =====
+function _applyGlossary(html, glossary) {
+  if (!glossary || !glossary.length) return html;
+  glossary.forEach(g => {
+    if (!g.term) return;
+    const re = new RegExp('\\b(' + g.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')\\b', 'gi');
+    html = html.replace(re, `<span class="gloss-term" tabindex="0" data-def="${escHtml(g.def||'')}" title="${escHtml(g.def||'')}">$1</span>`);
+  });
+  return html;
+}
+
+// ===== TEKST-MARKERING =====
+function _markSKey() { return arbSKey ? arbSKey() : (state.currentStudent || ''); }
+function _markSave(moduleIdx, markObj) {
+  const key = `os_marks_${_markSKey()}_m${moduleIdx}`;
+  const marks = JSON.parse(localStorage.getItem(key)||'[]');
+  marks.push({...markObj, id: Date.now()});
+  localStorage.setItem(key, JSON.stringify(marks));
+}
+function _markLoad(moduleIdx) {
+  return JSON.parse(localStorage.getItem(`os_marks_${_markSKey()}_m${moduleIdx}`)||'[]');
+}
+function _markDelete(moduleIdx, id) {
+  const key = `os_marks_${_markSKey()}_m${moduleIdx}`;
+  const marks = _markLoad(moduleIdx).filter(m => m.id !== id);
+  localStorage.setItem(key, JSON.stringify(marks));
+}
+function _reapplyMarks(moduleIdx) {
+  const body = document.getElementById('arb-text-body');
+  if (!body) return;
+  const marks = _markLoad(moduleIdx);
+  marks.forEach(mark => {
+    const re = new RegExp('(' + mark.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'g');
+    body.innerHTML = body.innerHTML.replace(re, `<mark class="text-mark" data-color="${escHtml(mark.color)}" data-id="${mark.id}" onclick="_markClickMenu(this,${moduleIdx})" title="${escHtml(mark.note||'')}">$1</mark>`);
+  });
+}
+function _initMarkSelection(moduleIdx) {
+  const body = document.getElementById('arb-text-body');
+  if (!body) return;
+  body.addEventListener('mouseup', () => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || sel.toString().trim().length < 2) return;
+    _showMarkPopover(sel.toString().trim(), moduleIdx);
+  });
+}
+let _markPopoverEl = null;
+function _showMarkPopover(selectedText, moduleIdx) {
+  _hideMarkPopover();
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const range = sel.getRangeAt(0);
+  const rect = range.getBoundingClientRect();
+  const pop = document.createElement('div');
+  pop.className = 'mark-popover print-hide';
+  pop.style.top = (rect.top + window.scrollY - 50) + 'px';
+  pop.style.left = (rect.left + window.scrollX) + 'px';
+  pop.innerHTML = `<span style="font-size:0.78rem;font-weight:800;color:var(--text-3);margin-right:4px;">Merk:</span>` +
+    ['yellow','green','pink'].map(c => `<button class="mark-color-btn" style="background:${c==='yellow'?'rgba(253,224,71,0.7)':c==='green'?'rgba(134,239,172,0.7)':'rgba(249,168,212,0.7)'};" onclick="_doMark('${c}','${selectedText.replace(/'/g,"\\'")}',${moduleIdx},this.parentElement)"></button>`).join('') +
+    `<button onclick="_hideMarkPopover()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:0.9rem;padding:0 4px;">✕</button>`;
+  document.body.appendChild(pop);
+  _markPopoverEl = pop;
+  setTimeout(() => document.addEventListener('click', _hideMarkPopover, {once:true}), 100);
+}
+function _hideMarkPopover() {
+  if (_markPopoverEl) { _markPopoverEl.remove(); _markPopoverEl = null; }
+}
+function _doMark(color, text, moduleIdx, popEl) {
+  _hideMarkPopover();
+  const note = prompt('Legg til notat (valgfritt):', '') || '';
+  _markSave(moduleIdx, {text, color, note});
+  _reapplyMarks(moduleIdx);
+}
+function _markClickMenu(el, moduleIdx) {
+  const id = parseInt(el.getAttribute('data-id'));
+  if (confirm('Fjerne denne markeringen?')) {
+    _markDelete(moduleIdx, id);
+    _reapplyMarks(moduleIdx);
+  }
+}
+function _showMarksPanel(moduleIdx) {
+  const panel = document.getElementById(`arb-marks-panel-${moduleIdx}`);
+  if (!panel) return;
+  const marks = _markLoad(moduleIdx);
+  if (!marks.length) { panel.innerHTML = '<div class="marks-panel"><p style="font-size:0.82rem;color:var(--text-3);">Ingen markeringer ennå. Marker tekst for å lagre notater.</p></div>'; return; }
+  panel.innerHTML = `<div class="marks-panel"><h3>📝 Mine markeringer (${marks.length})</h3>` +
+    marks.map(m => `<div class="mark-item"><div class="mark-item-dot" data-color="${escHtml(m.color)}"></div><div><div class="mark-item-text">${escHtml(m.text)}</div>${m.note?`<div class="mark-item-note">${escHtml(m.note)}</div>`:''}</div></div>`).join('') +
+    '</div>';
+}
+
 function arbRenderTab(type, m) {
   const container = document.getElementById('arbTaskContent');
   _arbScrollTop();
   if (type === 'text') {
+    const textHtml = _applyGlossary(escHtml(m.text||''), m.glossary||[]);
+    const mi = arbState.moduleIdx;
     container.innerHTML = `<div class="arb-content-card">
-      <h2 style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--text);margin-bottom:1rem;">📖 ${escHtml(m.name)}</h2>
-      <div class="arb-text-content">${escHtml(m.text||'')}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;">
+        <h2 style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--text);margin:0;">📖 ${escHtml(m.name)}</h2>
+        <button class="tts-btn print-hide" id="ttsBtnText" onclick="ttsSpeak(document.getElementById('arb-text-body')?.innerText||'', this)">🔊 Les høyt</button>
+      </div>
+      <div class="arb-text-content" id="arb-text-body" style="white-space:pre-wrap;">${textHtml}</div>
+      <button class="tts-btn print-hide" style="margin-top:1rem;" onclick="_showMarksPanel(${mi})">📝 Mine markeringer</button>
+      <div id="arb-marks-panel-${mi}"></div>
     </div>`;
+    _reapplyMarks(mi);
+    _initMarkSelection(mi);
     arbMarkDone('text');
   } else if (type === 'quiz') {
     arbRenderQuiz(m);
@@ -9262,6 +9698,7 @@ function arbRenderTab(type, m) {
 }
 
 function arbRenderQuiz(m) {
+  if (m.examMode && m.quiz?.length) { _arbExamRender(m); return; }
   const sKey = arbSKey();
   const container = document.getElementById('arbTaskContent');
   let html = `<div class="arb-content-card">
@@ -9276,8 +9713,13 @@ function arbRenderQuiz(m) {
       ...(q.d ? [{ text: q.d, correct: false }] : [])
     ]);
     const answerClass = answered ? (savedAns === 'correct' ? 'answered' : 'answered-wrong') : '';
+    const qImgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img" alt="" onerror="this.style.display='none'">` : '';
     html += `<div class="arb-quiz-card ${answerClass}" id="arb-qcard-${qi}">
-      <div class="arb-quiz-question">${qi+1}. ${escHtml(q.question)}</div>
+      ${qImgHtml}
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem;">
+        <div class="arb-quiz-question" style="margin:0;">${qi+1}. ${escHtml(q.question)}</div>
+        <button class="tts-btn print-hide" style="padding:4px 10px;font-size:0.75rem;flex-shrink:0;" onclick="ttsSpeak('${escHtml(q.question).replace(/'/g,"\\'")}', this)">🔊</button>
+      </div>
       <div class="arb-options">
         ${opts.map((o,oi) => {
           let cls = '';
@@ -9286,10 +9728,36 @@ function arbRenderQuiz(m) {
         }).join('')}
       </div>
       ${answered ? `<div class="arb-feedback ${savedAns==='correct'?'ok':'fail'}">${savedAns==='correct' ? '✅ Riktig!' : '❌ Feil'} ${q.explain ? '– '+escHtml(q.explain) : ''}</div>` : ''}
+      <div id="arb-af-${qi}" class="print-hide"></div>
     </div>`;
   });
   html += '</div>';
   container.innerHTML = html;
+  // Load teacher comments for answered questions
+  m.quiz.forEach((q, qi) => {
+    const sKey2 = arbSKey();
+    const fullKey = `${sKey2}_m${arbState.moduleIdx}_quiz_${qi}`;
+    const storKey = 'af_' + fullKey;
+    const comment = localStorage.getItem(storKey);
+    if (comment) {
+      const slot = document.getElementById('arb-af-' + qi);
+      if (slot) slot.innerHTML = `<div class="af-box"><strong>💬 Lærer:</strong> ${escHtml(comment)}</div>`;
+    }
+  });
+  // Also async-load from DB
+  (async () => {
+    for (let qi2 = 0; qi2 < m.quiz.length; qi2++) {
+      const sKey3 = arbSKey();
+      const fullKey = `${sKey3}_m${arbState.moduleIdx}_quiz_${qi2}`;
+      const storKey = 'af_' + fullKey;
+      const dbComment = await DB.loadFeedback(storKey);
+      if (dbComment) {
+        localStorage.setItem(storKey, dbComment);
+        const slot = document.getElementById('arb-af-' + qi2);
+        if (slot) slot.innerHTML = `<div class="af-box"><strong>💬 Lærer:</strong> ${escHtml(dbComment)}</div>`;
+      }
+    }
+  })();
 }
 
 function arbCheckAnswer(qi, isCorrect, optIdx, explain, correctMap) {
@@ -9311,6 +9779,91 @@ function arbCheckAnswer(qi, isCorrect, optIdx, explain, correctMap) {
   arbSave(`quiz_${qi}`, isCorrect ? 'correct' : 'wrong');
   arbMarkDone('quiz');
   arbUpdateProgress(arbState.moduleIdx);
+  // Show teacher comment if exists
+  const fullKey = `${arbSKey()}_m${arbState.moduleIdx}_quiz_${qi}`;
+  const storKey = 'af_' + fullKey;
+  const comment = localStorage.getItem(storKey);
+  const afSlot = document.getElementById('arb-af-' + qi);
+  if (afSlot && comment) afSlot.innerHTML = `<div class="af-box"><strong>💬 Lærer:</strong> ${escHtml(comment)}</div>`;
+}
+
+// ===== EKSAMEN-MODUS =====
+let _examState = null;
+function _arbExamRender(m) {
+  _examState = { qi: 0, results: [], startTime: Date.now() };
+  _arbExamShowQuestion(m);
+}
+function _arbExamShowQuestion(m) {
+  const container = document.getElementById('arbTaskContent');
+  const q = m.quiz[_examState.qi];
+  const total = m.quiz.length;
+  const pct = Math.round(_examState.qi / total * 100);
+  const opts = shuffleArr([
+    {text:q.a, correct:true},
+    {text:q.b, correct:false},
+    ...(q.c?[{text:q.c,correct:false}]:[]),
+    ...(q.d?[{text:q.d,correct:false}]:[])
+  ]);
+  _examState.currentOpts = opts;
+  const imgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img" onerror="this.style.display='none'">` : '';
+  const isLast = _examState.qi + 1 >= total;
+  container.innerHTML = `<div class="arb-content-card">
+    <div class="exam-q-counter">Spørsmål ${_examState.qi+1} av ${total}</div>
+    <div class="exam-progress"><div class="exam-progress-fill" style="width:${pct}%"></div></div>
+    ${imgHtml}
+    <div class="arb-quiz-question" style="margin-bottom:1rem;">${escHtml(q.question)}</div>
+    <div class="arb-options" id="examOpts">
+      ${opts.map((o,oi)=>`<button class="arb-opt" id="exam-opt-${oi}" onclick="_examSelectOpt(${oi},${o.correct},'${escHtml(q.question).replace(/'/g,"\\'")}','${escHtml(q.a).replace(/'/g,"\\'")}',${JSON.stringify(opts.map(x=>x.correct))})">${escHtml(o.text)}</button>`).join('')}
+    </div>
+    <div id="examNext" style="display:none;margin-top:1rem;">
+      <button id="examNextBtn" style="background:var(--accent);color:white;border:none;padding:11px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">${isLast?'Se resultat 🎓':'Neste →'}</button>
+    </div>
+  </div>`;
+}
+function _examSelectOpt(oi, isCorrect, qText, correctText, correctMap) {
+  if (document.getElementById('examNext').style.display !== 'none') return;
+  _examState.results[_examState.qi] = { correct: isCorrect, qText, correctText };
+  document.querySelectorAll('.arb-opt').forEach((b,i) => {
+    b.disabled = true;
+    if (correctMap[i]) b.style.background='rgba(34,197,94,0.15)';
+    if (i===oi && !isCorrect) b.style.background='rgba(239,68,68,0.15)';
+  });
+  const nextBtn = document.getElementById('examNextBtn');
+  if (nextBtn) nextBtn.onclick = () => {
+    const m = state.modules[arbState.moduleIdx];
+    _examState.qi++;
+    if (_examState.qi < m.quiz.length) { _arbExamShowQuestion(m); }
+    else { _arbExamShowResult(m); }
+  };
+  document.getElementById('examNext').style.display='block';
+}
+function _arbExamShowResult(m) {
+  const container = document.getElementById('arbTaskContent');
+  const results = _examState.results;
+  const trueCorrect = results.filter(r=>r&&r.correct).length;
+  const elapsed = Math.round((Date.now()-_examState.startTime)/1000);
+  const mins = Math.floor(elapsed/60), secs = elapsed%60;
+  const scoreColor = trueCorrect/m.quiz.length>=0.7?'var(--green)':trueCorrect/m.quiz.length>=0.4?'var(--yellow)':'var(--red)';
+  const rows = m.quiz.map((q,qi) => {
+    const r = results[qi];
+    const isCorr = r && r.correct;
+    return `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:0.82rem;display:flex;align-items:flex-start;gap:0.5rem;">
+      <span style="flex-shrink:0;">${isCorr?'✅':'❌'}</span>
+      <div><div style="color:var(--text);font-weight:600;">${escHtml(q.question)}</div>
+      ${!isCorr?`<div style="color:var(--c3);font-size:0.78rem;margin-top:2px;">Riktig: ${escHtml(q.a)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  container.innerHTML = `<div class="arb-content-card exam-result-card">
+    <div style="font-size:2.5rem;margin-bottom:0.5rem;">🎓</div>
+    <div class="exam-score-big" style="color:${scoreColor}">${trueCorrect}/${m.quiz.length}</div>
+    <div style="font-size:1rem;font-weight:700;color:var(--text-2);margin:0.5rem 0 0.25rem;">${Math.round(trueCorrect/m.quiz.length*100)}% riktige</div>
+    <div style="font-size:0.82rem;color:var(--text-3);margin-bottom:1.5rem;">Tid brukt: ${mins>0?mins+'m ':''}${secs}s</div>
+    <div style="text-align:left;max-width:400px;margin:0 auto;">${rows}</div>
+  </div>`;
+  arbMarkDone('quiz');
+  arbUpdateProgress(arbState.moduleIdx);
+  _examState = null;
 }
 
 function arbRenderDisc(m) {
@@ -9435,13 +9988,18 @@ function arbRenderFcCard(m) {
   const card = cards[i];
   const qLen = arbState.fcQueue.length;
   const pos = cards.length - qLen + 1;
+  const fcFrontContent = (card.imgFront ? `<img src="${escHtml(card.imgFront)}" style="max-height:80px;border-radius:6px;margin-bottom:6px;display:block;" onerror="this.style.display='none'">` : '') + escHtml(card.front);
+  const fcBackContent = (card.imgBack ? `<img src="${escHtml(card.imgBack)}" style="max-height:80px;border-radius:6px;margin-bottom:6px;display:block;" onerror="this.style.display='none'">` : '') + escHtml(card.back);
   container.innerHTML = `<div class="arb-content-card">
-    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin-bottom:0.5rem;">🃏 Flashcards</h2>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem;">
+      <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin:0;">🃏 Flashcards</h2>
+      <button class="tts-btn print-hide" onclick="ttsSpeak('${escHtml(card.front).replace(/'/g,"\\'")}', this)">🔊 Les høyt</button>
+    </div>
     <div class="arb-fc-hint">Klikk på kortet for å snu det — vurder deg selv!</div>
     <div class="arb-fc-wrapper">
       <div class="arb-fc-inner" id="arbFcInner" onclick="document.getElementById('arbFcInner').classList.toggle('flipped')">
-        <div class="arb-fc-face arb-fc-front">${escHtml(card.front)}</div>
-        <div class="arb-fc-face arb-fc-back">${escHtml(card.back)}</div>
+        <div class="arb-fc-face arb-fc-front" style="flex-direction:column;">${fcFrontContent}</div>
+        <div class="arb-fc-face arb-fc-back" style="flex-direction:column;">${fcBackContent}</div>
       </div>
     </div>
     <div class="arb-fc-nav">
