@@ -885,7 +885,7 @@
   <!-- Hero banner -->
   <div class="home-hero">
     <div class="home-hero-text">
-      <div class="home-hero-title">Velkommen til <span>OlaSkole</span></div>
+      <div class="home-hero-title" id="heroTitle">Velkommen til <span>OlaSkole</span></div>
       <div class="home-hero-sub">Din interaktive læringsplattform</div>
     </div>
     <!-- Action buttons always visible at top -->
@@ -995,7 +995,10 @@
         <textarea id="notepadText" rows="5" placeholder="Skriv notater her – lagres automatisk..." style="width:100%;padding:11px 13px;border:1px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;resize:vertical;outline:none;background:var(--s2);color:var(--text);box-sizing:border-box;" oninput="saveNotepad()"></textarea>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;">
           <span id="notepadSavedStatus" style="font-size:0.75rem;color:var(--text-3);">Lagres automatisk</span>
-          <button onclick="clearNotepad()" style="background:transparent;border:none;color:var(--text-3);font-family:'Nunito',sans-serif;font-size:0.78rem;cursor:pointer;font-weight:700;">Slett notater</button>
+          <div style="display:flex;gap:0.5rem;">
+            <button onclick="exportNotepad()" style="background:transparent;border:none;color:var(--text-3);font-family:'Nunito',sans-serif;font-size:0.78rem;cursor:pointer;font-weight:700;">📥 Last ned</button>
+            <button onclick="clearNotepad()" style="background:transparent;border:none;color:var(--text-3);font-family:'Nunito',sans-serif;font-size:0.78rem;cursor:pointer;font-weight:700;">Slett notater</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1310,6 +1313,10 @@
           <span>Generer alle oppgaver fra tekst</span>
           <div class="ai-spinner" id="aiSpinner"></div>
         </button>
+        <button onclick="generateAll()" style="background:linear-gradient(135deg,#7b5af5,#a78bfa);color:white;border:none;padding:13px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:flex;align-items:center;gap:8px;">
+          <span>🪄 Generer alt</span>
+          <div class="ai-spinner" id="genAllSpinner"></div>
+        </button>
       </div>
       <div class="ai-result" id="aiResult"></div>
     </div>
@@ -1610,7 +1617,7 @@
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="2" x2="22" y2="6"/><path d="M7.5 20.5 19 9l-4-4L3.5 16.5 2 22z"/></svg>
           Melding
         </label>
-        <textarea id="announcementText" placeholder="F.eks: Husk innlevering fredag! Lykke til med prøven!" style="width:100%;min-height:110px;border:1px solid var(--border-2);border-radius:10px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;resize:vertical;line-height:1.65;background:var(--s3);color:var(--text);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'"></textarea>
+        <textarea id="announcementText" placeholder="F.eks: Husk innlevering fredag! Lykke til med prøven!" style="width:100%;min-height:110px;border:1px solid var(--border-2);border-radius:10px;padding:12px 14px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;resize:vertical;line-height:1.65;background:var(--s3);color:var(--text);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" oninput="showAnnouncementPreview()"></textarea>
       </div>
 
       <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0.75rem;margin-bottom:1.25rem;align-items:end;" class="form-grid-2">
@@ -2693,19 +2700,22 @@
             <p style="color:var(--text-2);margin-bottom:1.5rem;font-size:0.95rem;">Velg en quizpakke. Elevene skriver inn en spillkode og svarer i sanntid.</p>
             <div class="form-row">
               <label>Velg emne / quizpakke</label>
-              <select id="crModuleSelect" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;outline:none;">
+              <select id="crModuleSelect" style="width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--border-2);font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;outline:none;background:var(--s2);color:var(--text);">
                 <option value="">— Velg emne —</option>
               </select>
             </div>
             <div class="form-row">
               <label>Tid per spørsmål (sekunder)</label>
-              <select id="crTimeLimit" style="width:160px;padding:12px 14px;border-radius:12px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;outline:none;">
+              <select id="crTimeLimit" style="width:160px;padding:12px 14px;border-radius:12px;border:2px solid var(--border-2);font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;outline:none;background:var(--s2);color:var(--text);">
                 <option value="10">10 sek</option><option value="15">15 sek</option>
                 <option value="20" selected>20 sek</option><option value="30">30 sek</option>
                 <option value="45">45 sek</option><option value="60">60 sek</option>
               </select>
             </div>
-            <button class="btn-primary" style="font-size:1.1rem;padding:14px 36px;" onclick="crCreateGame()">🎮 Opprett spillrom</button>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+              <button class="btn-primary" style="font-size:1.1rem;padding:14px 36px;" onclick="crCreateGame()">🎮 Opprett spillrom</button>
+              <button onclick="previewLiveQuiz()" style="background:var(--s3);color:var(--text-2);border:1px solid var(--border-2);padding:14px 22px;border-radius:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;">👁 Forhåndsvis spørsmål</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2887,8 +2897,8 @@
       <!-- Student name prompt if not logged in -->
       <div id="arbLoginPrompt" style="display:none;background:var(--s1);border-radius:14px;padding:1.5rem;box-shadow:var(--shadow);max-width:400px;margin-bottom:1.5rem;">
         <div style="font-weight:800;font-size:1.05rem;color:var(--text);margin-bottom:1rem;">👤 Hvem er du?</div>
-        <input type="text" id="arbNameInput" placeholder="Ditt navn" style="width:100%;padding:12px 14px;border:2px solid #e0e0e0;border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;margin-bottom:0.75rem;outline:none;" />
-        <input type="text" id="arbClassInput" placeholder="Klasse (f.eks. 9B)" style="width:100%;padding:12px 14px;border:2px solid #e0e0e0;border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;margin-bottom:0.75rem;outline:none;" />
+        <input type="text" id="arbNameInput" placeholder="Ditt navn" style="width:100%;padding:12px 14px;border:2px solid var(--border-2);border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;margin-bottom:0.75rem;outline:none;background:var(--s2);color:var(--text);" />
+        <input type="text" id="arbClassInput" placeholder="Klasse (f.eks. 9B)" style="width:100%;padding:12px 14px;border:2px solid var(--border-2);border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;margin-bottom:0.75rem;outline:none;background:var(--s2);color:var(--text);" />
         <button class="btn-primary" style="width:100%;" onclick="arbLogin()">Fortsett →</button>
       </div>
 
@@ -2919,9 +2929,9 @@
         <!-- Progress ring -->
         <div id="arbProgressWrap" style="text-align:center;">
           <svg width="54" height="54" viewBox="0 0 54 54">
-            <circle cx="27" cy="27" r="22" fill="none" stroke="#e0e0e0" stroke-width="5"/>
+            <circle cx="27" cy="27" r="22" fill="none" stroke="var(--border)" stroke-width="5"/>
             <circle cx="27" cy="27" r="22" fill="none" stroke="var(--c3)" stroke-width="5" stroke-linecap="round"
-              stroke-dasharray="138.2" stroke-dashoffset="138.2" id="arbProgressCircle" transform="rotate(-90 27 27)"/>
+              stroke-dasharray="138.2" stroke-dashoffset="138.2" id="arbProgressCircle" transform="rotate(-90 27 27)" stroke="var(--accent)"/>
           </svg>
           <div style="font-family:'Fredoka One',cursive;font-size:0.75rem;color:var(--c3);margin-top:-38px;position:relative;z-index:1;" id="arbProgressPct">0%</div>
         </div>
@@ -3049,7 +3059,7 @@ function showView(name) {
       tab.classList.add('active');
     }
   });
-  if (name === 'home') renderHomeModules();
+  if (name === 'home') { renderHomeModules(); _heroGreeting(); }
   if (name === 'tasks') { DB.loadModules().then(m => { state.modules = m; renderTaskModules(); }); }
   if (name === 'teacher') {
     if (!state.isTeacher) { showToast('⛔ Logg inn som lærer for å få tilgang'); return; }
@@ -3300,6 +3310,12 @@ function clearNotepad() {
     showToast('🗑 Notater slettet');
   });
 }
+function exportNotepad() {
+  const ta = document.getElementById('notepadText');
+  if (!ta?.value.trim()) { showToast('⚠️ Ingen notater å laste ned'); return; }
+  downloadFile('notater.txt', ta.value, 'text/plain');
+}
+
 function resetNotepadUI() {
   const body = document.getElementById('notepadBody');
   const chev = document.getElementById('notepadChevron');
@@ -3844,6 +3860,15 @@ function renderHomeModules() {
       ${isNewModule(m) ? '<span style="position:absolute;top:8px;left:8px;background:var(--c1);color:white;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;">NY</span>' : ''}
     </div>`;
   }).join('');
+}
+
+function _heroGreeting() {
+  if (!state.student?.name) return;
+  const h = new Date().getHours();
+  const tid = h < 12 ? 'morgen' : h < 18 ? 'ettermiddag' : 'kveld';
+  const fornavn = state.student.name.split(' ')[0];
+  const el = document.getElementById('heroTitle');
+  if (el) el.innerHTML = `God ${tid}, <span>${escHtml(fornavn)}</span>! 👋`;
 }
 
 function renderTaskModules() {
@@ -4643,6 +4668,21 @@ function saveAnnouncement() {
   loadAnnouncementEditor();
 }
 
+function showAnnouncementPreview() {
+  const text = document.getElementById('announcementText')?.value.trim();
+  const type = document.getElementById('announcementType')?.value || 'info';
+  const prev = document.getElementById('announcementPreview');
+  if (!prev) return;
+  if (!text) { prev.style.display = 'none'; return; }
+  const icons = { info: 'ℹ️', viktig: '⚠️', bra: '🎉' };
+  const colors = { info: 'rgba(123,143,253,0.1)', viktig: 'rgba(239,68,68,0.1)', bra: 'rgba(34,197,94,0.1)' };
+  const borders = { info: 'rgba(123,143,253,0.3)', viktig: 'rgba(239,68,68,0.3)', bra: 'rgba(34,197,94,0.3)' };
+  prev.style.display = 'block';
+  prev.style.background = colors[type] || colors.info;
+  prev.style.borderColor = borders[type] || borders.info;
+  prev.innerHTML = `<span style="margin-right:0.4rem;">${icons[type]||'ℹ️'}</span>${escHtml(text)}`;
+}
+
 function clearAnnouncement() {
   _showConfirm('Fjerne kunngjøringen?', () => {
     DB.deleteFeedback(ANNOUNCE_KEY);
@@ -4871,8 +4911,9 @@ function renderResults() {
       <div style="background:linear-gradient(135deg,#fdf4ff,#fce7ff);border-radius:12px;padding:0.875rem 1.25rem;flex:1;min-width:120px;"><div style="font-size:1.6rem;font-weight:800;color:var(--c5);">${numAnswers}</div><div style="font-size:0.78rem;color:var(--text-2);font-weight:700;">Totale svar</div></div>`;
   }
   if(!Object.keys(students).length){container.innerHTML='<p style="color:var(--text-3);">Ingen svar registrert ennå.</p>';return;}
-  container.innerHTML=Object.entries(students).map(([name,answers])=>`
-    <div style="border:2px solid #e8eaed;border-radius:14px;margin-bottom:0.75rem;overflow:hidden;">
+  const searchHtml=`<input type="text" id="studentResultSearch" placeholder="🔍 Filtrer elev..." oninput="filterStudentResults()" style="width:100%;padding:9px 16px;border:1px solid var(--border-2);border-radius:50px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;background:var(--s2);color:var(--text);box-sizing:border-box;margin-bottom:0.875rem;">`;
+  container.innerHTML=searchHtml+Object.entries(students).map(([name,answers])=>`
+    <div class="student-result-row" data-name="${escHtml(name.toLowerCase())}" style="border:1px solid var(--border);border-radius:14px;margin-bottom:0.75rem;overflow:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1rem;cursor:pointer;background:var(--s2);" onclick="toggleStudentResults('sr-${escHtml(name)}')">
         <div>
           <div style="font-weight:800;color:var(--text);">👤 ${escHtml(name)}</div>
@@ -4883,13 +4924,20 @@ function renderResults() {
           <span style="color:var(--text-3);font-size:1rem;">▼</span>
         </div>
       </div>
-      <div id="sr-${escHtml(name)}" style="display:none;padding:0.875rem 1rem;background:#fafafa;border-top:1px solid #f0f0f0;">
-        ${answers.length?answers.map(a=>`<div style="font-size:0.85rem;color:var(--text-2);padding:0.4rem 0;border-bottom:1px solid #f0f0f0;">${escHtml(a.key.split('_').slice(-2).join('_'))}: ${escHtml(String(a.val).substring(0,120))}</div>`).join(''):'<p style="color:var(--text-3);font-size:0.88rem;">Ingen svar ennå.</p>'}
+      <div id="sr-${escHtml(name)}" style="display:none;padding:0.875rem 1rem;background:var(--s1);border-top:1px solid var(--border);">
+        ${answers.length?answers.map(a=>`<div style="font-size:0.85rem;color:var(--text-2);padding:0.4rem 0;border-bottom:1px solid var(--border);">${escHtml(a.key.split('_').slice(-2).join('_'))}: ${escHtml(String(a.val).substring(0,120))}</div>`).join(''):'<p style="color:var(--text-3);font-size:0.88rem;">Ingen svar ennå.</p>'}
       </div>
     </div>`).join('');
 }
 
 function toggleStudentResults(id){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none';}
+
+function filterStudentResults() {
+  const q = (document.getElementById('studentResultSearch')?.value || '').toLowerCase();
+  document.querySelectorAll('.student-result-row').forEach(row => {
+    row.style.display = (row.dataset.name || '').includes(q) ? '' : 'none';
+  });
+}
 
 // ====== TEACHER STATISTICS ======
 function renderTeacherStats() {
@@ -5423,6 +5471,20 @@ Alt på ${s.language}. Kortfattede svar.`;
   renderPreviewPanel();
   updatePublishBarHint();
   showToast('✅ Oppgaver generert!');
+}
+
+async function generateAll() {
+  const text = document.getElementById('moduleText')?.value.trim();
+  if (!text) { showToast('⚠️ Skriv inn fagtekst først!'); return; }
+  const btn = document.getElementById('genAllSpinner')?.closest('button');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.65'; }
+  try {
+    await generateWithAI();
+    if (state.tempWrite.length === 0) await generateWriteTask();
+  } finally {
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+  }
+  showToast('🪄 Alt generert!');
 }
 
 async function generateFromGoal(){
@@ -9376,6 +9438,17 @@ function arbRenderModuleGrid() {
     grid.innerHTML = ''; empty.style.display = 'block'; return;
   }
   empty.style.display = 'none';
+  // Search field
+  let searchEl = document.getElementById('arbModuleSearch');
+  if (!searchEl) {
+    searchEl = document.createElement('input');
+    searchEl.type = 'text';
+    searchEl.id = 'arbModuleSearch';
+    searchEl.placeholder = '🔍 Søk emner...';
+    searchEl.oninput = filterArbModules;
+    searchEl.style.cssText = 'width:100%;padding:10px 16px;border:1px solid var(--border-2);border-radius:50px;font-family:\'Nunito\',sans-serif;font-size:0.92rem;outline:none;background:var(--s2);color:var(--text);margin-bottom:1rem;box-sizing:border-box;';
+    grid.parentNode.insertBefore(searchEl, grid);
+  }
   const colors = ['#FF6B6B','#4D96FF','#6BCB77','#FFD93D','#C77DFF'];
   grid.innerHTML = state.modules.map((m, i) => {
     const tasks = countTasks(m);
@@ -9387,8 +9460,9 @@ function arbRenderModuleGrid() {
     if (m.discussion?.length) chips.push(`💬 ${m.discussion.length} drøfting`);
     if (m.write?.length) chips.push(`✍️ Skriving`);
     if (m.flashcards?.length) chips.push(`🃏 Flashcards`);
-    return `<div class="arb-module-card" onclick="arbOpenModule(${i})">
+    return `<div class="arb-module-card" onclick="arbOpenModule(${i})" style="position:relative;">
       <div style="position:absolute;top:0;left:0;right:0;height:5px;background:${colors[i%5]};border-radius:20px 20px 0 0;"></div>
+      ${pct === 100 ? '<span style="position:absolute;top:12px;right:12px;background:rgba(34,197,94,0.2);color:#4ade80;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(34,197,94,0.3);">✅ Fullført</span>' : ''}
       <span class="arb-emoji">${m.emoji||'📚'}</span>
       <h3>${escHtml(m.name)}</h3>
       <p>${escHtml(m.desc||'')}</p>
@@ -9397,6 +9471,15 @@ function arbRenderModuleGrid() {
       <div style="font-size:0.78rem;color:var(--text-3);font-weight:700;margin-top:0.3rem;">${pct > 0 ? pct+'% fullført' : 'Ikke startet'}</div>
     </div>`;
   }).join('');
+  filterArbModules();
+}
+
+function filterArbModules() {
+  const q = (document.getElementById('arbModuleSearch')?.value || '').toLowerCase();
+  document.querySelectorAll('#arbModuleGrid .arb-module-card').forEach(card => {
+    const name = card.querySelector('h3')?.textContent.toLowerCase() || '';
+    card.style.display = name.includes(q) ? '' : 'none';
+  });
 }
 
 function arbGetModuleProgress(moduleIdx) {
@@ -9599,8 +9682,15 @@ function arbRenderQuiz(m) {
   if (m.examMode && m.quiz?.length) { _arbExamRender(m); return; }
   const sKey = arbSKey();
   const container = document.getElementById('arbTaskContent');
+  const totalQ = m.quiz.length;
+  const answeredCount = m.quiz.filter((q, qi) => arbLoad(`quiz_${qi}`) !== null).length;
+  const correctCount = m.quiz.filter((q, qi) => arbLoad(`quiz_${qi}`) === 'correct').length;
+  const allAnswered = answeredCount === totalQ;
   let html = `<div class="arb-content-card">
-    <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin-bottom:1.25rem;">Quiz</h2>`;
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
+      <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin:0;">Quiz</h2>
+      ${!allAnswered && answeredCount > 0 ? `<button onclick="_scrollToNextQuiz()" style="background:var(--s3);color:var(--accent);border:1px solid var(--border-2);padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">↓ Neste ubesvarte</button>` : ''}
+    </div>`;
   m.quiz.forEach((q, qi) => {
     const savedAns = arbLoad(`quiz_${qi}`);
     const answered = savedAns !== null;
@@ -9629,6 +9719,14 @@ function arbRenderQuiz(m) {
       <div id="arb-af-${qi}" class="print-hide"></div>
     </div>`;
   });
+  if (allAnswered) {
+    html += `<div style="text-align:center;padding:1.25rem 0 0.5rem;">
+      <div style="font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:0.75rem;">
+        ${correctCount >= totalQ * 0.8 ? '🏆' : correctCount >= totalQ * 0.5 ? '👍' : '📚'} ${correctCount}/${totalQ} riktige
+      </div>
+      <button onclick="arbResetQuiz(${arbState.moduleIdx})" style="background:var(--s3);color:var(--text-2);border:1px solid var(--border-2);padding:10px 24px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">🔄 Prøv på nytt</button>
+    </div>`;
+  }
   html += '</div>';
   container.innerHTML = html;
   // Load teacher comments for answered questions
@@ -9674,6 +9772,7 @@ function arbCheckAnswer(qi, isCorrect, optIdx, explain, correctMap) {
   fb.textContent = (isCorrect ? '✅ Riktig!' : '❌ Feil') + (explain ? ' – ' + explain : '');
   card.appendChild(fb);
   card.classList.add(isCorrect ? 'answered' : 'answered-wrong');
+  setTimeout(() => fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 120);
   arbSave(`quiz_${qi}`, isCorrect ? 'correct' : 'wrong');
   arbMarkDone('quiz');
   arbUpdateProgress(arbState.moduleIdx);
@@ -9683,6 +9782,19 @@ function arbCheckAnswer(qi, isCorrect, optIdx, explain, correctMap) {
   const comment = localStorage.getItem(storKey);
   const afSlot = document.getElementById('arb-af-' + qi);
   if (afSlot && comment) afSlot.innerHTML = `<div class="af-box"><strong>💬 Lærer:</strong> ${escHtml(comment)}</div>`;
+}
+
+function arbResetQuiz(moduleIdx) {
+  const sKey = arbSKey();
+  const prefix = `arb_${sKey}_m${moduleIdx}_quiz_`;
+  Object.keys(localStorage).filter(k => k.startsWith(prefix)).forEach(k => localStorage.removeItem(k));
+  const m = state.modules[moduleIdx];
+  if (m) arbRenderQuiz(m);
+}
+
+function _scrollToNextQuiz() {
+  const cards = document.querySelectorAll('.arb-quiz-card:not(.answered):not(.answered-wrong)');
+  if (cards[0]) cards[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // ===== EKSAMEN-MODUS =====
@@ -9772,7 +9884,7 @@ function arbRenderDisc(m) {
     const saved = arbLoad(`disc_${di}`) || '';
     html += `<div class="arb-disc-card">
       <div class="arb-disc-prompt">💬 ${escHtml(d)}</div>
-      <textarea id="arb-disc-${di}" rows="4" style="width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;resize:vertical;outline:none;" placeholder="Skriv svaret ditt her..." oninput="arbDiscCount(${di},this.value)">${escHtml(saved)}</textarea>
+      <textarea id="arb-disc-${di}" rows="4" style="width:100%;padding:10px 12px;border:2px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;resize:vertical;outline:none;background:var(--s2);color:var(--text);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" placeholder="Skriv svaret ditt her..." oninput="arbDiscCount(${di},this.value)">${escHtml(saved)}</textarea>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:0.5rem;">
           <button onclick="arbSaveDisc(${di})" style="background:var(--c4);color:white;border:none;padding:8px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Lagre svar</button>
@@ -9819,6 +9931,9 @@ function arbRenderWrite(m) {
         </div>
       </div>
       <textarea id="arb-write-${wi}" rows="8" style="width:100%;padding:12px 14px;border:2px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.93rem;resize:vertical;outline:none;line-height:1.6;background:var(--s2);color:var(--text);transition:border-color 0.2s;" placeholder="Skriv besvarelsen din her..." oninput="arbWriteCount(${wi},${w.minWords||100});arbAutoSave(${wi},${w.minWords||100})" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'">${escHtml(saved)}</textarea>
+      <div style="height:3px;background:var(--border);border-radius:99px;margin-top:0.5rem;overflow:hidden;">
+        <div id="arb-wc-bar-${wi}" style="height:100%;width:${Math.min(wordCount/(w.minWords||100),1)*100}%;background:var(--c3);transition:width 0.3s;border-radius:99px;"></div>
+      </div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;">
         <div style="display:flex;align-items:center;gap:0.5rem;"><div class="arb-wordcount${minOk?' ok':''}" id="arb-wc-${wi}">${wordCount} ord${minOk?' ✅':' (trenger '+(w.minWords||100)+' ord)'}</div><span id="arb-autosave-dot-${wi}" style="display:none;font-size:0.73rem;color:var(--c3);font-weight:700;">● Lagret automatisk</span></div>
         <div style="display:flex;align-items:center;gap:0.5rem;">
@@ -9841,6 +9956,8 @@ function arbWriteCount(wi, minWords) {
     el.textContent = count + ' ord' + (ok ? ' ✅' : ' (trenger '+minWords+' ord)');
     el.className = 'arb-wordcount' + (ok ? ' ok' : '');
   }
+  const bar = document.getElementById('arb-wc-bar-' + wi);
+  if (bar) bar.style.width = (Math.min(count / minWords, 1) * 100) + '%';
 }
 
 function arbSaveWrite(wi, minWords) {
@@ -9859,12 +9976,12 @@ function arbRenderVideo(m) {
     <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin-bottom:1.25rem;">🎬 Video</h2>`;
   m.videos.forEach((v, vi) => {
     const ytId = v.url ? v.url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)?.[1] : null;
-    html += `<div style="background:#f8f9fa;border-radius:14px;padding:1.25rem;margin-bottom:1rem;border:2px solid #e8eaed;">
+    html += `<div style="background:var(--s2);border-radius:14px;padding:1.25rem;margin-bottom:1rem;border:1px solid var(--border);">
       <div style="font-weight:800;font-size:1rem;color:var(--text);margin-bottom:0.75rem;">🎬 ${escHtml(v.title)}</div>
       ${ytId ? `<div style="position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;margin-bottom:0.75rem;">
         <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
       </div>` : (v.url ? `<a href="${escHtml(v.url)}" target="_blank" style="color:var(--c4);font-weight:700;font-size:0.9rem;">${escHtml(v.url)}</a>` : '')}
-      ${v.task ? `<div style="background:#fffbeb;border-radius:10px;padding:0.75rem 1rem;font-size:0.88rem;font-weight:600;color:var(--text-2);border-left:3px solid var(--c2);">📋 ${escHtml(v.task)}</div>` : ''}
+      ${v.task ? `<div style="background:rgba(245,158,11,0.1);border-radius:10px;padding:0.75rem 1rem;font-size:0.88rem;font-weight:600;color:var(--text-2);border-left:3px solid var(--c2);">📋 ${escHtml(v.task)}</div>` : ''}
     </div>`;
   });
   html += '</div>';
@@ -9907,9 +10024,9 @@ function arbRenderFcCard(m) {
       <span></span>
     </div>
     <div id="arbFcRating" style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.75rem;flex-wrap:wrap;">
-      <button onclick="arbFcRate('hard')" style="background:#fee2e2;color:#991b1b;border:none;border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;">❌ Vanskelig</button>
-      <button onclick="arbFcRate('ok')" style="background:#fef3c7;color:#92400e;border:none;border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;">🤔 Usikker</button>
-      <button onclick="arbFcRate('easy')" style="background:#d1fae5;color:#065f46;border:none;border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;">✅ Kunne det</button>
+      <button onclick="arbFcRate('hard')" style="background:rgba(239,68,68,0.15);color:var(--c1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;transition:background 0.15s;">❌ Vanskelig</button>
+      <button onclick="arbFcRate('ok')" style="background:rgba(245,158,11,0.15);color:var(--c2);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;transition:background 0.15s;">🤔 Usikker</button>
+      <button onclick="arbFcRate('easy')" style="background:rgba(34,197,94,0.15);color:var(--c3);border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;transition:background 0.15s;">✅ Kunne det</button>
     </div>
   </div>`;
 }
@@ -9952,9 +10069,9 @@ function _arbFcShowSummary(m) {
     <div style="font-size:3rem;margin-bottom:0.5rem;">🎉</div>
     <h2 style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--text);margin-bottom:1rem;">Runden er ferdig!</h2>
     <div style="display:flex;gap:1rem;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap;">
-      <div style="background:#fee2e2;border-radius:12px;padding:0.75rem 1.25rem;"><div style="font-size:1.5rem;font-weight:900;color:#991b1b;">${hard}</div><div style="font-size:0.8rem;color:#b91c1c;">Vanskelig</div></div>
-      <div style="background:#fef3c7;border-radius:12px;padding:0.75rem 1.25rem;"><div style="font-size:1.5rem;font-weight:900;color:#92400e;">${ok}</div><div style="font-size:0.8rem;color:#b45309;">Usikker</div></div>
-      <div style="background:#d1fae5;border-radius:12px;padding:0.75rem 1.25rem;"><div style="font-size:1.5rem;font-weight:900;color:#065f46;">${easy}</div><div style="font-size:0.8rem;color:#047857;">Kunne det</div></div>
+      <div style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:0.75rem 1.25rem;"><div style="font-size:1.5rem;font-weight:900;color:var(--c1);">${hard}</div><div style="font-size:0.8rem;color:var(--text-2);">Vanskelig</div></div>
+      <div style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.25);border-radius:12px;padding:0.75rem 1.25rem;"><div style="font-size:1.5rem;font-weight:900;color:var(--c2);">${ok}</div><div style="font-size:0.8rem;color:var(--text-2);">Usikker</div></div>
+      <div style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.25);border-radius:12px;padding:0.75rem 1.25rem;"><div style="font-size:1.5rem;font-weight:900;color:var(--c3);">${easy}</div><div style="font-size:0.8rem;color:var(--text-2);">Kunne det</div></div>
     </div>
     <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
       ${repeatCount > 0 ? `<button onclick="_arbFcRestart('repeat')" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.7rem 1.25rem;font-weight:700;cursor:pointer;font-size:0.95rem;">🔄 Øv på ${repeatCount} kort til</button>` : ''}
@@ -10046,6 +10163,23 @@ function sjShow(phase) {
   });
   const el = document.getElementById('sj-' + phase);
   if (el) el.style.display = 'block';
+}
+
+function previewLiveQuiz() {
+  const sel = document.getElementById('crModuleSelect');
+  if (!sel?.value) { showToast('⚠️ Velg et emne først'); return; }
+  const mod = state.modules[parseInt(sel.value)];
+  if (!mod?.quiz?.length) { showToast('⚠️ Ingen quiz-spørsmål i dette emnet'); return; }
+  const listHtml = mod.quiz.map((q, i) => `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:0.88rem;color:var(--text);"><strong style="color:var(--text-3);">${i+1}.</strong> ${escHtml(q.question)}</div>`).join('');
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.15s ease;';
+  ov.innerHTML = `<div style="background:var(--s2);border:1px solid var(--border-2);border-radius:16px;padding:1.5rem 1.75rem;max-width:480px;width:92%;max-height:80vh;overflow-y:auto;">
+    <div style="font-weight:800;font-size:1.1rem;color:var(--text);margin-bottom:1rem;">${mod.emoji||'📚'} ${escHtml(mod.name)} — ${mod.quiz.length} spørsmål</div>
+    ${listHtml}
+    <button onclick="this.closest('[style*=fixed]').remove()" style="margin-top:1rem;background:var(--s3);color:var(--text-2);border:1px solid var(--border-2);padding:9px 24px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;width:100%;">Lukk</button>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
 }
 
 // ---- Teacher: Create game ----
@@ -10793,6 +10927,15 @@ document.addEventListener('keydown', function(e) {
       e.preventDefault();
       const publishBtn = document.querySelector('.publish-bar .btn-primary');
       if (publishBtn) { publishBtn.click(); showToast('💾 Lagret!'); }
+    }
+  }
+  // 1/2/3: flashcard rating
+  if (!e.ctrlKey && !e.metaKey && (e.key === '1' || e.key === '2' || e.key === '3')) {
+    const tag = document.activeElement?.tagName;
+    if (!['INPUT','TEXTAREA','SELECT'].includes(tag) && document.getElementById('arbTaskContent')?.querySelector('.arb-fc-wrapper')) {
+      if (e.key === '1') arbFcRate('hard');
+      else if (e.key === '2') arbFcRate('ok');
+      else if (e.key === '3') arbFcRate('easy');
     }
   }
   // ?: vis hurtigtaster (ikke i input-felt)
