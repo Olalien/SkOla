@@ -9880,7 +9880,7 @@ function arbRenderDisc(m) {
           <button onclick="arbSaveDisc(${di})" style="background:var(--c4);color:white;border:none;padding:8px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Lagre svar</button>
           <span class="arb-save-indicator" id="arb-disc-saved-${di}">✓ Lagret!</span>
         </div>
-        <span id="arb-disc-count-${di}" style="font-size:0.75rem;color:var(--text-3);font-weight:700;">${saved.length} tegn</span>
+        <span id="arb-disc-count-${di}" style="font-size:0.75rem;color:var(--text-3);font-weight:700;">${saved.trim() ? saved.trim().split(/\s+/).filter(w=>w).length : 0} ord</span>
       </div>
     </div>`;
   });
@@ -9890,7 +9890,8 @@ function arbRenderDisc(m) {
 
 function arbDiscCount(di, val) {
   const el = document.getElementById('arb-disc-count-' + di);
-  if (el) el.textContent = val.length + ' tegn';
+  const wordCount = val.trim() ? val.trim().split(/\s+/).filter(w => w).length : 0;
+  if (el) el.textContent = wordCount + ' ord';
 }
 function arbSaveDisc(di) {
   const val = document.getElementById('arb-disc-' + di).value;
