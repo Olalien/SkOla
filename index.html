@@ -59,6 +59,7 @@
   body{padding-top:58px;}
   .progress-top{position:fixed;top:58px;left:0;right:0;height:3px;background:transparent;z-index:499;}
   .progress-fill{height:100%;background:linear-gradient(90deg,#7b8ffd,#a855f7,#ec4899,#7b8ffd);background-size:200% 100%;animation:progressShimmer 2s linear infinite;width:0;transition:width 0.4s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px rgba(123,143,253,0.7);}
+  #arbProgressCircle{transition:stroke-dashoffset 0.6s cubic-bezier(.4,0,.2,1);}
   @keyframes progressShimmer{0%{background-position:0% 0%;}100%{background-position:200% 0%;}}
   .logo{font-family:'Fredoka One',cursive;font-size:1.45rem;color:var(--text);letter-spacing:0.5px;flex-shrink:0;cursor:pointer;transition:transform 0.2s;}
   .logo:hover{transform:scale(1.04);}
@@ -180,8 +181,9 @@
   .back-btn{background:var(--s2);color:var(--text-2);border:1px solid var(--border-2);padding:9px 16px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;font-size:0.88rem;min-height:44px;transition:all 0.18s;}
   .back-btn:hover{background:var(--s3);color:var(--text);}
   .task-title{font-family:'Fredoka One',cursive;font-size:clamp(1.1rem,4vw,1.9rem);color:var(--text);}
-  .task-tabs{display:flex;gap:0.35rem;overflow-x:auto;scrollbar-width:none;margin-bottom:1.1rem;padding-bottom:3px;-webkit-overflow-scrolling:touch;}
+  .task-tabs{display:flex;gap:0.35rem;overflow-x:auto;scrollbar-width:none;margin-bottom:1.1rem;padding-bottom:3px;-webkit-overflow-scrolling:touch;mask-image:linear-gradient(to right,black 85%,transparent 100%);-webkit-mask-image:linear-gradient(to right,black 85%,transparent 100%);}
   .task-tabs::-webkit-scrollbar{display:none;}
+  #arbTaskTabs{mask-image:linear-gradient(to right,black 85%,transparent 100%);-webkit-mask-image:linear-gradient(to right,black 85%,transparent 100%);}
   .task-tab{padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:var(--s1);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;font-size:0.82rem;transition:all 0.18s;color:var(--text-2);white-space:nowrap;flex-shrink:0;min-height:44px;display:flex;align-items:center;}
   .task-tab:hover{background:var(--s2);color:var(--text);}
   .task-tab.active{background:var(--accent-g);color:var(--accent-h);border-color:rgba(79,110,247,0.3);font-weight:800;}
@@ -258,9 +260,10 @@
   .result-row .result-detail{font-size:0.8rem;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%;}
   .result-row .result-score{background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.3);padding:3px 10px;border-radius:6px;font-weight:800;font-size:0.8rem;flex-shrink:0;}
 
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:999;align-items:flex-end;justify-content:center;}
-  .modal-overlay.open{display:flex;}
-  .modal{background:linear-gradient(160deg,#0b0d1e,#0f1126);border:1px solid rgba(123,143,253,0.2);border-radius:24px 24px 0 0;padding:1.75rem;width:100%;max-width:520px;box-shadow:0 -16px 64px rgba(0,0,0,0.8),0 -1px 0 rgba(255,255,255,0.06),0 0 0 1px rgba(123,143,253,0.08);max-height:92vh;overflow-y:auto;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:999;align-items:flex-end;justify-content:center;display:flex;pointer-events:none;opacity:0;transition:opacity 0.2s ease;}
+  .modal-overlay.open{pointer-events:auto;opacity:1;}
+  .modal{background:linear-gradient(160deg,#0b0d1e,#0f1126);border:1px solid rgba(123,143,253,0.2);border-radius:24px 24px 0 0;padding:1.75rem;width:100%;max-width:520px;box-shadow:0 -16px 64px rgba(0,0,0,0.8),0 -1px 0 rgba(255,255,255,0.06),0 0 0 1px rgba(123,143,253,0.08);max-height:92vh;overflow-y:auto;transform:translateY(24px);opacity:0;transition:transform 0.28s cubic-bezier(.34,1.36,.64,1),opacity 0.2s ease;}
+  .modal-overlay.open .modal{transform:translateY(0);opacity:1;}
   .modal h2{font-family:'Fredoka One',cursive;font-size:1.4rem;margin-bottom:0.9rem;color:rgba(255,255,255,0.95);text-align:center;}
   .modal input{width:100%;padding:12px 14px;border:1px solid var(--border-2);border-radius:11px;font-family:'Nunito',sans-serif;font-size:1rem;outline:none;margin-bottom:0.875rem;background:var(--s2);color:var(--text);transition:all 0.2s;}
   .modal input:focus{border-color:var(--accent);box-shadow:var(--glow-sm);}
@@ -362,10 +365,11 @@
   .arb-progress-bar{height:3px;background:var(--s3);border-radius:50px;margin-top:0.5rem;overflow:hidden;}
   .arb-progress-fill{height:100%;background:var(--accent);border-radius:50px;transition:width 0.5s ease;}
   .arb-task-tab{padding:7px 13px;border-radius:8px;border:1px solid var(--border);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.18s;background:var(--s1);color:var(--text-2);white-space:nowrap;flex-shrink:0;}
+  #arbTaskContent.tab-fade{animation:fadeInUp 0.18s ease;}
   .arb-task-tab:hover{background:var(--s2);color:var(--text);}
   .arb-task-tab.active{background:var(--accent-g);color:var(--accent-h);border-color:rgba(79,110,247,0.3);}
   .arb-content-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.1rem;box-shadow:var(--shadow);}
-  .arb-quiz-card{background:var(--s2);border-radius:14px;padding:1rem;margin-bottom:0.875rem;border:1px solid var(--border);transition:border-color 0.2s;}
+  .arb-quiz-card{background:var(--s2);border-radius:14px;padding:1rem;margin-bottom:0.875rem;border:1px solid var(--border);transition:border-color 0.2s;user-select:none;}
   .arb-quiz-card.answered{border-color:rgba(34,197,94,0.3);box-shadow:0 0 0 1px rgba(34,197,94,0.12);}
   .arb-quiz-card.answered-wrong{border-color:rgba(239,68,68,0.3);box-shadow:0 0 0 1px rgba(239,68,68,0.12);}
   .arb-quiz-question{font-weight:800;font-size:0.93rem;color:var(--text);margin-bottom:0.7rem;line-height:1.4;}
@@ -575,7 +579,7 @@
   .tr-tab-mobile-select{display:none;width:100%;padding:10px 14px;border:1px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.92rem;background:var(--s2);color:var(--text);outline:none;cursor:pointer;}
   .tr-tab{padding:8px 16px;border-radius:8px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.83rem;cursor:pointer;transition:all 0.18s;background:transparent;color:var(--text-2);white-space:nowrap;}
   .tr-tab:hover{background:var(--s3);color:var(--text);}
-  .tr-tab.active{background:linear-gradient(135deg,var(--accent),var(--accent-h));color:white;box-shadow:0 2px 10px rgba(85,120,245,0.35);}
+  .tr-tab.active{background:var(--accent-g);color:var(--accent);border:1px solid rgba(123,143,253,0.3);}
   .tr-pane{display:none;}
   .tr-pane.active{display:block;}
   .task-cat-tabs{display:flex;gap:0.3rem;overflow-x:auto;scrollbar-width:none;padding-bottom:0.6rem;margin-bottom:1.25rem;flex-wrap:nowrap;border-bottom:1px solid var(--border);}
@@ -752,7 +756,7 @@
   body.light .tts-btn.speaking{color:#15803d;}
 
   /* ===== TEKSTMARKERING med notater ===== */
-  .mark-popover{position:fixed;background:var(--s1);border:1px solid var(--border-2);border-radius:10px;padding:6px 10px;box-shadow:var(--shadow-md);z-index:1000;display:flex;gap:0.4rem;align-items:center;animation:fadeIn 0.15s ease;}
+  .mark-popover{position:fixed;background:var(--s3);border:1px solid rgba(123,143,253,0.4);border-radius:10px;padding:6px 10px;box-shadow:0 4px 24px rgba(0,0,0,0.8),0 0 0 1px var(--border-2);z-index:1000;display:flex;gap:0.4rem;align-items:center;animation:fadeIn 0.15s ease;}
   .mark-color-btn{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform 0.15s;flex-shrink:0;}
   .mark-color-btn:hover{transform:scale(1.2);}
   .mark-color-btn.selected{border-color:var(--text);}
@@ -947,6 +951,9 @@
       <span class="es-icon">📭</span>
       <h3>Ingen emner ennå</h3>
       <p>Læreren din har ikke lagt inn noe innhold ennå.</p>
+      <div id="homeEmptyTeacherCta" style="display:none;margin-top:1rem;">
+        <button onclick="showView('teacher')" style="padding:10px 24px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-h));color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;box-shadow:0 4px 16px rgba(123,143,253,0.4);">+ Opprett første emne</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3286,11 +3293,12 @@ const _saveNoteDebounced = debounce(() => {
 }, 600);
 function saveNotepad() { _saveNoteDebounced(); }
 function clearNotepad() {
-  if (!confirm('Slette notatene for dette emnet?')) return;
-  localStorage.removeItem(_noteKey());
-  const ta = document.getElementById('notepadText');
-  if (ta) ta.value = '';
-  showToast('🗑 Notater slettet');
+  _showConfirm('Slette notatene for dette emnet?', () => {
+    localStorage.removeItem(_noteKey());
+    const ta = document.getElementById('notepadText');
+    if (ta) ta.value = '';
+    showToast('🗑 Notater slettet');
+  });
 }
 function resetNotepadUI() {
   const body = document.getElementById('notepadBody');
@@ -3372,7 +3380,7 @@ function saveAnswersToStorage() {
 async function studentLogin() {
   const name = document.getElementById('studentName').value.trim();
   const cls  = document.getElementById('studentClass').value.trim();
-  if (!name) { alert('Skriv inn navnet ditt!'); return; }
+  if (!name) { showToast('⚠️ Skriv inn navnet ditt!'); return; }
   state.student = { name, cls, joinedAt: new Date().toLocaleString('no') };
   localStorage.setItem('lh_student', JSON.stringify(state.student));
   const btn = document.querySelector('#studentLoginBox button');
@@ -3670,7 +3678,7 @@ function saveSettingsApiKey() {
 }
 async function testSettingsApiKey() {
   const key = document.getElementById('settingsApiInput')?.value.trim() || localStorage.getItem('olaskole_apikey');
-  if (!key) { alert('Lim inn en API-nøkkel først'); return; }
+  if (!key) { showToast('⚠️ Lim inn en API-nøkkel først'); return; }
   const fb = document.getElementById('settingsApiFeedback');
   if (fb) { fb.style.display='block'; fb.style.background='#f0f0f0'; fb.style.color='#555'; fb.textContent='⏳ Tester…'; }
   try {
@@ -3689,7 +3697,7 @@ function deleteSettingsApiKey() {
 }
 function changePassword() {
   const np = document.getElementById('newPassInput')?.value.trim();
-  if (!np || np.length < 4) { alert('Passord må være minst 4 tegn'); return; }
+  if (!np || np.length < 4) { showToast('⚠️ Passord må være minst 4 tegn'); return; }
   window._teacherPassOverride = np;
   const fb = document.getElementById('passFeedback');
   if (fb) { fb.style.display='block'; fb.style.background='#dcfce7'; fb.style.color='#166534'; fb.textContent='✅ Passord endret for denne sesjonen'; setTimeout(()=>fb.style.display='none',2500); }
@@ -3709,7 +3717,7 @@ function initMsToken() {
 }
 function testMsLogin() { msLogin(localStorage.getItem('olaskole_ms_clientid')); }
 function msLogin(clientId) {
-  if (!clientId) { alert('Lagre Azure App-ID først'); return; }
+  if (!clientId) { showToast('⚠️ Lagre Azure App-ID først'); return; }
   const scopes = 'Files.ReadWrite Notes.Create Notes.ReadWrite openid profile';
   const redirect = encodeURIComponent(window.location.href.split('?')[0]);
   const url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=token&redirect_uri=${redirect}&scope=${encodeURIComponent(scopes)}&response_mode=fragment`;
@@ -3814,7 +3822,13 @@ function renderHomeModules() {
   if (!grid) return;
   const colors = ['color-1','color-2','color-3','color-4','color-5'];
   const visible = state.modules.filter(m => !m.locked);
-  if (visible.length === 0) { grid.innerHTML = ''; if (empty) empty.style.display='block'; return; }
+  if (visible.length === 0) {
+    grid.innerHTML = '';
+    if (empty) empty.style.display='block';
+    const cta = document.getElementById('homeEmptyTeacherCta');
+    if (cta) cta.style.display = state.isTeacher ? 'block' : 'none';
+    return;
+  }
   if (empty) empty.style.display = 'none';
   renderSubjectFilter();
   grid.innerHTML = visible.map((m, i) => {
@@ -4630,17 +4644,18 @@ function saveAnnouncement() {
 }
 
 function clearAnnouncement() {
-  if (!confirm('Fjerne kunngjøringen?')) return;
-  DB.deleteFeedback(ANNOUNCE_KEY);
-  localStorage.removeItem(ANNOUNCE_KEY);
-  const ta = document.getElementById('announcementText');
-  if (ta) ta.value = '';
-  const prev = document.getElementById('announcementPreview');
-  if (prev) { prev.style.display='none'; prev.innerHTML=''; }
-  const status = document.getElementById('announcementStatus');
-  if (status) status.textContent = 'Kunngjøringen er fjernet.';
-  showToast('🗑 Kunngjøring fjernet');
-  hideAnnouncementBanner();
+  _showConfirm('Fjerne kunngjøringen?', () => {
+    DB.deleteFeedback(ANNOUNCE_KEY);
+    localStorage.removeItem(ANNOUNCE_KEY);
+    const ta = document.getElementById('announcementText');
+    if (ta) ta.value = '';
+    const prev = document.getElementById('announcementPreview');
+    if (prev) { prev.style.display='none'; prev.innerHTML=''; }
+    const status = document.getElementById('announcementStatus');
+    if (status) status.textContent = 'Kunngjøringen er fjernet.';
+    showToast('🗑 Kunngjøring fjernet');
+    hideAnnouncementBanner();
+  }, 'Fjern', 'var(--c1)');
 }
 
 async function loadAnnouncementEditor() {
@@ -4801,11 +4816,11 @@ function renderPreviewPanel() {
 
 function escHtml(str){return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-function pvDelQuiz(i){if(confirm('Slett?')){state.tempQuiz.splice(i,1);renderPreviewPanel();updatePublishBarHint();}}
-function pvDelDisc(i){if(confirm('Slett?')){state.tempDisc.splice(i,1);renderPreviewPanel();updatePublishBarHint();}}
-function pvDelWrite(i){if(confirm('Slett?')){state.tempWrite.splice(i,1);renderPreviewPanel();updatePublishBarHint();}}
-function pvDelVideo(i){if(confirm('Slett?')){state.tempVideos.splice(i,1);renderPreviewPanel();updatePublishBarHint();}}
-function pvDelFlash(i){if(confirm('Slett?')){state.tempFlashcards.splice(i,1);renderPreviewPanel();updatePublishBarHint();}}
+function pvDelQuiz(i){_showConfirm('Slette dette quizspørsmålet?',()=>{state.tempQuiz.splice(i,1);renderPreviewPanel();updatePublishBarHint();});}
+function pvDelDisc(i){_showConfirm('Slette dette drøftingsspørsmålet?',()=>{state.tempDisc.splice(i,1);renderPreviewPanel();updatePublishBarHint();});}
+function pvDelWrite(i){_showConfirm('Slette denne skriveoppgaven?',()=>{state.tempWrite.splice(i,1);renderPreviewPanel();updatePublishBarHint();});}
+function pvDelVideo(i){_showConfirm('Slette denne videoen?',()=>{state.tempVideos.splice(i,1);renderPreviewPanel();updatePublishBarHint();});}
+function pvDelFlash(i){_showConfirm('Slette dette flashkortet?',()=>{state.tempFlashcards.splice(i,1);renderPreviewPanel();updatePublishBarHint();});}
 
 function pvEditQuiz(i){const q=state.tempQuiz[i];document.getElementById('quizQ').value=q.question;document.getElementById('quizA').value=q.a;document.getElementById('quizB').value=q.b;document.getElementById('quizC').value=q.c;document.getElementById('quizD').value=q.d;document.getElementById('quizExplain').value=q.explain||'';state.tempQuiz.splice(i,1);tcTab('quiz');renderPreviewPanel();}
 function pvEditDisc(i){const d=state.tempDisc[i];document.getElementById('discQ').value=d;state.tempDisc.splice(i,1);tcTab('disc');renderPreviewPanel();}
@@ -5149,11 +5164,12 @@ function viewStudentDetail(studentName) {
 }
 
 async function removeStudent(name){
-  if(!confirm('Fjern '+name+' fra klasselisten?'))return;
-  const roster=getRosterSync().filter(r=>r.name!==name);
-  _rosterCache=roster;
-  await DB.saveRoster(roster);
-  renderClassRoster();
+  _showConfirm('Fjern ' + name + ' fra klasselisten?', async () => {
+    const roster=getRosterSync().filter(r=>r.name!==name);
+    _rosterCache=roster;
+    await DB.saveRoster(roster);
+    renderClassRoster();
+  }, 'Fjern', 'var(--c1)');
 }
 
 // ====== ELEVGRUPPER ======
@@ -5217,9 +5233,10 @@ function saveGroup() {
 }
 function deleteGroup(id) {
   if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
-  if (!confirm('Slette denne gruppen?')) return;
-  _saveGroups(_loadGroups().filter(g => g.id !== id));
-  renderGroups();
+  _showConfirm('Slette denne gruppen?', () => {
+    _saveGroups(_loadGroups().filter(g => g.id !== id));
+    renderGroups();
+  });
 }
 function renderGroups() {
   const container = document.getElementById('groupsList');
@@ -5347,13 +5364,11 @@ function getApiKey(){return localStorage.getItem('olaskole_apikey')||'';}
 
 async function aiCallJSON(prompt, spinnerId, maxTokens=2000) {
   const key=getApiKey();
-  if(!key){
-    const entered=window.prompt('Lim inn din Anthropic API-nøkkel (sk-ant-...).\nEller lagre den permanent under ⚙️ Innstillinger.');
-    if(!entered)return{error:'Ingen API-nøkkel'};
-    localStorage.setItem('olaskole_apikey',entered);
-  }
+  if(!key){showToast('⚠️ Ingen API-nøkkel — lagre den under ⚙️ Innstillinger');return{error:'Ingen API-nøkkel'};}
   const spinner=document.getElementById(spinnerId);
+  const spinnerBtn=spinner?.closest('button');
   if(spinner)spinner.style.display='inline-block';
+  if(spinnerBtn){spinnerBtn.disabled=true;spinnerBtn.style.opacity='0.65';}
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
@@ -5376,7 +5391,10 @@ async function aiCallJSON(prompt, spinnerId, maxTokens=2000) {
     try{return JSON.parse(t);}
     catch{return{error:'AI svarte ikke med gyldig JSON. Prøv igjen.'};}
   }catch(e){return{error:e.message};}
-  finally{if(spinner)spinner.style.display='none';}
+  finally{
+    if(spinner)spinner.style.display='none';
+    if(spinnerBtn){spinnerBtn.disabled=false;spinnerBtn.style.opacity='';}
+  }
 }
 
 async function generateWithAI() {
@@ -5917,6 +5935,25 @@ function _showUndoToast(msg, onUndo, duration=5000) {
   t.appendChild(span); t.appendChild(btn);
   t.classList.add('show');
   clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ===== STYLED CONFIRM DIALOG =====
+function _showConfirm(msg, onYes, yesLabel='Slett', yesColor='var(--c1)') {
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.15s ease;';
+  ov.innerHTML = `<div style="background:var(--s2);border:1px solid var(--border-2);border-radius:16px;padding:1.5rem 1.75rem;max-width:320px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.8);">
+    <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin:0 0 1.25rem;line-height:1.5;">${msg}</p>
+    <div style="display:flex;gap:0.75rem;justify-content:center;">
+      <button id="_cfNo" style="padding:9px 22px;border-radius:8px;border:1px solid var(--border-2);background:var(--s3);color:var(--text-2);cursor:pointer;font-weight:600;font-size:0.9rem;">Avbryt</button>
+      <button id="_cfYes" style="padding:9px 22px;border-radius:8px;border:none;background:${yesColor};color:white;cursor:pointer;font-weight:700;font-size:0.9rem;">${yesLabel}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  const close = () => ov.remove();
+  ov.querySelector('#_cfYes').onclick = () => { close(); onYes(); };
+  ov.querySelector('#_cfNo').onclick = close;
+  ov.addEventListener('click', e => { if (e.target === ov) close(); });
+  ov.querySelector('#_cfNo').focus();
 }
 
 // ===== TEKST-TIL-TALE =====
@@ -6543,12 +6580,13 @@ async function migrateToDb() {
 }
 
 function clearDbConfig() {
-  if (!confirm('Fjerne Supabase-tilkobling? Data i databasen beholdes.')) return;
-  localStorage.removeItem('os_sb_url');
-  localStorage.removeItem('os_sb_key');
-  showToast('⚠️ URL/nøkkel er hardkodet i filen – kan ikke fjernes herfra');
-  showDbStatus();
-  showDbFeedback('Tilkobling fjernet. Bruker lokal lagring.', true);
+  _showConfirm('Fjerne Supabase-tilkobling? Data i databasen beholdes.', () => {
+    localStorage.removeItem('os_sb_url');
+    localStorage.removeItem('os_sb_key');
+    showToast('⚠️ URL/nøkkel er hardkodet i filen – kan ikke fjernes herfra');
+    showDbStatus();
+    showDbFeedback('Tilkobling fjernet. Bruker lokal lagring.', true);
+  }, 'Fjern', 'var(--c1)');
 }
 
 function showDbFeedback(msg, ok) {
@@ -9322,7 +9360,7 @@ async function arbOpen() {
 function arbLogin() {
   const name = document.getElementById('arbNameInput').value.trim();
   const cls = document.getElementById('arbClassInput').value.trim();
-  if (!name) { alert('Skriv inn navnet ditt!'); return; }
+  if (!name) { showToast('⚠️ Skriv inn navnet ditt!'); return; }
   state.student = { name, cls, joinedAt: new Date().toLocaleString('no') };
   localStorage.setItem('lh_student', JSON.stringify(state.student));
   document.getElementById('roleBadge').textContent = '🎓 ' + name;
@@ -9413,6 +9451,8 @@ function arbSwitchTab(type) {
   const btn = document.getElementById('arbTab-' + type);
   if (btn) btn.classList.add('active');
   arbRenderTab(type, state.modules[arbState.moduleIdx]);
+  const tc = document.getElementById('arbTaskContent');
+  if (tc) { tc.classList.remove('tab-fade'); void tc.offsetWidth; tc.classList.add('tab-fade'); }
 }
 
 function _arbScrollTop() {
@@ -9476,9 +9516,9 @@ function _showMarkPopover(selectedText, moduleIdx) {
   pop.className = 'mark-popover print-hide';
   pop.style.top = (rect.top + window.scrollY - 50) + 'px';
   pop.style.left = (rect.left + window.scrollX) + 'px';
-  pop.innerHTML = `<span style="font-size:0.78rem;font-weight:800;color:var(--text-3);margin-right:4px;">Merk:</span>` +
-    ['yellow','green','pink'].map(c => `<button class="mark-color-btn" style="background:${c==='yellow'?'rgba(253,224,71,0.7)':c==='green'?'rgba(134,239,172,0.7)':'rgba(249,168,212,0.7)'};" onclick="_doMark('${c}','${selectedText.replace(/'/g,"\\'")}',${moduleIdx},this.parentElement)"></button>`).join('') +
-    `<button onclick="_hideMarkPopover()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:0.9rem;padding:0 4px;">✕</button>`;
+  pop.innerHTML = `<span style="font-size:0.78rem;font-weight:800;color:var(--text-2);margin-right:4px;">Merk:</span>` +
+    ['yellow','green','pink'].map(c => `<button class="mark-color-btn" style="background:${c==='yellow'?'rgba(253,224,71,0.7)':c==='green'?'rgba(134,239,172,0.7)':'rgba(249,168,212,0.7)'};" onclick="_doMark('${c}','${selectedText.replace(/'/g,"\\'")}',${moduleIdx})"></button>`).join('') +
+    `<button onclick="_hideMarkPopover()" style="background:none;border:none;cursor:pointer;color:var(--text-2);font-size:0.9rem;padding:0 4px;">✕</button>`;
   document.body.appendChild(pop);
   _markPopoverEl = pop;
   setTimeout(() => document.addEventListener('click', _hideMarkPopover, {once:true}), 100);
@@ -9487,17 +9527,32 @@ function _hideMarkPopover() {
   if (_markPopoverEl) { _markPopoverEl.remove(); _markPopoverEl = null; }
 }
 function _doMark(color, text, moduleIdx, popEl) {
-  _hideMarkPopover();
-  const note = prompt('Legg til notat (valgfritt):', '') || '';
-  _markSave(moduleIdx, {text, color, note});
-  _reapplyMarks(moduleIdx);
+  // Replace popover with inline note-input step
+  const pop = _markPopoverEl;
+  if (!pop) return;
+  const safeColor = color === 'yellow' ? 'rgba(253,224,71,0.7)' : color === 'green' ? 'rgba(134,239,172,0.7)' : 'rgba(249,168,212,0.7)';
+  pop.innerHTML = `<div style="width:12px;height:12px;border-radius:50%;background:${safeColor};flex-shrink:0;"></div>
+    <textarea id="_markNoteInput" placeholder="Notat (valgfritt)" style="width:160px;height:46px;font-size:0.78rem;background:var(--s2);color:var(--text);border:1px solid var(--border-2);border-radius:6px;padding:4px 7px;resize:none;outline:none;font-family:inherit;" maxlength="200"></textarea>
+    <button id="_markSaveBtn" style="background:var(--accent);color:white;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:0.82rem;font-weight:700;flex-shrink:0;">✓</button>
+    <button onclick="_hideMarkPopover()" style="background:none;border:none;cursor:pointer;color:var(--text-2);font-size:0.9rem;padding:0 3px;flex-shrink:0;">✕</button>`;
+  const ta = pop.querySelector('#_markNoteInput');
+  const saveBtn = pop.querySelector('#_markSaveBtn');
+  const doSave = () => {
+    const note = ta.value.trim();
+    _hideMarkPopover();
+    _markSave(moduleIdx, {text, color, note});
+    _reapplyMarks(moduleIdx);
+  };
+  saveBtn.onclick = doSave;
+  ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSave(); } });
+  setTimeout(() => ta.focus(), 50);
 }
 function _markClickMenu(el, moduleIdx) {
   const id = parseInt(el.getAttribute('data-id'));
-  if (confirm('Fjerne denne markeringen?')) {
+  _showConfirm('Fjerne denne markeringen?', () => {
     _markDelete(moduleIdx, id);
     _reapplyMarks(moduleIdx);
-  }
+  }, 'Fjern', 'var(--c1)');
 }
 function _showMarksPanel(moduleIdx) {
   const panel = document.getElementById(`arb-marks-panel-${moduleIdx}`);
@@ -9997,10 +10052,10 @@ function sjShow(phase) {
 async function crCreateGame() {
   if (!state.isTeacher) { showToast('⛔ Kun lærer kan starte quiz!'); return; }
   const sel = document.getElementById('crModuleSelect');
-  if (!sel || !sel.value) { alert('Velg et emne først!'); return; }
+  if (!sel || !sel.value) { showToast('⚠️ Velg et emne først!'); return; }
   const modIdx = parseInt(sel.value);
   const mod = state.modules[modIdx];
-  if (!mod || !mod.quiz || mod.quiz.length === 0) { alert('Dette emnet har ingen quizspørsmål!'); return; }
+  if (!mod || !mod.quiz || mod.quiz.length === 0) { showToast('⚠️ Dette emnet har ingen quizspørsmål!'); return; }
   const timeLimit = parseInt(document.getElementById('crTimeLimit').value) || 20;
 
   const code = crGenerateCode();
