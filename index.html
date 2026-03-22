@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#7c3aed" id="themeColorMeta">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="OlaSkole">
+<meta name="description" content="Interaktiv læringsplattform for ungdomsskolen">
+<link rel="manifest" href="manifest.json">
 <title>OlaSkole – Interaktiv læringsplattform</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <script>
@@ -718,9 +724,43 @@
 
   /* ===== SWIPE-INDIKATOR animasjon ===== */
   @keyframes swipeHint{0%{opacity:0;transform:translateX(-8px);}50%{opacity:1;}100%{opacity:0;transform:translateX(8px);}}
+
+  /* ===== SKIP-TO-CONTENT ===== */
+  .skip-link{position:absolute;top:-100px;left:1rem;background:var(--accent);color:#fff;padding:10px 18px;border-radius:0 0 10px 10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;z-index:9999;transition:top 0.15s;text-decoration:none;}
+  .skip-link:focus{top:0;}
+
+  /* ===== TEKSTSTØRRELSE ===== */
+  :root{--font-scale:1;}
+  .text-block,textarea,.arb-write-card,.discussion-card,.quiz-q,.quiz-opt,.option{font-size:calc(0.95rem * var(--font-scale))!important;}
+  .font-size-btn{background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:8px;padding:4px 10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.18s;line-height:1;min-height:30px;}
+  .font-size-btn:hover{background:var(--s3);color:var(--text);}
+
+  /* ===== PRINT-CSS ===== */
+  @media print{
+    nav,.mobile-nav,.progress-top,.skip-link,.dark-toggle,.teacher-btn,#teacherLogoutBtn,
+    .task-tabs,.fc-nav,.arb-save-indicator,.publish-bar,.modal-overlay,
+    button[onclick*="arbSaveWrite"],button[onclick*="arbToggleTimer"]{display:none!important;}
+    body{background:#fff!important;color:#000!important;}
+    .view{display:block!important;}
+    .text-block,.arb-write-card,.discussion-card{background:#fff!important;border:1px solid #ccc!important;box-shadow:none!important;}
+    textarea{border:1px solid #aaa!important;background:#fff!important;color:#000!important;min-height:auto!important;}
+    #main-content{padding:0!important;}
+    .print-hide{display:none!important;}
+  }
 </style>
 </head>
 <body class="dark">
+
+<!-- Skip-to-content for tastatur-navigasjon -->
+<a href="#main-content" class="skip-link">Hopp til innhold</a>
+
+<noscript>
+  <div style="position:fixed;inset:0;background:#04050d;color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;font-family:sans-serif;text-align:center;padding:2rem;z-index:9999;">
+    <div style="font-size:3rem;">📚</div>
+    <h1 style="font-size:1.5rem;">OlaSkole krever JavaScript</h1>
+    <p style="color:#aaa;max-width:360px;">Aktiver JavaScript i nettleserinnstillingene og last siden på nytt.</p>
+  </div>
+</noscript>
 
 <div class="progress-top"><div class="progress-fill" id="progressFill"></div></div>
 
@@ -737,6 +777,10 @@
   </div>
   <div class="nav-right">
     <div class="role-badge" id="roleBadge">Gjest</div>
+    <div style="display:flex;align-items:center;gap:2px;" title="Tekststørrelse" aria-label="Juster tekststørrelse">
+      <button class="font-size-btn" onclick="changeFontSize(-1)" aria-label="Mindre tekst" title="Mindre tekst">A−</button>
+      <button class="font-size-btn" onclick="changeFontSize(1)" aria-label="Større tekst" title="Større tekst">A+</button>
+    </div>
     <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="Bytt tema" aria-label="Bytt mellom lyst og mørkt tema">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     </button>
@@ -878,6 +922,21 @@
     <div class="task-tabs" id="taskTypeTabs"></div>
 
     <div id="taskTypeContent"></div>
+
+    <!-- Notatblokk for elever -->
+    <div id="studentNotepad" style="margin-top:1.5rem;background:var(--s1);border:1px solid var(--border-2);border-radius:16px;overflow:hidden;">
+      <button onclick="toggleNotepad()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1.1rem;background:transparent;border:none;color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">
+        <span>📝 Mine notater for dette emnet</span>
+        <span id="notepadChevron" style="transition:transform 0.2s;">▼</span>
+      </button>
+      <div id="notepadBody" style="display:none;padding:0 1rem 1rem;">
+        <textarea id="notepadText" rows="5" placeholder="Skriv notater her – lagres automatisk..." style="width:100%;padding:11px 13px;border:1px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;resize:vertical;outline:none;background:var(--s2);color:var(--text);box-sizing:border-box;" oninput="saveNotepad()"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;">
+          <span id="notepadSavedStatus" style="font-size:0.75rem;color:var(--text-3);">Lagres automatisk</span>
+          <button onclick="clearNotepad()" style="background:transparent;border:none;color:var(--text-3);font-family:'Nunito',sans-serif;font-size:0.78rem;cursor:pointer;font-weight:700;">Slett notater</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -925,6 +984,30 @@
         <div class="form-row" style="margin:0">
           <label>Ikon</label>
           <input type="text" id="moduleEmoji" placeholder="📚" maxlength="2" value="📚" />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.875rem;margin-bottom:0.875rem;">
+        <div class="form-row" style="margin:0">
+          <label>Fag / kategori</label>
+          <select id="moduleSubjectSelect" onchange="syncModuleSubject(this.value)" style="width:100%;padding:11px 13px;border:1px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;background:var(--s2);color:var(--text);">
+            <option value="">— Velg fag —</option>
+            <option value="Norsk">📝 Norsk</option>
+            <option value="Matematikk">🔢 Matematikk</option>
+            <option value="Naturfag">🔬 Naturfag</option>
+            <option value="Samfunnsfag">🌍 Samfunnsfag</option>
+            <option value="Engelsk">🇬🇧 Engelsk</option>
+            <option value="Kroppsøving">⚽ Kroppsøving</option>
+            <option value="Kunst og håndverk">🎨 Kunst og håndverk</option>
+            <option value="Musikk">🎵 Musikk</option>
+            <option value="Mat og helse">🍎 Mat og helse</option>
+            <option value="KRLE">✝️ KRLE</option>
+            <option value="Fremmedspråk">🗣️ Fremmedspråk</option>
+            <option value="Annet">📚 Annet</option>
+          </select>
+        </div>
+        <div class="form-row" style="margin:0">
+          <label>Egendefinert fag (valgfritt)</label>
+          <input type="text" id="moduleSubjectFree" placeholder="F.eks. Teknologi og design" oninput="syncModuleSubjectFromFree(this.value)" />
         </div>
       </div>
       <div class="form-row" style="margin:0">
@@ -2565,6 +2648,69 @@ function setProgress(pct) {
 // Site is dark by default; toggling adds .light class for light mode
 const SUN_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
 const MOON_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+
+/* ===== FAGFELT SYNC ===== */
+function syncModuleSubject(val) {
+  const free = document.getElementById('moduleSubjectFree');
+  if (free && val) free.value = '';
+}
+function syncModuleSubjectFromFree(val) {
+  const sel = document.getElementById('moduleSubjectSelect');
+  if (sel && val) sel.value = '';
+}
+
+/* ===== TEKSTSTØRRELSE ===== */
+let _fontScale = parseFloat(localStorage.getItem('os_font_scale') || '1');
+function applyFontScale(scale) {
+  _fontScale = Math.min(1.5, Math.max(0.75, scale));
+  document.documentElement.style.setProperty('--font-scale', _fontScale);
+  localStorage.setItem('os_font_scale', _fontScale);
+}
+function changeFontSize(dir) {
+  applyFontScale(_fontScale + dir * 0.1);
+  showToast(dir > 0 ? '🔡 Større tekst' : '🔡 Mindre tekst');
+}
+function initFontScale() { applyFontScale(_fontScale); }
+
+/* ===== NOTATBLOKK ===== */
+function _noteKey() {
+  const m = state.modules[state.currentModule];
+  return 'os_note_' + (m?._id || 'mod_' + state.currentModule);
+}
+function toggleNotepad() {
+  const body = document.getElementById('notepadBody');
+  const chev = document.getElementById('notepadChevron');
+  if (!body) return;
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
+  if (open) {
+    const ta = document.getElementById('notepadText');
+    if (ta) ta.value = localStorage.getItem(_noteKey()) || '';
+  }
+}
+const _saveNoteDebounced = debounce(() => {
+  const ta = document.getElementById('notepadText');
+  if (!ta) return;
+  localStorage.setItem(_noteKey(), ta.value);
+  const st = document.getElementById('notepadSavedStatus');
+  if (st) { st.textContent = '✓ Lagret'; setTimeout(() => { if(st) st.textContent = 'Lagres automatisk'; }, 1500); }
+}, 600);
+function saveNotepad() { _saveNoteDebounced(); }
+function clearNotepad() {
+  if (!confirm('Slette notatene for dette emnet?')) return;
+  localStorage.removeItem(_noteKey());
+  const ta = document.getElementById('notepadText');
+  if (ta) ta.value = '';
+  showToast('🗑 Notater slettet');
+}
+function resetNotepadUI() {
+  const body = document.getElementById('notepadBody');
+  const chev = document.getElementById('notepadChevron');
+  if (body) body.style.display = 'none';
+  if (chev) chev.style.transform = '';
+}
+
 function toggleDark() {
   const isLight = document.body.classList.toggle('light');
   localStorage.setItem('olaskole_light', isLight ? '1' : '');
@@ -2588,6 +2734,7 @@ function initDark() {
 async function loadState() {
   showDbStatus();
   initDark();
+  initFontScale();
   initMsToken();
   const dbMods = await DB.loadModules();
   if (dbMods.length > 0) {
@@ -3065,7 +3212,7 @@ function updateContinueCard() {
   if (!mod) { cc.style.display='none'; return; }
   const idx = state.modules.indexOf(mod);
   cc.style.display = 'block';
-  cc.innerHTML = `<div class="continue-card" onclick="openModule(${idx})">
+  cc.innerHTML = `<div class="continue-card" onclick="openModule(${idx})" role="button" tabindex="0" aria-label="Fortsett ${escHtml(mod.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${idx})}">
     <div class="continue-card-icon">${mod.emoji||'📖'}</div>
     <div class="continue-card-text">
       <div class="continue-card-label">Fortsett der du slapp</div>
@@ -3086,12 +3233,13 @@ function renderHomeModules() {
   renderSubjectFilter();
   grid.innerHTML = visible.map((m, i) => {
     const realIdx = state.modules.indexOf(m);
-    return `<div class="module-card ${colors[i%5]}" style="position:relative;" onclick="openModule(${realIdx})" data-module-name="${escHtml(m.name)}" data-module-subject="${escHtml(m.emoji||'📚')}">
+    return `<div class="module-card ${colors[i%5]}" style="position:relative;" onclick="openModule(${realIdx})" role="button" tabindex="0" aria-label="${escHtml(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${realIdx})}" data-module-name="${escHtml(m.name)}" data-module-subject="${escHtml(m.subject||m.emoji||'📚')}">
       ${state.isTeacher ? `<button class="mc-edit-btn" onclick="event.stopPropagation();quickEditModule(${realIdx})" title="Rediger">✏️</button>` : ''}
       <span class="mc-emoji">${m.emoji||'📚'}</span>
       <h3>${escHtml(m.name)}</h3>
       <p>${escHtml(m.desc||'')}</p>
       <span class="task-count">${countTasks(m)} oppgaver</span>
+      ${m.subject ? `<span style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.25);font-size:0.64rem;font-weight:800;padding:2px 7px;border-radius:50px;color:rgba(255,255,255,0.8);">${escHtml(m.subject)}</span>` : ''}
       ${isNewModule(m) ? '<span style="position:absolute;top:8px;left:8px;background:var(--c1);color:white;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;">NY</span>' : ''}
     </div>`;
   }).join('');
@@ -3107,7 +3255,7 @@ function renderTaskModules() {
   if (empty) empty.style.display = 'none';
   grid.innerHTML = visible.map((m, i) => {
     const realIdx = state.modules.indexOf(m);
-    return `<div class="module-card ${colors[i%5]}" style="position:relative;" onclick="openModule(${realIdx})">
+    return `<div class="module-card ${colors[i%5]}" style="position:relative;" onclick="openModule(${realIdx})" role="button" tabindex="0" aria-label="${escHtml(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${realIdx})}">
       ${state.isTeacher ? `<button class="mc-edit-btn" onclick="event.stopPropagation();quickEditModule(${realIdx})" title="Rediger">✏️</button>` : ''}
       <span class="mc-emoji">${m.emoji||'📚'}</span>
       <h3>${escHtml(m.name)}</h3>
@@ -3135,7 +3283,12 @@ function setSubjectFilter(subject) {
   renderHomeModules();
 }
 
-function filterHomeModules() {
+function debounce(fn, ms) {
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+const filterHomeModulesDebounced = debounce(filterHomeModulesImpl, 200);
+function filterHomeModules() { filterHomeModulesDebounced(); }
+function filterHomeModulesImpl() {
   const q = document.getElementById('moduleSearch')?.value.toLowerCase()||'';
   const cards = document.querySelectorAll('#homeModulesGrid .module-card');
   let visible = 0;
@@ -3160,6 +3313,7 @@ function openModule(idx) {
   document.getElementById('moduleDetail').style.display = 'block';
   showView('tasks');
   renderModuleDetail(m);
+  resetNotepadUI();
 }
 
 function showModuleList() {
@@ -3623,7 +3777,7 @@ async function saveModule() {
     text:document.getElementById('moduleText')?.value.trim()||'',
     quiz:[...state.tempQuiz], discussion:[...state.tempDisc],
     write:[...state.tempWrite], videos:[...state.tempVideos], flashcards:[...state.tempFlashcards],
-    subject:document.getElementById('aiSubject')?.value||'',
+    subject: (document.getElementById('moduleSubjectFree')?.value.trim()) || (document.getElementById('moduleSubjectSelect')?.value) || (document.getElementById('aiSubject')?.value) || '',
     quizTimer: s.quizTimer || 0,
     language: s.language || 'norsk bokmål',
     createdAt: wasEditing?state.modules[editingModuleIdx].createdAt:new Date().toLocaleString('no'),
@@ -3645,8 +3799,9 @@ async function saveModule() {
 
 function clearModuleForm() {
   state.tempQuiz=[];state.tempDisc=[];state.tempWrite=[];state.tempVideos=[];state.tempFlashcards=[];
-  ['moduleName','moduleDesc','moduleText'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['moduleName','moduleDesc','moduleText','moduleSubjectFree'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const emojiEl=document.getElementById('moduleEmoji');if(emojiEl)emojiEl.value='📚';
+  const subjSel=document.getElementById('moduleSubjectSelect');if(subjSel)subjSel.value='';
   ['quizPreview','discPreview','fcPreview'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
   const saveLabel=document.getElementById('saveModuleLabel');if(saveLabel)saveLabel.textContent='💾 Publiser emnet for elevene!';
   const cancelBtn=document.getElementById('cancelEditBtn');if(cancelBtn)cancelBtn.style.display='none';
@@ -3668,6 +3823,14 @@ function editModule(idx) {
   document.getElementById('moduleDesc').value=m.desc||'';
   document.getElementById('moduleEmoji').value=m.emoji||'📚';
   document.getElementById('moduleText').value=m.text||'';
+  // Fyll fagfelt
+  const subjectSel = document.getElementById('moduleSubjectSelect');
+  const subjectFree = document.getElementById('moduleSubjectFree');
+  if (subjectSel && subjectFree) {
+    const knownOptions = Array.from(subjectSel.options).map(o=>o.value);
+    if (knownOptions.includes(m.subject||'')) { subjectSel.value=m.subject||''; subjectFree.value=''; }
+    else { subjectSel.value=''; subjectFree.value=m.subject||''; }
+  }
   state.tempQuiz=JSON.parse(JSON.stringify(m.quiz||[]));
   state.tempDisc=JSON.parse(JSON.stringify(m.discussion||[]));
   state.tempWrite=JSON.parse(JSON.stringify(m.write||[]));
