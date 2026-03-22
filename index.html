@@ -426,9 +426,13 @@
   .arb-quiz-question{font-weight:800;font-size:0.93rem;color:var(--text);margin-bottom:0.7rem;line-height:1.4;}
   .arb-options{display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;}
   .arb-opt{padding:9px 11px;border-radius:10px;border:1px solid var(--border-2);background:var(--s1);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;text-align:left;transition:all 0.18s;color:var(--text);}
-  .arb-opt:hover{background:var(--accent-g);border-color:rgba(85,120,245,0.3);color:var(--accent-h);}
-  .arb-opt.correct{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.35);color:#4ade80;box-shadow:0 0 0 1px rgba(34,197,94,0.12);}
-  .arb-opt.wrong{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.35);color:#f87171;box-shadow:0 0 0 1px rgba(239,68,68,0.12);}
+  .arb-opt:hover:not([disabled]){background:var(--accent-g);border-color:var(--accent);color:var(--accent-h);}
+  .arb-opt:focus-visible:not([disabled]){outline:2px solid var(--accent);outline-offset:2px;background:var(--accent-g);color:var(--accent-h);}
+  .arb-opt:active:not([disabled]){transform:scale(0.97);}
+  .arb-opt.correct{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.35);color:#4ade80;box-shadow:0 0 0 1px rgba(34,197,94,0.12);animation:answerCorrect 0.4s ease;}
+  .arb-opt.wrong{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.35);color:#f87171;box-shadow:0 0 0 1px rgba(239,68,68,0.12);animation:answerWrong 0.4s ease;}
+  @keyframes answerCorrect{0%{transform:scale(1)}40%{transform:scale(1.06)}70%{transform:scale(0.97)}100%{transform:scale(1)}}
+  @keyframes answerWrong{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
   .arb-opt.reveal-correct{background:rgba(34,197,94,0.06);border-color:rgba(34,197,94,0.2);}
   .arb-feedback{margin-top:0.5rem;padding:7px 10px;border-radius:8px;font-size:0.82rem;font-weight:700;}
   .arb-feedback.ok{background:rgba(34,197,94,0.1);color:#4ade80;}
@@ -623,6 +627,7 @@
 
   .tr-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.5rem;}
   .tr-tabs{display:flex;gap:0.3rem;background:var(--s2);border:1px solid var(--border);border-radius:11px;padding:4px;flex-wrap:wrap;}
+  .tr-tab-mobile-select{display:none;width:100%;padding:10px 14px;border:1px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.92rem;background:var(--s2);color:var(--text);outline:none;cursor:pointer;}
   .tr-tab{padding:8px 16px;border-radius:8px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.83rem;cursor:pointer;transition:all 0.18s;background:transparent;color:var(--text-2);white-space:nowrap;}
   .tr-tab:hover{background:var(--s3);color:var(--text);}
   .tr-tab.active{background:linear-gradient(135deg,var(--accent),var(--accent-h));color:white;box-shadow:0 2px 10px rgba(85,120,245,0.35);}
@@ -643,7 +648,8 @@
   .publish-bar{position:sticky;bottom:0;background:rgba(12,13,27,0.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:0.875rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;z-index:50;border-radius:0 0 18px 18px;margin-top:1rem;}
   @media(max-width:600px){
     .form-grid-3,.form-grid-2{grid-template-columns:1fr!important;}
-    .tr-tabs{background:transparent;border:none;padding:0;gap:0.25rem;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
+    .tr-tabs{display:none!important;}
+    .tr-tab-mobile-select{display:block!important;}
     .tr-tab{font-size:0.78rem;padding:9px 13px;flex-shrink:0;min-height:44px;}
     .task-cat-btn{font-size:0.75rem;padding:9px 11px;min-height:44px;}
     .publish-bar{padding:0.75rem 1rem;gap:0.5rem;}
@@ -947,7 +953,10 @@
 <!-- TASKS VIEW -->
 <div class="view" id="view-tasks">
   <div id="moduleList">
-    <div class="section-title">Alle emner</div>
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.1rem;flex-wrap:wrap;">
+      <div class="section-title" style="margin-bottom:0;flex:1;">📋 Alle emner</div>
+      <input type="text" id="taskModuleSearch" placeholder="Søk emner..." oninput="filterTaskModules()" style="padding:8px 14px;border:1px solid var(--border-2);border-radius:50px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;width:180px;transition:border 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
+    </div>
     <div class="modules-grid" id="taskModulesGrid"></div>
     <div class="empty-state" id="taskEmpty" style="display:none">
       <span class="es-icon">📭</span>
@@ -998,6 +1007,15 @@
       <button class="tr-tab"        id="trtab-spill" onclick="trTab('spill')">Spill</button>
       <button class="tr-tab"        id="trtab-stats" onclick="trTab('stats')">📊 Statistikk</button>
     </div>
+    <select id="trTabMobileSelect" class="tr-tab-mobile-select" onchange="trTab(this.value)">
+      <option value="new">✏️ Nytt emne</option>
+      <option value="emner">📚 Emner</option>
+      <option value="results">📊 Resultater</option>
+      <option value="klasser">👥 Klasser</option>
+      <option value="kunngjoring">📣 Kunngjøring</option>
+      <option value="spill">🎮 Spill</option>
+      <option value="stats">📈 Statistikk</option>
+    </select>
   </div>
 
   <!-- ═══════════════════════════════════════════
@@ -1446,7 +1464,12 @@
   <div class="tr-pane" id="trpane-emner">
     <div class="teacher-panel">
       <h2>Publiserte emner</h2>
-      <div id="manageModulesList"><p style="color:var(--text-3);">Ingen emner publisert ennå.</p></div>
+      <div id="manageModulesList"><div style="text-align:center;padding:2rem 1rem;color:var(--text-3);">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem;">📭</div>
+        <div style="font-weight:800;margin-bottom:0.5rem;">Ingen emner ennå</div>
+        <p style="font-size:0.88rem;margin-bottom:1rem;">Opprett ditt første emne for å komme i gang.</p>
+        <button onclick="trTab('new')" style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:0.6rem 1.5rem;font-weight:800;font-size:0.9rem;cursor:pointer;">✏️ Lag ditt første emne</button>
+      </div></div>
     </div>
   </div>
 
@@ -2088,6 +2111,9 @@
           <button id="usLightBtn" onclick="usSetTheme('light')" style="flex:1;padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             Lyst
+          </button>
+          <button id="usAutoBtn" onclick="usSetTheme('auto')" style="flex:1;padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:6px;">
+            ⚙️ Auto
           </button>
         </div>
       </div>
@@ -2869,6 +2895,11 @@
         </div>
       </div>
 
+      <!-- Linear progress bar -->
+      <div id="arbTopProgressWrap" style="height:5px;background:var(--s3);border-radius:50px;overflow:hidden;margin-bottom:1rem;">
+        <div id="arbTopProgressBar" style="height:100%;width:0%;background:var(--c3);border-radius:50px;transition:width 0.5s ease;"></div>
+      </div>
+
       <!-- Task type tabs -->
       <div id="arbTaskTabs" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;"></div>
 
@@ -2987,7 +3018,12 @@ function showView(name) {
   });
   if (name === 'home') renderHomeModules();
   if (name === 'tasks') { DB.loadModules().then(m => { state.modules = m; renderTaskModules(); }); }
-  if (name === 'teacher') { renderResults(); renderManageModules(); teacherUpdateActivity(); }
+  if (name === 'teacher') {
+    if (!state.isTeacher) { showToast('⛔ Logg inn som lærer for å få tilgang'); return; }
+    renderResults(); renderManageModules(); teacherUpdateActivity();
+    const lastTab = localStorage.getItem('os_last_tr_tab') || 'new';
+    trTab(lastTab);
+  }
   if (name === 'join' && state.isTeacher) crPopulateModules();
   if (name === 'arbeid') { arbState.moduleIdx = null; arbRenderModuleGrid(); }
   if (name === 'wc') wcInit();
@@ -3104,8 +3140,11 @@ function _usRefreshUI() {
   const isLight = document.body.classList.contains('light');
   const dBtn = document.getElementById('usDarkBtn');
   const lBtn = document.getElementById('usLightBtn');
-  if (dBtn) { dBtn.style.borderColor = isLight ? 'var(--border-2)' : 'var(--accent)'; dBtn.style.color = isLight ? 'var(--text-2)' : 'var(--text)'; }
-  if (lBtn) { lBtn.style.borderColor = isLight ? 'var(--accent)' : 'var(--border-2)'; lBtn.style.color = isLight ? 'var(--text)' : 'var(--text-2)'; }
+  const isAuto = localStorage.getItem('olaskole_light') === null;
+  const aBtn = document.getElementById('usAutoBtn');
+  if (dBtn) { dBtn.style.borderColor = (!isAuto && !isLight) ? 'var(--accent)' : 'var(--border-2)'; dBtn.style.color = (!isAuto && !isLight) ? 'var(--text)' : 'var(--text-2)'; }
+  if (lBtn) { lBtn.style.borderColor = (!isAuto && isLight) ? 'var(--accent)' : 'var(--border-2)'; lBtn.style.color = (!isAuto && isLight) ? 'var(--text)' : 'var(--text-2)'; }
+  if (aBtn) { aBtn.style.borderColor = isAuto ? 'var(--accent)' : 'var(--border-2)'; aBtn.style.color = isAuto ? 'var(--text)' : 'var(--text-2)'; }
 
   // Accent picker
   const picker = document.getElementById('usAccentPicker');
@@ -3149,9 +3188,15 @@ function _usRefreshToggle(key, btnId, thumbId) {
 }
 
 function usSetTheme(mode) {
-  const isLight = document.body.classList.contains('light');
-  if (mode === 'light' && !isLight) toggleDark();
-  if (mode === 'dark'  &&  isLight) toggleDark();
+  if (mode === 'auto') {
+    localStorage.removeItem('olaskole_light');
+    const preferLight = window.matchMedia?.('(prefers-color-scheme: light)').matches;
+    document.body.classList.toggle('light', preferLight);
+  } else {
+    const isLight = document.body.classList.contains('light');
+    if (mode === 'light' && !isLight) toggleDark();
+    if (mode === 'dark'  &&  isLight) toggleDark();
+  }
   _usRefreshUI();
 }
 
@@ -3262,12 +3307,22 @@ function toggleDark() {
 }
 function initDark() {
   const btn = document.getElementById('darkToggle');
-  if (localStorage.getItem('olaskole_light')) {
+  const stored = localStorage.getItem('olaskole_light');
+  // Auto-detect: use system preference only if user has never set a preference
+  const preferLight = stored !== null ? stored === '1' : window.matchMedia?.('(prefers-color-scheme: light)').matches;
+  if (preferLight) {
     document.body.classList.add('light');
     if (btn) btn.innerHTML = MOON_ICON;
   } else {
     if (btn) btn.innerHTML = SUN_ICON;
   }
+  // Listen for system changes when no explicit preference is stored
+  window.matchMedia?.('(prefers-color-scheme: light)').addEventListener('change', e => {
+    if (localStorage.getItem('olaskole_light') === null) {
+      document.body.classList.toggle('light', e.matches);
+      if (btn) btn.innerHTML = e.matches ? MOON_ICON : SUN_ICON;
+    }
+  });
 }
 
 // ====== LOAD / SAVE STATE ======
@@ -3610,7 +3665,12 @@ function closeModal(id) {
 }
 function openModal(id) {
   const el = document.getElementById(id);
-  if (el) el.classList.add('open');
+  if (!el) return;
+  el.classList.add('open');
+  setTimeout(() => {
+    const first = el.querySelector('input:not([type=hidden]):not([disabled]), textarea:not([disabled])');
+    if (first) first.focus();
+  }, 80);
 }
 function showApiStatus(ok) {
   const el = document.getElementById('settingsApiStatus');
@@ -3693,6 +3753,7 @@ function msLogin(clientId) {
 
 // ====== TEACHER ROOM TABS ======
 function trTab(name) {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   document.querySelectorAll('.tr-tabs .tr-tab').forEach(t => t.classList.remove('active'));
   ['trpane-new','trpane-emner','trpane-results','trpane-klasser','trpane-kunngjoring','trpane-spill','trpane-stats'].forEach(id => {
     const el = document.getElementById(id); if (el) el.classList.remove('active');
@@ -3707,6 +3768,9 @@ function trTab(name) {
   if (name === 'kunngjoring') loadAnnouncementEditor();
   if (name === 'spill') { gsLoadSessions(); gsLoadActiveBanner(); }
   if (name === 'stats') renderTeacherStats();
+  localStorage.setItem('os_last_tr_tab', name);
+  const sel = document.getElementById('trTabMobileSelect');
+  if (sel) sel.value = name;
 }
 
 function tcTab(name) {
@@ -3802,7 +3866,7 @@ function renderTaskModules() {
   if (empty) empty.style.display = 'none';
   grid.innerHTML = visible.map((m, i) => {
     const realIdx = state.modules.indexOf(m);
-    return `<div class="module-card ${colors[i%5]}" style="position:relative;" onclick="openModule(${realIdx})" role="button" tabindex="0" aria-label="${escHtml(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${realIdx})}">
+    return `<div class="module-card ${colors[i%5]}" style="position:relative;" onclick="openModule(${realIdx})" role="button" tabindex="0" aria-label="${escHtml(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${realIdx})}" data-module-name="${escHtml(m.name)}">
       ${state.isTeacher ? `<button class="mc-edit-btn" onclick="event.stopPropagation();quickEditModule(${realIdx})" title="Rediger">✏️</button>` : ''}
       <span class="mc-emoji">${m.emoji||'📚'}</span>
       <h3>${escHtml(m.name)}</h3>
@@ -3867,6 +3931,18 @@ function filterHomeModulesImpl() {
   if (empty) empty.style.display = (visible===0 && state.modules.length>0) ? 'block' : 'none';
 }
 
+function filterTaskModules() {
+  const q = document.getElementById('taskModuleSearch')?.value.toLowerCase()||'';
+  const cards = document.querySelectorAll('#taskModulesGrid .module-card');
+  let visible = 0;
+  cards.forEach(c => {
+    const show = (c.getAttribute('data-module-name')||'').toLowerCase().includes(q);
+    c.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  const empty = document.getElementById('taskEmpty');
+  if (empty) empty.style.display = (visible===0 && state.modules.length>0) ? 'block' : 'none';
+}
 function openModule(idx) {
   if(state.modules[idx]) localStorage.setItem('os_last_module', state.modules[idx]._id||'mod_'+idx);
   state.currentModule = idx;
@@ -4331,6 +4407,7 @@ function addFlashcard() { setTimeout(updatePublishBarHint,50);
 }
 
 async function saveModule() {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   const name=document.getElementById('moduleName')?.value.trim();
   if(!name){showToast('Emnet trenger et navn!');return;}
   const wasEditing=editingModuleIdx!==null;
@@ -4428,6 +4505,7 @@ async function duplicateModule(idx) {
 }
 
 async function moveModuleUp(idx) {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   if (idx === 0) return;
   [state.modules[idx-1], state.modules[idx]] = [state.modules[idx], state.modules[idx-1]];
   await saveModulesToStorage();
@@ -4437,6 +4515,7 @@ async function moveModuleUp(idx) {
 }
 
 async function moveModuleDown(idx) {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   if (idx >= state.modules.length - 1) return;
   [state.modules[idx+1], state.modules[idx]] = [state.modules[idx], state.modules[idx+1]];
   await saveModulesToStorage();
@@ -4446,22 +4525,29 @@ async function moveModuleDown(idx) {
 }
 
 async function deleteModule(idx) {
-  const m=state.modules[idx];
-  if(!confirm(`Slett emnet «${m.name}»? Dette kan ikke angres.`))return;
-  if(editingModuleIdx===idx)clearModuleForm();
-  const moduleId = m._id;
-  state.modules.splice(idx,1);
-  // Eksplisitt slett fra Supabase
-  if (moduleId) await DB.deleteModule(moduleId);
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
+  const m = state.modules[idx];
+  if (editingModuleIdx === idx) clearModuleForm();
+  // Soft-delete: remove from list immediately, allow undo for 5 seconds
+  state.modules.splice(idx, 1);
   localStorage.setItem('lh_modules', JSON.stringify(state.modules));
-  renderManageModules();
-  renderHomeModules();
-  renderTaskModules();
-  updateContinueCard();
-  showToast('🗑 «' + m.name + '» slettet');
+  renderManageModules(); renderHomeModules(); renderTaskModules(); updateContinueCard();
+  let undone = false;
+  _showUndoToast(`🗑 «${m.name}» slettet`, () => {
+    undone = true;
+    state.modules.splice(idx, 0, m);
+    localStorage.setItem('lh_modules', JSON.stringify(state.modules));
+    renderManageModules(); renderHomeModules(); renderTaskModules(); updateContinueCard();
+    showToast('↩️ Sletting angret!');
+  }, 5000);
+  // After 5s, actually delete from Supabase if not undone
+  setTimeout(async () => {
+    if (!undone && m._id) await DB.deleteModule(m._id);
+  }, 5200);
 }
 
 function toggleLock(idx) {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   state.modules[idx].locked=!state.modules[idx].locked;
   saveModulesToStorage();
   renderManageModules();
@@ -4916,7 +5002,7 @@ function viewStudentDetail(studentName) {
                 <div style="flex:1;min-width:0;">
                   <div style="font-size:0.72rem;color:var(--text-3);font-weight:700;margin-bottom:1px;">${escHtml(taskKey)}</div>
                   <div style="font-size:0.82rem;color:var(--text);word-break:break-word;">${escHtml(String(val).substring(0,200))}${String(val).length>200?'…':''}</div>
-                  ${time?`<div style="font-size:0.68rem;color:var(--text-3);margin-top:1px;">${escHtml(time)}</div>`:''}
+                  ${time?`<div style="font-size:0.68rem;color:var(--text-3);margin-top:1px;" title="${escHtml(time)}">${relativeTime(time)}</div>`:''}
                 </div>
               </div>`;
             }).join('')}
@@ -4958,6 +5044,7 @@ function _loadGroups() { try { return JSON.parse(localStorage.getItem('os_groups
 function _saveGroups(groups) { localStorage.setItem('os_groups', JSON.stringify(groups)); }
 
 function openGroupModal(editId) {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   const modal = document.getElementById('groupModal');
   const titleEl = document.getElementById('groupModalTitle');
   const nameInput = document.getElementById('groupNameInput');
@@ -4987,13 +5074,14 @@ function openGroupModal(editId) {
     }
   }
   modal.style.display = 'flex';
-  if (nameInput) nameInput.focus();
+  setTimeout(() => { if (nameInput) nameInput.focus(); }, 80);
 }
 function closeGroupModal() {
   const modal = document.getElementById('groupModal');
   if (modal) modal.style.display = 'none';
 }
 function saveGroup() {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   const name = document.getElementById('groupNameInput')?.value.trim();
   if (!name) { showToast('⚠️ Skriv inn et gruppenavn'); return; }
   const members = [...document.querySelectorAll('#groupMembersList input[type=checkbox]:checked')].map(c => c.value);
@@ -5011,6 +5099,7 @@ function saveGroup() {
   showToast('👥 Gruppe lagret!');
 }
 function deleteGroup(id) {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   if (!confirm('Slette denne gruppen?')) return;
   _saveGroups(_loadGroups().filter(g => g.id !== id));
   renderGroups();
@@ -5040,6 +5129,7 @@ function renderGroups() {
 
 // ====== LÆRERFEEDBACK ======
 async function saveTeacherFeedback(studentName) {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   const text = document.getElementById('teacherFeedbackInput')?.value.trim();
   if (text) await DB.saveFeedback('feedback_' + studentName, text);
   else await DB.deleteFeedback('feedback_' + studentName);
@@ -5188,6 +5278,7 @@ Lag eksakt: ${s.quizCount} quiz-spørsmål, ${s.discCount} drøftingsspørsmål,
 }
 
 async function aiGenerateSingleQuiz(){
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   const topic=document.getElementById('aiQuizTopic')?.value.trim();
   if(!topic){showToast('Skriv inn et tema');return;}
   const s=getAiSettings();
@@ -5214,6 +5305,7 @@ function useSqResult(res){
 }
 
 async function aiImportQuizFromText() {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   const text = document.getElementById('aiImportText')?.value.trim();
   const fb = document.getElementById('aiImportFeedback');
   if (!text) { showToast('⚠️ Lim inn en tekst først'); return; }
@@ -5234,6 +5326,7 @@ async function aiImportQuizFromText() {
   showToast(`✨ ${res.questions.length} spørsmål generert!`);
 }
 function importKahootCsv() {
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   const raw = document.getElementById('kahootCsvText')?.value.trim();
   const fb = document.getElementById('kahootFeedback');
   if (!raw) { showToast('⚠️ Lim inn CSV-tekst'); return; }
@@ -5261,6 +5354,7 @@ function importKahootCsv() {
 }
 
 async function aiGenerateSingleDisc(){
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   const topic=document.getElementById('aiDiscTopic')?.value.trim();
   if(!topic){showToast('Skriv inn et tema');return;}
   const s=getAiSettings();
@@ -5279,6 +5373,7 @@ async function aiGenerateSingleDisc(){
 function useSdResult(q){const el=document.getElementById('discQ');if(el)el.value=q;const r=document.getElementById('sdResult');if(r)r.style.display='none';}
 
 async function aiGenerateWriteTask(){
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   const topic=document.getElementById('aiWriteTopic')?.value.trim();
   if(!topic){showToast('Skriv inn et tema');return;}
   const s=getAiSettings();
@@ -5302,6 +5397,7 @@ function useSwResult(res){
 }
 
 async function aiGenerateVideo(){
+  if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   const topic=document.getElementById('aiVideoTopic')?.value.trim();
   if(!topic){showToast('Skriv inn et tema');return;}
   const s=getAiSettings();
@@ -5631,12 +5727,41 @@ Alt på ${s.language}.`;
 }
 // ====== END URL/IMAGE ======
 
+// ====== RELATIVE TIME ======
+function relativeTime(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return String(dateStr);
+  const diff = Date.now() - d.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'akkurat nå';
+  if (mins < 60) return `for ${mins} min siden`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `for ${hrs} time${hrs > 1 ? 'r' : ''} siden`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `for ${days} dag${days > 1 ? 'er' : ''} siden`;
+  return d.toLocaleDateString('no');
+}
+
 // ====== TOAST ======
 function showToast(msg, duration=3200){
   let t=document.getElementById('globalToast');
   if(!t){t=document.createElement('div');t.id='globalToast';t.className='toast';document.body.appendChild(t);}
   t.textContent=msg;t.classList.add('show');
   clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),duration);
+}
+
+function _showUndoToast(msg, onUndo, duration=5000) {
+  let t = document.getElementById('globalToast');
+  if (!t) { t = document.createElement('div'); t.id = 'globalToast'; t.className = 'toast'; document.body.appendChild(t); }
+  t.innerHTML = '';
+  const span = document.createElement('span'); span.textContent = msg;
+  const btn = document.createElement('button');
+  btn.textContent = 'Angre'; btn.style.cssText = 'margin-left:0.75rem;background:rgba(255,255,255,0.25);border:none;border-radius:6px;padding:3px 10px;font-weight:800;cursor:pointer;color:inherit;font-size:0.85rem;';
+  btn.onclick = () => { t.classList.remove('show'); clearTimeout(t._timer); onUndo(); };
+  t.appendChild(span); t.appendChild(btn);
+  t.classList.add('show');
+  clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), duration);
 }
 
 // ====== CONFETTI ======
@@ -9109,8 +9234,14 @@ function arbSwitchTab(type) {
   arbRenderTab(type, state.modules[arbState.moduleIdx]);
 }
 
+function _arbScrollTop() {
+  const panel = document.getElementById('arbWorkContainer') || document.getElementById('view-arbeid');
+  if (panel) panel.scrollTo({ top: 0, behavior: 'smooth' });
+  else window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 function arbRenderTab(type, m) {
   const container = document.getElementById('arbTaskContent');
+  _arbScrollTop();
   if (type === 'text') {
     container.innerHTML = `<div class="arb-content-card">
       <h2 style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--text);margin-bottom:1rem;">📖 ${escHtml(m.name)}</h2>
@@ -9190,10 +9321,13 @@ function arbRenderDisc(m) {
     const saved = arbLoad(`disc_${di}`) || '';
     html += `<div class="arb-disc-card">
       <div class="arb-disc-prompt">💬 ${escHtml(d)}</div>
-      <textarea id="arb-disc-${di}" rows="4" style="width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;resize:vertical;outline:none;" placeholder="Skriv svaret ditt her...">${escHtml(saved)}</textarea>
-      <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.6rem;">
-        <button onclick="arbSaveDisc(${di})" style="background:var(--c4);color:white;border:none;padding:8px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Lagre svar</button>
-        <span class="arb-save-indicator" id="arb-disc-saved-${di}">✓ Lagret!</span>
+      <textarea id="arb-disc-${di}" rows="4" style="width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;resize:vertical;outline:none;" placeholder="Skriv svaret ditt her..." oninput="arbDiscCount(${di},this.value)">${escHtml(saved)}</textarea>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <button onclick="arbSaveDisc(${di})" style="background:var(--c4);color:white;border:none;padding:8px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Lagre svar</button>
+          <span class="arb-save-indicator" id="arb-disc-saved-${di}">✓ Lagret!</span>
+        </div>
+        <span id="arb-disc-count-${di}" style="font-size:0.75rem;color:var(--text-3);font-weight:700;">${saved.length} tegn</span>
       </div>
     </div>`;
   });
@@ -9201,6 +9335,10 @@ function arbRenderDisc(m) {
   container.innerHTML = html;
 }
 
+function arbDiscCount(di, val) {
+  const el = document.getElementById('arb-disc-count-' + di);
+  if (el) el.textContent = val.length + ' tegn';
+}
 function arbSaveDisc(di) {
   const val = document.getElementById('arb-disc-' + di).value;
   arbSave(`disc_${di}`, val);
@@ -9290,6 +9428,7 @@ function arbRenderFlashcards(m) {
 }
 
 function arbRenderFcCard(m) {
+  _arbScrollTop();
   const container = document.getElementById('arbTaskContent');
   const cards = m.flashcards || [];
   const i = arbState.fcIndex;
@@ -9423,6 +9562,8 @@ function arbUpdateProgress(moduleIdx) {
   const pctEl = document.getElementById('arbProgressPct');
   if (circle) { const offset = 138.2 * (1 - pct/100); circle.style.strokeDashoffset = offset; }
   if (pctEl) pctEl.textContent = pct + '%';
+  const topBar = document.getElementById('arbTopProgressBar');
+  if (topBar) topBar.style.width = pct + '%';
   // Jubel ved 100%
   const prevKey = `arb_${arbSKey()}_m${moduleIdx}_celebrated`;
   if (pct === 100 && types.length > 0 && !sessionStorage.getItem(prevKey)) {
