@@ -1,4 +1,4 @@
-// OlaSkole Service Worker — offline-støtte
+// SkOla Service Worker — offline-støtte
 const CACHE = 'olaskole-v1';
 const ASSETS = [
   './',

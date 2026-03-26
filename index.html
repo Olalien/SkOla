@@ -6,10 +6,10 @@
 <meta name="theme-color" content="#7c3aed" id="themeColorMeta">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="OlaSkole">
+<meta name="apple-mobile-web-app-title" content="SkOla">
 <meta name="description" content="Interaktiv læringsplattform for ungdomsskolen">
 <link rel="manifest" href="manifest.json">
-<title>OlaSkole – Interaktiv læringsplattform</title>
+<title>SkOla – Interaktiv læringsplattform</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <script>
   if ('serviceWorker' in navigator) {
@@ -783,7 +783,7 @@
   .exam-q-counter{font-size:0.78rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;}
 
   /* ===== PLANLAGT PUBLISERING ===== */
-  .sched-badge{display:inline-flex;align-items:center;gap:0.3rem;background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.3);color:#92400e;padding:3px 10px;border-radius:50px;font-size:0.73rem;font-weight:800;}
+  .sched-badge{display:inline-flex;align-items:center;gap:0.3rem;background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.3);color:var(--c2);padding:3px 10px;border-radius:50px;font-size:0.73rem;font-weight:800;}
   body.light .sched-badge{color:#78350f;}
 
   /* ===== STATISTIKK PER SPØRSMÅL ===== */
@@ -812,7 +812,7 @@
 <noscript>
   <div style="position:fixed;inset:0;background:#04050d;color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;font-family:sans-serif;text-align:center;padding:2rem;z-index:9999;">
     <div style="font-size:3rem;">📚</div>
-    <h1 style="font-size:1.5rem;">OlaSkole krever JavaScript</h1>
+    <h1 style="font-size:1.5rem;">SkOla krever JavaScript</h1>
     <p style="color:#aaa;max-width:360px;">Aktiver JavaScript i nettleserinnstillingene og last siden på nytt.</p>
   </div>
 </noscript>
@@ -820,7 +820,7 @@
 <div class="progress-top"><div class="progress-fill" id="progressFill"></div></div>
 
 <nav>
-  <div class="logo" onclick="showView('home')" style="cursor:pointer;" title="Tilbake til hjem">Ola<span>Skole</span></div>
+  <div class="logo" onclick="showView('home')" style="cursor:pointer;" title="Tilbake til hjem">Sk<span>Ola</span></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showView('home')">Hjem</button>
     <button class="nav-tab" onclick="arbOpen()" id="tasksTab">Oppgaver</button>
@@ -885,7 +885,7 @@
   <!-- Hero banner -->
   <div class="home-hero">
     <div class="home-hero-text">
-      <div class="home-hero-title" id="heroTitle">Velkommen til <span>OlaSkole</span></div>
+      <div class="home-hero-title" id="heroTitle">Velkommen til <span>SkOla</span></div>
       <div class="home-hero-sub">Din interaktive læringsplattform</div>
     </div>
     <!-- Action buttons always visible at top -->
@@ -1035,11 +1035,11 @@
   <div class="tr-pane active" id="trpane-new">
 
     <!-- Editing banner (shown when editing existing module) -->
-    <div id="editingBanner" style="display:none;background:linear-gradient(135deg,#fef9c3,#fef08a);border:2px solid #fbbf24;border-radius:14px;padding:0.875rem 1.25rem;margin-bottom:1.25rem;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+    <div id="editingBanner" style="display:none;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.4);border-radius:14px;padding:0.875rem 1.25rem;margin-bottom:1.25rem;align-items:center;gap:0.75rem;flex-wrap:wrap;">
       <span style="font-size:1.3rem;">✏️</span>
       <div style="flex:1;min-width:0;">
-        <div style="font-weight:800;color:#92400e;font-size:0.95rem;">Du redigerer: <span id="editingBannerName" style="color:#78350f;"></span></div>
-        <div style="font-size:0.8rem;color:#a16207;margin-top:0.1rem;">Gjør endringer og trykk «Lagre endringer» når du er ferdig.</div>
+        <div style="font-weight:800;color:var(--c2);font-size:0.95rem;">Du redigerer: <span id="editingBannerName" style="color:var(--text);"></span></div>
+        <div style="font-size:0.8rem;color:var(--text-2);margin-top:0.1rem;">Gjør endringer og trykk «Lagre endringer» når du er ferdig.</div>
       </div>
       <button onclick="cancelEditModule()" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:7px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">✕ Avbryt</button>
     </div>
@@ -1538,7 +1538,7 @@
       <h2>Elevsvar og resultater</h2>
       <div style="display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;margin-bottom:1.25rem;">
         <select id="filterClass" onchange="renderResults()" style="padding:9px 13px;border:1px solid var(--border-2);border-radius:50px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;outline:none;cursor:pointer;"><option value="">Alle klasser</option></select>
-        <select id="filterModule" onchange="renderResults()" style="padding:9px 13px;border:2px solid #e0e0e0;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;outline:none;cursor:pointer;"><option value="">Alle emner</option></select>
+        <select id="filterModule" onchange="renderResults()" style="padding:9px 13px;border:1px solid var(--border-2);border-radius:50px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;outline:none;cursor:pointer;"><option value="">Alle emner</option></select>
         <button onclick="exportAllAnswersDocx()" style="background:var(--c4);color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">📄 Eksporter Word</button>
         <button onclick="exportAllAnswersTxt()" style="background:#22c55e;color:white;border:none;padding:9px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">📋 Eksporter tekst</button>
       </div>
@@ -1974,7 +1974,7 @@
         Microsoft-integrasjon
       </div>
       <div style="font-size:0.8rem;color:var(--text-2);margin-bottom:0.875rem;line-height:1.55;">
-        Koble OlaSkole til Microsoft 365 slik at elever kan eksportere arbeid til <b style="color:var(--text);">OneNote</b> og <b style="color:var(--text);">Word Online</b>.
+        Koble SkOla til Microsoft 365 slik at elever kan eksportere arbeid til <b style="color:var(--text);">OneNote</b> og <b style="color:var(--text);">Word Online</b>.
       </div>
       <div style="background:var(--s3);border-radius:10px;padding:0.875rem;border:1px solid var(--border);margin-bottom:0.75rem;">
         <div style="font-size:0.78rem;font-weight:800;color:var(--text-2);margin-bottom:0.5rem;">Microsoft App-ID (Azure)</div>
@@ -2009,7 +2009,7 @@
         Office-integrasjon – oversikt
       </div>
       <div style="font-size:0.8rem;color:var(--text-2);margin-bottom:1rem;line-height:1.55;">
-        Sømløs toveisflyt mellom OlaSkole og Microsoft Office. Importer dokumenter og eksporter elevarbeid direkte.
+        Sømløs toveisflyt mellom SkOla og Microsoft Office. Importer dokumenter og eksporter elevarbeid direkte.
       </div>
 
       <!-- 3-stegs guide -->
@@ -2331,6 +2331,16 @@
       <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;background:var(--s2);border-radius:8px;border:1px solid var(--border);">
         <span style="font-size:0.85rem;color:var(--text);">Snu flashkort</span>
         <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">Enter</kbd>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.75rem;background:var(--s2);border-radius:8px;border:1px solid var(--border);">
+        <span style="font-size:0.85rem;color:var(--text);">Vurder: ❌ Vanskelig / 🤔 Usikker / ✅ Kunne det</span>
+        <div style="display:flex;gap:3px;align-items:center;">
+          <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">1</kbd>
+          <span style="color:var(--text-3);font-size:0.75rem;">/</span>
+          <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">2</kbd>
+          <span style="color:var(--text-3);font-size:0.75rem;">/</span>
+          <kbd style="background:var(--s3);border:1px solid var(--border-2);border-radius:5px;padding:2px 8px;font-family:monospace;font-size:0.78rem;color:var(--text-2);">3</kbd>
+        </div>
       </div>
     </div>
     <button class="btn-primary" style="width:100%;justify-content:center;margin-top:1.1rem;" onclick="closeModal('shortcutsModal')">Lukk</button>
@@ -2741,7 +2751,7 @@
               <div id="crAnsweredCount" style="font-size:0.9rem;color:var(--text-2);">0 av 0 har svart</div>
               <div style="position:relative;width:52px;height:52px;">
                 <svg width="52" height="52" viewBox="0 0 60 60">
-                  <circle cx="30" cy="30" r="26" fill="none" stroke="#e0e0e0" stroke-width="5"/>
+                  <circle cx="30" cy="30" r="26" fill="none" stroke="var(--border-2)" stroke-width="5"/>
                   <circle id="crTimerCircle" cx="30" cy="30" r="26" fill="none" stroke="var(--c3)" stroke-width="5"
                     stroke-dasharray="188.5" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 30 30)" style="transition:stroke-dashoffset 1s linear;"/>
                 </svg>
@@ -2778,7 +2788,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.25rem;">
           <div style="font-family:'Fredoka One',cursive;font-size:1.8rem;color:var(--text);">🏆 High Scores</div>
           <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-            <select id="hsQuizFilter" onchange="loadHighscoreView()" style="padding:8px 12px;border-radius:10px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;outline:none;">
+            <select id="hsQuizFilter" onchange="loadHighscoreView()" style="padding:8px 12px;border-radius:10px;border:1px solid var(--border-2);background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;outline:none;">
               <option value="">— Alle quizer —</option>
             </select>
             <button onclick="loadHighscoreView()" style="background:var(--c4);color:white;border:none;padding:8px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">🔄 Oppdater</button>
@@ -3115,7 +3125,7 @@ function shareModule() {
   if (!m) return;
   const url = window.location.origin + window.location.pathname + '?modul=' + encodeURIComponent(m._id || m.name);
   if (navigator.share) {
-    navigator.share({ title: m.name, text: 'Sjekk ut dette emnet på OlaSkole: ' + m.name, url }).catch(() => {});
+    navigator.share({ title: m.name, text: 'Sjekk ut dette emnet på SkOla: ' + m.name, url }).catch(() => {});
   } else {
     navigator.clipboard.writeText(url)
       .then(() => showToast('🔗 Lenke kopiert til utklippstavlen!'))
@@ -4111,7 +4121,7 @@ function renderDiscHTML(m) {
     const saved = savedKey ? state.studentAnswers[savedKey] : null;
     return `<div class="discussion-card">
       <div class="dq-prompt">💬 ${escHtml(d)}</div>
-      <textarea id="disc-${di}" placeholder="Skriv svaret ditt her..." style="width:100%;min-height:100px;border:2px solid #e0e0e0;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;margin-top:0.5rem;">${saved?escHtml(saved.val):''}</textarea>
+      <textarea id="disc-${di}" placeholder="Skriv svaret ditt her..." style="width:100%;min-height:100px;border:2px solid var(--border-2);background:var(--s2);color:var(--text);border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;margin-top:0.5rem;">${saved?escHtml(saved.val):''}</textarea>
       <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
         <button class="btn-save" onclick="saveDiscAnswer(${di})">💾 Lagre svar</button>
         <span class="saved-badge" id="saved-badge-${di}" style="display:none;">✓ Lagret!</span>
@@ -4141,7 +4151,7 @@ function renderWriteHTML(m) {
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;align-items:center;">
         ${w.minWords?`<span style="font-size:0.82rem;color:var(--text-3);font-weight:700;background:var(--s3);padding:4px 10px;border-radius:50px;">Minimum ${w.minWords} ord</span>`:''}
         <span style="font-size:0.78rem;color:var(--text-3);font-weight:700;">🌐 ${escHtml(lang)}</span>
-        <select onchange="applyWriteTemplate(${wi},this.value)" style="font-size:0.8rem;padding:4px 10px;border-radius:50px;border:2px solid #e0e0e0;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;outline:none;color:var(--text-2);">
+        <select onchange="applyWriteTemplate(${wi},this.value)" style="font-size:0.8rem;padding:4px 10px;border-radius:50px;border:1px solid var(--border-2);background:var(--s2);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;outline:none;">
           <option value="">📝 Velg tekstmal...</option>
           <option value="argumenterende">📣 Argumenterende</option>
           <option value="beskrivende">🔍 Beskrivende</option>
@@ -4152,8 +4162,8 @@ function renderWriteHTML(m) {
       <div id="writeTemplate-${wi}" style="display:none;background:#fffbea;border:2px dashed var(--c2);border-radius:12px;padding:0.875rem;margin-bottom:0.75rem;font-size:0.85rem;color:var(--text-2);line-height:1.65;"></div>
       <textarea id="write-${wi}" lang="${langAttr}" spellcheck="true"
         placeholder="Skriv teksten din her..."
-        style="width:100%;min-height:200px;border:2px solid #e0e0e0;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;line-height:1.7;transition:border-color 0.2s;"
-        onfocus="this.style.borderColor='var(--c4)'" onblur="this.style.borderColor='#e0e0e0'"
+        style="width:100%;min-height:200px;border:2px solid var(--border-2);background:var(--s2);color:var(--text);border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;line-height:1.7;transition:border-color 0.2s;"
+        onfocus="this.style.borderColor='var(--c4)'" onblur="this.style.borderColor='var(--border-2)'"
         oninput="countWords(${wi},${w.minWords||0})">${saved?escHtml(saved.val):''}</textarea>
       <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.6rem;flex-wrap:wrap;">
         <span id="wcount-${wi}" style="font-size:0.82rem;color:var(--text-3);font-weight:700;">0 ord</span>
@@ -4250,7 +4260,7 @@ function renderVideoHTML(m) {
       ${embedHtml}
       <h3 style="font-weight:800;margin-bottom:0.5rem;">${escHtml(v.title||'Video')}</h3>
       ${v.task?`<div style="background:var(--bg);border-radius:12px;padding:1rem;margin-top:0.75rem;border-left:4px solid var(--c2);font-size:0.95rem;color:var(--text-2);">📋 <b>Oppgave:</b> ${escHtml(v.task)}</div>
-      <textarea style="width:100%;margin-top:0.75rem;border:2px solid #e0e0e0;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;min-height:100px;outline:none;" id="vid-${vi}" placeholder="Skriv svaret ditt her...">${saved?escHtml(saved.val):''}</textarea>
+      <textarea style="width:100%;margin-top:0.75rem;border:2px solid var(--border-2);background:var(--s2);color:var(--text);border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;min-height:100px;outline:none;" id="vid-${vi}" placeholder="Skriv svaret ditt her...">${saved?escHtml(saved.val):''}</textarea>
       <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
         <button class="btn-save" onclick="saveVidAnswer(${vi})">💾 Lagre</button>
         <span class="saved-badge" id="vidsaved-${vi}" style="display:none;">✓ Lagret!</span>
@@ -5390,7 +5400,7 @@ function downloadFile(name,content,type){
 }
 function getStudentAnswersText(studentName){
   const answers=Object.entries(state.studentAnswers).filter(([k])=>k.startsWith(studentName));
-  let txt=`OlaSkole – Svar fra ${studentName}\n${'='.repeat(40)}\n\n`;
+  let txt=`SkOla – Svar fra ${studentName}\n${'='.repeat(40)}\n\n`;
   state.modules.forEach((m,mi)=>{
     const modAnswers=answers.filter(([k])=>k.includes('_m'+mi+'_'));
     if(!modAnswers.length)return;
@@ -5649,9 +5659,9 @@ Svar KUN med JSON: {"videos":[{"title":"...","ytId":"11-tegns-ID eller null","se
       const ytId=v.ytId&&v.ytId.length===11?v.ytId:null;
       const finalUrl=ytId?`https://www.youtube.com/watch?v=${ytId}`:(v.searchUrl||'');
       const safeV=JSON.stringify({title:v.title,url:finalUrl,task:v.task||''}).replace(/'/g,"&#39;").replace(/"/g,"&quot;");
-      return `<div style="background:var(--s1);border-radius:14px;padding:0.875rem;border:1px solid #e0e0e0;">
+      return `<div style="background:var(--s1);border-radius:14px;padding:0.875rem;border:1px solid var(--border);">
         ${ytId?`<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" style="width:100%;border-radius:10px;margin-bottom:0.5rem;cursor:pointer;" onclick="svToggleEmbed('svembed-${i}','${ytId}')" /><div id="svembed-${i}" style="display:none;margin-bottom:0.5rem;"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe></div>`
-        :`<div style="background:#f5f5f5;border-radius:10px;padding:1rem;text-align:center;margin-bottom:0.5rem;"><a href="${escHtml(v.searchUrl||'')}" target="_blank" style="color:var(--c4);font-weight:800;">🔍 Søk på YouTube</a></div>`}
+        :`<div style="background:var(--s2);border-radius:10px;padding:1rem;text-align:center;margin-bottom:0.5rem;"><a href="${escHtml(v.searchUrl||'')}" target="_blank" style="color:var(--c4);font-weight:800;">🔍 Søk på YouTube</a></div>`}
         <div style="font-weight:800;font-size:0.92rem;margin-bottom:0.2rem;">🎬 ${escHtml(v.title)}</div>
         ${v.channel?`<div style="font-size:0.75rem;color:var(--text-3);margin-bottom:0.3rem;">📺 ${escHtml(v.channel)}</div>`:''}
         ${v.task?`<div style="font-size:0.82rem;color:var(--text-2);background:var(--s2);border-radius:8px;padding:0.5rem;margin:0.4rem 0;">📋 ${escHtml(v.task)}</div>`:''}
@@ -5683,7 +5693,7 @@ async function aiGenerateFlashcards(){
   if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
   const cards=res.cards||[];
   if(resultEl)resultEl.innerHTML=`<div style="font-weight:800;margin-bottom:0.5rem;">📋 ${cards.length} flashcards:</div>
-    <div style="display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.75rem;">${cards.map(c=>`<div style="background:var(--s2);border-radius:8px;padding:0.5rem 0.875rem;font-size:0.88rem;border:1px solid #e0e0e0;"><b>${escHtml(c.front)}</b> → ${escHtml(c.back)}</div>`).join('')}</div>
+    <div style="display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.75rem;">${cards.map(c=>`<div style="background:var(--s2);border-radius:8px;padding:0.5rem 0.875rem;font-size:0.88rem;border:1px solid var(--border);"><b>${escHtml(c.front)}</b> → ${escHtml(c.back)}</div>`).join('')}</div>
     <button class="btn-success" style="padding:8px 18px;" onclick='useFcAiResult(${JSON.stringify(cards).replace(/'/g,"&#39;").replace(/"/g,"&quot;")})'>➕ Legg til alle</button>`;
 }
 function useFcAiResult(cards){
@@ -6351,7 +6361,7 @@ function getRosterSync() { return _rosterCache; }
 // ════════════════════════════════════════════════════════
 
 const DB_SQL_SCHEMA = `-- ============================================================
--- OlaSkole – Supabase oppsett
+-- SkOla – Supabase oppsett
 -- Lim inn ALT dette i SQL Editor og trykk RUN.
 -- Trygt å kjøre flere ganger.
 -- ============================================================
@@ -6541,7 +6551,7 @@ async function runDbDiagnose() {
     panel.scrollTop = panel.scrollHeight;
   };
 
-  dlog('🔬 OlaSkole DB Diagnose', '#FFD93D');
+  dlog('🔬 SkOla DB Diagnose', '#FFD93D');
   dlog('URL: ' + SB_URL, '#aaa');
   dlog('Nøkkel: ' + SB_KEY.substring(0,20) + '...', '#aaa');
   dlog('─────────────────────────────');
@@ -6683,7 +6693,7 @@ async function arbExportAnswers() {
   if (!m) { showToast('⚠️ Fant ikke emnet'); return; }
   showToast('⏳ Genererer Word-fil…');
   try {
-    let txt = 'OlaSkole – Svar fra ' + state.student.name + '\n';
+    let txt = 'SkOla – Svar fra ' + state.student.name + '\n';
     txt += 'Emne: ' + m.name + '\n' + '='.repeat(40) + '\n\n';
     (m.discussion||[]).forEach((d,di) => {
       const val = arbLoad('disc_'+di);
@@ -6693,7 +6703,7 @@ async function arbExportAnswers() {
       const val = arbLoad('write_'+wi);
       if (val) txt += '✍️ ' + (w.title||'Skriveoppgave') + '\n→ ' + val + '\n\n';
     });
-    const blob = await generateDocx('OlaSkole – ' + m.name, txt);
+    const blob = await generateDocx('SkOla – ' + m.name, txt);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = (state.student.name + '_' + (m.name||'svar')).replace(/[^a-z0-9_]/gi,'_') + '.docx';
@@ -6738,7 +6748,7 @@ async function generateDocx(title, bodyText) {
 async function exportAllAnswersDocx() {
   const students=[...new Set(Object.keys(state.studentAnswers).map(k=>k.split('_m')[0]))];
   const content=students.map(s=>getStudentAnswersText(s)).join('\n\n'+'='.repeat(50)+'\n\n');
-  const blob = await generateDocx('OlaSkole – Alle svar', content);
+  const blob = await generateDocx('SkOla – Alle svar', content);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'alle_svar.docx';
@@ -6767,7 +6777,7 @@ async function uploadToOneDrive(filename, blob) {
   if (!token) { showToast('⚠️ Ikke koblet til Microsoft 365 – gå til Innstillinger'); return; }
   try {
     const ab = await blob.arrayBuffer();
-    const res = await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/OlaSkole/' + encodeURIComponent(filename) + ':/content', {
+    const res = await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/SkOla/' + encodeURIComponent(filename) + ':/content', {
       method: 'PUT',
       headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
       body: ab
@@ -6781,21 +6791,21 @@ async function arbExportToOneNote() {
   if (arbState.moduleIdx === null || !state.student) { showToast('⚠️ Ingen elev eller emne valgt'); return; }
   const m = state.modules[arbState.moduleIdx]; if (!m) return;
   const escHtml = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  let html = '<h1>OlaSkole &ndash; ' + escHtml(m.name) + '</h1><p><b>Elev:</b> ' + escHtml(state.student.name) + '</p><hr/>';
+  let html = '<h1>SkOla &ndash; ' + escHtml(m.name) + '</h1><p><b>Elev:</b> ' + escHtml(state.student.name) + '</p><hr/>';
   (m.discussion||[]).forEach((d,di) => { const val=arbLoad('disc_'+di); if(val) html += '<h3>' + escHtml(d) + '</h3><p>' + escHtml(val).replace(/\n/g,'<br/>') + '</p>'; });
   (m.write||[]).forEach((w,wi) => { const val=arbLoad('write_'+wi); if(val) html += '<h3>' + escHtml(w.title||'Skriveoppgave') + '</h3><p>' + escHtml(val).replace(/\n/g,'<br/>') + '</p>'; });
-  await exportToOneNote('OlaSkole – ' + m.name, html);
+  await exportToOneNote('SkOla – ' + m.name, html);
 }
 
 async function arbExportToOneDrive() {
   if (arbState.moduleIdx === null || !state.student) { showToast('⚠️ Ingen elev eller emne valgt'); return; }
   const m = state.modules[arbState.moduleIdx]; if (!m) { showToast('⚠️ Fant ikke emnet'); return; }
   try {
-    let txt = 'OlaSkole – Svar fra ' + state.student.name + '\nEmne: ' + m.name + '\n' + '='.repeat(40) + '\n\n';
+    let txt = 'SkOla – Svar fra ' + state.student.name + '\nEmne: ' + m.name + '\n' + '='.repeat(40) + '\n\n';
     (m.discussion||[]).forEach((d,di) => { const val=arbLoad('disc_'+di); if(val) txt += '💬 '+d+'\n→ '+val+'\n\n'; });
     (m.write||[]).forEach((w,wi) => { const val=arbLoad('write_'+wi); if(val) txt += '✍️ '+(w.title||'Skriveoppgave')+'\n→ '+val+'\n\n'; });
     const fname = (state.student.name + '_' + (m.name||'svar')).replace(/[^a-z0-9_]/gi,'_') + '.docx';
-    const blob = await generateDocx('OlaSkole – ' + m.name, txt);
+    const blob = await generateDocx('SkOla – ' + m.name, txt);
     await uploadToOneDrive(fname, blob);
   } catch(e) { showToast('❌ Feil ved OneDrive-opplasting: ' + e.message); }
 }
@@ -8669,7 +8679,7 @@ async function gsDiagnose() {
 }
 
 function copyGameSQL() {
-  const sql = `-- OlaSkole Spillmodul – Kjør dette i Supabase SQL Editor
+  const sql = `-- SkOla Spillmodul – Kjør dette i Supabase SQL Editor
 -- Trygt å kjøre flere ganger
 
 -- Tabell for spilløkter
@@ -9390,8 +9400,8 @@ function crSwitchTab(tab) {
     if (!btn) return;
     const colors = { quiz:'var(--c4)', arbeid:'var(--c3)', hs:'var(--c2)' };
     const textColors = { quiz:'white', arbeid:'white', hs:'var(--dark)' };
-    btn.style.background = t === tab ? colors[t] : '#e0e0e0';
-    btn.style.color = t === tab ? textColors[t] : '#555';
+    btn.style.background = t === tab ? colors[t] : 'var(--s3)';
+    btn.style.color = t === tab ? textColors[t] : 'var(--text-2)';
   });
   if (tab === 'arbeid') crPopulateModules();
 }
@@ -10971,7 +10981,7 @@ function _pwaShowBanner() {
   const b = document.createElement('div');
   b.id = 'pwaBanner';
   b.innerHTML = `
-    <div class="pwa-text">📲 <strong>Legg til OlaSkole</strong><br><span style="font-size:0.78rem;font-weight:600;color:var(--text-2);">på hjemskjermen for raskere tilgang</span></div>
+    <div class="pwa-text">📲 <strong>Legg til SkOla</strong><br><span style="font-size:0.78rem;font-weight:600;color:var(--text-2);">på hjemskjermen for raskere tilgang</span></div>
     <button class="pwa-install-btn" onclick="_pwaInstall()">Legg til</button>
     <button class="pwa-dismiss-btn" onclick="_pwaDismiss()" aria-label="Lukk">×</button>`;
   document.body.appendChild(b);
