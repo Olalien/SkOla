@@ -253,6 +253,20 @@
   @keyframes spin{to{transform:rotate(360deg);}}
   .ai-result{background:linear-gradient(135deg,rgba(168,85,247,0.07),rgba(85,120,245,0.07));border-radius:14px;padding:1rem 1.1rem;margin-top:0.875rem;border:1px solid rgba(168,85,247,0.2);display:none;color:var(--text);box-shadow:0 2px 16px rgba(168,85,247,0.08);}
 
+  /* AI Draft Selection UI */
+  .ai-draft-section{margin-bottom:0.75rem;}
+  .ai-draft-section-title{font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.35rem;padding:0 0.25rem;}
+  .ai-draft-row{display:flex;align-items:flex-start;gap:0.6rem;padding:0.55rem 0.75rem;border-radius:10px;border:1px solid var(--border);background:var(--s2);margin-bottom:0.3rem;cursor:pointer;transition:border-color 0.15s,background 0.15s;}
+  .ai-draft-row:hover{border-color:var(--accent);background:var(--s3);}
+  .ai-draft-row:has(.ai-draft-cb:checked){border-color:rgba(123,143,253,0.4);background:rgba(123,143,253,0.06);}
+  .ai-regen-btn{background:var(--s3);border:1px solid var(--border-2);color:var(--text-3);border-radius:7px;width:28px;height:28px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;margin-top:1px;}
+  .ai-regen-btn:hover{background:rgba(123,143,253,0.15);border-color:var(--accent);color:var(--accent);}
+  .ai-regen-btn:disabled{opacity:0.5;cursor:default;}
+  .ai-draft-actions{display:flex;gap:0.5rem;margin-top:0.875rem;flex-wrap:wrap;}
+  .ai-draft-actions .btn-success{flex:1;justify-content:center;}
+  .ai-draft-mini-btn{background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);padding:8px 13px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+  .ai-draft-mini-btn:hover{background:var(--s2);color:var(--text);border-color:var(--accent);}
+
   .results-panel{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.35rem;margin-bottom:1.1rem;box-shadow:var(--shadow);}
   .results-panel h3{font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--text);margin-bottom:0.75rem;}
   .result-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:0.4rem;gap:0.4rem;flex-wrap:wrap;}
@@ -5472,15 +5486,13 @@ Alt på ${s.language}. Kortfattede svar.`;
   const resultEl=document.getElementById('aiResult');
   if(!resultEl)return;
   if(!res||res.error){resultEl.innerHTML=`<div style="color:var(--c1);font-weight:800;">❌ ${res?.error||'Feil'}</div>`;resultEl.style.display='block';return;}
-  if(res.quiz?.length){res.quiz.forEach(q=>state.tempQuiz.push(q));}
-  if(res.discussion?.length){res.discussion.forEach(d=>state.tempDisc.push(d));}
-  if(res.write&&s.writeTasks){state.tempWrite.push(res.write);}
-  if(res.flashcards?.length){res.flashcards.forEach(f=>state.tempFlashcards.push(f));}
-  resultEl.style.display='block';
-  resultEl.innerHTML=`<div style="background:#dcfce7;border-radius:12px;padding:1rem;border:2px solid var(--c3);font-weight:800;color:#166534;">✅ Generert: ${state.tempQuiz.length} quiz, ${state.tempDisc.length} drøfting, ${state.tempWrite.length} skriveoppgaver, ${state.tempFlashcards.length} flashcards</div>`;
-  renderPreviewPanel();
-  updatePublishBarHint();
-  showToast('✅ Oppgaver generert!');
+  _aiDraft = {
+    quiz: res.quiz?.length ? res.quiz : [],
+    discussion: res.discussion?.length ? res.discussion : [],
+    flashcards: res.flashcards?.length ? res.flashcards : [],
+    write: (res.write && s.writeTasks) ? res.write : null,
+  };
+  _renderAiDraftUI('aiResult');
 }
 
 async function generateAll() {
@@ -5490,11 +5502,120 @@ async function generateAll() {
   if (btn) { btn.disabled = true; btn.style.opacity = '0.65'; }
   try {
     await generateWithAI();
-    if (state.tempWrite.length === 0) await generateWriteTask();
   } finally {
     if (btn) { btn.disabled = false; btn.style.opacity = ''; }
   }
-  showToast('🪄 Alt generert!');
+}
+
+// ====== AI DRAFT SELECTION UI ======
+let _aiDraft = null;
+
+function _renderAiDraftUI(resultElId) {
+  const elId = resultElId || 'aiResult';
+  const el = document.getElementById(elId);
+  if (!el || !_aiDraft) return;
+  const regenIcon = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
+  const row = (type, idx, inner) =>
+    `<label class="ai-draft-row" id="ai-draft-${type}-${idx}">
+      <input type="checkbox" class="ai-draft-cb" data-type="${type}" data-idx="${idx}" data-el="${elId}" checked style="width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;margin-top:2px;">
+      <div style="flex:1;min-width:0;">${inner}</div>
+      <button class="ai-regen-btn" onclick="event.preventDefault();_aiRegenerateItem('${type}',${idx},'${elId}')" title="Generer nytt" type="button">${regenIcon}</button>
+    </label>`;
+  const total = (_aiDraft.quiz?.length||0) + (_aiDraft.discussion?.length||0) + (_aiDraft.flashcards?.length||0) + (_aiDraft.write?1:0);
+  let html = `<div style="font-size:0.78rem;font-weight:800;color:var(--accent);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">
+    ✨ ${total} oppgave${total===1?'':'r'} generert – velg hvilke du vil legge til:
+  </div>`;
+  if (_aiDraft.quiz?.length) {
+    html += `<div class="ai-draft-section"><div class="ai-draft-section-title">❓ Quiz (${_aiDraft.quiz.length})</div>`;
+    _aiDraft.quiz.forEach((q, i) => {
+      html += row('quiz', i, `<div style="font-weight:700;font-size:0.87rem;">${escHtml(q.question)}</div>
+        <div style="font-size:0.75rem;color:var(--text-3);margin-top:0.15rem;">✅ ${escHtml(q.a||'')} &nbsp;·&nbsp; ❌ ${escHtml(q.b||'')}</div>`);
+    });
+    html += '</div>';
+  }
+  if (_aiDraft.discussion?.length) {
+    html += `<div class="ai-draft-section"><div class="ai-draft-section-title">💬 Drøfting (${_aiDraft.discussion.length})</div>`;
+    _aiDraft.discussion.forEach((d, i) => {
+      html += row('disc', i, `<div style="font-size:0.87rem;">${escHtml(d)}</div>`);
+    });
+    html += '</div>';
+  }
+  if (_aiDraft.flashcards?.length) {
+    html += `<div class="ai-draft-section"><div class="ai-draft-section-title">🃏 Flashcards (${_aiDraft.flashcards.length})</div>`;
+    _aiDraft.flashcards.forEach((f, i) => {
+      html += row('fc', i, `<div style="font-size:0.87rem;"><b>${escHtml(f.front)}</b> <span style="color:var(--text-3);">→</span> ${escHtml(f.back)}</div>`);
+    });
+    html += '</div>';
+  }
+  if (_aiDraft.write) {
+    html += `<div class="ai-draft-section"><div class="ai-draft-section-title">✍️ Skriveoppgave</div>`;
+    html += row('write', 0, `<div style="font-size:0.87rem;"><b>${escHtml(_aiDraft.write.title)}</b>
+      <div style="font-size:0.75rem;color:var(--text-3);margin-top:0.1rem;">${escHtml(_aiDraft.write.desc||'')}</div></div>`);
+    html += '</div>';
+  }
+  html += `<div class="ai-draft-actions">
+    <button class="btn-success" onclick="_aiUseSelected('${elId}')" type="button">✅ Legg til valgte</button>
+    <button class="ai-draft-mini-btn" onclick="_aiSelectAll(true,'${elId}')" type="button">Velg alle</button>
+    <button class="ai-draft-mini-btn" onclick="_aiSelectAll(false,'${elId}')" type="button">Fjern alle</button>
+  </div>`;
+  el.style.display = 'block';
+  el.innerHTML = html;
+}
+
+function _aiSelectAll(checked, elId) {
+  document.querySelectorAll(`#${elId||'aiResult'} .ai-draft-cb`).forEach(cb => cb.checked = checked);
+}
+
+function _aiUseSelected(elId) {
+  if (!_aiDraft) return;
+  let added = 0;
+  document.querySelectorAll(`#${elId||'aiResult'} .ai-draft-cb`).forEach(cb => {
+    if (!cb.checked) return;
+    const type = cb.dataset.type, idx = parseInt(cb.dataset.idx);
+    if (type === 'quiz'  && _aiDraft.quiz?.[idx])        { state.tempQuiz.push(_aiDraft.quiz[idx]); added++; }
+    if (type === 'disc'  && _aiDraft.discussion?.[idx])  { state.tempDisc.push(_aiDraft.discussion[idx]); added++; }
+    if (type === 'fc'    && _aiDraft.flashcards?.[idx])  { state.tempFlashcards.push(_aiDraft.flashcards[idx]); added++; }
+    if (type === 'write' && idx === 0 && _aiDraft.write) { state.tempWrite.push(_aiDraft.write); added++; }
+  });
+  _aiDraft = null;
+  const el = document.getElementById(elId || 'aiResult');
+  if (el) el.innerHTML = `<div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:0.7rem 1rem;font-weight:800;color:var(--c3);">✅ ${added} oppgave${added===1?'':'r'} lagt til i forhåndsvisningen</div>`;
+  renderPreviewPanel();
+  updatePublishBarHint();
+  showToast(`✅ ${added} oppgave${added===1?'':'r'} lagt til!`);
+}
+
+async function _aiRegenerateItem(type, idx, elId) {
+  if (!_aiDraft) return;
+  const s = getAiSettings();
+  const text = document.getElementById('moduleText')?.value.trim() || '';
+  const ctx = text ? `\nBasert på tekst: """\n${text.substring(0,1200)}\n"""` : '';
+  const row = document.getElementById(`ai-draft-${type}-${idx}`);
+  const btn = row?.querySelector('.ai-regen-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<div class="ai-spinner" style="display:inline-block;border-top-color:var(--accent);"></div>'; }
+  let prompt = '';
+  if (type === 'quiz') {
+    prompt = `Du er norsk ungdomsskolelærer. Klasse: ${s.klasse}. Vanskelighetsgrad: ${s.vanske}.${ctx}
+Lag ETT nytt, variert flervalg-spørsmål. Svar KUN med JSON: {"question":"...","a":"riktig svar","b":"feil","c":"feil","d":"feil","explain":"..."} Alt på ${s.language}.`;
+  } else if (type === 'disc') {
+    prompt = `Lag ETT nytt drøftingsspørsmål for ungdomsskolen (${s.klasse}, ${s.vanske}).${ctx} Svar KUN med JSON: {"q":"..."} Alt på ${s.language}.`;
+  } else if (type === 'fc') {
+    prompt = `Lag ETT nytt flashcard (begrep → forklaring) for ${s.klasse}.${ctx} Svar KUN med JSON: {"front":"...","back":"..."} Alt på ${s.language}.`;
+  } else if (type === 'write') {
+    prompt = `Lag EN ny skriveoppgave for ${s.klasse}.${ctx} Svar KUN med JSON: {"title":"...","desc":"...","minWords":150} Alt på ${s.language}.`;
+  }
+  const res = await aiCallJSON(prompt, null, 1000);
+  if (res && !res.error) {
+    if (type === 'quiz'  && res.question) _aiDraft.quiz[idx] = res;
+    else if (type === 'disc'  && (res.q || res.question)) _aiDraft.discussion[idx] = res.q || res.question;
+    else if (type === 'fc'   && res.front)  _aiDraft.flashcards[idx] = res;
+    else if (type === 'write' && res.title) _aiDraft.write = res;
+    _renderAiDraftUI(elId);
+    showToast('🔄 Nytt spørsmål generert!');
+  } else {
+    if (btn) { btn.disabled = false; btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`; }
+    showToast('❌ Feil ved regenerering');
+  }
 }
 
 async function generateFromGoal(){
@@ -5514,12 +5635,13 @@ Lag eksakt: ${s.quizCount} quiz-spørsmål, ${s.discCount} drøftingsspørsmål,
   const resultEl=document.getElementById('goalGenResult');
   if(!resultEl)return;
   if(!res||res.error){resultEl.style.display='block';resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
-  if(res.quiz?.length)res.quiz.forEach(q=>state.tempQuiz.push(q));
-  if(res.discussion?.length)res.discussion.forEach(d=>state.tempDisc.push(d));
-  if(res.flashcards?.length)res.flashcards.forEach(f=>state.tempFlashcards.push(f));
-  resultEl.style.display='block';
-  resultEl.innerHTML=`<span style="color:#c7f3d4;font-weight:800;">✅ Lagt til: ${res.quiz?.length||0} quiz, ${res.discussion?.length||0} drøfting, ${res.flashcards?.length||0} flashcards</span>`;
-  renderPreviewPanel();updatePublishBarHint();
+  _aiDraft = {
+    quiz: res.quiz?.length ? res.quiz : [],
+    discussion: res.discussion?.length ? res.discussion : [],
+    flashcards: res.flashcards?.length ? res.flashcards : [],
+    write: null,
+  };
+  _renderAiDraftUI('goalGenResult');
 }
 
 async function aiGenerateSingleQuiz(){
