@@ -1,6 +1,6 @@
 {
-  "name": "OlaSkole",
-  "short_name": "OlaSkole",
+  "name": "SkOla",
+  "short_name": "SkOla",
   "description": "Læringsplattform for ungdomsskolen",
   "start_url": "/",
   "display": "standalone",
