@@ -33,6 +33,17 @@
     word-spacing: 0.1em;
     line-height: 1.75 !important;
   }
+  body.serif-font .text-block, body.serif-font .discussion-card, body.serif-font .arb-write-card,
+  body.serif-font textarea, body.serif-font .quiz-q {
+    font-family: Georgia, 'Times New Roman', serif !important;
+    line-height: 1.8 !important;
+  }
+  body.mono-font .text-block, body.mono-font .discussion-card, body.mono-font .arb-write-card,
+  body.mono-font textarea, body.mono-font .quiz-q {
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 0.92em !important;
+    line-height: 1.7 !important;
+  }
   :root {
     --bg:#04050d; --s1:#090b18; --s2:#0e1022; --s3:#141628;
     --border:#1f2240; --border-2:#2d3260;
@@ -131,6 +142,17 @@
   .btn-save:hover{background:rgba(168,85,247,0.18);border-color:rgba(168,85,247,0.4);}
   .btn-cancel{background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:10px 18px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;flex:1;font-size:0.88rem;transition:all 0.18s;}
   .btn-cancel:hover{background:var(--s3);color:var(--text);}
+  /* Reusable hover utility classes (replaces inline onmouseover/onmouseout) */
+  .btn-icon-hover{transition:color 0.18s;}
+  .btn-icon-hover:hover{color:var(--text)!important;}
+  .btn-secondary-action{transition:all 0.18s;color:var(--text-2);}
+  .btn-secondary-action:hover{color:var(--text)!important;}
+  .btn-danger-hover{transition:all 0.18s;}
+  .btn-danger-hover:hover{border-color:#ef4444!important;color:#ef4444!important;}
+  .btn-modal-close{background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);width:30px;height:30px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color 0.18s;min-height:0;}
+  .btn-modal-close:hover{color:var(--text);}
+  .game-label-hover{transition:border-color 0.15s;}
+  .game-label-hover:hover{border-color:var(--accent)!important;}
   .btn-ai{background:linear-gradient(135deg,rgba(168,85,247,0.12),rgba(85,120,245,0.12));border:1px solid rgba(168,85,247,0.25);color:#c084fc;padding:10px 18px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:0.5rem;}
   .btn-ai:hover{background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(85,120,245,0.2));border-color:rgba(168,85,247,0.4);}
 
@@ -252,6 +274,20 @@
   .ai-spinner{display:none;width:15px;height:15px;border:3px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .ai-result{background:linear-gradient(135deg,rgba(168,85,247,0.07),rgba(85,120,245,0.07));border-radius:14px;padding:1rem 1.1rem;margin-top:0.875rem;border:1px solid rgba(168,85,247,0.2);display:none;color:var(--text);box-shadow:0 2px 16px rgba(168,85,247,0.08);}
+
+  /* AI Draft Selection UI */
+  .ai-draft-section{margin-bottom:0.75rem;}
+  .ai-draft-section-title{font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.35rem;padding:0 0.25rem;}
+  .ai-draft-row{display:flex;align-items:flex-start;gap:0.6rem;padding:0.55rem 0.75rem;border-radius:10px;border:1px solid var(--border);background:var(--s2);margin-bottom:0.3rem;cursor:pointer;transition:border-color 0.15s,background 0.15s;}
+  .ai-draft-row:hover{border-color:var(--accent);background:var(--s3);}
+  .ai-draft-row:has(.ai-draft-cb:checked){border-color:rgba(123,143,253,0.4);background:rgba(123,143,253,0.06);}
+  .ai-regen-btn{background:var(--s3);border:1px solid var(--border-2);color:var(--text-3);border-radius:7px;width:28px;height:28px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;margin-top:1px;}
+  .ai-regen-btn:hover{background:rgba(123,143,253,0.15);border-color:var(--accent);color:var(--accent);}
+  .ai-regen-btn:disabled{opacity:0.5;cursor:default;}
+  .ai-draft-actions{display:flex;gap:0.5rem;margin-top:0.875rem;flex-wrap:wrap;}
+  .ai-draft-actions .btn-success{flex:1;justify-content:center;}
+  .ai-draft-mini-btn{background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);padding:8px 13px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+  .ai-draft-mini-btn:hover{background:var(--s2);color:var(--text);border-color:var(--accent);}
 
   .results-panel{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.35rem;margin-bottom:1.1rem;box-shadow:var(--shadow);}
   .results-panel h3{font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--text);margin-bottom:0.75rem;}
@@ -839,7 +875,7 @@
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
       Lærer
     </button>
-    <button id="teacherLogoutBtn" onclick="logoutTeacher()" style="display:none;align-items:center;gap:6px;padding:7px 12px;background:transparent;border:1px solid var(--border-2);color:var(--text-3);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;transition:all 0.18s;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='var(--border-2)';this.style.color='var(--text-3)'">
+    <button id="teacherLogoutBtn" onclick="logoutTeacher()" class="btn-danger-hover" style="display:none;align-items:center;gap:6px;padding:7px 12px;background:transparent;border:1px solid var(--border-2);color:var(--text-3);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Logg ut
     </button>
@@ -1097,6 +1133,12 @@
           <button type="button" onclick="addGlossary()" style="background:var(--accent);color:white;border:none;border-radius:8px;padding:8px 14px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;font-size:0.85rem;white-space:nowrap;">+ Legg til</button>
         </div>
         <div id="glossPreview" style="margin-top:0.5rem;"></div>
+      </div>
+      <!-- Wordle words linked to this module -->
+      <div class="form-row" style="margin:0;margin-top:0.75rem;">
+        <label>🅦 Wordle-ord knyttet til emnet <span style="font-weight:600;color:var(--text-3);font-size:0.78rem;">(valgfritt – brukes i spilløkter)</span></label>
+        <input type="text" id="moduleWordleWords" placeholder="FOTOSYNTESE, CELLE, DNA, KROMOSOM" style="letter-spacing:0.05em;" oninput="this.value=this.value.toUpperCase()" />
+        <div style="font-size:0.72rem;color:var(--text-3);margin-top:0.3rem;">Kommaseparert liste med ord (maks 8 bokstaver). Lastes automatisk inn i Wordle-spilløkter.</div>
       </div>
     </div>
 
@@ -1509,6 +1551,10 @@
     <div class="publish-bar">
       <div style="font-size:0.83rem;color:var(--text-3);font-weight:700;" id="publishBarHint">Fyll inn emnenavn og legg til oppgaver for å publisere</div>
       <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+        <button onclick="previewModuleAsStudent()" class="btn-cancel" style="display:flex;align-items:center;gap:6px;" title="Forhåndsvis som elev">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          👁 Forhåndsvis
+        </button>
         <button class="btn-primary" style="font-size:0.95rem;padding:12px 28px;display:flex;align-items:center;gap:8px;" onclick="saveModule()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 11 4 4"/></svg><span id="saveModuleLabel">Publiser for elevene</span></button>
         <button onclick="cancelEditModule()" id="cancelEditBtn" style="display:none;" class="btn-cancel">Avbryt</button>
       </div>
@@ -1727,9 +1773,9 @@
             Aktive spill
           </div>
           <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
-            <label style="display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border-2);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:700;font-size:0.9rem;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-2)'"><input type="checkbox" id="gsWordle" checked onchange="gsToggleGamePanel('wordle',this.checked)"> 🅦 Wordle</label>
-            <label style="display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border-2);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:700;font-size:0.9rem;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-2)'"><input type="checkbox" id="gsWorldle" checked onchange="gsToggleGamePanel('worldle',this.checked)"> 🌍 Worldle</label>
-            <label style="display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border-2);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:700;font-size:0.9rem;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-2)'"><input type="checkbox" id="gsWhoami" checked onchange="gsToggleGamePanel('whoami',this.checked)"> ❓ Who Am I</label>
+            <label class="game-label-hover" style="display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border-2);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:700;font-size:0.9rem;"><input type="checkbox" id="gsWordle" checked onchange="gsToggleGamePanel('wordle',this.checked)"> 🅦 Wordle</label>
+            <label class="game-label-hover" style="display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border-2);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:700;font-size:0.9rem;"><input type="checkbox" id="gsWorldle" checked onchange="gsToggleGamePanel('worldle',this.checked)"> 🌍 Worldle</label>
+            <label class="game-label-hover" style="display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border-2);border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:700;font-size:0.9rem;"><input type="checkbox" id="gsWhoami" checked onchange="gsToggleGamePanel('whoami',this.checked)"> ❓ Who Am I</label>
           </div>
         </div>
 
@@ -1891,7 +1937,7 @@
     <div class="teacher-panel">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
         <h2 style="margin:0;">📊 Statistikk</h2>
-        <button onclick="renderTeacherStats()" style="display:flex;align-items:center;gap:5px;background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);padding:7px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-2)'">
+        <button onclick="renderTeacherStats()" class="btn-secondary-action" style="display:flex;align-items:center;gap:5px;background:var(--s3);border:1px solid var(--border-2);padding:7px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
           Oppdater
         </button>
@@ -1913,7 +1959,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Innstillinger
       </h2>
-      <button onclick="closeModal('settingsModal')" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);width:30px;height:30px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;min-height:0;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-2)'">
+      <button onclick="closeModal('settingsModal')" class="btn-modal-close">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2145,7 +2191,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Innstillinger
       </h2>
-      <button onclick="closeModal('userSettingsModal')" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);width:30px;height:30px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;min-height:0;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-2)'">
+      <button onclick="closeModal('userSettingsModal')" class="btn-modal-close">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2182,12 +2228,14 @@
 
       <!-- Skrifttype -->
       <div style="margin-top:1rem;">
-        <div style="font-size:0.8rem;font-weight:700;color:var(--text-2);margin-bottom:0.5rem;">Skrifttype</div>
-        <div style="display:flex;gap:0.5rem;">
-          <button id="usFontNormalBtn" onclick="usSetFont('default')" style="flex:1;padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.18s;">Vanlig</button>
-          <button id="usFontDyslexiaBtn" onclick="usSetFont('dyslexia')" style="flex:1;padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'OpenDyslexic','Nunito',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;transition:all 0.18s;">OpenDyslexic</button>
+        <div style="font-size:0.8rem;font-weight:700;color:var(--text-2);margin-bottom:0.5rem;">Skrifttype (lese-tekster)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+          <button id="usFontNormalBtn" onclick="usSetFont('default')" style="padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;transition:all 0.18s;">Vanlig</button>
+          <button id="usFontSerifBtn" onclick="usSetFont('serif')" style="padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:Georgia,serif;font-weight:700;font-size:0.82rem;cursor:pointer;transition:all 0.18s;">Serif</button>
+          <button id="usFontMonoBtn" onclick="usSetFont('mono')" style="padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'Courier New',monospace;font-weight:700;font-size:0.78rem;cursor:pointer;transition:all 0.18s;">Monospace</button>
+          <button id="usFontDyslexiaBtn" onclick="usSetFont('dyslexia')" style="padding:9px 0;border-radius:9px;border:2px solid var(--border-2);background:var(--s3);color:var(--text-2);font-family:'OpenDyslexic','Nunito',sans-serif;font-weight:700;font-size:0.75rem;cursor:pointer;transition:all 0.18s;">OpenDyslexic</button>
         </div>
-        <div style="font-size:0.72rem;color:var(--text-3);margin-top:0.4rem;">OpenDyslexic er designet for å gjøre lesing lettere for elever med dysleksi.</div>
+        <div style="font-size:0.72rem;color:var(--text-3);margin-top:0.4rem;">Påvirker fagtekst, drøfting og skriveoppgaver.</div>
       </div>
     </div>
 
@@ -2288,7 +2336,7 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
         Hurtigtaster
       </h2>
-      <button onclick="closeModal('shortcutsModal')" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);width:30px;height:30px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:0;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-2)'">
+      <button onclick="closeModal('shortcutsModal')" class="btn-modal-close">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -2988,7 +3036,7 @@
 </div>
 
 <!-- EXPORT MODAL -->
-<div class="modal-overlay" id="exportModal">
+<div class="modal-overlay" id="exportModal" onclick="if(event.target===this)closeModal('exportModal')"
   <div class="modal" style="max-width:480px;width:95%;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
       <h2 style="margin:0;font-size:1.35rem;">Eksporter svar</h2>
@@ -2999,7 +3047,7 @@
 </div>
 
 <!-- FEEDBACK MODAL (lærer → elev) -->
-<div class="modal-overlay" id="feedbackModal">
+<div class="modal-overlay" id="feedbackModal" onclick="if(event.target===this)closeModal('feedbackModal')"
   <div class="modal" style="max-width:480px;width:95%;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
       <h2 style="margin:0;font-size:1.25rem;">💬 Gi tilbakemelding</h2>
@@ -3058,6 +3106,16 @@ let _autoSaveTimers = {};
 
 // ====== NAVIGATION ======
 function showView(name) {
+  // Cleanup timers when leaving views
+  if (name !== 'wc' && typeof WC !== 'undefined' && WC.refreshTimer) {
+    clearInterval(WC.refreshTimer); WC.refreshTimer = null;
+  }
+  if (name !== 'tasks' && name !== 'arbeid') {
+    Object.values(_quizTimers||{}).forEach(t => clearInterval(t));
+    _quizTimers = {};
+    Object.values(_writeTimers||{}).forEach(t => clearTimeout(t));
+    _writeTimers = {};
+  }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   const viewEl = document.getElementById('view-' + name);
@@ -3206,11 +3264,15 @@ function _usRefreshUI() {
   if (label) label.textContent = Math.round(_fontScale * 100) + '%';
 
   // Font buttons
-  const isDyslexia = _usSettings.font === 'dyslexia';
-  const fnBtn = document.getElementById('usFontNormalBtn');
-  const fdBtn = document.getElementById('usFontDyslexiaBtn');
-  if (fnBtn) { fnBtn.style.borderColor = isDyslexia ? 'var(--border-2)' : 'var(--accent)'; fnBtn.style.color = isDyslexia ? 'var(--text-2)' : 'var(--text)'; }
-  if (fdBtn) { fdBtn.style.borderColor = isDyslexia ? 'var(--accent)' : 'var(--border-2)'; fdBtn.style.color = isDyslexia ? 'var(--text)' : 'var(--text-2)'; }
+  const curFont = _usSettings.font || 'default';
+  ['usFontNormalBtn','usFontSerifBtn','usFontMonoBtn','usFontDyslexiaBtn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    const active = (id==='usFontNormalBtn'&&curFont==='default')||(id==='usFontSerifBtn'&&curFont==='serif')||(id==='usFontMonoBtn'&&curFont==='mono')||(id==='usFontDyslexiaBtn'&&curFont==='dyslexia');
+    btn.style.borderColor = active ? 'var(--accent)' : 'var(--border-2)';
+    btn.style.color = active ? 'var(--text)' : 'var(--text-2)';
+    btn.style.background = active ? 'rgba(123,143,253,0.1)' : 'var(--s3)';
+  });
 
   // Toggles
   _usRefreshToggle('reduceMotion', 'usReduceMotionToggle', 'usReduceMotionThumb');
@@ -3264,6 +3326,8 @@ function _usApplyAll() {
   document.body.classList.toggle('compact-mode',   !!_usSettings.compact);
   document.body.classList.toggle('large-targets',  !!_usSettings.largeTargets);
   document.body.classList.toggle('dyslexia-font',  _usSettings.font === 'dyslexia');
+  document.body.classList.toggle('serif-font',     _usSettings.font === 'serif');
+  document.body.classList.toggle('mono-font',      _usSettings.font === 'mono');
 }
 
 function usSetFont(val) {
@@ -3313,11 +3377,16 @@ const _saveNoteDebounced = debounce(() => {
 }, 600);
 function saveNotepad() { _saveNoteDebounced(); }
 function clearNotepad() {
-  _showConfirm('Slette notatene for dette emnet?', () => {
-    localStorage.removeItem(_noteKey());
-    const ta = document.getElementById('notepadText');
-    if (ta) ta.value = '';
-    showToast('🗑 Notater slettet');
+  const key = _noteKey();
+  const ta = document.getElementById('notepadText');
+  const prev = localStorage.getItem(key) || ta?.value || '';
+  if (!prev.trim()) return;
+  localStorage.removeItem(key);
+  if (ta) ta.value = '';
+  _showUndoToast('🗑 Notater slettet', () => {
+    localStorage.setItem(key, prev);
+    if (ta) ta.value = prev;
+    showToast('↩️ Notater gjenopprettet');
   });
 }
 function exportNotepad() {
@@ -3421,6 +3490,7 @@ async function studentLogin() {
   }
   if (btn) { btn.textContent = btn._orig; btn.disabled = false; }
   showStudentWelcome();
+  updateContinueCard();
   showView('tasks');
   // Vis lærerfeedback hvis det finnes
   const fbKey = 'feedback_' + name;
@@ -3429,6 +3499,13 @@ async function studentLogin() {
 }
 
 function studentLogout(fullLogout) {
+  if (fullLogout) {
+    _showConfirm('Er du sikker på at du vil logge ut?', () => _doStudentLogout(true));
+    return;
+  }
+  _doStudentLogout(false);
+}
+function _doStudentLogout(fullLogout) {
   state.student = null;
   _progressCache = {};
   localStorage.removeItem('lh_student');
@@ -3804,6 +3881,65 @@ function toggleAiSettings() {
   if (arrow) arrow.textContent = open ? '▼' : '▲';
 }
 
+function previewModuleAsStudent() {
+  const name = document.getElementById('moduleName')?.value.trim();
+  if (!name) { showToast('⚠️ Fyll inn emnenavn først'); return; }
+  const tempMod = {
+    name, emoji: document.getElementById('moduleEmoji')?.value || '📚',
+    desc: document.getElementById('moduleDesc')?.value.trim() || '',
+    subject: document.getElementById('moduleSubject')?.value.trim() || '',
+    text: document.getElementById('moduleText')?.value.trim() || '',
+    quiz: [...(state.tempQuiz||[])],
+    discussion: [...(state.tempDisc||[])],
+    write: [...(state.tempWrite||[])],
+    videos: [...(state.tempVideos||[])],
+    flashcards: [...(state.tempFlashcards||[])],
+    language: document.getElementById('moduleLang')?.value || 'norsk bokmål',
+  };
+  const types = [];
+  if (tempMod.text) types.push({key:'text',label:'📖 Les tekst'});
+  if (tempMod.quiz.length) types.push({key:'quiz',label:'❓ Quiz'});
+  if (tempMod.discussion.length) types.push({key:'disc',label:'💬 Drøfting'});
+  if (tempMod.write.length) types.push({key:'write',label:'✍️ Skriveoppgave'});
+  if (tempMod.videos.length) types.push({key:'video',label:'🎬 Video'});
+  if (tempMod.flashcards.length) types.push({key:'fc',label:'🃏 Flashcards'});
+  if (!types.length && !tempMod.text) { showToast('⚠️ Legg til innhold først'); return; }
+  const tabsHtml = types.map(t => `<button onclick="pvStudentSwitchTab('${t.key}',this,pvStudentMod)" style="padding:8px 14px;border-radius:8px;border:1px solid var(--border-2);background:var(--s2);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;transition:all 0.18s;">${t.label}</button>`).join('');
+  const ov = document.createElement('div');
+  ov.id = 'pvStudentOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  ov.innerHTML = `<div style="background:var(--bg);border:1px solid var(--border-2);border-radius:20px;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;padding:1.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div style="font-weight:800;font-size:1.05rem;color:var(--text);">👁 Forhåndsvisning: ${escHtml(name)}</div>
+      <button onclick="document.getElementById('pvStudentOverlay')?.remove()" class="btn-modal-close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem;" id="pvStudentTabs">${tabsHtml}</div>
+    <div id="pvStudentContent" style="color:var(--text);"></div>
+  </div>`;
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  document.body.appendChild(ov);
+  window.pvStudentMod = tempMod;
+  if (types.length) {
+    const firstBtn = ov.querySelector('#pvStudentTabs button');
+    if (firstBtn) pvStudentSwitchTab(types[0].key, firstBtn, tempMod);
+  }
+}
+
+function pvStudentSwitchTab(type, btn, m) {
+  document.querySelectorAll('#pvStudentTabs button').forEach(b => {
+    b.style.background = 'var(--s2)'; b.style.color = 'var(--text-2)'; b.style.borderColor = 'var(--border-2)';
+  });
+  if (btn) { btn.style.background = 'var(--accent-g)'; btn.style.color = 'var(--accent-h)'; btn.style.borderColor = 'var(--accent)'; }
+  const content = document.getElementById('pvStudentContent');
+  if (!content) return;
+  if (type==='text') content.innerHTML = renderTextHTML(m);
+  else if (type==='quiz') content.innerHTML = renderQuizHTML(m);
+  else if (type==='disc') content.innerHTML = renderDiscHTML(m);
+  else if (type==='write') content.innerHTML = renderWriteHTML(m);
+  else if (type==='video') content.innerHTML = renderVideoHTML(m);
+  else if (type==='fc') content.innerHTML = renderFlashcardHTML(m);
+}
+
 function updatePublishBarHint() {
   const hint = document.getElementById('publishBarHint');
   if (!hint) return;
@@ -3867,7 +4003,7 @@ function renderHomeModules() {
       <span class="task-count">${countTasks(m)} oppgaver</span>
       ${(() => { const pct = getModuleProgress(realIdx); if (pct < 0) return ''; const color = pct===100?'#4ade80':'var(--accent)'; return `<div style="margin-top:0.6rem;"><div style="height:4px;background:rgba(255,255,255,0.1);border-radius:50px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${color};border-radius:50px;transition:width 0.4s;"></div></div><div style="font-size:0.68rem;font-weight:800;color:rgba(255,255,255,0.6);margin-top:3px;">${pct===100?'✓ Fullført':pct+'% gjennomført'}</div></div>`; })()}
       ${m.subject ? `<span style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.25);font-size:0.64rem;font-weight:800;padding:2px 7px;border-radius:50px;color:rgba(255,255,255,0.8);">${escHtml(m.subject)}</span>` : ''}
-      ${isNewModule(m) ? '<span style="position:absolute;top:8px;left:8px;background:var(--c1);color:white;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;">NY</span>' : ''}
+      ${(() => { const pct = getModuleProgress(realIdx); if (pct===100) return '<span style="position:absolute;top:8px;left:8px;background:rgba(34,197,94,0.25);color:#4ade80;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(34,197,94,0.4);">✅ Ferdig</span>'; if (isNewModule(m)) return '<span style="position:absolute;top:8px;left:8px;background:var(--c1);color:white;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;">NY</span>'; return ''; })()}
     </div>`;
   }).join('');
 }
@@ -3979,6 +4115,16 @@ function openModule(idx) {
   showView('tasks');
   renderModuleDetail(m);
   resetNotepadUI();
+  // Auto-open notepad if saved content exists
+  const savedNote = localStorage.getItem('os_note_' + (m._id || 'mod_' + idx));
+  if (savedNote && savedNote.trim() && state.student) {
+    const body = document.getElementById('notepadBody');
+    const chev = document.getElementById('notepadChevron');
+    const ta = document.getElementById('notepadText');
+    if (body) body.style.display = 'block';
+    if (chev) chev.style.transform = 'rotate(180deg)';
+    if (ta) ta.value = savedNote;
+  }
 }
 
 function showModuleList() {
@@ -4047,13 +4193,23 @@ function renderQuizHTML(m) {
   if (!m.quiz?.length) return '<p style="color:var(--text-3);padding:2rem;">Ingen quiz ennå.</p>';
   const timerSec = m.quizTimer || 0;
   const shuffled = [...m.quiz].map((q,i) => ({...q, origIdx:i}));
+  // Store stable shuffle order per module in sessionStorage to prevent re-shuffling on re-render
+  const shuffleKey = `arb_quiz_shuffle_m${state.currentModule}`;
+  let quizShuffle;
+  try { quizShuffle = JSON.parse(sessionStorage.getItem(shuffleKey)); } catch {}
+  if (!quizShuffle || quizShuffle.length !== m.quiz.length) {
+    quizShuffle = m.quiz.map(() => [0,1,2,3].sort(()=>Math.random()-0.5));
+    sessionStorage.setItem(shuffleKey, JSON.stringify(quizShuffle));
+  }
   return `<div id="quizContainer">${shuffled.map((q, qi) => {
-    const opts = [
+    const order = quizShuffle[qi] || [0,1,2,3];
+    const allOpts = [
       {letter:'A', text:q.a, correct:true},
       {letter:'B', text:q.b, correct:false},
       {letter:'C', text:q.c, correct:false},
       {letter:'D', text:q.d, correct:false}
-    ].sort(()=>Math.random()-0.5);
+    ];
+    const opts = order.map(oi => allOpts[oi]);
     const correctMap = JSON.stringify(opts.map(o=>o.correct));
     return `<div class="quiz-card" id="qcard-${qi}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
@@ -4136,6 +4292,15 @@ function saveDiscAnswer(di) {
   saveAnswer('disc_'+di, val);
   const badge = document.getElementById('saved-badge-'+di);
   if (badge) { badge.style.display='inline-block'; setTimeout(()=>badge.style.display='none',2500); }
+  // Show awaiting feedback indicator
+  let fbInd = document.getElementById('disc-fb-ind-'+di);
+  if (!fbInd) {
+    fbInd = document.createElement('span');
+    fbInd.id = 'disc-fb-ind-'+di;
+    fbInd.style.cssText = 'font-size:0.78rem;font-weight:700;color:var(--text-3);margin-left:0.5rem;';
+    badge?.parentNode?.appendChild(fbInd);
+  }
+  fbInd.textContent = '⏳ Venter på tilbakemelding fra lærer';
 }
 
 function renderWriteHTML(m) {
@@ -4159,7 +4324,7 @@ function renderWriteHTML(m) {
           <option value="reflekterende">💭 Reflekterende</option>
         </select>
       </div>
-      <div id="writeTemplate-${wi}" style="display:none;background:#fffbea;border:2px dashed var(--c2);border-radius:12px;padding:0.875rem;margin-bottom:0.75rem;font-size:0.85rem;color:var(--text-2);line-height:1.65;"></div>
+      <div id="writeTemplate-${wi}" style="display:none;background:rgba(245,158,11,0.08);border:2px dashed var(--c2);border-radius:12px;padding:0.875rem;margin-bottom:0.75rem;font-size:0.85rem;color:var(--text-2);line-height:1.65;"></div>
       <textarea id="write-${wi}" lang="${langAttr}" spellcheck="true"
         placeholder="Skriv teksten din her..."
         style="width:100%;min-height:200px;border:2px solid var(--border-2);background:var(--s2);color:var(--text);border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;line-height:1.7;transition:border-color 0.2s;"
@@ -4242,6 +4407,15 @@ function saveWriteAnswer(wi) {
   saveAnswer('write_'+wi, val);
   const badge = document.getElementById('wsaved-'+wi);
   if (badge) { badge.style.display='inline-block'; setTimeout(()=>badge.style.display='none',2500); }
+  // Show awaiting feedback indicator
+  let fbInd = document.getElementById('write-fb-ind-'+wi);
+  if (!fbInd) {
+    fbInd = document.createElement('span');
+    fbInd.id = 'write-fb-ind-'+wi;
+    fbInd.style.cssText = 'font-size:0.78rem;font-weight:700;color:var(--text-3);display:block;margin-top:0.35rem;';
+    badge?.parentNode?.appendChild(fbInd);
+  }
+  fbInd.textContent = '⏳ Venter på tilbakemelding fra lærer';
 }
 
 function renderVideoHTML(m) {
@@ -4496,6 +4670,7 @@ async function saveModule() {
     quizTimer: s.quizTimer || 0,
     language: s.language || 'norsk bokmål',
     glossary: [...state.tempGlossary],
+    wordleWords: (document.getElementById('moduleWordleWords')?.value.trim().split(',').map(w=>w.trim().toUpperCase()).filter(w=>w.length>=2&&w.length<=8) || []),
     examMode: document.getElementById('examModeToggle')?.checked || false,
     createdAt: wasEditing?state.modules[editingModuleIdx].createdAt:new Date().toLocaleString('no'),
     updatedAt: wasEditing?new Date().toLocaleString('no'):null,
@@ -4519,7 +4694,7 @@ function clearModuleForm() {
   state.tempQuiz=[];state.tempDisc=[];state.tempWrite=[];state.tempVideos=[];state.tempFlashcards=[];state.tempGlossary=[];
   const emTog=document.getElementById('examModeToggle');if(emTog)emTog.checked=false;
   _renderGlossPreview();
-  ['moduleName','moduleDesc','moduleText','moduleSubjectFree'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['moduleName','moduleDesc','moduleText','moduleSubjectFree','moduleWordleWords'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const emojiEl=document.getElementById('moduleEmoji');if(emojiEl)emojiEl.value='📚';
   const subjSel=document.getElementById('moduleSubjectSelect');if(subjSel)subjSel.value='';
   ['quizPreview','discPreview','fcPreview'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
@@ -4557,6 +4732,7 @@ function editModule(idx) {
   state.tempVideos=JSON.parse(JSON.stringify(m.videos||[]));
   state.tempFlashcards=JSON.parse(JSON.stringify(m.flashcards||[]));
   state.tempGlossary=JSON.parse(JSON.stringify(m.glossary||[]));
+  const wordleWordsEl=document.getElementById('moduleWordleWords');if(wordleWordsEl)wordleWordsEl.value=(m.wordleWords||[]).join(', ');
   const emTog=document.getElementById('examModeToggle');if(emTog)emTog.checked=m.examMode||false;
   _renderGlossPreview();
   const saveLabel=document.getElementById('saveModuleLabel');if(saveLabel)saveLabel.textContent='💾 Lagre endringer';
@@ -4956,8 +5132,19 @@ function renderTeacherStats() {
   const answers = state.studentAnswers;
   const allKeys = Object.keys(answers);
 
-  if (!allKeys.length && !state.modules.length) {
-    container.innerHTML = '<p style="color:var(--text-3);">Ingen data ennå. Elever må logge inn og svare på oppgaver.</p>';
+  if (!allKeys.length) {
+    container.innerHTML = `<div style="text-align:center;padding:2rem 1rem;">
+      <div style="font-size:2.5rem;margin-bottom:0.75rem;">📊</div>
+      <div style="font-weight:800;font-size:1.05rem;color:var(--text);margin-bottom:0.5rem;">Ingen aktivitet ennå</div>
+      <div style="font-size:0.88rem;color:var(--text-3);margin-bottom:1.25rem;line-height:1.6;">Statistikk dukker opp her når elever logger inn og svarer på oppgaver.</div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:left;font-size:0.85rem;color:var(--text-2);line-height:1.7;">
+        <div style="font-weight:800;color:var(--accent-h);margin-bottom:0.4rem;">💡 Kom i gang</div>
+        <div>1. Opprett et emne under <strong>Nytt emne</strong></div>
+        <div>2. Del emnet med elevene dine</div>
+        <div>3. Elever logger inn på forsiden og åpner emnet</div>
+        <div>4. Svarene vises her automatisk</div>
+      </div>
+    </div>`;
     return;
   }
 
@@ -5472,15 +5659,13 @@ Alt på ${s.language}. Kortfattede svar.`;
   const resultEl=document.getElementById('aiResult');
   if(!resultEl)return;
   if(!res||res.error){resultEl.innerHTML=`<div style="color:var(--c1);font-weight:800;">❌ ${res?.error||'Feil'}</div>`;resultEl.style.display='block';return;}
-  if(res.quiz?.length){res.quiz.forEach(q=>state.tempQuiz.push(q));}
-  if(res.discussion?.length){res.discussion.forEach(d=>state.tempDisc.push(d));}
-  if(res.write&&s.writeTasks){state.tempWrite.push(res.write);}
-  if(res.flashcards?.length){res.flashcards.forEach(f=>state.tempFlashcards.push(f));}
-  resultEl.style.display='block';
-  resultEl.innerHTML=`<div style="background:#dcfce7;border-radius:12px;padding:1rem;border:2px solid var(--c3);font-weight:800;color:#166534;">✅ Generert: ${state.tempQuiz.length} quiz, ${state.tempDisc.length} drøfting, ${state.tempWrite.length} skriveoppgaver, ${state.tempFlashcards.length} flashcards</div>`;
-  renderPreviewPanel();
-  updatePublishBarHint();
-  showToast('✅ Oppgaver generert!');
+  _aiDraft = {
+    quiz: res.quiz?.length ? res.quiz : [],
+    discussion: res.discussion?.length ? res.discussion : [],
+    flashcards: res.flashcards?.length ? res.flashcards : [],
+    write: (res.write && s.writeTasks) ? res.write : null,
+  };
+  _renderAiDraftUI('aiResult');
 }
 
 async function generateAll() {
@@ -5490,11 +5675,124 @@ async function generateAll() {
   if (btn) { btn.disabled = true; btn.style.opacity = '0.65'; }
   try {
     await generateWithAI();
-    if (state.tempWrite.length === 0) await generateWriteTask();
   } finally {
     if (btn) { btn.disabled = false; btn.style.opacity = ''; }
   }
-  showToast('🪄 Alt generert!');
+}
+
+// ====== AI DRAFT SELECTION UI ======
+let _aiDraft = null;
+
+function _renderAiDraftUI(resultElId) {
+  const elId = resultElId || 'aiResult';
+  const el = document.getElementById(elId);
+  if (!el || !_aiDraft) return;
+  const regenIcon = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
+  const row = (type, idx, inner) =>
+    `<label class="ai-draft-row" id="ai-draft-${type}-${idx}">
+      <input type="checkbox" class="ai-draft-cb" data-type="${type}" data-idx="${idx}" data-el="${elId}" checked style="width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;margin-top:2px;">
+      <div style="flex:1;min-width:0;">${inner}</div>
+      <span id="ai-row-spin-${type}-${idx}" class="ai-spinner" style="display:none;border-top-color:var(--accent);flex-shrink:0;"></span>
+      <button class="ai-regen-btn" onclick="event.preventDefault();_aiRegenerateItem('${type}',${idx},'${elId}')" title="Generer nytt" type="button">${regenIcon}</button>
+    </label>`;
+  const total = (_aiDraft.quiz?.length||0) + (_aiDraft.discussion?.length||0) + (_aiDraft.flashcards?.length||0) + (_aiDraft.write?1:0);
+  let html = `<div style="font-size:0.78rem;font-weight:800;color:var(--accent);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">
+    ✨ ${total} oppgave${total===1?'':'r'} generert – velg hvilke du vil legge til:
+  </div>`;
+  if (_aiDraft.quiz?.length) {
+    html += `<div class="ai-draft-section"><div class="ai-draft-section-title">❓ Quiz (${_aiDraft.quiz.length})</div>`;
+    _aiDraft.quiz.forEach((q, i) => {
+      html += row('quiz', i, `<div style="font-weight:700;font-size:0.87rem;">${escHtml(q.question)}</div>
+        <div style="font-size:0.75rem;color:var(--text-3);margin-top:0.15rem;">✅ ${escHtml(q.a||'')} &nbsp;·&nbsp; ❌ ${escHtml(q.b||'')}</div>`);
+    });
+    html += '</div>';
+  }
+  if (_aiDraft.discussion?.length) {
+    html += `<div class="ai-draft-section"><div class="ai-draft-section-title">💬 Drøfting (${_aiDraft.discussion.length})</div>`;
+    _aiDraft.discussion.forEach((d, i) => {
+      html += row('disc', i, `<div style="font-size:0.87rem;">${escHtml(d)}</div>`);
+    });
+    html += '</div>';
+  }
+  if (_aiDraft.flashcards?.length) {
+    html += `<div class="ai-draft-section"><div class="ai-draft-section-title">🃏 Flashcards (${_aiDraft.flashcards.length})</div>`;
+    _aiDraft.flashcards.forEach((f, i) => {
+      html += row('fc', i, `<div style="font-size:0.87rem;"><b>${escHtml(f.front)}</b> <span style="color:var(--text-3);">→</span> ${escHtml(f.back)}</div>`);
+    });
+    html += '</div>';
+  }
+  if (_aiDraft.write) {
+    html += `<div class="ai-draft-section"><div class="ai-draft-section-title">✍️ Skriveoppgave</div>`;
+    html += row('write', 0, `<div style="font-size:0.87rem;"><b>${escHtml(_aiDraft.write.title)}</b>
+      <div style="font-size:0.75rem;color:var(--text-3);margin-top:0.1rem;">${escHtml(_aiDraft.write.desc||'')}</div></div>`);
+    html += '</div>';
+  }
+  html += `<div class="ai-draft-actions">
+    <button class="btn-success" onclick="_aiUseSelected('${elId}')" type="button">✅ Legg til valgte</button>
+    <button class="ai-draft-mini-btn" onclick="_aiSelectAll(true,'${elId}')" type="button">Velg alle</button>
+    <button class="ai-draft-mini-btn" onclick="_aiSelectAll(false,'${elId}')" type="button">Fjern alle</button>
+  </div>`;
+  el.style.display = 'block';
+  el.innerHTML = html;
+}
+
+function _aiSelectAll(checked, elId) {
+  document.querySelectorAll(`#${elId||'aiResult'} .ai-draft-cb`).forEach(cb => cb.checked = checked);
+}
+
+function _aiUseSelected(elId) {
+  if (!_aiDraft) return;
+  let added = 0;
+  document.querySelectorAll(`#${elId||'aiResult'} .ai-draft-cb`).forEach(cb => {
+    if (!cb.checked) return;
+    const type = cb.dataset.type, idx = parseInt(cb.dataset.idx);
+    if (type === 'quiz'  && _aiDraft.quiz?.[idx])        { state.tempQuiz.push(_aiDraft.quiz[idx]); added++; }
+    if (type === 'disc'  && _aiDraft.discussion?.[idx])  { state.tempDisc.push(_aiDraft.discussion[idx]); added++; }
+    if (type === 'fc'    && _aiDraft.flashcards?.[idx])  { state.tempFlashcards.push(_aiDraft.flashcards[idx]); added++; }
+    if (type === 'write' && idx === 0 && _aiDraft.write) { state.tempWrite.push(_aiDraft.write); added++; }
+  });
+  _aiDraft = null;
+  const el = document.getElementById(elId || 'aiResult');
+  if (el) el.innerHTML = `<div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:0.7rem 1rem;font-weight:800;color:var(--c3);">✅ ${added} oppgave${added===1?'':'r'} lagt til i forhåndsvisningen</div>`;
+  renderPreviewPanel();
+  updatePublishBarHint();
+  showToast(`✅ ${added} oppgave${added===1?'':'r'} lagt til!`);
+}
+
+async function _aiRegenerateItem(type, idx, elId) {
+  if (!_aiDraft) return;
+  const s = getAiSettings();
+  const text = document.getElementById('moduleText')?.value.trim() || '';
+  const ctx = text ? `\nBasert på tekst: """\n${text.substring(0,1200)}\n"""` : '';
+  const row = document.getElementById(`ai-draft-${type}-${idx}`);
+  const btn = row?.querySelector('.ai-regen-btn');
+  const spinnerId = `ai-row-spin-${type}-${idx}`;
+  if (btn) { btn.disabled = true; btn.style.display = 'none'; }
+  let prompt = '';
+  if (type === 'quiz') {
+    prompt = `Du er norsk ungdomsskolelærer. Klasse: ${s.klasse}. Vanskelighetsgrad: ${s.vanske}.${ctx}
+Lag ETT nytt, variert flervalg-spørsmål. Svar KUN med JSON: {"question":"...","a":"riktig svar","b":"feil","c":"feil","d":"feil","explain":"..."} Alt på ${s.language}.`;
+  } else if (type === 'disc') {
+    prompt = `Lag ETT nytt drøftingsspørsmål for ungdomsskolen (${s.klasse}, ${s.vanske}).${ctx} Svar KUN med JSON: {"q":"..."} Alt på ${s.language}.`;
+  } else if (type === 'fc') {
+    prompt = `Lag ETT nytt flashcard (begrep → forklaring) for ${s.klasse}.${ctx} Svar KUN med JSON: {"front":"...","back":"..."} Alt på ${s.language}.`;
+  } else if (type === 'write') {
+    prompt = `Lag EN ny skriveoppgave for ${s.klasse}.${ctx} Svar KUN med JSON: {"title":"...","desc":"...","minWords":150} Alt på ${s.language}.`;
+  }
+  const res = await aiCallJSON(prompt, spinnerId, 1000);
+  if (res && !res.error) {
+    if (type === 'quiz'  && res.question) _aiDraft.quiz[idx] = res;
+    else if (type === 'disc'  && (res.q || res.question)) _aiDraft.discussion[idx] = res.q || res.question;
+    else if (type === 'fc'   && res.front)  _aiDraft.flashcards[idx] = res;
+    else if (type === 'write' && res.title) _aiDraft.write = res;
+    _renderAiDraftUI(elId);
+    showToast('🔄 Nytt spørsmål generert!');
+  } else {
+    if (btn) { btn.disabled = false; btn.style.display = ''; }
+    const sp = document.getElementById(spinnerId);
+    if (sp) sp.style.display = 'none';
+    showToast('❌ Feil ved regenerering');
+  }
 }
 
 async function generateFromGoal(){
@@ -5514,12 +5812,13 @@ Lag eksakt: ${s.quizCount} quiz-spørsmål, ${s.discCount} drøftingsspørsmål,
   const resultEl=document.getElementById('goalGenResult');
   if(!resultEl)return;
   if(!res||res.error){resultEl.style.display='block';resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
-  if(res.quiz?.length)res.quiz.forEach(q=>state.tempQuiz.push(q));
-  if(res.discussion?.length)res.discussion.forEach(d=>state.tempDisc.push(d));
-  if(res.flashcards?.length)res.flashcards.forEach(f=>state.tempFlashcards.push(f));
-  resultEl.style.display='block';
-  resultEl.innerHTML=`<span style="color:#c7f3d4;font-weight:800;">✅ Lagt til: ${res.quiz?.length||0} quiz, ${res.discussion?.length||0} drøfting, ${res.flashcards?.length||0} flashcards</span>`;
-  renderPreviewPanel();updatePublishBarHint();
+  _aiDraft = {
+    quiz: res.quiz?.length ? res.quiz : [],
+    discussion: res.discussion?.length ? res.discussion : [],
+    flashcards: res.flashcards?.length ? res.flashcards : [],
+    write: null,
+  };
+  _renderAiDraftUI('goalGenResult');
 }
 
 async function aiGenerateSingleQuiz(){
@@ -5991,14 +6290,14 @@ function relativeTime(dateStr) {
 // ====== TOAST ======
 function showToast(msg, duration=3200){
   let t=document.getElementById('globalToast');
-  if(!t){t=document.createElement('div');t.id='globalToast';t.className='toast';document.body.appendChild(t);}
+  if(!t){t=document.createElement('div');t.id='globalToast';t.className='toast';t.setAttribute('aria-live','polite');t.setAttribute('role','status');document.body.appendChild(t);}
   t.textContent=msg;t.classList.add('show');
   clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),duration);
 }
 
 function _showUndoToast(msg, onUndo, duration=5000) {
   let t = document.getElementById('globalToast');
-  if (!t) { t = document.createElement('div'); t.id = 'globalToast'; t.className = 'toast'; document.body.appendChild(t); }
+  if (!t) { t = document.createElement('div'); t.id = 'globalToast'; t.className = 'toast'; t.setAttribute('aria-live','polite'); t.setAttribute('role','status'); document.body.appendChild(t); }
   t.innerHTML = '';
   const span = document.createElement('span'); span.textContent = msg;
   const btn = document.createElement('button');
@@ -7096,9 +7395,11 @@ function wcSubmitWords(code) {
   existing.push({name: state.student||'Anonym', words:[word], ts:Date.now()});
   localStorage.setItem(key, JSON.stringify(existing));
   if (input) input.value = '';
-  document.getElementById('wc-student-result-msg').style.display='block';
-  document.getElementById('wc-student-result-msg').textContent='✅ «'+word+'» er sendt!';
-  showToast('Sendt!');
+  const resultMsg = document.getElementById('wc-student-result-msg');
+  if (resultMsg) { resultMsg.style.display='block'; resultMsg.textContent='✅ «'+word+'» er sendt!'; }
+  const inputArea = document.getElementById('wc-student-input-area');
+  if (inputArea) inputArea.innerHTML = `<div style="text-align:center;padding:1.25rem;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:12px;font-weight:800;color:var(--c3);font-size:1rem;">✅ Svaret ditt er registrert!<div style="font-size:0.8rem;font-weight:600;color:var(--text-3);margin-top:0.3rem;">«${escHtml(word)}»</div></div>`;
+  showToast('✅ Sendt!');
 }
 
 function wcSubmitPoll(vote, code) {
@@ -9321,7 +9622,7 @@ async function showPublicHighscores() {
     const top = entries.sort((a,b) => b.score-a.score).slice(0,10);
     out += `<div style="background:var(--s1);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 4px 16px rgba(0,0,0,0.07);">
       <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--text);margin-bottom:0.875rem;">🎮 ${quiz}</div>
-      ${top.map((r,i) => `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;border-radius:10px;background:${i<3?['#fff9e6','#f0f4ff','#f0fff4'][i]:'#fafafa'};margin-bottom:0.4rem;">
+      ${top.map((r,i) => `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;border-radius:10px;background:${i<3?['rgba(234,179,8,0.12)','rgba(123,143,253,0.1)','rgba(34,197,94,0.1)'][i]:'var(--s2)'};margin-bottom:0.4rem;border:1px solid ${i<3?['rgba(234,179,8,0.25)','rgba(123,143,253,0.2)','rgba(34,197,94,0.2)'][i]:'var(--border)'};">
         <span style="font-size:1.3rem;min-width:2rem;text-align:center;">${medals[i]||i+1}</span>
         <span style="font-weight:800;flex:1;">${r.player_name}</span>
         <span style="font-weight:900;color:var(--c4);">${r.score} pts</span>
@@ -9373,12 +9674,12 @@ async function loadHighscoreView() {
       <div style="background:var(--s1);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem;box-shadow:0 4px 16px rgba(0,0,0,0.07);">
         <div style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--text);margin-bottom:0.875rem;">🎮 ${quiz}</div>
         ${top.map((r, i) => `
-          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;border-radius:10px;background:${i<3?['#fff9e6','#f0f4ff','#f0fff4'][i]:'#fafafa'};margin-bottom:0.4rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;border-radius:10px;background:${i<3?['rgba(234,179,8,0.12)','rgba(123,143,253,0.1)','rgba(34,197,94,0.1)'][i]:'var(--s2)'};margin-bottom:0.4rem;border:1px solid ${i<3?['rgba(234,179,8,0.25)','rgba(123,143,253,0.2)','rgba(34,197,94,0.2)'][i]:'var(--border)'};">
             <div style="font-size:1.3rem;min-width:2rem;text-align:center;">${medals[i] || (i+1)}</div>
             <div style="font-weight:800;flex:1;">${r.player_name}</div>
             <div style="font-weight:900;color:var(--c4);font-size:1.05rem;">${r.score} pts</div>
             <div style="font-size:0.78rem;color:var(--text-3);">${new Date(r.played_at).toLocaleDateString('no')}</div>
-            ${isTeacher ? `<button onclick="deleteHighscoreEntry('${r.id}')" title="Fjern fra listen" style="background:none;border:none;cursor:pointer;font-size:1rem;color:#ccc;padding:2px 6px;border-radius:6px;" onmouseover="this.style.color='var(--c1)'" onmouseout="this.style.color='#ccc'">🗑</button>` : ''}
+            ${isTeacher ? `<button onclick="deleteHighscoreEntry('${r.id}')" title="Fjern fra listen" class="btn-danger-hover" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--text-3);padding:2px 6px;border-radius:6px;">🗑</button>` : ''}
           </div>`).join('')}
       </div>`;
   }
@@ -10153,8 +10454,30 @@ function arbUpdateProgress(moduleIdx) {
   if (pct === 100 && types.length > 0 && !sessionStorage.getItem(prevKey)) {
     sessionStorage.setItem(prevKey, '1');
     launchConfetti();
-    setTimeout(() => showToast('🎉 Supert! Du har fullført hele emnet!'), 300);
+    setTimeout(() => _showCompletionModal(moduleIdx), 400);
   }
+}
+
+function _showCompletionModal(moduleIdx) {
+  const m = state.modules[moduleIdx];
+  if (!m) return;
+  // Find next unlocked module
+  const nextIdx = state.modules.findIndex((mod, i) => i > moduleIdx && !mod.locked);
+  const nextMod = nextIdx !== -1 ? state.modules[nextIdx] : null;
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);z-index:9998;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s ease;';
+  ov.innerHTML = `<div style="background:linear-gradient(135deg,var(--s1),var(--s2));border:1px solid var(--border-2);border-radius:20px;padding:2rem 2.25rem;max-width:380px;width:92%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+    <div style="font-size:3rem;margin-bottom:0.75rem;">🎉</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--text);margin-bottom:0.4rem;">Bra jobba!</div>
+    <div style="font-size:0.9rem;color:var(--text-2);margin-bottom:1.5rem;">Du har fullført alle oppgavene i <strong>${escHtml(m.name)}</strong>!</div>
+    ${nextMod ? `<div style="background:var(--s3);border:1px solid var(--border-2);border-radius:12px;padding:0.875rem 1rem;margin-bottom:1rem;text-align:left;cursor:pointer;" onclick="document.querySelector('[style*=fixed]').remove();openModule(${nextIdx})">
+      <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem;">Neste emne</div>
+      <div style="font-weight:800;color:var(--text);font-size:0.92rem;">${nextMod.emoji||'📚'} ${escHtml(nextMod.name)}</div>
+    </div>` : ''}
+    <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;padding:11px;background:var(--accent);color:white;border:none;border-radius:11px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;">Fortsett</button>
+  </div>`;
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  document.body.appendChild(ov);
 }
 
 function crShow(phase) {
@@ -10610,7 +10933,7 @@ function sjShowGameOver(data) {
   miniBoard.style.cssText = 'margin:1.25rem auto;max-width:320px;text-align:left;';
   miniBoard.innerHTML = `<div style="font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--text);margin-bottom:0.75rem;text-align:center;">🏆 Resultater</div>` +
     sorted.slice(0,5).map((p,i) => `
-      <div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.75rem;border-radius:10px;background:${p.username===sjGame.username?'#fff9c4':'#f5f5f5'};margin-bottom:0.35rem;border:${p.username===sjGame.username?'2px solid var(--c2)':'2px solid transparent'}">
+      <div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.75rem;border-radius:10px;background:${p.username===sjGame.username?'rgba(245,158,11,0.15)':'var(--s2)'};margin-bottom:0.35rem;border:${p.username===sjGame.username?'2px solid var(--c2)':'1px solid var(--border)'}">
         <span style="font-size:1.2rem;min-width:1.8rem;">${medals[i]||i+1}</span>
         <span style="font-size:1.1rem;">${p.avatar}</span>
         <span style="flex:1;font-weight:800;font-size:0.88rem;">${p.username}</span>
