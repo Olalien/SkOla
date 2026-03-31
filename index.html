@@ -19,13 +19,12 @@
   }
 </script>
 <!-- Preload file-parsing libraries -->
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap');
   @import url('https://fonts.cdnfonts.com/css/opendyslexic');
   body.dyslexia-font, body.dyslexia-font * {
     font-family: 'OpenDyslexic', sans-serif !important;
@@ -1076,19 +1075,23 @@
       <button class="tr-tab active" id="trtab-new"    onclick="trTab('new')">Nytt emne</button>
       <button class="tr-tab"        id="trtab-emner"  onclick="trTab('emner')">Emner</button>
       <button class="tr-tab"        id="trtab-results" onclick="trTab('results')">Resultater</button>
+      <button class="tr-tab"        id="trtab-inbox"   onclick="trTab('inbox')">📥 Innboks</button>
       <button class="tr-tab"        id="trtab-klasser" onclick="trTab('klasser')">Klasser</button>
       <button class="tr-tab"        id="trtab-kunngjoring" onclick="trTab('kunngjoring')">Kunngjøring</button>
       <button class="tr-tab"        id="trtab-spill" onclick="trTab('spill')">Spill</button>
       <button class="tr-tab"        id="trtab-stats" onclick="trTab('stats')">📊 Statistikk</button>
+      <button class="tr-tab"        id="trtab-search" onclick="trTab('search')">🔍 Søk</button>
     </div>
     <select id="trTabMobileSelect" class="tr-tab-mobile-select" onchange="trTab(this.value)">
       <option value="new">✏️ Nytt emne</option>
       <option value="emner">📚 Emner</option>
       <option value="results">📊 Resultater</option>
+      <option value="inbox">📥 Innboks</option>
       <option value="klasser">👥 Klasser</option>
       <option value="kunngjoring">📣 Kunngjøring</option>
       <option value="spill">🎮 Spill</option>
       <option value="stats">📈 Statistikk</option>
+      <option value="search">🔍 Søk</option>
     </select>
   </div>
 
@@ -1641,6 +1644,27 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
+       PANE – INNBOKS (skriveoppgave-innleveringer)
+  ═══════════════════════════════════════════ -->
+  <div class="tr-pane" id="trpane-inbox">
+    <div class="teacher-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
+        <h2 style="margin:0;">📥 Innboks — skriveoppgaver</h2>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <select id="inboxFilterModule" onchange="renderWriteInbox()" style="padding:8px 13px;border:1px solid var(--border-2);border-radius:50px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;outline:none;cursor:pointer;"><option value="">Alle emner</option></select>
+          <select id="inboxFilterStatus" onchange="renderWriteInbox()" style="padding:8px 13px;border:1px solid var(--border-2);border-radius:50px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;outline:none;cursor:pointer;">
+            <option value="">Alle</option>
+            <option value="unread">Ikke kommentert</option>
+            <option value="read">Kommentert</option>
+          </select>
+        </div>
+      </div>
+      <div id="inboxStatsRow" style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.25rem;"></div>
+      <div id="inboxContainer"><p style="color:var(--text-3);">Laster innleveringer...</p></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
        PANE 4 – KLASSER
   ═══════════════════════════════════════════ -->
   <div class="tr-pane" id="trpane-klasser">
@@ -1993,6 +2017,17 @@
     </div>
   </div>
 
+  <div class="tr-pane" id="trpane-search">
+    <div class="teacher-panel">
+      <h2 style="margin:0 0 1rem 0;">🔍 Innholdssøk</h2>
+      <div style="position:relative;margin-bottom:1rem;">
+        <input type="text" id="globalSearchInput" placeholder="Søk i alle emner, oppgaver og spørsmål..." oninput="renderGlobalSearch()" style="width:100%;padding:12px 16px 12px 44px;border:1px solid var(--border-2);border-radius:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;background:var(--s2);color:var(--text);box-sizing:border-box;" />
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1.1rem;pointer-events:none;">🔍</span>
+      </div>
+      <div id="globalSearchResults" style="color:var(--text-3);text-align:center;padding:2rem;">Skriv for å søke i alle emner</div>
+    </div>
+  </div>
+
 </div><!-- /view-teacher -->
 
 
@@ -2017,7 +2052,8 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
         Anthropic API-nøkkel
       </div>
-      <div style="font-size:0.8rem;color:var(--text-2);margin-bottom:0.875rem;line-height:1.55;">Nødvendig for AI-generering. Lagres kun lokalt i nettleseren.</div>
+      <div style="font-size:0.8rem;color:var(--text-2);margin-bottom:0.5rem;line-height:1.55;">Nødvendig for AI-generering. Lagres kun lokalt i nettleseren.</div>
+      <div style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);border-radius:9px;padding:0.6rem 0.875rem;margin-bottom:0.875rem;font-size:0.78rem;color:#f59e0b;font-weight:700;line-height:1.5;">⚠️ <strong>Sikkerhetsadvarsel:</strong> API-nøkkelen lagres i nettleserens localStorage og er synlig for alle som bruker denne enheten. Ikke bruk nøkkelen på delte datamaskiner. Vurder å bruke en backend-proxy for produksjon.</div>
       <div id="settingsApiStatus" style="margin-bottom:0.6rem;font-size:0.83rem;font-weight:700;"></div>
       <div style="position:relative;margin-bottom:0.75rem;">
         <input type="password" id="settingsApiInput" placeholder="sk-ant-api03-..." style="width:100%;padding:10px 42px 10px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:monospace;font-size:0.88rem;outline:none;box-sizing:border-box;background:var(--s3);color:var(--text);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
@@ -2993,10 +3029,11 @@
   <div id="arb-select">
     <div style="max-width:900px;margin:0 auto;">
       <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <div>
+        <div style="flex:1;">
           <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--text);">📚 Arbeidsøkt</div>
           <div style="color:var(--text-2);font-size:0.95rem;">Velg et emne og jobb i ditt eget tempo</div>
         </div>
+        <button id="arbProgressBtn" onclick="arbShowDashboard()" style="display:none;background:var(--s2);border:1px solid var(--border-2);border-radius:50px;padding:9px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;color:var(--text);display:flex;align-items:center;gap:0.4rem;">📊 Min fremgang</button>
       </div>
 
       <!-- Student name prompt if not logged in -->
@@ -3006,6 +3043,9 @@
         <input type="text" id="arbClassInput" placeholder="Klasse (f.eks. 9B)" style="width:100%;padding:12px 14px;border:2px solid var(--border-2);border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;margin-bottom:0.75rem;outline:none;background:var(--s2);color:var(--text);" />
         <button class="btn-primary" style="width:100%;" onclick="arbLogin()">Fortsett →</button>
       </div>
+
+      <!-- Progress Dashboard (hidden by default) -->
+      <div id="arbDashboard" style="display:none;margin-bottom:2rem;"></div>
 
       <!-- Module grid -->
       <div id="arbModuleGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem;"></div>
@@ -3957,7 +3997,7 @@ function msLogin(clientId) {
 function trTab(name) {
   if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
   document.querySelectorAll('.tr-tabs .tr-tab').forEach(t => t.classList.remove('active'));
-  ['trpane-new','trpane-emner','trpane-results','trpane-klasser','trpane-kunngjoring','trpane-spill','trpane-stats'].forEach(id => {
+  ['trpane-new','trpane-emner','trpane-results','trpane-inbox','trpane-klasser','trpane-kunngjoring','trpane-spill','trpane-stats','trpane-search'].forEach(id => {
     const el = document.getElementById(id); if (el) el.classList.remove('active');
   });
   const btn = document.getElementById('trtab-' + name);
@@ -3970,6 +4010,8 @@ function trTab(name) {
   if (name === 'kunngjoring') loadAnnouncementEditor();
   if (name === 'spill') { gsLoadSessions(); gsLoadActiveBanner(); }
   if (name === 'stats') renderTeacherStats();
+  if (name === 'inbox') renderWriteInbox();
+  if (name === 'search') { document.getElementById('globalSearchInput')?.focus(); renderGlobalSearch(); }
   localStorage.setItem('os_last_tr_tab', name);
   const sel = document.getElementById('trTabMobileSelect');
   if (sel) sel.value = name;
@@ -4094,34 +4136,45 @@ function updateContinueCard() {
   </div>`;
 }
 
-function renderHomeModules() {
-  const grid = document.getElementById('homeModulesGrid');
-  const empty = document.getElementById('homeEmpty');
+function _renderModuleGrid(gridId, emptyId, opts={}) {
+  const grid = document.getElementById(gridId);
+  const empty = document.getElementById(emptyId);
   if (!grid) return;
   const colors = ['color-1','color-2','color-3','color-4','color-5'];
   const visible = state.modules.filter(m => !m.locked);
   if (visible.length === 0) {
     grid.innerHTML = '';
-    if (empty) empty.style.display='block';
-    const cta = document.getElementById('homeEmptyTeacherCta');
-    if (cta) cta.style.display = state.isTeacher ? 'block' : 'none';
+    if (empty) empty.style.display = 'block';
+    if (opts.onEmpty) opts.onEmpty();
     return;
   }
   if (empty) empty.style.display = 'none';
-  renderSubjectFilter();
   grid.innerHTML = visible.map((m, i) => {
     const realIdx = state.modules.indexOf(m);
-    return `<div class="module-card ${colors[i%5]}" style="position:relative;" onclick="openModule(${realIdx})" role="button" tabindex="0" aria-label="${escHtml(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${realIdx})}" data-module-name="${escHtml(m.name)}" data-module-subject="${escHtml(m.subject||m.emoji||'📚')}">
+    const pct = getModuleProgress(realIdx);
+    const progressBar = (pct >= 0) ? `<div style="margin-top:0.6rem;"><div style="height:4px;background:rgba(255,255,255,0.1);border-radius:50px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${pct===100?'#4ade80':'var(--accent)'};border-radius:50px;transition:width 0.4s;"></div></div><div style="font-size:0.68rem;font-weight:800;color:rgba(255,255,255,0.6);margin-top:3px;">${pct===100?'✓ Fullført':pct+'% gjennomført'}</div></div>` : '';
+    const statusBadge = pct===100 ? '<span style="position:absolute;top:8px;left:8px;background:rgba(34,197,94,0.25);color:#4ade80;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(34,197,94,0.4);">✅ Ferdig</span>' : isNewModule(m) ? '<span style="position:absolute;top:8px;left:8px;background:var(--c1);color:white;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;">NY</span>' : '';
+    const subjectBadge = m.subject ? `<span style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.25);font-size:0.64rem;font-weight:800;padding:2px 7px;border-radius:50px;color:rgba(255,255,255,0.8);">${escHtml(m.subject)}</span>` : '';
+    return `<div class="module-card ${colors[i%5]}" style="position:relative;" onclick="openModule(${realIdx})" role="button" tabindex="0" aria-label="${escHtml(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${realIdx})}" data-module-name="${escHtml(m.name)}" data-module-subject="${escHtml(m.subject||'')}">
       ${state.isTeacher ? `<button class="mc-edit-btn" onclick="event.stopPropagation();quickEditModule(${realIdx})" title="Rediger">✏️</button>` : ''}
+      ${statusBadge}${subjectBadge}
       <span class="mc-emoji">${m.emoji||'📚'}</span>
       <h3>${escHtml(m.name)}</h3>
       <p>${escHtml(m.desc||'')}</p>
       <span class="task-count">${countTasks(m)} oppgaver</span>
-      ${(() => { const pct = getModuleProgress(realIdx); if (pct < 0) return ''; const color = pct===100?'#4ade80':'var(--accent)'; return `<div style="margin-top:0.6rem;"><div style="height:4px;background:rgba(255,255,255,0.1);border-radius:50px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${color};border-radius:50px;transition:width 0.4s;"></div></div><div style="font-size:0.68rem;font-weight:800;color:rgba(255,255,255,0.6);margin-top:3px;">${pct===100?'✓ Fullført':pct+'% gjennomført'}</div></div>`; })()}
-      ${m.subject ? `<span style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.25);font-size:0.64rem;font-weight:800;padding:2px 7px;border-radius:50px;color:rgba(255,255,255,0.8);">${escHtml(m.subject)}</span>` : ''}
-      ${(() => { const pct = getModuleProgress(realIdx); if (pct===100) return '<span style="position:absolute;top:8px;left:8px;background:rgba(34,197,94,0.25);color:#4ade80;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(34,197,94,0.4);">✅ Ferdig</span>'; if (isNewModule(m)) return '<span style="position:absolute;top:8px;left:8px;background:var(--c1);color:white;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;">NY</span>'; return ''; })()}
+      ${progressBar}
     </div>`;
   }).join('');
+}
+
+function renderHomeModules() {
+  _renderModuleGrid('homeModulesGrid', 'homeEmpty', {
+    onEmpty: () => {
+      const cta = document.getElementById('homeEmptyTeacherCta');
+      if (cta) cta.style.display = state.isTeacher ? 'block' : 'none';
+    }
+  });
+  renderSubjectFilter();
 }
 
 function _heroGreeting() {
@@ -4134,23 +4187,7 @@ function _heroGreeting() {
 }
 
 function renderTaskModules() {
-  const grid = document.getElementById('taskModulesGrid');
-  const empty = document.getElementById('taskEmpty');
-  if (!grid) return;
-  const colors = ['color-1','color-2','color-3','color-4','color-5'];
-  const visible = state.modules.filter(m => !m.locked);
-  if (visible.length === 0) { grid.innerHTML = ''; if (empty) empty.style.display='block'; return; }
-  if (empty) empty.style.display = 'none';
-  grid.innerHTML = visible.map((m, i) => {
-    const realIdx = state.modules.indexOf(m);
-    return `<div class="module-card ${colors[i%5]}" style="position:relative;" onclick="openModule(${realIdx})" role="button" tabindex="0" aria-label="${escHtml(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${realIdx})}" data-module-name="${escHtml(m.name)}">
-      ${state.isTeacher ? `<button class="mc-edit-btn" onclick="event.stopPropagation();quickEditModule(${realIdx})" title="Rediger">✏️</button>` : ''}
-      <span class="mc-emoji">${m.emoji||'📚'}</span>
-      <h3>${escHtml(m.name)}</h3>
-      <p>${escHtml(m.desc||'')}</p>
-      <span class="task-count">${countTasks(m)} oppgaver</span>
-    </div>`;
-  }).join('');
+  _renderModuleGrid('taskModulesGrid', 'taskEmpty');
 }
 
 function getModuleProgress(realIdx) {
@@ -5532,6 +5569,182 @@ function filterStudentResults() {
   document.querySelectorAll('.student-result-row').forEach(row => {
     row.style.display = (row.dataset.name || '').includes(q) ? '' : 'none';
   });
+}
+
+// ====== INNBOKS: SKRIVEOPPGAVE-INNLEVERINGER ======
+async function renderWriteInbox() {
+  if (!state.isTeacher) return;
+  const container = document.getElementById('inboxContainer');
+  const statsRow = document.getElementById('inboxStatsRow');
+  const modFilter = document.getElementById('inboxFilterModule');
+  const statusFilter = document.getElementById('inboxFilterStatus')?.value || '';
+  if (!container) return;
+
+  // Populate module filter
+  if (modFilter && modFilter.options.length === 1) {
+    state.modules.forEach((m, mi) => {
+      if (m.write?.length) {
+        const opt = document.createElement('option');
+        opt.value = mi;
+        opt.textContent = (m.emoji||'📚') + ' ' + m.name;
+        modFilter.appendChild(opt);
+      }
+    });
+  }
+  const modFilterVal = modFilter?.value;
+
+  // Collect all write answers from studentAnswers
+  const inbox = [];
+  const allAnswers = state.studentAnswers;
+  Object.entries(allAnswers).forEach(([key, val]) => {
+    const m = key.match(/^(.+)_m(\d+)_write_(\d+)$/);
+    if (!m) return;
+    const [, studentName, miStr, wiStr] = m;
+    const mi = parseInt(miStr), wi = parseInt(wiStr);
+    if (modFilterVal !== '' && modFilterVal !== undefined && parseInt(modFilterVal) !== mi) return;
+    const mod = state.modules[mi];
+    if (!mod?.write?.[wi]) return;
+    const text = typeof val === 'object' ? val.val : val;
+    if (!text || text.toString().trim().length < 3) return;
+    const fbKey = 'af_' + key;
+    const feedback = localStorage.getItem(fbKey) || '';
+    if (statusFilter === 'unread' && feedback) return;
+    if (statusFilter === 'read' && !feedback) return;
+    inbox.push({ key, studentName, mi, wi, mod, task: mod.write[wi], text: text.toString(), feedback, time: typeof val === 'object' ? val.time : '' });
+  });
+
+  inbox.sort((a, b) => (b.time||'').localeCompare(a.time||''));
+
+  const total = inbox.length;
+  const unread = inbox.filter(i => !i.feedback).length;
+  if (statsRow) statsRow.innerHTML = `
+    <div style="background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(239,68,68,0.05));border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:0.75rem 1.25rem;flex:1;min-width:100px;text-align:center;"><div style="font-size:1.5rem;font-weight:800;color:var(--c1);">${unread}</div><div style="font-size:0.75rem;color:var(--text-2);font-weight:700;">Venter svar</div></div>
+    <div style="background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(34,197,94,0.05));border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:0.75rem 1.25rem;flex:1;min-width:100px;text-align:center;"><div style="font-size:1.5rem;font-weight:800;color:var(--c3);">${total-unread}</div><div style="font-size:0.75rem;color:var(--text-2);font-weight:700;">Kommentert</div></div>
+    <div style="background:linear-gradient(135deg,rgba(123,143,253,0.1),rgba(123,143,253,0.05));border:1px solid rgba(123,143,253,0.2);border-radius:12px;padding:0.75rem 1.25rem;flex:1;min-width:100px;text-align:center;"><div style="font-size:1.5rem;font-weight:800;color:var(--c4);">${total}</div><div style="font-size:0.75rem;color:var(--text-2);font-weight:700;">Totalt</div></div>`;
+
+  if (!inbox.length) {
+    container.innerHTML = `<div style="text-align:center;padding:3rem 1rem;color:var(--text-3);"><div style="font-size:2.5rem;margin-bottom:0.75rem;">📭</div><div style="font-weight:800;">Ingen innleveringer${statusFilter==='unread'?' å kommentere':''} ennå</div></div>`;
+    return;
+  }
+
+  container.innerHTML = inbox.map(item => {
+    const safeKey = item.key.replace(/[^a-zA-Z0-9]/g,'_');
+    const wordCount = item.text.split(/\s+/).filter(Boolean).length;
+    const minWords = item.task.minWords || 0;
+    const wordOk = !minWords || wordCount >= minWords;
+    return `<div class="inbox-item" id="inboxRow-${safeKey}" style="background:var(--s2);border:1px solid ${item.feedback?'var(--border)':'rgba(239,68,68,0.25)'};border-radius:14px;margin-bottom:0.75rem;overflow:hidden;">
+      <div style="padding:0.875rem 1rem;cursor:pointer;display:flex;align-items:flex-start;gap:0.75rem;" onclick="_inboxToggle('inboxBody-${safeKey}')">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.25rem;">
+            ${!item.feedback?'<span style="background:rgba(239,68,68,0.15);color:var(--c1);font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(239,68,68,0.3);">● Venter</span>':'<span style="background:rgba(34,197,94,0.12);color:var(--c3);font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(34,197,94,0.25);">✓ Kommentert</span>'}
+            <span style="font-weight:800;font-size:0.88rem;color:var(--text);">👤 ${escHtml(item.studentName)}</span>
+            <span style="font-size:0.75rem;color:var(--text-3);">— ${escHtml(item.mod.emoji||'📚')} ${escHtml(item.mod.name)}</span>
+          </div>
+          <div style="font-size:0.82rem;color:var(--text-2);font-weight:700;">${escHtml(item.task.title||'Skriveoppgave')}</div>
+          <div style="font-size:0.78rem;color:${wordOk?'var(--c3)':'var(--c1)'};margin-top:2px;">${wordCount} ord${minWords?` / ${minWords} minimum`:''}</div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-3);flex-shrink:0;margin-top:2px;">${item.time ? relativeTime(item.time) : ''}</div>
+      </div>
+      <div id="inboxBody-${safeKey}" style="display:none;padding:0 1rem 1rem;">
+        <div style="background:var(--s3);border-radius:10px;padding:0.875rem 1rem;margin-bottom:0.75rem;font-size:0.88rem;color:var(--text);line-height:1.7;white-space:pre-wrap;max-height:200px;overflow-y:auto;">${escHtml(item.text)}</div>
+        <div style="font-weight:800;font-size:0.82rem;color:var(--text-2);margin-bottom:0.4rem;">💬 Din kommentar til eleven:</div>
+        <textarea id="inboxFb-${safeKey}" placeholder="Skriv en kommentar..." style="width:100%;min-height:80px;padding:9px 12px;border:1px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;background:var(--s3);color:var(--text);resize:vertical;box-sizing:border-box;">${escHtml(item.feedback)}</textarea>
+        <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;">
+          <button onclick="_saveInboxFeedback('${item.key}','${safeKey}')" style="background:var(--accent);color:#fff;border:none;border-radius:9px;padding:7px 18px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:'Nunito',sans-serif;">💾 Lagre</button>
+          ${item.feedback?`<button onclick="_deleteInboxFeedback('${item.key}','${safeKey}')" style="background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.25);border-radius:9px;padding:7px 14px;font-weight:800;font-size:0.82rem;cursor:pointer;font-family:'Nunito',sans-serif;">🗑 Slett</button>`:''}
+          <span id="inboxFbSaved-${safeKey}" style="display:none;color:var(--c3);font-weight:700;font-size:0.85rem;align-self:center;">✅ Lagret</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function _inboxToggle(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+async function _saveInboxFeedback(answerKey, safeKey) {
+  const ta = document.getElementById('inboxFb-' + safeKey);
+  const text = ta?.value.trim() || '';
+  const fbKey = 'af_' + answerKey;
+  if (text) {
+    localStorage.setItem(fbKey, text);
+    await DB.saveFeedback(fbKey, text);
+  }
+  const badge = document.getElementById('inboxFbSaved-' + safeKey);
+  if (badge) { badge.style.display = 'inline'; setTimeout(() => badge.style.display = 'none', 2000); }
+  // Update border color to show it's now commented
+  const row = document.getElementById('inboxRow-' + safeKey);
+  if (row) row.style.borderColor = 'var(--border)';
+  showToast('💬 Tilbakemelding lagret!');
+}
+async function _deleteInboxFeedback(answerKey, safeKey) {
+  const fbKey = 'af_' + answerKey;
+  localStorage.removeItem(fbKey);
+  await DB.deleteFeedback(fbKey);
+  renderWriteInbox();
+}
+
+// ====== GLOBAL CONTENT SEARCH ======
+function renderGlobalSearch() {
+  const q = (document.getElementById('globalSearchInput')?.value || '').trim().toLowerCase();
+  const container = document.getElementById('globalSearchResults');
+  if (!container) return;
+  if (!q) { container.innerHTML = '<div style="color:var(--text-3);text-align:center;padding:2rem;">Skriv for å søke i alle emner</div>'; return; }
+  const results = [];
+  state.modules.forEach((m, mi) => {
+    const mName = (m.name || '').toLowerCase();
+    const mDesc = (m.desc || '').toLowerCase();
+    if (mName.includes(q) || mDesc.includes(q)) {
+      results.push({ type: 'emne', mi, label: m.name, detail: m.desc || '', emoji: m.emoji || '📚' });
+    }
+    if (m.text && m.text.toLowerCase().includes(q)) {
+      const idx = m.text.toLowerCase().indexOf(q);
+      const snippet = m.text.slice(Math.max(0, idx - 40), idx + 80).replace(/\n/g, ' ');
+      results.push({ type: 'tekst', mi, label: m.name, detail: snippet, emoji: '📖' });
+    }
+    (m.quiz || []).forEach((qz, qi) => {
+      const qText = ((qz.question || qz.q || '') + ' ' + (qz.a||'') + ' ' + (qz.b||'') + ' ' + (qz.c||'') + ' ' + (qz.d||'')).toLowerCase();
+      if (qText.includes(q)) {
+        results.push({ type: 'quiz', mi, qi, label: m.name, detail: qz.question || qz.q || '', emoji: '❓' });
+      }
+    });
+    (m.flashcards || []).forEach((fc, fi) => {
+      if ((fc.term + ' ' + fc.def).toLowerCase().includes(q)) {
+        results.push({ type: 'flashcard', mi, label: m.name, detail: fc.term + ' → ' + fc.def, emoji: '🃏' });
+      }
+    });
+    (m.write || []).forEach((w, wi) => {
+      const wText = (w.prompt || w || '').toLowerCase();
+      if (wText.includes(q)) {
+        results.push({ type: 'skriving', mi, label: m.name, detail: w.prompt || w || '', emoji: '✍️' });
+      }
+    });
+    (m.discussion || []).forEach((d, di) => {
+      if ((d || '').toLowerCase().includes(q)) {
+        results.push({ type: 'drøfting', mi, label: m.name, detail: d, emoji: '💬' });
+      }
+    });
+  });
+  if (!results.length) {
+    container.innerHTML = '<div style="color:var(--text-3);text-align:center;padding:2rem;">Ingen treff for «' + escHtml(q) + '»</div>';
+    return;
+  }
+  const highlight = (text) => {
+    if (!text) return '';
+    const safe = escHtml(text);
+    const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    return safe.replace(re, '<mark style="background:rgba(251,191,36,0.35);border-radius:3px;padding:0 2px;">$1</mark>');
+  };
+  container.innerHTML = `<div style="font-size:0.82rem;color:var(--text-3);margin-bottom:0.75rem;font-weight:700;">${results.length} treff</div>` +
+    results.map(r => `
+      <div onclick="trTab('new');editModule(${r.mi})" style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:0.875rem 1rem;margin-bottom:0.6rem;cursor:pointer;transition:border-color 0.15s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.2rem;">
+          <span>${r.emoji}</span>
+          <span style="font-weight:800;font-size:0.88rem;color:var(--text);">${highlight(r.label)}</span>
+          <span style="background:var(--s3);color:var(--text-2);font-size:0.73rem;font-weight:800;padding:2px 8px;border-radius:50px;margin-left:auto;">${r.type}</span>
+        </div>
+        <div style="font-size:0.82rem;color:var(--text-2);line-height:1.4;">${highlight(r.detail.slice(0,120))}${r.detail.length>120?'…':''}</div>
+      </div>`).join('');
 }
 
 // ====== TEACHER STATISTICS ======
@@ -10208,10 +10421,81 @@ function arbLogin() {
   arbRenderModuleGrid();
 }
 
+function arbShowDashboard() {
+  const dash = document.getElementById('arbDashboard');
+  if (!dash) return;
+  if (dash.style.display !== 'none') { dash.style.display = 'none'; return; }
+  const name = state.student?.name || '_guest';
+  const prefix = 'arb_' + name + '_';
+  // Compute per-module progress
+  let totalDone = 0, totalTasks = 0, completedModules = 0;
+  const modRows = state.modules.map((m, i) => {
+    const tasks = countTasks(m);
+    const done = arbGetModuleProgress(i);
+    totalDone += done; totalTasks += tasks;
+    if (tasks > 0 && done >= tasks) completedModules++;
+    const pct = tasks > 0 ? Math.round((done / tasks) * 100) : 0;
+    const bar = `<div style="height:6px;background:var(--s3);border-radius:99px;overflow:hidden;margin-top:4px;"><div style="height:100%;width:${pct}%;background:var(--c3);border-radius:99px;transition:width 0.4s;"></div></div>`;
+    return `<div style="display:flex;align-items:center;gap:0.75rem;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:1.3rem;">${m.emoji||'📚'}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(m.name)}</div>
+        ${bar}
+      </div>
+      <span style="font-weight:800;font-size:0.85rem;color:${pct===100?'#4ade80':'var(--text-2)'};">${pct}%</span>
+    </div>`;
+  }).join('');
+  // Streak: count distinct days with any arb_ key activity (using timestamps in localStorage)
+  const activityDays = new Set();
+  Object.keys(localStorage).filter(k => k.startsWith(prefix)).forEach(k => {
+    try { const v = JSON.parse(localStorage.getItem(k)); if (v?.at) activityDays.add(v.at.slice(0,10)); } catch(e){}
+  });
+  const streak = activityDays.size;
+  // Achievements
+  const achievements = [];
+  if (completedModules >= 1) achievements.push({emoji:'🏅', label:'Første emne fullført'});
+  if (completedModules >= 5) achievements.push({emoji:'🥈', label:'5 emner fullført'});
+  if (completedModules >= 10) achievements.push({emoji:'🥇', label:'10 emner fullført'});
+  if (streak >= 3) achievements.push({emoji:'🔥', label:'3-dagers streak'});
+  if (streak >= 7) achievements.push({emoji:'⚡', label:'7-dagers streak'});
+  const overallPct = totalTasks > 0 ? Math.round((totalDone/totalTasks)*100) : 0;
+  dash.style.display = 'block';
+  dash.innerHTML = `
+    <div style="background:var(--s1);border-radius:18px;padding:1.5rem;box-shadow:var(--shadow);margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+        <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;">📊 Min fremgang</div>
+        <button onclick="document.getElementById('arbDashboard').style.display='none'" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-2);">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem;">
+        <div style="background:var(--s2);border-radius:14px;padding:1rem;text-align:center;">
+          <div style="font-size:1.8rem;font-family:'Fredoka One',cursive;color:var(--accent);">${completedModules}</div>
+          <div style="font-size:0.78rem;color:var(--text-2);font-weight:700;">Fullførte emner</div>
+        </div>
+        <div style="background:var(--s2);border-radius:14px;padding:1rem;text-align:center;">
+          <div style="font-size:1.8rem;font-family:'Fredoka One',cursive;color:var(--c3);">${overallPct}%</div>
+          <div style="font-size:0.78rem;color:var(--text-2);font-weight:700;">Totalt fullført</div>
+        </div>
+        <div style="background:var(--s2);border-radius:14px;padding:1rem;text-align:center;">
+          <div style="font-size:1.8rem;font-family:'Fredoka One',cursive;color:#f59e0b;">${streak}🔥</div>
+          <div style="font-size:0.78rem;color:var(--text-2);font-weight:700;">Aktive dager</div>
+        </div>
+      </div>
+      ${achievements.length ? `<div style="margin-bottom:1.25rem;">
+        <div style="font-weight:800;font-size:0.82rem;color:var(--text-2);margin-bottom:0.5rem;">MERKER</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">${achievements.map(a=>`<span style="background:var(--s2);border:1px solid var(--border-2);border-radius:50px;padding:5px 14px;font-size:0.82rem;font-weight:800;">${a.emoji} ${a.label}</span>`).join('')}</div>
+      </div>` : ''}
+      <div style="font-weight:800;font-size:0.82rem;color:var(--text-2);margin-bottom:0.5rem;">EMNER</div>
+      <div style="max-height:260px;overflow-y:auto;">${modRows || '<div style="color:var(--text-3);text-align:center;padding:1rem;">Ingen data ennå</div>'}</div>
+    </div>`;
+}
+
 function arbRenderModuleGrid() {
   const grid = document.getElementById('arbModuleGrid');
   const empty = document.getElementById('arbEmpty');
   if (!grid) return;
+  // Show/hide progress button
+  const progBtn = document.getElementById('arbProgressBtn');
+  if (progBtn) progBtn.style.display = state.student ? 'flex' : 'none';
   if (state.modules.length === 0) {
     grid.innerHTML = ''; empty.style.display = 'block'; return;
   }
@@ -10478,18 +10762,30 @@ function arbRenderTab(type, m) {
   }
 }
 
+let _quizOneAtATime = false;
+let _quizCurrentIdx = 0;
+
 function arbRenderQuiz(m) {
   if (m.examMode && m.quiz?.length) { _arbExamRender(m); return; }
-  const sKey = arbSKey();
   const container = document.getElementById('arbTaskContent');
   const totalQ = m.quiz.length;
   const answeredCount = m.quiz.filter((q, qi) => arbLoad(`quiz_${qi}`) !== null).length;
   const correctCount = m.quiz.filter((q, qi) => arbLoad(`quiz_${qi}`) === 'correct').length;
   const allAnswered = answeredCount === totalQ;
+
+  // One-at-a-time mode
+  if (_quizOneAtATime) {
+    _arbRenderQuizCard(m, _quizCurrentIdx);
+    return;
+  }
+
   let html = `<div class="arb-content-card">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
       <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin:0;">Quiz</h2>
-      ${!allAnswered && answeredCount > 0 ? `<button onclick="_scrollToNextQuiz()" style="background:var(--s3);color:var(--accent);border:1px solid var(--border-2);padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">↓ Neste ubesvarte</button>` : ''}
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+        <button onclick="_quizOneAtATime=true;_quizCurrentIdx=0;arbRenderQuiz(state.modules[arbState.moduleIdx])" style="background:var(--s3);color:var(--accent);border:1px solid var(--border-2);padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;" title="Én og én modus">🃏 Kortmodus</button>
+        ${!allAnswered && answeredCount > 0 ? `<button onclick="_scrollToNextQuiz()" style="background:var(--s3);color:var(--accent);border:1px solid var(--border-2);padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">↓ Neste ubesvarte</button>` : ''}
+      </div>
     </div>`;
   m.quiz.forEach((q, qi) => {
     const savedAns = arbLoad(`quiz_${qi}`);
@@ -10554,6 +10850,77 @@ function arbRenderQuiz(m) {
       }
     }
   })();
+}
+
+function _arbRenderQuizCard(m, qi) {
+  const container = document.getElementById('arbTaskContent');
+  const totalQ = m.quiz.length;
+  // Find first unanswered if current is already answered
+  while (qi < totalQ && arbLoad(`quiz_${qi}`) !== null) qi++;
+  if (qi >= totalQ) {
+    // All answered
+    const correctCount = m.quiz.filter((q, i) => arbLoad(`quiz_${i}`) === 'correct').length;
+    container.innerHTML = `<div class="arb-content-card" style="text-align:center;padding:2rem;">
+      <div style="font-size:3rem;margin-bottom:0.5rem;">${correctCount >= totalQ*0.8?'🏆':correctCount>=totalQ*0.5?'👍':'📚'}</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--text);margin-bottom:0.5rem;">Quiz fullført!</div>
+      <div style="font-size:1.1rem;font-weight:800;color:var(--text-2);margin-bottom:1.5rem;">${correctCount}/${totalQ} riktige</div>
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+        <button onclick="_quizOneAtATime=false;arbRenderQuiz(state.modules[arbState.moduleIdx])" style="background:var(--s3);color:var(--text);border:1px solid var(--border-2);padding:10px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">📋 Se alle</button>
+        <button onclick="arbResetQuiz(arbState.moduleIdx);_quizCurrentIdx=0;" style="background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">🔄 Prøv igjen</button>
+      </div>
+    </div>`;
+    arbMarkDone('quiz');
+    return;
+  }
+  _quizCurrentIdx = qi;
+  const q = m.quiz[qi];
+  const opts = shuffleArr([
+    { text: q.a, correct: true },
+    { text: q.b, correct: false },
+    ...(q.c ? [{ text: q.c, correct: false }] : []),
+    ...(q.d ? [{ text: q.d, correct: false }] : [])
+  ]);
+  const qImgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img" alt="" onerror="this.style.display='none'">` : '';
+  container.innerHTML = `<div class="arb-content-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+      <div style="font-size:0.82rem;font-weight:800;color:var(--text-2);">Spørsmål ${qi+1} av ${totalQ}</div>
+      <button onclick="_quizOneAtATime=false;arbRenderQuiz(state.modules[arbState.moduleIdx])" style="background:none;border:1px solid var(--border-2);border-radius:50px;padding:4px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;color:var(--text-2);">📋 Alle spørsmål</button>
+    </div>
+    <div style="width:100%;height:4px;background:var(--s3);border-radius:99px;margin-bottom:1.25rem;overflow:hidden;">
+      <div style="height:100%;width:${Math.round((qi/totalQ)*100)}%;background:var(--accent);border-radius:99px;transition:width 0.3s;"></div>
+    </div>
+    ${qImgHtml}
+    <div class="arb-quiz-question" style="font-size:1.1rem;margin-bottom:1.25rem;">${escHtml(q.question)}</div>
+    <div class="arb-options" id="cardOpts">
+      ${opts.map((o,oi) => `<button class="arb-opt" onclick="arbCheckAnswerCard(${qi},${o.correct},${oi},'${escHtml(q.explain||'').replace(/'/g,"\\'")}',${JSON.stringify(opts.map(x=>x.correct))})">${escHtml(o.text)}</button>`).join('')}
+    </div>
+    <div id="cardFeedback"></div>
+  </div>`;
+}
+
+function arbCheckAnswerCard(qi, isCorrect, optIdx, explain, correctMap) {
+  const optsEl = document.getElementById('cardOpts');
+  if (!optsEl) return;
+  optsEl.querySelectorAll('.arb-opt').forEach((b, i) => {
+    b.disabled = true;
+    if (correctMap[i]) b.classList.add('reveal-correct');
+  });
+  optsEl.querySelectorAll('.arb-opt')[optIdx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (isCorrect) { SND.correct(); launchConfetti(); } else { SND.wrong(); }
+  const fb = document.getElementById('cardFeedback');
+  if (fb) {
+    fb.className = 'arb-feedback ' + (isCorrect ? 'ok' : 'fail');
+    fb.innerHTML = (isCorrect ? '✅ Riktig!' : '❌ Feil') + (explain ? ' – ' + escHtml(explain) : '');
+    // Add next button
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = qi + 1 < state.modules[arbState.moduleIdx].quiz.length ? 'Neste →' : 'Se resultat';
+    nextBtn.style.cssText = 'margin-top:0.75rem;background:var(--accent);color:#fff;border:none;padding:10px 24px;border-radius:50px;font-family:\'Nunito\',sans-serif;font-weight:800;font-size:0.92rem;cursor:pointer;display:block;';
+    nextBtn.onclick = () => { _quizCurrentIdx = qi + 1; _arbRenderQuizCard(state.modules[arbState.moduleIdx], _quizCurrentIdx); };
+    fb.appendChild(nextBtn);
+  }
+  arbSave(`quiz_${qi}`, isCorrect ? 'correct' : 'wrong');
+  arbMarkDone('quiz');
+  arbUpdateProgress(arbState.moduleIdx);
 }
 
 function arbCheckAnswer(qi, isCorrect, optIdx, explain, correctMap) {
