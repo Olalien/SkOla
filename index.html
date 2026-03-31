@@ -90,7 +90,7 @@
   .mobile-nav{display:none;position:fixed;top:auto;bottom:0;left:0;right:0;background:rgba(13,14,24,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:400;padding-bottom:env(safe-area-inset-bottom);}
   .mobile-nav-inner{display:flex;justify-content:flex-start;align-items:stretch;height:60px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:relative;}
   .mobile-nav-inner::-webkit-scrollbar{display:none;}
-  .mob-active-pill{position:absolute;bottom:6px;height:3px;width:32px;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:99px;transition:transform 0.25s cubic-bezier(.4,0,.2,1),opacity 0.2s;pointer-events:none;left:0;opacity:0;}
+  .mob-active-pill{position:absolute;bottom:6px;height:3px;width:32px;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:99px;transition:transform 0.25s cubic-bezier(.4,0,.2,1),opacity 0.2s;pointer-events:none;left:0;opacity:0;will-change:transform;}
   .mob-nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px;background:none;border:none;color:var(--text-3);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.62rem;cursor:pointer;flex:1;transition:color 0.18s;min-height:unset;}
   .mob-nav-btn.active{color:var(--accent-h);}
   .mob-nav-btn .mob-icon{display:flex;align-items:center;justify-content:center;}
@@ -106,8 +106,8 @@
   .skip-link:focus{top:0;}
 
   .view{display:none;padding:1.25rem;max-width:1200px;margin:0 auto;}
-  .view.active{display:block;animation:viewEnter 0.22s ease both;}
-  .view.leaving{animation:viewExit 0.17s ease forwards;pointer-events:none;}
+  .view.active{display:block;animation:viewEnter 0.22s ease both;will-change:opacity,transform;}
+  .view.leaving{animation:viewExit 0.17s ease forwards;pointer-events:none;will-change:opacity,transform;}
   @keyframes viewEnter{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
   @keyframes viewExit{to{opacity:0;transform:translateY(-6px);}}
   @media(prefers-reduced-motion:reduce){.view.active{animation:none;}.view.leaving{animation:none;}}
@@ -399,8 +399,8 @@
   @keyframes toastShrink{from{width:100%;}to{width:0;}}
 
   /* Stagger cards */
-  .arb-module-card,.module-card{opacity:0;transform:translateY(10px);transition:opacity 0.25s ease,transform 0.25s ease;}
-  .arb-module-card.card-visible,.module-card.card-visible{opacity:1;transform:translateY(0);}
+  .arb-module-card,.module-card{opacity:0;transform:translateY(10px);transition:opacity 0.25s ease,transform 0.25s ease;will-change:transform,opacity;}
+  .arb-module-card.card-visible,.module-card.card-visible{opacity:1;transform:translateY(0);will-change:auto;}
 
   /* Skeleton loading */
   .skeleton-card{background:var(--s2);border-radius:18px;height:160px;border:1px solid var(--border);animation:skeletonPulse 1.4s ease-in-out infinite;}
@@ -2283,6 +2283,20 @@
       </div>
     </div>
 
+    <!-- Change password (only visible when logged in as teacher) -->
+    <div id="changePassSection" style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:0.875rem;display:none;">
+      <div style="font-weight:800;font-size:0.88rem;color:var(--text);margin-bottom:0.5rem;">🔑 Endre lærerpassord</div>
+      <div style="font-size:0.78rem;color:var(--text-2);margin-bottom:0.75rem;">Passordet lagres kun lokalt i denne nettleseren.</div>
+      <input type="password" id="changePassCurrent" placeholder="Nåværende passord" autocomplete="current-password"
+        style="width:100%;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;background:var(--s3);color:var(--text);box-sizing:border-box;margin-bottom:0.5rem;"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
+      <input type="password" id="changePassNew" placeholder="Nytt passord (min. 6 tegn)" autocomplete="new-password"
+        style="width:100%;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;background:var(--s3);color:var(--text);box-sizing:border-box;margin-bottom:0.75rem;"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
+      <div id="changePassError" style="display:none;color:var(--c1);font-weight:700;font-size:0.82rem;margin-bottom:0.5rem;"></div>
+      <button onclick="changeTeacherPass()" style="background:linear-gradient(135deg,var(--accent),var(--accent-h));border:none;border-radius:9px;padding:9px 20px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;color:#fff;">Lagre nytt passord</button>
+    </div>
+
     <button class="btn-primary" style="width:100%;justify-content:center;" onclick="closeModal('settingsModal')">Lukk</button>
   </div>
 </div>
@@ -3122,16 +3136,15 @@
 </main>
 
 <!-- TEACHER LOGIN MODAL -->
-<div class="modal-overlay" id="teacherModal" aria-hidden="true">
+<div class="modal-overlay" id="teacherModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="teacherModalTitle">
     <h2 id="teacherModalTitle">Lærertilgang</h2>
-    <input type="password" id="teacherPass" placeholder="Passord" onkeydown="if(event.key==='Enter')loginTeacher()" />
+    <input type="password" id="teacherPass" placeholder="Passord" autocomplete="current-password" onkeydown="if(event.key==='Enter')loginTeacher()" />
     <div id="teacherError" style="display:none;color:var(--c1);font-weight:800;font-size:0.88rem;margin-bottom:0.5rem;">❌ Feil passord</div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('teacherModal')">Avbryt</button>
-      <button class="btn-primary" id="teacherLoginBtn" onclick="loginTeacher()">Logg inn</button>
+      <button class="btn-primary" onclick="loginTeacher()">Logg inn</button>
     </div>
-    <p style="font-size:0.8rem;color:var(--text-3);text-align:center;margin-top:1rem;">Hint: <strong>...</strong></p>
   </div>
 </div>
 
@@ -3217,6 +3230,8 @@ let _writeTimers = {};
 let _quizTimers = {}; // Quiz-timer handles per spørsmål
 let _autoSaveTimers = {};
 
+let _showViewTimer = null;
+
 // ====== NAVIGATION ======
 function showView(name) {
   // Cleanup timers when leaving views
@@ -3229,22 +3244,43 @@ function showView(name) {
     Object.values(_writeTimers||{}).forEach(t => clearTimeout(t));
     _writeTimers = {};
   }
+  // Cancel any in-flight transition to prevent race conditions
+  if (_showViewTimer) { clearTimeout(_showViewTimer); _showViewTimer = null; }
+  // Clear all leaving states (cleanup from interrupted transitions)
+  document.querySelectorAll('.view.leaving').forEach(v => v.classList.remove('leaving', 'active'));
+
   const currentView = document.querySelector('.view.active');
-  if (currentView && currentView.id !== 'view-' + name) {
+  const targetId = 'view-' + name;
+  if (currentView && currentView.id !== targetId) {
     currentView.classList.add('leaving');
-    setTimeout(() => { currentView.classList.remove('active', 'leaving'); }, 170);
-  } else {
+    _showViewTimer = setTimeout(() => {
+      currentView.classList.remove('active', 'leaving');
+      _showViewTimer = null;
+    }, 170);
+  } else if (!currentView) {
+    // No current view — instant show, no flash
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   }
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  const viewEl = document.getElementById('view-' + name);
+
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  const viewEl = document.getElementById(targetId);
   if (!viewEl) return;
-  setTimeout(() => { viewEl.classList.add('active'); }, currentView && currentView.id !== 'view-' + name ? 140 : 0);
-  document.querySelectorAll('.nav-tab').forEach(tab => {
-    const oc = tab.getAttribute('onclick') || '';
-    if (oc.includes("'"+name+"'") || oc.includes('"'+name+'"')) {
-      tab.classList.add('active');
+
+  const delay = (currentView && currentView.id !== targetId) ? 140 : 0;
+  setTimeout(() => {
+    viewEl.classList.add('active');
+    // Scroll to top on view change
+    if (!currentView || currentView.id !== targetId) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
+    // Release will-change after animation completes
+    setTimeout(() => { viewEl.style.willChange = 'auto'; }, 300);
+  }, delay);
+
+  tabs.forEach(tab => {
+    const oc = tab.getAttribute('onclick') || '';
+    if (oc.includes("'"+name+"'") || oc.includes('"'+name+'"')) tab.classList.add('active');
   });
   if (name === 'home') { renderHomeModules(); _heroGreeting(); }
   if (name === 'tasks') { DB.loadModules().then(m => { state.modules = m; renderTaskModules(); }); }
@@ -3824,15 +3860,19 @@ function updateStudentProgress() {
 }
 
 // ====== TEACHER ======
+function getTeacherPass() {
+  // Allow stored override (set from settings while logged in)
+  return localStorage.getItem('os_teacher_pass') || TEACHER_PASS;
+}
 function openTeacherModal() {
-  const modal = document.getElementById('teacherModal');
-  if (modal) modal.classList.add('open');
   const tp = document.getElementById('teacherPass');
-  if (tp) { tp.value = ''; setTimeout(() => tp.focus(), 100); }
+  if (tp) tp.value = '';
+  openModal('teacherModal');
+  setTimeout(() => { const t = document.getElementById('teacherPass'); if (t) t.focus(); }, 150);
 }
 function loginTeacher() {
   const pass = document.getElementById('teacherPass').value;
-  const correct = TEACHER_PASS;
+  const correct = getTeacherPass();
   if (pass === correct) {
     state.isTeacher = true;
     // Persist teacher session
@@ -3840,7 +3880,7 @@ function loginTeacher() {
     document.getElementById('teacherQuizSection').style.display = 'block';
     document.getElementById('studentQuizSection').style.display = 'none';
     showDbStatus();
-    closeTeacherModal();
+    closeModal('teacherModal');
     document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'inline-flex');
     document.getElementById('teacherLoginBtn').style.display = 'none';
     const rb = document.getElementById('roleBadge');
@@ -3867,8 +3907,7 @@ function loginTeacher() {
   }
 }
 function closeTeacherModal() {
-  const modal = document.getElementById('teacherModal');
-  if (modal) modal.classList.remove('open');
+  closeModal('teacherModal');
 }
 function checkTeacher() {
   if (state.isTeacher) { showView('teacher'); return; }
@@ -4012,10 +4051,32 @@ async function importModulesJSON(input) {
 
 // ====== SETTINGS ======
 function openSettings() {
-  const modal = document.getElementById('settingsModal');
-  if (modal) modal.classList.add('open');
+  openModal('settingsModal');
   showDbStatus();
   initSettingsFields();
+  // Show password change section only for logged-in teacher
+  const cpSection = document.getElementById('changePassSection');
+  if (cpSection) cpSection.style.display = state.isTeacher ? 'block' : 'none';
+  // Clear password fields
+  const c = document.getElementById('changePassCurrent'); if (c) c.value = '';
+  const n = document.getElementById('changePassNew'); if (n) n.value = '';
+  const err = document.getElementById('changePassError'); if (err) err.style.display = 'none';
+}
+
+function changeTeacherPass() {
+  const currentEl = document.getElementById('changePassCurrent');
+  const newEl = document.getElementById('changePassNew');
+  const errEl = document.getElementById('changePassError');
+  const current = currentEl?.value || '';
+  const newPass = newEl?.value || '';
+  const showErr = msg => { if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; } };
+  if (current !== getTeacherPass()) { showErr('❌ Nåværende passord er feil'); return; }
+  if (newPass.length < 6) { showErr('❌ Nytt passord må være minst 6 tegn'); return; }
+  if (errEl) errEl.style.display = 'none';
+  localStorage.setItem('os_teacher_pass', newPass);
+  if (currentEl) currentEl.value = '';
+  if (newEl) newEl.value = '';
+  showToast('✅ Passord oppdatert!');
 }
 function initSettingsFields() {
   const apiEl = document.getElementById('settingsApiInput');
@@ -10800,13 +10861,12 @@ let arbState = { moduleIdx: null, fcIndex: 0, completedTasks: {}, fcQueue: [], f
 async function arbOpen() {
   showView('arbeid');
   document.getElementById('tasksTab')?.classList.add('active');
-  // Always fetch latest modules from DB so students see teacher's latest content
-  const grid = document.getElementById('arbModuleGrid');
-  if (grid) grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-3);"><div style="font-size:2rem;">⏳</div><div style="margin-top:0.5rem;font-weight:700;">Laster emner...</div></div>';
+  // Show skeleton cards while fetching from DB
+  _showSkeletons('arbModuleGrid', Math.min(state.modules.length || 6, 9));
   try {
     state.modules = await DB.loadModules();
   } catch(e) {
-    // If DB fails, we already have localStorage fallback in loadModules
+    // DB failed — loadModules already fell back to localStorage
   }
   if (!state.student) {
     document.getElementById('arbLoginPrompt').style.display = 'block';
@@ -10916,7 +10976,8 @@ function arbRenderModuleGrid() {
     searchEl.type = 'text';
     searchEl.id = 'arbModuleSearch';
     searchEl.placeholder = '🔍 Søk emner...';
-    searchEl.oninput = filterArbModules;
+    let _searchDebounce;
+    searchEl.oninput = () => { clearTimeout(_searchDebounce); _searchDebounce = setTimeout(filterArbModules, 150); };
     searchEl.style.cssText = 'width:100%;padding:10px 16px;border:1px solid var(--border-2);border-radius:50px;font-family:\'Nunito\',sans-serif;font-size:0.92rem;outline:none;background:var(--s2);color:var(--text);margin-bottom:1rem;box-sizing:border-box;';
     grid.parentNode.insertBefore(searchEl, grid);
   }
@@ -12613,11 +12674,7 @@ Svar BARE med selve forklaringen, ingen ekstra tekst.`
 // GLOBALE TASTATURSNARVEI
 // ═══════════════════════════════════════════════════════
 document.addEventListener('keydown', function(e) {
-  // Escape: lukk åpne modaler
-  if (e.key === 'Escape') {
-    const openModal = document.querySelector('.modal-overlay.open');
-    if (openModal) { openModal.classList.remove('open'); return; }
-  }
+  // Escape: handled by closeModal/_modalStack in openModal system — no duplicate needed
   // Ctrl+K / Cmd+K: hurtigsøk på hjemside
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
     const homeView = document.getElementById('view-home');
