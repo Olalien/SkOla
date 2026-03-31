@@ -1,3 +1,10 @@
+// ====== HANDLER REGISTRY (CSP-safe closures for dynamic HTML) ======
+// Usage in template literals: data-hid="${_reg(function(event){...})}"
+// delegation calls fn.call(element, event) so `this` = element, event = MouseEvent
+const _H = {};
+let _hid = 0;
+function _reg(fn) { const id = ++_hid; _H[id] = fn; return id; }
+
 // ====== STATE ======
 let state = {
   isTeacher: false,
@@ -336,7 +343,7 @@ function _usRefreshUI() {
   const picker = document.getElementById('usAccentPicker');
   if (picker) {
     picker.innerHTML = US_ACCENTS.map((a, i) => `
-      <button onclick="usSetAccent(${i})" title="${a.name}"
+      <button data-onclick="usSetAccent" data-onclick-arg="${i}" title="${a.name}"
         style="width:34px;height:34px;border-radius:50%;background:${a.accent};border:3px solid ${i===_usSettings.accent?'var(--text)':'transparent'};cursor:pointer;transition:all 0.18s;transform:${i===_usSettings.accent?'scale(1.15)':'scale(1)'};box-shadow:${i===_usSettings.accent?'0 0 0 1px '+a.accent:'none'};"
         aria-label="${a.name}" aria-pressed="${i===_usSettings.accent}"></button>
     `).join('');
@@ -1034,8 +1041,8 @@ function _showTeacherWelcome() {
         </div>
       </div>
       <div style="display:flex;gap:0.75rem;">
-        <button onclick="document.getElementById('teacherWelcomeOverlay').remove()" style="flex:1;background:var(--s3);border:1px solid var(--border-2);border-radius:12px;padding:11px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;color:var(--text);">Lukk</button>
-        <button onclick="document.getElementById('teacherWelcomeOverlay').remove();trTab('new')" style="flex:2;background:linear-gradient(135deg,var(--accent),var(--accent-h));border:none;border-radius:12px;padding:11px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;color:#fff;box-shadow:0 4px 16px rgba(123,143,253,0.3);">✏️ Opprett første emne →</button>
+        <button data-onclick="_removeById" data-onclick-arg="teacherWelcomeOverlay" style="flex:1;background:var(--s3);border:1px solid var(--border-2);border-radius:12px;padding:11px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;color:var(--text);">Lukk</button>
+        <button data-onclick="_removeByIdThenTab" data-onclick-args='["teacherWelcomeOverlay","new"]' style="flex:2;background:linear-gradient(135deg,var(--accent),var(--accent-h));border:none;border-radius:12px;padding:11px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;color:#fff;box-shadow:0 4px 16px rgba(123,143,253,0.3);">✏️ Opprett første emne →</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -1308,14 +1315,14 @@ function previewModuleAsStudent() {
   if (tempMod.videos.length) types.push({key:'video',label:'🎬 Video'});
   if (tempMod.flashcards.length) types.push({key:'fc',label:'🃏 Flashcards'});
   if (!types.length && !tempMod.text) { showToast('⚠️ Legg til innhold først'); return; }
-  const tabsHtml = types.map(t => `<button onclick="pvStudentSwitchTab('${t.key}',this,pvStudentMod)" style="padding:8px 14px;border-radius:8px;border:1px solid var(--border-2);background:var(--s2);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;transition:all 0.18s;">${t.label}</button>`).join('');
+  const tabsHtml = types.map(t => `<button data-onclick="_pvStudentSwitchTab" data-onclick-self data-onclick-args='["${t.key}"]' style="padding:8px 14px;border-radius:8px;border:1px solid var(--border-2);background:var(--s2);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;transition:all 0.18s;">${t.label}</button>`).join('');
   const ov = document.createElement('div');
   ov.id = 'pvStudentOverlay';
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
   ov.innerHTML = `<div style="background:var(--bg);border:1px solid var(--border-2);border-radius:20px;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;padding:1.5rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
       <div style="font-weight:800;font-size:1.05rem;color:var(--text);">👁 Forhåndsvisning: ${escHtml(name)}</div>
-      <button onclick="document.getElementById('pvStudentOverlay')?.remove()" class="btn-modal-close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button data-onclick="_removeById" data-onclick-arg="pvStudentOverlay" class="btn-modal-close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem;" id="pvStudentTabs">${tabsHtml}</div>
     <div id="pvStudentContent" style="color:var(--text);"></div>
@@ -1372,7 +1379,7 @@ function updateContinueCard() {
   if (!mod) { cc.style.display='none'; return; }
   const idx = state.modules.indexOf(mod);
   cc.style.display = 'block';
-  cc.innerHTML = `<div class="continue-card" onclick="openModule(${idx})" role="button" tabindex="0" aria-label="Fortsett ${escHtml(mod.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${idx})}">
+  cc.innerHTML = `<div class="continue-card" data-onclick="openModule" data-onclick-arg="${idx}" role="button" tabindex="0" aria-label="Fortsett ${escHtml(mod.name)}" data-onkeydown-activate="openModule" data-onkeydown-activate-arg="${idx}">
     <div class="continue-card-icon">${mod.emoji||'📖'}</div>
     <div class="continue-card-text">
       <div class="continue-card-label">Fortsett der du slapp</div>
@@ -1403,8 +1410,8 @@ function _renderModuleGrid(gridId, emptyId, opts={}) {
     const progressBar = (pct >= 0) ? `<div style="margin-top:0.6rem;"><div style="height:4px;background:rgba(255,255,255,0.1);border-radius:50px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${pct===100?'#4ade80':'var(--accent)'};border-radius:50px;transition:width 0.4s;"></div></div><div style="font-size:0.68rem;font-weight:800;color:rgba(255,255,255,0.6);margin-top:3px;">${pct===100?'✓ Fullført':pct+'% gjennomført'}</div></div>` : '';
     const statusBadge = pct===100 ? '<span style="position:absolute;top:8px;left:8px;background:rgba(34,197,94,0.25);color:#4ade80;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(34,197,94,0.4);">✅ Ferdig</span>' : isNewModule(m) ? '<span style="position:absolute;top:8px;left:8px;background:var(--c1);color:white;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;">NY</span>' : '';
     const subjectBadge = m.subject ? `<span style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.25);font-size:0.64rem;font-weight:800;padding:2px 7px;border-radius:50px;color:rgba(255,255,255,0.8);">${escHtml(m.subject)}</span>` : '';
-    return `<div class="module-card ${colors[i%5]}" style="position:relative;--i:${i}" onclick="openModule(${realIdx})" role="button" tabindex="0" aria-label="${escHtml(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${realIdx})}" data-module-name="${escHtml(m.name)}" data-module-subject="${escHtml(m.subject||'')}">
-      ${state.isTeacher ? `<button class="mc-edit-btn" onclick="event.stopPropagation();quickEditModule(${realIdx})" title="Rediger">✏️</button>` : ''}
+    return `<div class="module-card ${colors[i%5]}" style="position:relative;--i:${i}" data-onclick="openModule" data-onclick-arg="${realIdx}" role="button" tabindex="0" aria-label="${escHtml(m.name)}" data-onkeydown-activate="openModule" data-onkeydown-activate-arg="${realIdx}" data-module-name="${escHtml(m.name)}" data-module-subject="${escHtml(m.subject||'')}">
+      ${state.isTeacher ? `<button class="mc-edit-btn" data-onclick="quickEditModule" data-onclick-arg="${realIdx}" title="Rediger">✏️</button>` : ''}
       ${statusBadge}${subjectBadge}
       <span class="mc-emoji">${m.emoji||'📚'}</span>
       <h3>${escHtml(m.name)}</h3>
@@ -1475,8 +1482,8 @@ function renderSubjectFilter() {
   if (!el) return;
   const subjects = [...new Set(state.modules.filter(m=>!m.locked&&m.subject).map(m=>m.subject))];
   if (!subjects.length) { el.innerHTML=''; return; }
-  el.innerHTML = `<button class="subject-chip ${!activeSubjectFilter?'active':''}" onclick="setSubjectFilter(null)">Alle</button>` +
-    subjects.map(s=>`<button class="subject-chip ${activeSubjectFilter===s?'active':''}" onclick="setSubjectFilter('${escHtml(s)}')">${escHtml(s)}</button>`).join('');
+  el.innerHTML = `<button class="subject-chip ${!activeSubjectFilter?'active':''}" data-onclick="setSubjectFilter">Alle</button>` +
+    subjects.map(s=>`<button class="subject-chip ${activeSubjectFilter===s?'active':''}" data-onclick="setSubjectFilter" data-onclick-arg="${escHtml(s)}">${escHtml(s)}</button>`).join('');
 }
 
 function setSubjectFilter(subject) {
@@ -1568,7 +1575,7 @@ function renderModuleDetail(m) {
   if (m.flashcards?.length >= 2 || m.glossary?.length >= 2) available.push({key:'match', label:'🎯 Match'});
   if (!available.length) { content.innerHTML='<p style="color:var(--text-3);padding:2rem;">Ingen innhold i dette emnet ennå.</p>'; tabs.innerHTML=''; return; }
   // t.key and t.label are hardcoded constants — safe, but escape defensively
-  tabs.innerHTML = available.map((t,i)=>`<button class="task-tab ${i===0?'active':''}" onclick="switchTaskTab('${escHtml(t.key)}',this)">${escHtml(t.label)}</button>`).join('');
+  tabs.innerHTML = available.map((t,i)=>`<button class="task-tab ${i===0?'active':''}" data-onclick="_switchTaskTabEl" data-onclick-args='["${escHtml(t.key)}"]' data-onclick-self>${escHtml(t.label)}</button>`).join('');
   switchTaskType(available[0].key, m);
 }
 
@@ -1603,13 +1610,13 @@ function renderTextHTML(m) {
   const textHtml = _applyGlossary ? _applyGlossary(escHtml(m.text), m.glossary||[]) : escHtml(m.text);
   return `<div class="text-block">
     <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;flex-wrap:wrap;">
-      <button class="tts-btn print-hide" id="ttsBtnTaskText" onclick="ttsSpeak(document.getElementById('tasks-text-body')?.innerText||'',this)">🔊 Les høyt</button>
-      ${state.student ? `<button class="tts-btn print-hide" onclick="_showMarksPanel(${state.currentModule},'tasks-text-body')">📝 Markeringer</button>` : ''}
+      <button class="tts-btn print-hide" id="ttsBtnTaskText" data-onclick="ttsSpeak" data-onclick-args='[null,"tasks-text-body"]'>🔊 Les høyt</button>
+      ${state.student ? `<button class="tts-btn print-hide" data-onclick="_showMarksPanel" data-onclick-args="${JSON.stringify([state.currentModule,'tasks-text-body'])}">📝 Markeringer</button>` : ''}
     </div>
     <div id="tasks-text-body" style="white-space:pre-wrap;line-height:1.8;font-size:0.98rem;">${textHtml}</div>
     <div id="tasks-marks-panel-${state.currentModule}"></div>
     ${state.student ? `<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">
-      <button class="btn-save" onclick="markTextRead()" style="${saved?'background:var(--c3);':''}">
+      <button class="btn-save" data-onclick="markTextRead" style="${saved?'background:var(--c3);':''}">
         ${saved ? '✅ Lest!' : '📖 Merk som lest'}
       </button>
     </div>` : ''}
@@ -1624,7 +1631,7 @@ function _initTaskTextView(m) {
   const marks = _markLoad ? _markLoad(mi) : [];
   marks.forEach(mark => {
     const re = new RegExp('(' + mark.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'g');
-    body.innerHTML = body.innerHTML.replace(re, `<mark class="text-mark" data-color="${escHtml(mark.color)}" data-id="${mark.id}" onclick="_markClickMenu(this,${mi},'tasks-text-body')" title="${escHtml(mark.note||'')}">$1</mark>`);
+    body.innerHTML = body.innerHTML.replace(re, `<mark class="text-mark" data-color="${escHtml(mark.color)}" data-id="${mark.id}" data-hid="${_reg(function(){_markClickMenu(this,mi,'tasks-text-body')})}" title="${escHtml(mark.note||'')}">$1</mark>`);
   });
   // Init selection handler
   body.addEventListener('mouseup', () => {
@@ -1668,7 +1675,7 @@ function renderQuizHTML(m) {
         ${timerSec>0?`<div id="qtimer-${qi}" style="font-size:0.85rem;font-weight:800;color:var(--c2);background:var(--dark);padding:4px 10px;border-radius:50px;min-width:44px;text-align:center;">${timerSec}s</div>`:''}
       </div>
       <div class="quiz-opts">
-        ${opts.map((o,oi)=>`<button class="quiz-opt" id="qopt-${qi}-${oi}" onclick="checkAnswer(${qi},${o.correct},${oi},${correctMap})">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
+        ${opts.map((o,oi)=>`<button class="quiz-opt" id="qopt-${qi}-${oi}" data-onclick="checkAnswer" data-onclick-args="${JSON.stringify([qi,o.correct,oi,correctMap])}">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
       </div>
       <div class="quiz-feedback" id="qfb-${qi}"></div>
     </div>`;
@@ -1731,7 +1738,7 @@ function renderDiscHTML(m) {
       <div class="dq-prompt">💬 ${escHtml(d)}</div>
       <textarea id="disc-${di}" placeholder="Skriv svaret ditt her..." style="width:100%;min-height:100px;border:2px solid var(--border-2);background:var(--s2);color:var(--text);border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;margin-top:0.5rem;">${saved?escHtml(saved.val):''}</textarea>
       <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
-        <button class="btn-save" onclick="saveDiscAnswer(${di})">💾 Lagre svar</button>
+        <button class="btn-save" data-onclick="saveDiscAnswer" data-onclick-arg="${di}">💾 Lagre svar</button>
         <span class="saved-badge" id="saved-badge-${di}" style="display:none;">✓ Lagret!</span>
       </div>
     </div>`;
@@ -1768,7 +1775,7 @@ function renderWriteHTML(m) {
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem;align-items:center;">
         ${w.minWords?`<span style="font-size:0.82rem;color:var(--text-3);font-weight:700;background:var(--s3);padding:4px 10px;border-radius:50px;">Minimum ${w.minWords} ord</span>`:''}
         <span style="font-size:0.78rem;color:var(--text-3);font-weight:700;">🌐 ${escHtml(lang)}</span>
-        <select onchange="applyWriteTemplate(${wi},this.value)" style="font-size:0.8rem;padding:4px 10px;border-radius:50px;border:1px solid var(--border-2);background:var(--s2);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;outline:none;">
+        <select data-onchange="_applyWriteTemplateEl" data-onchange-arg="${wi}" style="font-size:0.8rem;padding:4px 10px;border-radius:50px;border:1px solid var(--border-2);background:var(--s2);color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;outline:none;">
           <option value="">📝 Velg tekstmal...</option>
           <option value="argumenterende">📣 Argumenterende</option>
           <option value="beskrivende">🔍 Beskrivende</option>
@@ -1780,13 +1787,13 @@ function renderWriteHTML(m) {
       <textarea id="write-${wi}" lang="${langAttr}" spellcheck="true"
         placeholder="Skriv teksten din her..."
         style="width:100%;min-height:200px;border:2px solid var(--border-2);background:var(--s2);color:var(--text);border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;line-height:1.7;transition:border-color 0.2s;"
-        onfocus="this.style.borderColor='var(--c4)'" onblur="this.style.borderColor='var(--border-2)'"
-        oninput="countWords(${wi},${w.minWords||0})">${saved?escHtml(saved.val):''}</textarea>
+        class="focus-accent"
+        data-oninput="_countWordsEl" data-oninput-args="${JSON.stringify([wi,w.minWords||0])}">${saved?escHtml(saved.val):''}</textarea>
       <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.6rem;flex-wrap:wrap;">
         <span id="wcount-${wi}" style="font-size:0.82rem;color:var(--text-3);font-weight:700;">0 ord</span>
         <span id="wreadability-${wi}" style="font-size:0.78rem;color:var(--text-3);font-weight:700;"></span>
         <div style="flex:1;"></div>
-        <button class="btn-save" onclick="saveWriteAnswer(${wi})">💾 Lagre</button>
+        <button class="btn-save" data-onclick="saveWriteAnswer" data-onclick-arg="${wi}">💾 Lagre</button>
         <span class="saved-badge" id="wsaved-${wi}" style="display:none;">✓ Lagret!</span>
       </div>
       <div id="write-fb-${wi}"></div>
@@ -1905,7 +1912,7 @@ function renderVideoHTML(m) {
       ${v.task?`<div style="background:var(--bg);border-radius:12px;padding:1rem;margin-top:0.75rem;border-left:4px solid var(--c2);font-size:0.95rem;color:var(--text-2);">📋 <b>Oppgave:</b> ${escHtml(v.task)}</div>
       <textarea style="width:100%;margin-top:0.75rem;border:2px solid var(--border-2);background:var(--s2);color:var(--text);border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;min-height:100px;outline:none;" id="vid-${vi}" placeholder="Skriv svaret ditt her...">${saved?escHtml(saved.val):''}</textarea>
       <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
-        <button class="btn-save" onclick="saveVidAnswer(${vi})">💾 Lagre</button>
+        <button class="btn-save" data-onclick="saveVidAnswer" data-onclick-arg="${vi}">💾 Lagre</button>
         <span class="saved-badge" id="vidsaved-${vi}" style="display:none;">✓ Lagret!</span>
       </div>`:''}
     </div>`;
@@ -1927,9 +1934,9 @@ function renderFlashcardHTML(m) {
     <div id="fcHolder"></div>
     <div class="flashcard-hint">Klikk på kortet for å se svaret!</div>
     <div class="fc-nav">
-      <button onclick="prevFC()">← Forrige</button>
+      <button data-onclick="prevFC">← Forrige</button>
       <span class="fc-counter" id="fcCounter">1 / ${m.flashcards.length}</span>
-      <button onclick="nextFC()">Neste →</button>
+      <button data-onclick="nextFC">Neste →</button>
     </div>
   </div>`;
 }
@@ -1940,7 +1947,7 @@ function renderFC(m) {
   if (!fc) return;
   const holder = document.getElementById('fcHolder');
   if (!holder) return;
-  holder.innerHTML = `<div class="flashcard" id="currentFC" onclick="document.getElementById('currentFC').classList.toggle('flipped')">
+  holder.innerHTML = `<div class="flashcard" id="currentFC" data-onclick="_toggleFC">
     <div class="flashcard-inner">
       <div class="flashcard-front"><span style="font-size:1.1rem;font-weight:800;">${escHtml(fc.front)}</span></div>
       <div class="flashcard-back"><span style="font-size:1rem;">${escHtml(fc.back)}</span></div>
@@ -2045,7 +2052,7 @@ function renderQuizPreview() {
       return `<div class="preview-item" draggable="true" data-qi="${qi}" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;">
         <span style="cursor:grab;color:var(--text-3);font-size:1rem;flex-shrink:0;">⠿</span>
         <span style="flex:1;font-size:0.85rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(qText)}">${qi+1}. ${escHtml(qText.substring(0,80))}${qText.length>80?'…':''}</span>
-        <button onclick="state.tempQuiz.splice(${qi},1);renderQuizPreview();" style="background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.3);border-radius:6px;padding:3px 7px;font-size:0.72rem;font-weight:800;cursor:pointer;flex-shrink:0;" title="Slett">🗑</button>
+        <button data-hid="${_reg(function(){state.tempQuiz.splice(qi,1);renderQuizPreview();})}" style="background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.3);border-radius:6px;padding:3px 7px;font-size:0.72rem;font-weight:800;cursor:pointer;flex-shrink:0;" title="Slett">🗑</button>
       </div>`;
     }).join('');
   // Init drag-and-drop
@@ -2106,7 +2113,7 @@ function _renderGlossPreview() {
   p.innerHTML = state.tempGlossary.map((g,i) =>
     `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--accent-g);border:1px solid var(--border-2);border-radius:50px;padding:3px 10px;font-size:0.78rem;font-weight:700;color:var(--text);margin:2px;">
       <strong>${escHtml(g.term)}</strong>: ${escHtml(g.def)}
-      <button onclick="state.tempGlossary.splice(${i},1);_renderGlossPreview()" style="background:none;border:none;cursor:pointer;font-size:0.85rem;color:var(--text-3);padding:0 2px;" title="Fjern">✕</button>
+      <button data-hid="${_reg(function(){state.tempGlossary.splice(i,1);_renderGlossPreview();})}" style="background:none;border:none;cursor:pointer;font-size:0.85rem;color:var(--text-3);padding:0 2px;" title="Fjern">✕</button>
     </span>`
   ).join('');
 }
@@ -2196,8 +2203,8 @@ function renderBlanksHTML(m) {
     });
     html += `</div>
     <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap;">
-      <button class="btn-save" onclick="checkBlanks(${bi},${inputIdx})">✅ Sjekk svar</button>
-      <button class="btn-cancel" onclick="resetBlanks(${bi},${inputIdx})" style="font-size:0.82rem;">🔄 Nullstill</button>
+      <button class="btn-save" data-onclick="checkBlanks" data-onclick-args="${JSON.stringify([bi,inputIdx])}">✅ Sjekk svar</button>
+      <button class="btn-cancel" data-onclick="resetBlanks" data-onclick-args="${JSON.stringify([bi,inputIdx])}" style="font-size:0.82rem;">🔄 Nullstill</button>
     </div>
     <div id="blank-result-${bi}" style="margin-top:0.75rem;font-size:0.9rem;font-weight:700;"></div></div>`;
     return html;
@@ -2273,10 +2280,10 @@ function _renderMatchGame(m, container) {
     <p style="font-size:0.82rem;color:var(--text-3);margin-bottom:1.25rem;">Klikk et begrep, deretter riktig definisjon.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;" id="matchGrid">
       <div class="match-col" id="matchTerms">
-        ${rawPairs.map((p,i) => `<button class="match-item" id="mterm-${i}" onclick="_matchClick('term',${i})">${escHtml(p.term)}</button>`).join('')}
+        ${rawPairs.map((p,i) => `<button class="match-item" id="mterm-${i}" data-onclick="_matchClick" data-onclick-args="${JSON.stringify(['term',i])}">${escHtml(p.term)}</button>`).join('')}
       </div>
       <div class="match-col" id="matchDefs">
-        ${defs.map((pi,ri) => `<button class="match-item" id="mdef-${ri}" data-pi="${pi}" onclick="_matchClick('def',${ri})">${escHtml(rawPairs[pi].def)}</button>`).join('')}
+        ${defs.map((pi,ri) => `<button class="match-item" id="mdef-${ri}" data-pi="${pi}" data-onclick="_matchClick" data-onclick-args="${JSON.stringify(['def',ri])}">${escHtml(rawPairs[pi].def)}</button>`).join('')}
       </div>
     </div>
     <div id="matchResult" style="text-align:center;margin-top:1rem;font-size:0.9rem;font-weight:800;"></div>
@@ -2354,7 +2361,7 @@ function _loadModuleTemplateModal() {
   modal.innerHTML = `<div style="background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:1.5rem;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
       <h2 style="margin:0;font-size:1rem;font-weight:800;color:var(--text);">📂 Velg mal</h2>
-      <button onclick="this.closest('[style*=\"position:fixed\"]').remove()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--text-2);">✕</button>
+      <button data-hid="${_reg(function(){this.closest('[style*=\"position:fixed\"]').remove()})}" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--text-2);">✕</button>
     </div>
     ${templates.map((t, ti) => `<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:0.75rem 1rem;margin-bottom:0.5rem;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
       <div style="min-width:0;">
@@ -2362,8 +2369,8 @@ function _loadModuleTemplateModal() {
         <div style="font-size:0.72rem;color:var(--text-3);margin-top:2px;">${t.quiz?.length||0} quiz · ${t.flashcards?.length||0} kort · ${t.savedAt||''}</div>
       </div>
       <div style="display:flex;gap:0.35rem;flex-shrink:0;">
-        <button onclick="_applyModuleTemplate(${ti});this.closest('[style*=\"position:fixed\"]').remove()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:0.8rem;font-weight:800;cursor:pointer;">Last inn</button>
-        <button onclick="if(confirm('Slette malen?')){const ts=JSON.parse(localStorage.getItem('os_module_templates')||'[]');ts.splice(${ti},1);localStorage.setItem('os_module_templates',JSON.stringify(ts));this.closest('.template-row')?.remove();}" style="background:rgba(239,68,68,0.1);color:#f87171;border:none;border-radius:8px;padding:5px 8px;font-size:0.8rem;font-weight:800;cursor:pointer;">🗑</button>
+        <button data-onclick="_applyTemplateThenClose" data-onclick-self data-onclick-args="${JSON.stringify([ti])}" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:0.8rem;font-weight:800;cursor:pointer;">Last inn</button>
+        <button data-onclick="_deleteTemplate" data-onclick-self data-onclick-arg="${ti}" style="background:rgba(239,68,68,0.1);color:#f87171;border:none;border-radius:8px;padding:5px 8px;font-size:0.8rem;font-weight:800;cursor:pointer;">🗑</button>
       </div>
     </div>`).join('')}
   </div>`;
@@ -2699,19 +2706,19 @@ function renderManageModules() {
         </div>
         <div style="margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
           <span style="font-size:0.72rem;font-weight:800;color:var(--text-3);">🕒 Planlegg publisering:</span>
-          <input type="datetime-local" id="sched-${i}" value="${m.scheduledFor||''}" onchange="setScheduled(${i},this.value)" style="font-family:'Nunito',sans-serif;font-size:0.75rem;border:1px solid var(--border-2);border-radius:7px;padding:3px 7px;background:var(--s2);color:var(--text);outline:none;" />
-          ${m.scheduledFor?`<button onclick="setScheduled(${i},'')" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:0.8rem;" title="Fjern planlegging">✕</button>`:''}
+          <input type="datetime-local" id="sched-${i}" value="${m.scheduledFor||''}" data-onchange="_setScheduledEl" data-onchange-arg="${i}" style="font-family:'Nunito',sans-serif;font-size:0.75rem;border:1px solid var(--border-2);border-radius:7px;padding:3px 7px;background:var(--s2);color:var(--text);outline:none;" />
+          ${m.scheduledFor?`<button data-hid="${_reg(function(){setScheduled(i,'')})}" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:0.8rem;" title="Fjern planlegging">✕</button>`:''}
         </div>
       </div>
       <div class="module-manage-actions">
         <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
-          <button onclick="moveModuleUp(${i})" title="Flytt opp" ${i===0?'disabled':''} style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:6px;width:28px;height:28px;font-size:0.75rem;cursor:pointer;font-family:'Nunito',sans-serif;${i===0?'opacity:0.3;':''}" aria-label="Flytt opp">▲</button>
-          <button onclick="moveModuleDown(${i})" title="Flytt ned" ${i===state.modules.length-1?'disabled':''} style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:6px;width:28px;height:28px;font-size:0.75rem;cursor:pointer;font-family:'Nunito',sans-serif;${i===state.modules.length-1?'opacity:0.3;':''}" aria-label="Flytt ned">▼</button>
+          <button data-onclick="moveModuleUp" data-onclick-arg="${i}" title="Flytt opp" ${i===0?'disabled':''} style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:6px;width:28px;height:28px;font-size:0.75rem;cursor:pointer;font-family:'Nunito',sans-serif;${i===0?'opacity:0.3;':''}" aria-label="Flytt opp">▲</button>
+          <button data-onclick="moveModuleDown" data-onclick-arg="${i}" title="Flytt ned" ${i===state.modules.length-1?'disabled':''} style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:6px;width:28px;height:28px;font-size:0.75rem;cursor:pointer;font-family:'Nunito',sans-serif;${i===state.modules.length-1?'opacity:0.3;':''}" aria-label="Flytt ned">▼</button>
         </div>
-        <button class="pv-edit-btn" style="font-size:0.85rem;padding:8px 14px;" onclick="editModule(${i})">✏️ Rediger</button>
-        <button onclick="duplicateModule(${i})" title="Kopier emnet" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 12px;border-radius:7px;font-size:0.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">📋 Kopier</button>
-        <button onclick="toggleLock(${i})" style="background:${m.locked?'var(--c3)':'var(--s2)'};color:${m.locked?'white':'var(--text-2)'};border:1px solid var(--border-2);padding:8px 12px;border-radius:7px;font-size:0.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">${m.locked?'🔓 Åpne':'🔒 Lås'}</button>
-        <button class="pv-del-btn" style="font-size:0.85rem;padding:8px 14px;" onclick="deleteModule(${i})">🗑 Slett</button>
+        <button class="pv-edit-btn" style="font-size:0.85rem;padding:8px 14px;" data-onclick="editModule" data-onclick-arg="${i}">✏️ Rediger</button>
+        <button data-onclick="duplicateModule" data-onclick-arg="${i}" title="Kopier emnet" style="background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:8px 12px;border-radius:7px;font-size:0.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">📋 Kopier</button>
+        <button data-onclick="toggleLock" data-onclick-arg="${i}" style="background:${m.locked?'var(--c3)':'var(--s2)'};color:${m.locked?'white':'var(--text-2)'};border:1px solid var(--border-2);padding:8px 12px;border-radius:7px;font-size:0.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">${m.locked?'🔓 Åpne':'🔒 Lås'}</button>
+        <button class="pv-del-btn" style="font-size:0.85rem;padding:8px 14px;" data-onclick="deleteModule" data-onclick-arg="${i}">🗑 Slett</button>
       </div>
     </div>`).join('');
 }
@@ -2731,8 +2738,8 @@ function renderPreviewPanel() {
       <div class="preview-item-content"><div style="font-weight:700;font-size:0.9rem;">${escHtml(q.question)}</div>
       <div style="font-size:0.78rem;color:var(--text-3);margin-top:0.2rem;">✅ ${escHtml(q.a)} / ❌ ${escHtml(q.b)}</div></div>
       <div class="preview-item-actions">
-        <button class="pv-edit-btn" onclick="pvEditQuiz(${i})">✏️</button>
-        <button class="pv-del-btn" onclick="pvDelQuiz(${i})">🗑</button>
+        <button class="pv-edit-btn" data-onclick="pvEditQuiz" data-onclick-arg="${i}">✏️</button>
+        <button class="pv-del-btn" data-onclick="pvDelQuiz" data-onclick-arg="${i}">🗑</button>
       </div></div>`;});
     html+='</div>';
   }
@@ -2741,8 +2748,8 @@ function renderPreviewPanel() {
     state.tempDisc.forEach((d,i)=>{html+=`<div class="preview-item" id="pvd-${i}">
       <div class="preview-item-content"><div style="font-size:0.9rem;">${escHtml(d)}</div></div>
       <div class="preview-item-actions">
-        <button class="pv-edit-btn" onclick="pvEditDisc(${i})">✏️</button>
-        <button class="pv-del-btn" onclick="pvDelDisc(${i})">🗑</button>
+        <button class="pv-edit-btn" data-onclick="pvEditDisc" data-onclick-arg="${i}">✏️</button>
+        <button class="pv-del-btn" data-onclick="pvDelDisc" data-onclick-arg="${i}">🗑</button>
       </div></div>`;});
     html+='</div>';
   }
@@ -2751,8 +2758,8 @@ function renderPreviewPanel() {
     state.tempWrite.forEach((w,i)=>{html+=`<div class="preview-item" id="pvw-${i}">
       <div class="preview-item-content"><div style="font-weight:700;font-size:0.9rem;">${escHtml(w.title)}</div></div>
       <div class="preview-item-actions">
-        <button class="pv-edit-btn" onclick="pvEditWrite(${i})">✏️</button>
-        <button class="pv-del-btn" onclick="pvDelWrite(${i})">🗑</button>
+        <button class="pv-edit-btn" data-onclick="pvEditWrite" data-onclick-arg="${i}">✏️</button>
+        <button class="pv-del-btn" data-onclick="pvDelWrite" data-onclick-arg="${i}">🗑</button>
       </div></div>`;});
     html+='</div>';
   }
@@ -2766,9 +2773,9 @@ function renderPreviewPanel() {
           ${ytId?`<div style="font-size:0.75rem;color:var(--c4);margin-top:0.2rem;">YouTube: ${ytId}</div>`:''}
           </div>
           <div style="display:flex;gap:0.35rem;flex-shrink:0;">
-            ${ytId?`<button class="pv-edit-btn" style="background:var(--c3);" onclick="toggleVideoEmbed('pvembed-${i}','${ytId}')">▶</button>`:''}
-            <button class="pv-edit-btn" onclick="pvEditVideo(${i})">✏️</button>
-            <button class="pv-del-btn" onclick="pvDelVideo(${i})">🗑</button>
+            ${ytId?`<button class="pv-edit-btn" style="background:var(--c3);" data-onclick="_toggleVideoEmbedEl" data-onclick-args='["pvembed-${i}","${ytId}"]'>▶</button>`:''}
+            <button class="pv-edit-btn" data-onclick="pvEditVideo" data-onclick-arg="${i}">✏️</button>
+            <button class="pv-del-btn" data-onclick="pvDelVideo" data-onclick-arg="${i}">🗑</button>
           </div>
         </div>
         ${ytId?`<div id="pvembed-${i}" style="display:none;margin-top:0.5rem;"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:10px;display:block;"></iframe></div>`:''}
@@ -2780,8 +2787,8 @@ function renderPreviewPanel() {
     state.tempFlashcards.forEach((f,i)=>{html+=`<div class="preview-item" id="pvf-${i}">
       <div class="preview-item-content" style="font-size:0.88rem;"><b>${escHtml(f.front)}</b> → ${escHtml(f.back)}</div>
       <div class="preview-item-actions">
-        <button class="pv-edit-btn" onclick="pvEditFlash(${i})">✏️</button>
-        <button class="pv-del-btn" onclick="pvDelFlash(${i})">🗑</button>
+        <button class="pv-edit-btn" data-onclick="pvEditFlash" data-onclick-arg="${i}">✏️</button>
+        <button class="pv-del-btn" data-onclick="pvDelFlash" data-onclick-arg="${i}">🗑</button>
       </div></div>`;});
     html+='</div>';
   }
@@ -3005,7 +3012,7 @@ async function renderWriteInbox() {
     const minWords = item.task.minWords || 0;
     const wordOk = !minWords || wordCount >= minWords;
     return `<div class="inbox-item" id="inboxRow-${safeKey}" style="background:var(--s2);border:1px solid ${item.feedback?'var(--border)':'rgba(239,68,68,0.25)'};border-radius:14px;margin-bottom:0.75rem;overflow:hidden;">
-      <div style="padding:0.875rem 1rem;cursor:pointer;display:flex;align-items:flex-start;gap:0.75rem;" onclick="_inboxToggle('inboxBody-${safeKey}')">
+      <div style="padding:0.875rem 1rem;cursor:pointer;display:flex;align-items:flex-start;gap:0.75rem;" data-onclick="_inboxToggle" data-onclick-arg="inboxBody-${safeKey}">
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.25rem;">
             ${!item.feedback?'<span style="background:rgba(239,68,68,0.15);color:var(--c1);font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(239,68,68,0.3);">● Venter</span>':'<span style="background:rgba(34,197,94,0.12);color:var(--c3);font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(34,197,94,0.25);">✓ Kommentert</span>'}
@@ -3022,8 +3029,8 @@ async function renderWriteInbox() {
         <div style="font-weight:800;font-size:0.82rem;color:var(--text-2);margin-bottom:0.4rem;">💬 Din kommentar til eleven:</div>
         <textarea id="inboxFb-${safeKey}" placeholder="Skriv en kommentar..." style="width:100%;min-height:80px;padding:9px 12px;border:1px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;background:var(--s3);color:var(--text);resize:vertical;box-sizing:border-box;">${escHtml(item.feedback)}</textarea>
         <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;">
-          <button onclick="_saveInboxFeedback('${item.key}','${safeKey}')" style="background:var(--accent);color:#fff;border:none;border-radius:9px;padding:7px 18px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:'Nunito',sans-serif;">💾 Lagre</button>
-          ${item.feedback?`<button onclick="_deleteInboxFeedback('${item.key}','${safeKey}')" style="background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.25);border-radius:9px;padding:7px 14px;font-weight:800;font-size:0.82rem;cursor:pointer;font-family:'Nunito',sans-serif;">🗑 Slett</button>`:''}
+          <button data-hid="${_reg(function(){_saveInboxFeedback('${item.key}','${safeKey}')})}" style="background:var(--accent);color:#fff;border:none;border-radius:9px;padding:7px 18px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:'Nunito',sans-serif;">💾 Lagre</button>
+          ${item.feedback?`<button data-hid="${_reg(function(){_deleteInboxFeedback('${item.key}','${safeKey}')})}" style="background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.25);border-radius:9px;padding:7px 14px;font-weight:800;font-size:0.82rem;cursor:pointer;font-family:'Nunito',sans-serif;">🗑 Slett</button>`:''}
           <span id="inboxFbSaved-${safeKey}" style="display:none;color:var(--c3);font-weight:700;font-size:0.85rem;align-self:center;">✅ Lagret</span>
         </div>
       </div>
@@ -3109,7 +3116,7 @@ function renderGlobalSearch() {
   };
   container.innerHTML = `<div style="font-size:0.82rem;color:var(--text-3);margin-bottom:0.75rem;font-weight:700;">${results.length} treff</div>` +
     results.map(r => `
-      <div onclick="trTab('new');editModule(${r.mi})" style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:0.875rem 1rem;margin-bottom:0.6rem;cursor:pointer;transition:border-color 0.15s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
+      <div data-hid="${_reg(function(){trTab('new');editModule(r.mi)})}" style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:0.875rem 1rem;margin-bottom:0.6rem;cursor:pointer;transition:border-color 0.15s;">
         <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.2rem;">
           <span>${r.emoji}</span>
           <span style="font-weight:800;font-size:0.88rem;color:var(--text);">${highlight(r.label)}</span>
@@ -3392,14 +3399,14 @@ function renderClassRoster() {
       </div>
       <div style="padding:0.5rem 0.5rem;">
         ${students.map((s,i)=>`
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.6rem;border-radius:8px;transition:background 0.15s;" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background='transparent'">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.6rem;border-radius:8px;transition:background 0.15s;">
             <span style="display:flex;align-items:center;gap:0.5rem;font-size:0.88rem;font-weight:700;color:var(--text);">
               <span style="width:24px;height:24px;border-radius:50%;background:var(--s3);border:1px solid var(--border-2);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;color:var(--text-3);">${i+1}</span>
               ${escHtml(s.name)}
             </span>
             <div style="display:flex;gap:4px;">
-              <button onclick="viewStudentDetail('${escHtml(s.name)}')" title="Se svar" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);cursor:pointer;font-size:0.78rem;padding:4px 7px;border-radius:6px;transition:all 0.15s;line-height:1;font-family:'Nunito',sans-serif;font-weight:800;" onmouseover="this.style.background='var(--accent-g)';this.style.color='var(--accent-h)'" onmouseout="this.style.background='var(--s3)';this.style.color='var(--text-2)'">📋</button>
-              <button onclick="removeStudent('${escHtml(s.name)}')" title="Fjern elev" style="background:transparent;border:none;color:var(--text-3);cursor:pointer;font-size:0.85rem;padding:4px 6px;border-radius:6px;transition:all 0.15s;line-height:1;" onmouseover="this.style.background='rgba(239,68,68,0.12)';this.style.color='#f87171'" onmouseout="this.style.background='transparent';this.style.color='var(--text-3)'">🗑</button>
+              <button data-onclick="viewStudentDetail" data-onclick-arg="${escHtml(s.name)}" title="Se svar" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);cursor:pointer;font-size:0.78rem;padding:4px 7px;border-radius:6px;transition:all 0.15s;line-height:1;font-family:'Nunito',sans-serif;font-weight:800;">📋</button>
+              <button data-onclick="removeStudent" data-onclick-arg="${escHtml(s.name)}" title="Fjern elev" style="background:transparent;border:none;color:var(--text-3);cursor:pointer;font-size:0.85rem;padding:4px 6px;border-radius:6px;transition:all 0.15s;line-height:1;">🗑</button>
             </div>
           </div>`).join('')}
       </div>
@@ -3431,8 +3438,8 @@ function viewStudentDetail(studentName) {
         <div style="font-size:0.8rem;color:var(--text-2);">Klasse: <b style="color:var(--text);">${escHtml(cls)}</b> &nbsp;·&nbsp; ${totalAnswers} svar &nbsp;·&nbsp; ${totalAnswers?Math.round(correctAnswers/totalAnswers*100):0}% riktige</div>
       </div>
       <div style="display:flex;gap:0.4rem;align-items:center;">
-        <button onclick="exportStudentAnswersTxt('${escHtml(studentName)}')" style="display:flex;align-items:center;gap:5px;background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);padding:7px 12px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">📥 Eksporter</button>
-        <button onclick="closeModal('studentDetailModal')" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);width:30px;height:30px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:0;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-2)'">
+        <button data-onclick="exportStudentAnswersTxt" data-onclick-arg="${escHtml(studentName)}" style="display:flex;align-items:center;gap:5px;background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);padding:7px 12px;border-radius:8px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">📥 Eksporter</button>
+        <button data-onclick="closeModal" data-onclick-arg="studentDetailModal" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);width:30px;height:30px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:0;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -3465,7 +3472,7 @@ function viewStudentDetail(studentName) {
                     <div style="font-size:0.82rem;color:var(--text);word-break:break-word;">${escHtml(String(val).substring(0,200))}${String(val).length>200?'…':''}</div>
                     ${time?`<div style="font-size:0.68rem;color:var(--text-3);margin-top:1px;" title="${escHtml(time)}">${relativeTime(time)}</div>`:''}
                   </div>
-                  <button onclick="openAnswerFeedback('${escHtml(k)}','srow-${k.replace(/[^a-zA-Z0-9]/g,'_')}')" id="afbtn-${k.replace(/[^a-zA-Z0-9]/g,'_')}" title="Kommenter svar" style="background:none;border:none;cursor:pointer;font-size:0.9rem;flex-shrink:0;color:var(--text-3);" class="print-hide">💬</button>
+                  <button data-hid="${_reg(function(){openAnswerFeedback('${escHtml(k)}','srow-${k.replace(/[^a-zA-Z0-9]/g,\'_\')}')})}"  id="afbtn-${k.replace(/[^a-zA-Z0-9]/g,'_')}" title="Kommenter svar" style="background:none;border:none;cursor:pointer;font-size:0.9rem;flex-shrink:0;color:var(--text-3);" class="print-hide">💬</button>
                 </div>
                 <div id="afinline-${k.replace(/[^a-zA-Z0-9]/g,'_')}"></div>
               </div>`;
@@ -3479,7 +3486,7 @@ function viewStudentDetail(studentName) {
     <div style="font-weight:800;font-size:0.88rem;color:var(--text);margin-bottom:0.5rem;">💬 Tilbakemelding til eleven</div>
     <textarea id="teacherFeedbackInput" maxlength="500" placeholder="Skriv en personlig melding til eleven – vises ved neste innlogging..." style="width:100%;min-height:80px;padding:9px 12px;border:1px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;background:var(--s3);color:var(--text);resize:vertical;box-sizing:border-box;"></textarea>
     <div style="display:flex;gap:0.5rem;margin-top:0.5rem;align-items:center;">
-      <button onclick="saveTeacherFeedback('${escHtml(studentName)}')" style="background:var(--accent);color:#fff;border:none;border-radius:9px;padding:0.5rem 1.1rem;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Lagre</button>
+      <button data-onclick="saveTeacherFeedback" data-onclick-arg="${escHtml(studentName)}" style="background:var(--accent);color:#fff;border:none;border-radius:9px;padding:0.5rem 1.1rem;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Lagre</button>
       <span id="feedbackSavedMsg" style="display:none;color:var(--c3);font-weight:700;font-size:0.85rem;">✅ Lagret</span>
     </div>
   </div>`;
@@ -3584,8 +3591,8 @@ function renderGroups() {
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">
         <div style="font-weight:800;font-size:0.95rem;color:var(--text);">👥 ${escHtml(g.name)}</div>
         <div style="display:flex;gap:4px;">
-          <button onclick="openGroupModal('${g.id}')" title="Rediger" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);padding:4px 7px;border-radius:6px;cursor:pointer;font-size:0.78rem;font-family:'Nunito',sans-serif;font-weight:800;">✏️</button>
-          <button onclick="deleteGroup('${g.id}')" title="Slett" style="background:transparent;border:none;color:var(--text-3);padding:4px 6px;border-radius:6px;cursor:pointer;font-size:0.82rem;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--text-3)'">🗑</button>
+          <button data-onclick="openGroupModal" data-onclick-arg="${g.id}" title="Rediger" style="background:var(--s3);border:1px solid var(--border-2);color:var(--text-2);padding:4px 7px;border-radius:6px;cursor:pointer;font-size:0.78rem;font-family:'Nunito',sans-serif;font-weight:800;">✏️</button>
+          <button data-onclick="deleteGroup" data-onclick-arg="${g.id}" title="Slett" style="background:transparent;border:none;color:var(--text-3);padding:4px 6px;border-radius:6px;cursor:pointer;font-size:0.82rem;">🗑</button>
         </div>
       </div>
       <div style="font-size:0.78rem;color:var(--text-3);font-weight:700;margin-bottom:0.35rem;">${g.members.length} elev${g.members.length===1?'':'er'}</div>
@@ -3613,8 +3620,8 @@ function openAnswerFeedback(answerKey, rowId) {
   const existing = localStorage.getItem(storageKey) || '';
   slot.innerHTML = `<textarea class="af-inline-editor" id="afta-${slotId}" placeholder="Skriv en kommentar til dette svaret...">${escHtml(existing)}</textarea>
     <div style="display:flex;gap:0.5rem;align-items:center;">
-      <button class="af-inline-save" onclick="_saveAnswerFeedback('${escHtml(answerKey)}','${slotId}')">💾 Lagre kommentar</button>
-      ${existing?`<button onclick="_deleteAnswerFeedback('${escHtml(answerKey)}','${slotId}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:0.78rem;font-weight:700;">🗑 Slett</button>`:''}
+      <button class="af-inline-save" data-hid="${_reg(function(){_saveAnswerFeedback('${escHtml(answerKey)}','${slotId}')})}">💾 Lagre kommentar</button>
+      ${existing?`<button data-hid="${_reg(function(){_deleteAnswerFeedback('${escHtml(answerKey)}','${slotId}')})}" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:0.78rem;font-weight:700;">🗑 Slett</button>`:''}
     </div>`;
 }
 async function _saveAnswerFeedback(answerKey, slotId) {
@@ -3654,7 +3661,7 @@ function showFeedbackNotice(text, key) {
     <div style="font-size:2.5rem;margin-bottom:0.75rem;">💬</div>
     <h3 style="font-family:'Fredoka One',cursive;font-size:1.2rem;color:var(--text);margin:0 0 0.75rem;">Melding fra læreren</h3>
     <div style="background:var(--s2);border-radius:12px;padding:1rem 1.25rem;text-align:left;font-size:0.92rem;color:var(--text);line-height:1.7;margin-bottom:1.25rem;border:1px solid var(--border);">${escHtml(text)}</div>
-    <button onclick="document.getElementById('${id}').style.display='none';DB.deleteFeedback('${key}');" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.65rem 2rem;font-weight:800;font-size:0.95rem;cursor:pointer;">OK 👍</button>
+    <button data-onclick="_dismissFeedback" data-onclick-args="${escHtml(JSON.stringify([id,key]))}" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.65rem 2rem;font-weight:800;font-size:0.95rem;cursor:pointer;">OK 👍</button>
   </div>`;
 }
 
@@ -3805,7 +3812,7 @@ function _renderAiDraftUI(resultElId) {
       <input type="checkbox" class="ai-draft-cb" data-type="${type}" data-idx="${idx}" data-el="${elId}" checked style="width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;margin-top:2px;">
       <div style="flex:1;min-width:0;">${inner}</div>
       <span id="ai-row-spin-${type}-${idx}" class="ai-spinner" style="display:none;border-top-color:var(--accent);flex-shrink:0;"></span>
-      <button class="ai-regen-btn" onclick="event.preventDefault();_aiRegenerateItem('${type}',${idx},'${elId}')" title="Generer nytt" type="button">${regenIcon}</button>
+      <button class="ai-regen-btn" data-onclick="_aiRegenerateItem" data-onclick-args="${escHtml(JSON.stringify([type,idx,elId]))}" title="Generer nytt" type="button">${regenIcon}</button>
     </label>`;
   const total = (_aiDraft.quiz?.length||0) + (_aiDraft.discussion?.length||0) + (_aiDraft.flashcards?.length||0) + (_aiDraft.write?1:0);
   let html = `<div style="font-size:0.78rem;font-weight:800;color:var(--accent);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">
@@ -3840,9 +3847,9 @@ function _renderAiDraftUI(resultElId) {
     html += '</div>';
   }
   html += `<div class="ai-draft-actions">
-    <button class="btn-success" onclick="_aiUseSelected('${elId}')" type="button">✅ Legg til valgte</button>
-    <button class="ai-draft-mini-btn" onclick="_aiSelectAll(true,'${elId}')" type="button">Velg alle</button>
-    <button class="ai-draft-mini-btn" onclick="_aiSelectAll(false,'${elId}')" type="button">Fjern alle</button>
+    <button class="btn-success" data-onclick="_aiUseSelected" data-onclick-arg="${elId}" type="button">✅ Legg til valgte</button>
+    <button class="ai-draft-mini-btn" data-onclick="_aiSelectAll" data-onclick-args="${escHtml(JSON.stringify([true,elId]))}" type="button">Velg alle</button>
+    <button class="ai-draft-mini-btn" data-onclick="_aiSelectAll" data-onclick-args="${escHtml(JSON.stringify([false,elId]))}" type="button">Fjern alle</button>
   </div>`;
   el.style.display = 'block';
   el.innerHTML = html;
@@ -3994,7 +4001,7 @@ function _renderQbank() {
   if (!pool.length) { el.innerHTML = '<p style="font-size:0.83rem;color:var(--text-3);">Ingen spørsmål i eksisterende moduler ennå.</p>'; return; }
   const qbSearch = el.querySelector('#qbankSearch')?.value || '';
   const filtered = qbSearch ? pool.filter(p => p.q.toLowerCase().includes(qbSearch.toLowerCase()) || p.module.toLowerCase().includes(qbSearch.toLowerCase())) : pool;
-  el.innerHTML = `<input id="qbankSearch" type="text" placeholder="Søk i spørsmål..." oninput="_renderQbank()" value="${escHtml(qbSearch)}"
+  el.innerHTML = `<input id="qbankSearch" type="text" placeholder="Søk i spørsmål..." data-oninput="_renderQbank" value="${escHtml(qbSearch)}"
     style="width:100%;padding:7px 11px;border:1px solid var(--border-2);border-radius:8px;font-family:'Nunito',sans-serif;font-size:0.85rem;outline:none;background:var(--s3);color:var(--text);margin-bottom:0.5rem;box-sizing:border-box;">
     <div style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:0.35rem;">
     ${filtered.slice(0,30).map((p, li) => `<div class="qbank-item">
@@ -4002,7 +4009,7 @@ function _renderQbank() {
         <div style="font-weight:700;font-size:0.82rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(p.q.substring(0,100))}</div>
         <div style="font-size:0.72rem;color:var(--text-3);margin-top:2px;">📚 ${escHtml(p.module)}</div>
       </div>
-      <button onclick="_qbankAdd(${p.mi},${p.qi})" style="background:var(--accent-g);color:var(--accent-h);border:1px solid rgba(79,110,247,0.3);border-radius:7px;padding:4px 9px;font-size:0.75rem;font-weight:800;cursor:pointer;flex-shrink:0;">＋ Legg til</button>
+      <button data-onclick="_qbankAdd" data-onclick-args="${JSON.stringify([p.mi,p.qi])}" style="background:var(--accent-g);color:var(--accent-h);border:1px solid rgba(79,110,247,0.3);border-radius:7px;padding:4px 9px;font-size:0.75rem;font-weight:800;cursor:pointer;flex-shrink:0;">＋ Legg til</button>
     </div>`).join('')}
     ${filtered.length > 30 ? `<div style="font-size:0.75rem;color:var(--text-3);text-align:center;padding:4px;">… og ${filtered.length-30} til (bruk søket for å filtrere)</div>` : ''}
     </div>`;
@@ -4057,7 +4064,7 @@ async function aiGenerateSingleDisc(){
   if(resultEl)resultEl.innerHTML=`<div style="display:flex;flex-direction:column;gap:0.5rem;">`+
     qs.map(q=>`<div style="background:var(--s1);border-radius:10px;padding:0.875rem;border:1px solid var(--c5);">
       <div style="font-size:0.92rem;font-weight:700;margin-bottom:0.5rem;">💬 ${escHtml(q)}</div>
-      <button style="background:var(--c5);color:white;border:none;padding:6px 14px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;" onclick="useSdResult('${escHtml(q).replace(/'/g,"\\'")}')">➕ Bruk</button>
+      <button style="background:var(--c5);color:white;border:none;padding:6px 14px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;" data-onclick="useSdResult" data-onclick-args="${escHtml(JSON.stringify([q]))}">➕ Bruk</button>
     </div>`).join('')+`</div>`;
 }
 function useSdResult(q){const el=document.getElementById('discQ');if(el)el.value=q;const r=document.getElementById('sdResult');if(r)r.style.display='none';}
@@ -4105,13 +4112,13 @@ Svar KUN med JSON: {"videos":[{"title":"...","ytId":"11-tegns-ID eller null","se
       const finalUrl=ytId?`https://www.youtube.com/watch?v=${ytId}`:(v.searchUrl||'');
       const safeV=JSON.stringify({title:v.title,url:finalUrl,task:v.task||''}).replace(/'/g,"&#39;").replace(/"/g,"&quot;");
       return `<div style="background:var(--s1);border-radius:14px;padding:0.875rem;border:1px solid var(--border);">
-        ${ytId?`<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" style="width:100%;border-radius:10px;margin-bottom:0.5rem;cursor:pointer;" loading="lazy" onclick="svToggleEmbed('svembed-${i}','${ytId}')" /><div id="svembed-${i}" style="display:none;margin-bottom:0.5rem;"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe></div>`
+        ${ytId?`<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" style="width:100%;border-radius:10px;margin-bottom:0.5rem;cursor:pointer;" loading="lazy" data-hid="${_reg(function(){svToggleEmbed('svembed-${i}','${ytId}')})}" /><div id="svembed-${i}" style="display:none;margin-bottom:0.5rem;"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe></div>`
         :`<div style="background:var(--s2);border-radius:10px;padding:1rem;text-align:center;margin-bottom:0.5rem;"><a href="${escHtml(v.searchUrl||'')}" target="_blank" style="color:var(--c4);font-weight:800;">🔍 Søk på YouTube</a></div>`}
         <div style="font-weight:800;font-size:0.92rem;margin-bottom:0.2rem;">🎬 ${escHtml(v.title)}</div>
         ${v.channel?`<div style="font-size:0.75rem;color:var(--text-3);margin-bottom:0.3rem;">📺 ${escHtml(v.channel)}</div>`:''}
         ${v.task?`<div style="font-size:0.82rem;color:var(--text-2);background:var(--s2);border-radius:8px;padding:0.5rem;margin:0.4rem 0;">📋 ${escHtml(v.task)}</div>`:''}
         <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.5rem;">
-          ${ytId?`<button style="background:var(--c3);color:white;border:none;padding:6px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;" onclick="svToggleEmbed('svembed-${i}','${ytId}')">▶ Spill av</button>`:''}
+          ${ytId?`<button style="background:var(--c3);color:white;border:none;padding:6px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;" data-hid="${_reg(function(){svToggleEmbed('svembed-${i}','${ytId}')})}">▶ Spill av</button>`:''}
           <a href="${escHtml(v.searchUrl||finalUrl)}" target="_blank" style="background:var(--s3);color:var(--text-2);padding:6px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;text-decoration:none;">🔍 Søk</a>
           <button style="background:var(--c4);color:white;border:none;padding:6px 14px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;" onclick='useSvResult(${safeV})'>➕ Legg til</button>
         </div>
@@ -4437,17 +4444,12 @@ function relativeTime(dateStr) {
 function showToast(msg, duration=3200){
   let t=document.getElementById('globalToast');
   if(!t){t=document.createElement('div');t.id='globalToast';t.className='toast';t.setAttribute('aria-live','polite');t.setAttribute('role','status');document.body.appendChild(t);}
-  // Build content with progress bar
-  t.innerHTML = '';
-  const span = document.createElement('span'); span.textContent = msg; t.appendChild(span);
-  const bar = document.createElement('div'); bar.className = 'toast-bar';
-  bar.style.animation = 'none'; t.appendChild(bar);
-  t.classList.add('show');
-  // Trigger progress bar animation after paint
+  t.textContent = msg;
+  t.style.setProperty('--toast-dur', duration + 'ms');
+  // Re-trigger ::after animation by toggling show
+  t.classList.remove('show');
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      bar.style.animation = `toastShrink ${duration}ms linear forwards`;
-    });
+    requestAnimationFrame(() => { t.classList.add('show'); });
   });
   clearTimeout(t._timer);
   t._timer=setTimeout(()=>t.classList.remove('show'), duration);
@@ -4971,7 +4973,7 @@ async function testDbConnection() {
     const warn = document.getElementById('dbSqlWarning');
     if (warn) {
       warn.style.display = 'block';
-      warn.innerHTML = '<div style="font-weight:800;color:#991b1b;margin-bottom:0.5rem;">⏸️ Supabase-prosjektet er på PAUSE!</div><div style="font-size:0.82rem;color:#7f1d1d;line-height:1.7;margin-bottom:0.75rem;">Gratisplanen setter prosjektet på pause etter 1 uke uten aktivitet.<br><b>Slik fikser du det:</b><br>1. Gå til <a href="https://supabase.com" target="_blank" style="color:#dc2626;font-weight:800;">supabase.com</a> og logg inn<br>2. Åpne prosjektet ditt<br>3. Klikk den store oransje knappen <b>«Resume project»</b><br>4. Vent ca. 30 sekunder<br>5. Kom tilbake og trykk 🔬 Diagnose på nytt</div><button onclick="testDbConnection()" style="background:#dc2626;color:white;border:none;padding:9px 20px;border-radius:50px;font-family:\'Nunito\',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">🔄 Prøv igjen</button>';
+      warn.innerHTML = '<div style="font-weight:800;color:#991b1b;margin-bottom:0.5rem;">⏸️ Supabase-prosjektet er på PAUSE!</div><div style="font-size:0.82rem;color:#7f1d1d;line-height:1.7;margin-bottom:0.75rem;">Gratisplanen setter prosjektet på pause etter 1 uke uten aktivitet.<br><b>Slik fikser du det:</b><br>1. Gå til <a href="https://supabase.com" target="_blank" style="color:#dc2626;font-weight:800;">supabase.com</a> og logg inn<br>2. Åpne prosjektet ditt<br>3. Klikk den store oransje knappen <b>«Resume project»</b><br>4. Vent ca. 30 sekunder<br>5. Kom tilbake og trykk 🔬 Diagnose på nytt</div><button data-onclick="testDbConnection" style="background:#dc2626;color:white;border:none;padding:9px 20px;border-radius:50px;font-family:\'Nunito\',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">🔄 Prøv igjen</button>';
     }
   } else {
     showDbFeedback(result.msg, result.ok);
@@ -5819,7 +5821,7 @@ function gzRenderGameCards() {
         ${myScore!=null ? `<div style="margin-left:auto;background:${g.color}22;border:1px solid ${g.color}55;border-radius:8px;padding:4px 10px;font-family:'Fredoka One',cursive;font-size:1rem;color:${g.color};">${myScore}p</div>` : ''}
       </div>
       <div style="display:flex;gap:0.4rem;margin-bottom:0.875rem;">
-        ${['easy','normal','hard'].map(d=>`<button onclick="gzSetDiff('${g.id}','${d}')" id="diff-${g.id}-${d}" style="flex:1;padding:7px 4px;border-radius:8px;border:2px solid ${d===defDiff?g.color:'var(--border-2)'};background:${d===defDiff?g.color+'22':'transparent'};color:${d===defDiff?g.color:'var(--text-2)'};font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;transition:all 0.15s;">${{easy:'Lett',normal:'Normal',hard:'Vanskelig'}[d]}</button>`).join('')}
+        ${['easy','normal','hard'].map(d=>`<button data-onclick="gzSetDiff" data-onclick-args="${escHtml(JSON.stringify([g.id,d]))}" id="diff-${g.id}-${d}" style="flex:1;padding:7px 4px;border-radius:8px;border:2px solid ${d===defDiff?g.color:'var(--border-2)'};background:${d===defDiff?g.color+'22':'transparent'};color:${d===defDiff?g.color:'var(--text-2)'};font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;transition:all 0.15s;">${{easy:'Lett',normal:'Normal',hard:'Vanskelig'}[d]}</button>`).join('')}
       </div>
       ${g.id === 'worldle' && (sess.worldleContinent === 'all' || !sess.worldleContinent) ? `
       <div style="margin-bottom:0.875rem;">
@@ -5847,7 +5849,7 @@ function gzRenderGameCards() {
           <option value="gründer">💡 Gründere</option>
         </select>
       </div>` : ''}
-      <button onclick="${g.startFn}()" style="width:100%;padding:11px;background:${g.color};color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;transition:opacity 0.18s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">Spill nå</button>
+      <button data-onclick="_callWindowFn" data-onclick-arg="${g.startFn}" style="width:100%;padding:11px;background:${g.color};color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;transition:opacity 0.18s;">Spill nå</button>
     </div>`;
   }).join('');
 
@@ -6085,7 +6087,7 @@ function wordleRenderKeyboard() {
     const bg = colors[k] || 'var(--s3)';
     const tc = colors[k] ? 'white' : 'var(--text)';
     const w = (k==='⌫'||k==='↵') ? '52px' : '36px';
-    return `<button onclick="wordleKey('${k}')" style="width:${w};height:46px;border-radius:7px;border:none;background:${bg};color:${tc};font-family:'Nunito',sans-serif;font-weight:800;font-size:${k.length>1?'0.7':'0.95'}rem;cursor:pointer;transition:background 0.2s;">${k}</button>`;
+    return `<button data-onclick="wordleKey" data-onclick-arg="${k}" style="width:${w};height:46px;border-radius:7px;border:none;background:${bg};color:${tc};font-family:'Nunito',sans-serif;font-weight:800;font-size:${k.length>1?'0.7':'0.95'}rem;cursor:pointer;transition:background 0.2s;">${k}</button>`;
   }).join('')}</div>`).join('');
 }
 
@@ -6333,11 +6335,7 @@ function worldleAutocomplete(val) {
   ac.style.display='block';
   ac.innerHTML = scored.map((x,i) => {
     const already = WORLDLE_ST.guesses.map(g=>g.toLowerCase()).includes(x.c.n.toLowerCase());
-    return `<div onclick="worldleSelectCountry('${x.c.n.replace(/'/g,"\\'")}',event)"
-      data-idx="${i}"
-      style="padding:9px 14px;cursor:pointer;font-weight:700;font-size:0.88rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;${already?'opacity:0.45;':''};"
-      onmouseover="worldleAcHover(${i})"
-      onmouseout="">
+    return `<div data-onclick="worldleSelectCountry" data-onclick-args="${escHtml(JSON.stringify([x.c.n]))}" data-idx="${i}" data-ac-hover="${i}" style="padding:9px 14px;cursor:pointer;font-weight:700;font-size:0.88rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;${already?'opacity:0.45;':''};">
       <span style="font-size:1.2rem;">${x.c.f}</span>
       <span style="flex:1;">${worldleHighlight(x.c.n, val)}</span>
       <span style="font-size:0.72rem;color:var(--text-3);">${x.c.c}</span>
@@ -6654,10 +6652,7 @@ function whoamiAutocomplete(val) {
       oppdagelsesreisende:'Utforsker'}[x.p.cat] || x.p.cat||'';
     // Highlight matching part
     const highlighted = whoamiHighlight(x.p.n, val);
-    return `<div onclick="whoamiSelectPerson('${x.p.n.replace(/'/g,"\\'")}',event)"
-      data-idx="${i}" data-name="${x.p.n.replace(/"/g,'&quot;')}"
-      style="padding:9px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;border-bottom:1px solid var(--border);font-size:0.9rem;font-weight:700;"
-      onmouseover="whoamiAcHover(${i})" onmouseout="">
+    return `<div data-onclick="whoamiSelectPerson" data-onclick-args="${escHtml(JSON.stringify([x.p.n]))}" data-idx="${i}" data-name="${escHtml(x.p.n)}" data-whoami-hover="${i}" style="padding:9px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;border-bottom:1px solid var(--border);font-size:0.9rem;font-weight:700;">
       <span>${highlighted}</span>
       <span style="font-size:0.72rem;color:${catColor};background:${catColor}22;border-radius:4px;padding:2px 7px;white-space:nowrap;">${catLabel}</span>
     </div>`;
@@ -6968,12 +6963,12 @@ async function gsLoadSessions() {
           ${s.ends_at ? `<div style="font-size:0.75rem;color:var(--text-3);margin-top:0.2rem;">Slutter: ${new Date(s.ends_at).toLocaleString('no-NO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;gap:0.4rem;align-items:flex-end;">
-          ${active ? `<button onclick="gsCopyCode('${s.code}')" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:5px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Kopier kode</button>` : ''}
-          <button onclick="gsViewLeaderboard('${s.code}')" style="padding:6px 12px;background:var(--s2);border:1px solid var(--border-2);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-2);cursor:pointer;">Toppliste</button>
-          <button onclick="gsEditSession('${s.code}')" style="padding:6px 12px;background:var(--s2);border:1px solid var(--border-2);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-2);cursor:pointer;">Rediger</button>
-          <button onclick="gsDeleteSession('${s.code}')"
+          ${active ? `<button data-onclick="gsCopyCode" data-onclick-arg="${s.code}" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:5px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Kopier kode</button>` : ''}
+          <button data-onclick="gsViewLeaderboard" data-onclick-arg="${s.code}" style="padding:6px 12px;background:var(--s2);border:1px solid var(--border-2);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-2);cursor:pointer;">Toppliste</button>
+          <button data-onclick="gsEditSession" data-onclick-arg="${s.code}" style="padding:6px 12px;background:var(--s2);border:1px solid var(--border-2);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:var(--text-2);cursor:pointer;">Rediger</button>
+          <button data-onclick="gsDeleteSession" data-onclick-arg="${s.code}"
             style="padding:6px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:#ef4444;cursor:pointer;">Slett</button>
-          <button onclick="gsEndSession('${s.code}')" style="padding:6px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:#ef4444;cursor:pointer;">Avslutt</button>
+          <button data-onclick="gsEndSession" data-onclick-arg="${s.code}" style="padding:6px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;color:#ef4444;cursor:pointer;">Avslutt</button>
         </div>
       </div>
     </div>`;
@@ -7048,7 +7043,7 @@ function gsShowActiveBanner(sess) {
         <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.2rem;">Kode til elevene</div>
         <div style="font-family:'Fredoka One',cursive;font-size:2.5rem;color:var(--accent-h);letter-spacing:0.25em;line-height:1;">${sess.code}</div>
       </div>
-      <button onclick="gsCopyCode('${sess.code}')" style="padding:10px 18px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">Kopier kode</button>
+      <button data-onclick="gsCopyCode" data-onclick-arg="${sess.code}" style="padding:10px 18px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">Kopier kode</button>
     </div>`;
 }
 
@@ -7290,8 +7285,8 @@ function wordleGiveUp() {
   const resultActions = resultEl.querySelector('div:last-child');
   if (resultActions) {
     resultActions.innerHTML = `
-      <button onclick="gzStartWordle()" style="padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Prøv et nytt ord</button>
-      <button onclick="gzBackToLobby()" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>`;
+      <button data-onclick="gzStartWordle" style="padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Prøv et nytt ord</button>
+      <button data-onclick="gzBackToLobby" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>`;
   }
   gzSaveScore('wordle', 0);
 }
@@ -7318,8 +7313,8 @@ function worldleGiveUp() {
   const resultActions = resultEl.querySelector('div:last-child');
   if (resultActions) {
     resultActions.innerHTML = `
-      <button onclick="gzStartWorldle()" style="padding:11px 24px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Prøv et nytt land</button>
-      <button onclick="gzBackToLobby()" style="padding:11px 24px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake</button>`;
+      <button data-onclick="gzStartWorldle" style="padding:11px 24px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Prøv et nytt land</button>
+      <button data-onclick="gzBackToLobby" style="padding:11px 24px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake</button>`;
   }
   gzSaveScore('worldle', 0);
 }
@@ -7347,8 +7342,8 @@ function whoamiGiveUp() {
   const resultActions = resultEl.querySelector('div:last-child');
   if (resultActions) {
     resultActions.innerHTML = `
-      <button onclick="gzStartWhoami()" style="padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Prøv en ny person</button>
-      <button onclick="gzBackToLobby()" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>`;
+      <button data-onclick="gzStartWhoami" style="padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Prøv en ny person</button>
+      <button data-onclick="gzBackToLobby" style="padding:10px 22px;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);border-radius:9px;font-family:'Nunito',sans-serif;font-weight:800;cursor:pointer;">Tilbake til meny</button>`;
   }
   gzSaveScore('whoami', 0);
 }
@@ -8007,7 +8002,7 @@ async function loadHighscoreView() {
             <div style="font-weight:800;flex:1;">${r.player_name}</div>
             <div style="font-weight:900;color:var(--c4);font-size:1.05rem;">${r.score} pts</div>
             <div style="font-size:0.78rem;color:var(--text-3);">${new Date(r.played_at).toLocaleDateString('no')}</div>
-            ${isTeacher ? `<button onclick="deleteHighscoreEntry('${r.id}')" title="Fjern fra listen" class="btn-danger-hover" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--text-3);padding:2px 6px;border-radius:6px;">🗑</button>` : ''}
+            ${isTeacher ? `<button data-onclick="deleteHighscoreEntry" data-onclick-arg="${r.id}" title="Fjern fra listen" class="btn-danger-hover" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--text-3);padding:2px 6px;border-radius:6px;">🗑</button>` : ''}
           </div>`).join('')}
       </div>`;
   }
@@ -8111,7 +8106,7 @@ function arbShowDashboard() {
     <div style="background:var(--s1);border-radius:18px;padding:1.5rem;box-shadow:var(--shadow);margin-bottom:1rem;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
         <div style="font-family:'Fredoka One',cursive;font-size:1.4rem;">📊 Min fremgang</div>
-        <button onclick="document.getElementById('arbDashboard').style.display='none'" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-2);">✕</button>
+        <button data-onclick="_hideArbDashboard" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-2);">✕</button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem;">
         <div style="background:var(--s2);border-radius:14px;padding:1rem;text-align:center;">
@@ -8194,7 +8189,7 @@ function arbRenderModuleGrid() {
         <p style="color:var(--text-3);font-size:0.8rem;">${openMsg}</p>
       </div>`;
     }
-    return `<div class="arb-module-card" onclick="arbOpenModule(${i})" style="position:relative;--i:${i}">
+    return `<div class="arb-module-card" data-onclick="arbOpenModule" data-onclick-arg="${i}" style="position:relative;--i:${i}">
       <div style="position:absolute;top:0;left:0;right:0;height:5px;background:${colors[i%5]};border-radius:20px 20px 0 0;"></div>
       ${pct === 100 ? '<span style="position:absolute;top:12px;right:12px;background:rgba(34,197,94,0.2);color:#4ade80;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(34,197,94,0.3);">✅ Fullført</span>' : ''}
       <span class="arb-emoji">${m.emoji||'📚'}</span>
@@ -8294,7 +8289,7 @@ function arbRenderTabs(m) {
 
   const bar = document.getElementById('arbTaskTabs');
   bar.innerHTML = tabs.map((t,i) => `
-    <button class="arb-task-tab${i===0?' active':''}" id="arbTab-${t.id}" onclick="arbSwitchTab('${t.id}')">${t.label}</button>
+    <button class="arb-task-tab${i===0?' active':''}" id="arbTab-${t.id}" data-onclick="arbSwitchTab" data-onclick-arg="${t.id}">${t.label}</button>
   `).join('');
   if (tabs.length) arbRenderTab(tabs[0].id, m);
 }
@@ -8346,7 +8341,7 @@ function _reapplyMarks(moduleIdx, bodyId) {
   const marks = _markLoad(moduleIdx);
   marks.forEach(mark => {
     const re = new RegExp('(' + mark.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'g');
-    body.innerHTML = body.innerHTML.replace(re, `<mark class="text-mark" data-color="${escHtml(mark.color)}" data-id="${mark.id}" onclick="_markClickMenu(this,${moduleIdx})" title="${escHtml(mark.note||'')}">$1</mark>`);
+    body.innerHTML = body.innerHTML.replace(re, `<mark class="text-mark" data-color="${escHtml(mark.color)}" data-id="${mark.id}" data-hid="${_reg(function(){_markClickMenu(this,moduleIdx)})}" title="${escHtml(mark.note||'')}">$1</mark>`);
   });
 }
 function _initMarkSelection(moduleIdx) {
@@ -8373,8 +8368,8 @@ function _showMarkPopover(selectedText, moduleIdx, bodyId) {
   pop.style.left = (rect.left + window.scrollX) + 'px';
   const safeText = selectedText.replace(/'/g,"\\'");
   pop.innerHTML = `<span style="font-size:0.78rem;font-weight:800;color:var(--text-2);margin-right:4px;">Merk:</span>` +
-    ['yellow','green','pink'].map(c => `<button class="mark-color-btn" style="background:${c==='yellow'?'rgba(253,224,71,0.7)':c==='green'?'rgba(134,239,172,0.7)':'rgba(249,168,212,0.7)'};" onclick="_doMark('${c}','${safeText}',${moduleIdx},'${_markPopoverBodyId}')"></button>`).join('') +
-    `<button onclick="_hideMarkPopover()" style="background:none;border:none;cursor:pointer;color:var(--text-2);font-size:0.9rem;padding:0 4px;">✕</button>`;
+    ['yellow','green','pink'].map(c => `<button class="mark-color-btn" style="background:${c==='yellow'?'rgba(253,224,71,0.7)':c==='green'?'rgba(134,239,172,0.7)':'rgba(249,168,212,0.7)'};" data-onclick="_doMark" data-onclick-args="${escHtml(JSON.stringify([c,selectedText,moduleIdx,_markPopoverBodyId]))}"></button>`).join('') +
+    `<button data-onclick="_hideMarkPopover" style="background:none;border:none;cursor:pointer;color:var(--text-2);font-size:0.9rem;padding:0 4px;">✕</button>`;
   document.body.appendChild(pop);
   _markPopoverEl = pop;
   setTimeout(() => document.addEventListener('click', _hideMarkPopover, {once:true}), 100);
@@ -8391,7 +8386,7 @@ function _doMark(color, text, moduleIdx, bodyId) {
   pop.innerHTML = `<div style="width:12px;height:12px;border-radius:50%;background:${safeColor};flex-shrink:0;"></div>
     <textarea id="_markNoteInput" placeholder="Notat (valgfritt)" style="width:160px;height:46px;font-size:0.78rem;background:var(--s2);color:var(--text);border:1px solid var(--border-2);border-radius:6px;padding:4px 7px;resize:none;outline:none;font-family:inherit;" maxlength="200"></textarea>
     <button id="_markSaveBtn" style="background:var(--accent);color:white;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:0.82rem;font-weight:700;flex-shrink:0;">✓</button>
-    <button onclick="_hideMarkPopover()" style="background:none;border:none;cursor:pointer;color:var(--text-2);font-size:0.9rem;padding:0 3px;flex-shrink:0;">✕</button>`;
+    <button data-onclick="_hideMarkPopover" style="background:none;border:none;cursor:pointer;color:var(--text-2);font-size:0.9rem;padding:0 3px;flex-shrink:0;">✕</button>`;
   const ta = pop.querySelector('#_markNoteInput');
   const saveBtn = pop.querySelector('#_markSaveBtn');
   const doSave = () => {
@@ -8432,10 +8427,10 @@ function arbRenderTab(type, m) {
     container.innerHTML = `<div class="arb-content-card">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem;">
         <h2 style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--text);margin:0;">📖 ${escHtml(m.name)}</h2>
-        <button class="tts-btn print-hide" id="ttsBtnText" onclick="ttsSpeak(document.getElementById('arb-text-body')?.innerText||'', this)">🔊 Les høyt</button>
+        <button class="tts-btn print-hide" id="ttsBtnText" data-onclick="ttsSpeak" data-onclick-args='[null,"arb-text-body"]'>🔊 Les høyt</button>
       </div>
       <div class="arb-text-content" id="arb-text-body" style="white-space:pre-wrap;">${textHtml}</div>
-      <button class="tts-btn print-hide" style="margin-top:1rem;" onclick="_showMarksPanel(${mi})">📝 Mine markeringer</button>
+      <button class="tts-btn print-hide" style="margin-top:1rem;" data-onclick="_showMarksPanel" data-onclick-args='[${mi}]'>📝 Mine markeringer</button>
       <div id="arb-marks-panel-${mi}"></div>
     </div>`;
     _reapplyMarks(mi);
@@ -8486,8 +8481,8 @@ function arbRenderQuiz(m) {
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
       <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin:0;">Quiz</h2>
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-        <button onclick="_quizOneAtATime=true;_quizCurrentIdx=0;arbRenderQuiz(state.modules[arbState.moduleIdx])" style="background:var(--s3);color:var(--accent);border:1px solid var(--border-2);padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;" title="Én og én modus">🃏 Kortmodus</button>
-        ${!allAnswered && answeredCount > 0 ? `<button onclick="_scrollToNextQuiz()" style="background:var(--s3);color:var(--accent);border:1px solid var(--border-2);padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">↓ Neste ubesvarte</button>` : ''}
+        <button data-onclick="_arbShowCardMode" style="background:var(--s3);color:var(--accent);border:1px solid var(--border-2);padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;" title="Én og én modus">🃏 Kortmodus</button>
+        ${!allAnswered && answeredCount > 0 ? `<button data-onclick="_scrollToNextQuiz" style="background:var(--s3);color:var(--accent);border:1px solid var(--border-2);padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">↓ Neste ubesvarte</button>` : ''}
       </div>
     </div>`;
   m.quiz.forEach((q, qi) => {
@@ -8505,13 +8500,13 @@ function arbRenderQuiz(m) {
       ${qImgHtml}
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem;">
         <div class="arb-quiz-question" style="margin:0;">${qi+1}. ${escHtml(q.question)}</div>
-        <button class="tts-btn print-hide" style="padding:4px 10px;font-size:0.75rem;flex-shrink:0;" onclick="ttsSpeak('${escHtml(q.question).replace(/'/g,"\\'")}', this)">🔊</button>
+        <button class="tts-btn print-hide" style="padding:4px 10px;font-size:0.75rem;flex-shrink:0;" data-onclick="_ttsSpeakSelf" data-onclick-self data-onclick-args="${escHtml(JSON.stringify([q.question]))}">🔊</button>
       </div>
       <div class="arb-options">
         ${opts.map((o,oi) => {
           let cls = '';
           if (answered) { cls = o.correct ? 'reveal-correct' : ''; }
-          return `<button class="arb-opt ${cls}" id="arb-opt-${qi}-${oi}" ${answered?'disabled':''} onclick="arbCheckAnswer(${qi}, ${o.correct}, ${oi}, '${escHtml(q.explain||'').replace(/'/g,"\\'")}', ${JSON.stringify(opts.map(x=>x.correct))})">${escHtml(o.text)}</button>`;
+          return `<button class="arb-opt ${cls}" id="arb-opt-${qi}-${oi}" ${answered?'disabled':''} data-onclick="arbCheckAnswer" data-onclick-args="${escHtml(JSON.stringify([qi,o.correct,oi,q.explain||'',opts.map(x=>x.correct)]))}}">${escHtml(o.text)}</button>`;
         }).join('')}
       </div>
       ${answered ? `<div class="arb-feedback ${savedAns==='correct'?'ok':'fail'}">${savedAns==='correct' ? '✅ Riktig!' : '❌ Feil'} ${q.explain ? '– '+escHtml(q.explain) : ''}</div>` : ''}
@@ -8523,7 +8518,7 @@ function arbRenderQuiz(m) {
       <div style="font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:0.75rem;">
         ${correctCount >= totalQ * 0.8 ? '🏆' : correctCount >= totalQ * 0.5 ? '👍' : '📚'} ${correctCount}/${totalQ} riktige
       </div>
-      <button onclick="arbResetQuiz(${arbState.moduleIdx})" style="background:var(--s3);color:var(--text-2);border:1px solid var(--border-2);padding:10px 24px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">🔄 Prøv på nytt</button>
+      <button data-onclick="arbResetQuiz" data-onclick-arg="${arbState.moduleIdx}" style="background:var(--s3);color:var(--text-2);border:1px solid var(--border-2);padding:10px 24px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">🔄 Prøv på nytt</button>
     </div>`;
   }
   html += '</div>';
@@ -8568,8 +8563,8 @@ function _arbRenderQuizCard(m, qi) {
       <div style="font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--text);margin-bottom:0.5rem;">Quiz fullført!</div>
       <div style="font-size:1.1rem;font-weight:800;color:var(--text-2);margin-bottom:1.5rem;">${correctCount}/${totalQ} riktige</div>
       <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
-        <button onclick="_quizOneAtATime=false;arbRenderQuiz(state.modules[arbState.moduleIdx])" style="background:var(--s3);color:var(--text);border:1px solid var(--border-2);padding:10px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">📋 Se alle</button>
-        <button onclick="arbResetQuiz(arbState.moduleIdx);_quizCurrentIdx=0;" style="background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">🔄 Prøv igjen</button>
+        <button data-onclick="_arbShowAllQuiz" style="background:var(--s3);color:var(--text);border:1px solid var(--border-2);padding:10px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">📋 Se alle</button>
+        <button data-onclick="_arbResetQuizAll" style="background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">🔄 Prøv igjen</button>
       </div>
     </div>`;
     arbMarkDone('quiz');
@@ -8587,7 +8582,7 @@ function _arbRenderQuizCard(m, qi) {
   container.innerHTML = `<div class="arb-content-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
       <div style="font-size:0.82rem;font-weight:800;color:var(--text-2);">Spørsmål ${qi+1} av ${totalQ}</div>
-      <button onclick="_quizOneAtATime=false;arbRenderQuiz(state.modules[arbState.moduleIdx])" style="background:none;border:1px solid var(--border-2);border-radius:50px;padding:4px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;color:var(--text-2);">📋 Alle spørsmål</button>
+      <button data-onclick="_arbShowAllQuiz" style="background:none;border:1px solid var(--border-2);border-radius:50px;padding:4px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.78rem;cursor:pointer;color:var(--text-2);">📋 Alle spørsmål</button>
     </div>
     <div style="width:100%;height:4px;background:var(--s3);border-radius:99px;margin-bottom:1.25rem;overflow:hidden;">
       <div style="height:100%;width:${Math.round((qi/totalQ)*100)}%;background:var(--accent);border-radius:99px;transition:width 0.3s;"></div>
@@ -8595,7 +8590,7 @@ function _arbRenderQuizCard(m, qi) {
     ${qImgHtml}
     <div class="arb-quiz-question" style="font-size:1.1rem;margin-bottom:1.25rem;">${escHtml(q.question)}</div>
     <div class="arb-options" id="cardOpts">
-      ${opts.map((o,oi) => `<button class="arb-opt" onclick="arbCheckAnswerCard(${qi},${o.correct},${oi},'${escHtml(q.explain||'').replace(/'/g,"\\'")}',${JSON.stringify(opts.map(x=>x.correct))})">${escHtml(o.text)}</button>`).join('')}
+      ${opts.map((o,oi) => `<button class="arb-opt" data-onclick="arbCheckAnswerCard" data-onclick-args="${escHtml(JSON.stringify([qi,o.correct,oi,q.explain||'',opts.map(x=>x.correct)]))}}">${escHtml(o.text)}</button>`).join('')}
     </div>
     <div id="cardFeedback"></div>
   </div>`;
@@ -8697,7 +8692,7 @@ function _arbExamShowQuestion(m) {
     ${imgHtml}
     <div class="arb-quiz-question" style="margin-bottom:1rem;">${escHtml(q.question)}</div>
     <div class="arb-options" id="examOpts">
-      ${opts.map((o,oi)=>`<button class="arb-opt" id="exam-opt-${oi}" onclick="_examSelectOpt(${oi},${o.correct},'${escHtml(q.question).replace(/'/g,"\\'")}','${escHtml(q.a).replace(/'/g,"\\'")}',${JSON.stringify(opts.map(x=>x.correct))})">${escHtml(o.text)}</button>`).join('')}
+      ${opts.map((o,oi)=>`<button class="arb-opt" id="exam-opt-${oi}" data-onclick="_examSelectOpt" data-onclick-args="${escHtml(JSON.stringify([oi,o.correct,q.question,q.a||'',opts.map(x=>x.correct)]))}}">${escHtml(o.text)}</button>`).join('')}
     </div>
     <div id="examNext" style="display:none;margin-top:1rem;">
       <button id="examNextBtn" style="background:var(--accent);color:white;border:none;padding:11px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">${isLast?'Se resultat 🎓':'Neste →'}</button>
@@ -8758,10 +8753,10 @@ function arbRenderDisc(m) {
     const saved = arbLoad(`disc_${di}`) || '';
     html += `<div class="arb-disc-card">
       <div class="arb-disc-prompt">💬 ${escHtml(d)}</div>
-      <textarea id="arb-disc-${di}" rows="4" style="width:100%;padding:10px 12px;border:2px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;resize:vertical;outline:none;background:var(--s2);color:var(--text);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" placeholder="Skriv svaret ditt her..." oninput="arbDiscCount(${di},this.value)">${escHtml(saved)}</textarea>
+      <textarea id="arb-disc-${di}" rows="4" style="width:100%;padding:10px 12px;border:2px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.92rem;resize:vertical;outline:none;background:var(--s2);color:var(--text);transition:border-color 0.2s;" class="focus-accent" placeholder="Skriv svaret ditt her..." data-oninput="_arbDiscCountEl" data-oninput-arg="${di}">${escHtml(saved)}</textarea>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:0.5rem;">
-          <button onclick="arbSaveDisc(${di})" style="background:var(--c4);color:white;border:none;padding:8px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Lagre svar</button>
+          <button data-onclick="arbSaveDisc" data-onclick-arg="${di}" style="background:var(--c4);color:white;border:none;padding:8px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Lagre svar</button>
           <span class="arb-save-indicator" id="arb-disc-saved-${di}">✓ Lagret!</span>
         </div>
         <span id="arb-disc-count-${di}" style="font-size:0.75rem;color:var(--text-3);font-weight:700;">${saved.trim() ? saved.trim().split(/\s+/).filter(w=>w).length : 0} ord</span>
@@ -8802,17 +8797,17 @@ function arbRenderWrite(m) {
         <div style="font-size:0.82rem;color:var(--text-3);font-weight:700;">Minimum ${w.minWords||100} ord</div>
         <div style="display:flex;align-items:center;gap:0.5rem;">
           <span id="arb-timer-${wi}" style="font-family:'Fredoka One',cursive;font-size:0.95rem;color:var(--c4);">⏱ 00:00</span>
-          <button onclick="arbToggleTimer(${wi})" id="arb-timer-btn-${wi}" style="background:var(--c4);color:white;border:none;padding:4px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;">▶ Start</button>
+          <button data-onclick="arbToggleTimer" data-onclick-arg="${wi}" id="arb-timer-btn-${wi}" style="background:var(--c4);color:white;border:none;padding:4px 12px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;">▶ Start</button>
         </div>
       </div>
-      <textarea id="arb-write-${wi}" rows="8" style="width:100%;padding:12px 14px;border:2px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.93rem;resize:vertical;outline:none;line-height:1.6;background:var(--s2);color:var(--text);transition:border-color 0.2s;" placeholder="Skriv besvarelsen din her..." oninput="arbWriteCount(${wi},${w.minWords||100});arbAutoSave(${wi},${w.minWords||100})" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'">${escHtml(saved)}</textarea>
+      <textarea id="arb-write-${wi}" rows="8" style="width:100%;padding:12px 14px;border:2px solid var(--border-2);border-radius:10px;font-family:'Nunito',sans-serif;font-size:0.93rem;resize:vertical;outline:none;line-height:1.6;background:var(--s2);color:var(--text);transition:border-color 0.2s;" placeholder="Skriv besvarelsen din her..." data-oninput="_arbWriteCountEl" data-oninput-args="${escHtml(JSON.stringify([wi,w.minWords||100]))}" class="focus-accent">${escHtml(saved)}</textarea>
       <div style="height:3px;background:var(--border);border-radius:99px;margin-top:0.5rem;overflow:hidden;">
         <div id="arb-wc-bar-${wi}" style="height:100%;width:${Math.min(wordCount/(w.minWords||100),1)*100}%;background:var(--c3);transition:width 0.3s;border-radius:99px;"></div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;">
         <div style="display:flex;align-items:center;gap:0.5rem;"><div class="arb-wordcount${minOk?' ok':''}" id="arb-wc-${wi}">${wordCount} ord${minOk?' ✅':' (trenger '+(w.minWords||100)+' ord)'}</div><span id="arb-autosave-dot-${wi}" style="display:none;font-size:0.73rem;color:var(--c3);font-weight:700;">● Lagret automatisk</span></div>
         <div style="display:flex;align-items:center;gap:0.5rem;">
-          <button onclick="arbSaveWrite(${wi},${w.minWords||100})" style="background:var(--c4);color:white;border:none;padding:8px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Lagre</button>
+          <button data-onclick="arbSaveWrite" data-onclick-args="${JSON.stringify([wi,w.minWords||100])}" style="background:var(--c4);color:white;border:none;padding:8px 18px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">💾 Lagre</button>
           <span class="arb-save-indicator" id="arb-write-saved-${wi}">✓ Lagret!</span>
         </div>
       </div>
@@ -8892,11 +8887,11 @@ function arbRenderFcCard(m) {
   container.innerHTML = `<div class="arb-content-card">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem;">
       <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin:0;">🃏 Flashcards</h2>
-      <button class="tts-btn print-hide" onclick="ttsSpeak('${escHtml(card.front).replace(/'/g,"\\'")}', this)">🔊 Les høyt</button>
+      <button class="tts-btn print-hide" data-onclick="_ttsSpeakSelf" data-onclick-self data-onclick-args="${escHtml(JSON.stringify([card.front]))}">🔊 Les høyt</button>
     </div>
     <div class="arb-fc-hint">Klikk på kortet for å snu det — vurder deg selv!${state.student ? (() => { const days = _sm2DaysUntil(arbState.moduleIdx, i); return days > 0 ? ` <span style="font-size:0.72rem;background:rgba(34,197,94,0.15);color:var(--c3);border-radius:50px;padding:1px 8px;font-weight:700;">📅 Forfaller om ${days} dag${days===1?'':'er'}</span>` : ' <span style="font-size:0.72rem;background:rgba(245,158,11,0.15);color:var(--c2);border-radius:50px;padding:1px 8px;font-weight:700;">⏰ Forfalt</span>'; })() : ''}</div>
     <div class="arb-fc-wrapper">
-      <div class="arb-fc-inner" id="arbFcInner" onclick="document.getElementById('arbFcInner').classList.toggle('flipped')">
+      <div class="arb-fc-inner" id="arbFcInner" data-onclick="_toggleArbFC">
         <div class="arb-fc-face arb-fc-front" style="flex-direction:column;">${fcFrontContent}</div>
         <div class="arb-fc-face arb-fc-back" style="flex-direction:column;">${fcBackContent}</div>
       </div>
@@ -8907,9 +8902,9 @@ function arbRenderFcCard(m) {
       <span></span>
     </div>
     <div id="arbFcRating" style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.75rem;flex-wrap:wrap;">
-      <button onclick="arbFcRate('hard')" style="background:rgba(239,68,68,0.15);color:var(--c1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;transition:background 0.15s;">❌ Vanskelig</button>
-      <button onclick="arbFcRate('ok')" style="background:rgba(245,158,11,0.15);color:var(--c2);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;transition:background 0.15s;">🤔 Usikker</button>
-      <button onclick="arbFcRate('easy')" style="background:rgba(34,197,94,0.15);color:var(--c3);border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;transition:background 0.15s;">✅ Kunne det</button>
+      <button data-onclick="arbFcRate" data-onclick-arg="hard" style="background:rgba(239,68,68,0.15);color:var(--c1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;transition:background 0.15s;">❌ Vanskelig</button>
+      <button data-onclick="arbFcRate" data-onclick-arg="ok" style="background:rgba(245,158,11,0.15);color:var(--c2);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;transition:background 0.15s;">🤔 Usikker</button>
+      <button data-onclick="arbFcRate" data-onclick-arg="easy" style="background:rgba(34,197,94,0.15);color:var(--c3);border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:0.5rem 1rem;font-weight:700;cursor:pointer;font-size:0.9rem;transition:background 0.15s;">✅ Kunne det</button>
     </div>
   </div>`;
 }
@@ -9003,8 +8998,8 @@ function _arbFcShowSummary(m) {
       <div style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.25);border-radius:12px;padding:0.75rem 1.25rem;"><div style="font-size:1.5rem;font-weight:900;color:var(--c3);">${easy}</div><div style="font-size:0.8rem;color:var(--text-2);">Kunne det</div></div>
     </div>
     <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
-      ${repeatCount > 0 ? `<button onclick="_arbFcRestart('repeat')" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.7rem 1.25rem;font-weight:700;cursor:pointer;font-size:0.95rem;">🔄 Øv på ${repeatCount} kort til</button>` : ''}
-      <button onclick="_arbFcRestart('all')" style="background:var(--s2);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:0.7rem 1.25rem;font-weight:700;cursor:pointer;font-size:0.95rem;">🔁 Start på nytt</button>
+      ${repeatCount > 0 ? `<button data-onclick="_arbFcRestart" data-onclick-arg="repeat" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.7rem 1.25rem;font-weight:700;cursor:pointer;font-size:0.95rem;">🔄 Øv på ${repeatCount} kort til</button>` : ''}
+      <button data-onclick="_arbFcRestart" data-onclick-arg="all" style="background:var(--s2);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:0.7rem 1.25rem;font-weight:700;cursor:pointer;font-size:0.95rem;">🔁 Start på nytt</button>
     </div>
   </div>`;
 }
@@ -9089,11 +9084,11 @@ function _showCompletionModal(moduleIdx) {
     <div style="font-size:3rem;margin-bottom:0.75rem;">🎉</div>
     <div style="font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--text);margin-bottom:0.4rem;">Bra jobba!</div>
     <div style="font-size:0.9rem;color:var(--text-2);margin-bottom:1.5rem;">Du har fullført alle oppgavene i <strong>${escHtml(m.name)}</strong>!</div>
-    ${nextMod ? `<div style="background:var(--s3);border:1px solid var(--border-2);border-radius:12px;padding:0.875rem 1rem;margin-bottom:1rem;text-align:left;cursor:pointer;" onclick="document.querySelector('[style*=fixed]').remove();openModule(${nextIdx})">
+    ${nextMod ? `<div style="background:var(--s3);border:1px solid var(--border-2);border-radius:12px;padding:0.875rem 1rem;margin-bottom:1rem;text-align:left;cursor:pointer;" data-onclick="_openNextModule" data-onclick-arg="${nextIdx}">
       <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem;">Neste emne</div>
       <div style="font-weight:800;color:var(--text);font-size:0.92rem;">${nextMod.emoji||'📚'} ${escHtml(nextMod.name)}</div>
     </div>` : ''}
-    <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;padding:11px;background:var(--accent);color:white;border:none;border-radius:11px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;">Fortsett</button>
+    <button data-onclick="_removeClosestModal" data-onclick-self style="width:100%;padding:11px;background:var(--accent);color:white;border:none;border-radius:11px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;cursor:pointer;">Fortsett</button>
   </div>`;
   ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
   document.body.appendChild(ov);
@@ -9128,7 +9123,7 @@ function previewLiveQuiz() {
   ov.innerHTML = `<div style="background:var(--s2);border:1px solid var(--border-2);border-radius:16px;padding:1.5rem 1.75rem;max-width:480px;width:92%;max-height:80vh;overflow-y:auto;">
     <div style="font-weight:800;font-size:1.1rem;color:var(--text);margin-bottom:1rem;">${mod.emoji||'📚'} ${escHtml(mod.name)} — ${mod.quiz.length} spørsmål</div>
     ${listHtml}
-    <button onclick="this.closest('[style*=fixed]').remove()" style="margin-top:1rem;background:var(--s3);color:var(--text-2);border:1px solid var(--border-2);padding:9px 24px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;width:100%;">Lukk</button>
+    <button data-onclick="_removeClosestModal" data-onclick-self style="margin-top:1rem;background:var(--s3);color:var(--text-2);border:1px solid var(--border-2);padding:9px 24px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;width:100%;">Lukk</button>
   </div>`;
   document.body.appendChild(ov);
   ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
@@ -9330,7 +9325,7 @@ async function crShowFinalScoreboard() {
   if (sb) sb.insertAdjacentHTML('afterend', `
     <div style="margin-top:1.5rem;padding:1rem;background:#f0f9ff;border-radius:14px;border:2px solid var(--c4);text-align:center;">
       <div style="font-weight:800;color:var(--c4);margin-bottom:0.5rem;">🏆 Resultater lagret!</div>
-      <button onclick="crSwitchTab('hs');loadHighscoreView();crShow('setup')" style="background:var(--c4);color:white;border:none;padding:9px 20px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">Se alle high scores →</button>
+      <button data-onclick="_crSwitchTabHsSetup" style="background:var(--c4);color:white;border:none;padding:9px 20px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;cursor:pointer;">Se alle high scores →</button>
     </div>`);
 }
 
@@ -9711,8 +9706,8 @@ const SND = (() => {
       font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;
       padding:10px 14px;border-radius:8px;cursor:pointer;text-align:left;
       display:flex;align-items:center;gap:8px;transition:background 0.15s;
-    " onmouseover="this.style.background='rgba(255,255,255,0.1)'"
-       onmouseout="this.style.background='none'">
+    "
+      >
       📖 Hva betyr ordet?
     </button>
   `;
@@ -9732,7 +9727,7 @@ const SND = (() => {
   popup.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
       <span id="wordPopupWord" style="font-weight:900;font-size:1.1rem;color:var(--c4);"></span>
-      <button onclick="document.getElementById('wordPopup').style.display='none'"
+      <button data-onclick="_hideWordPopup"
         style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--text-3);padding:0 0 0 8px;">✕</button>
     </div>
     <div id="wordPopupBody" style="font-size:0.92rem;line-height:1.65;color:var(--text);"></div>
@@ -9924,8 +9919,8 @@ function _pwaShowBanner() {
   b.id = 'pwaBanner';
   b.innerHTML = `
     <div class="pwa-text">📲 <strong>Legg til SkOla</strong><br><span style="font-size:0.78rem;font-weight:600;color:var(--text-2);">på hjemskjermen for raskere tilgang</span></div>
-    <button class="pwa-install-btn" onclick="_pwaInstall()">Legg til</button>
-    <button class="pwa-dismiss-btn" onclick="_pwaDismiss()" aria-label="Lukk">×</button>`;
+    <button class="pwa-install-btn" data-onclick="_pwaInstall">Legg til</button>
+    <button class="pwa-dismiss-btn" data-onclick="_pwaDismiss" aria-label="Lukk">×</button>`;
   document.body.appendChild(b);
 }
 function _pwaInstall() {
@@ -9988,67 +9983,107 @@ function _pwaHideBanner() {
 
 // ====== EVENT DELEGATION (replaces inline onclick/oninput/onchange/onkeydown handlers) ======
 (function() {
-  // Helper: call named global function with optional JSON-parsed args
-  function _call(name, args) {
-    const fn = window[name];
+  // Call a named global function with optional args
+  // data-onclick="fn"                         → fn()
+  // data-onclick="fn" data-onclick-arg="3"    → fn(3)
+  // data-onclick="fn" data-onclick-args="[1,true,'x']" → fn(1,true,'x')
+  // data-onclick="fn" data-onclick-self       → fn(element)
+  // data-onclick="fn" data-onclick-args="[1]" data-onclick-self → fn(element,1)
+  function _dispatch(el, extra) {
+    const fn = window[el.dataset.onclick];
     if (typeof fn !== 'function') return;
-    if (args === undefined || args === null || args === '') fn();
-    else fn(args);
+    let args = [];
+    if (el.dataset.onclickArgs !== undefined) {
+      try { args = JSON.parse(el.dataset.onclickArgs); } catch {}
+    } else if (el.dataset.onclickArg !== undefined) {
+      args = [_parseArg(el.dataset.onclickArg)];
+    }
+    if ('onclickSelf' in el.dataset) args = [el, ...args];
+    if (extra !== undefined) args = [...args, extra];
+    fn(...args);
   }
 
-  // Click delegation
+  // Handler registry delegation (data-hid)
+  document.addEventListener('click', function(e) {
+    const el = e.target.closest('[data-hid]');
+    if (!el) return;
+    const fn = _H[el.dataset.hid];
+    if (typeof fn === 'function') fn.call(el, e);
+  });
+
+  // Click delegation — finds innermost element with data-onclick
   document.addEventListener('click', function(e) {
     const el = e.target.closest('[data-onclick]');
     if (!el) return;
-    // Overlay pattern: only fire if click was directly on the overlay element
-    if (el.dataset.onclickOverlay !== undefined && e.target !== el) return;
-    _call(el.dataset.onclick, _parseArg(el.dataset.onclickArg));
+    if ('onclickOverlay' in el.dataset && e.target !== el) return;
+    _dispatch(el);
   });
 
   // Input delegation
   document.addEventListener('input', function(e) {
     const el = e.target.closest('[data-oninput]');
     if (!el) return;
-    let arg;
-    if (el.dataset.oninputVal) arg = e.target.value;
-    else if (el.dataset.oninputEl) arg = el;
-    else arg = _parseArg(el.dataset.oninputArg);
-    _call(el.dataset.oninput, arg);
+    const fn = window[el.dataset.oninput];
+    if (typeof fn !== 'function') return;
+    if ('oninputVal' in el.dataset) { fn(e.target.value); return; }
+    if ('oninputEl' in el.dataset) { fn(el); return; }
+    // Support data-oninput-args / data-oninput-arg (passes element as first arg)
+    if (el.dataset.oninputArgs !== undefined) {
+      let args = []; try { args = JSON.parse(el.dataset.oninputArgs); } catch {}
+      fn(el, ...args);
+    } else if (el.dataset.oninputArg !== undefined) {
+      const a = el.dataset.oninputArg;
+      const v = (a==='true'?true:a==='false'?false:!isNaN(a)&&a!==''?Number(a):a);
+      fn(el, v);
+    } else { fn(); }
   });
 
   // Change delegation
   document.addEventListener('change', function(e) {
     const el = e.target;
     if (!el.dataset.onchange) return;
-    let arg;
-    if (el.dataset.onchangeEl) arg = el;
-    else if (el.dataset.onchangeVal) arg = e.target.value;
-    else if (el.dataset.onchangeChecked !== undefined) {
-      const fn = window[el.dataset.onchange];
-      if (typeof fn === 'function') fn(el.dataset.onchangeArg || el.dataset.onclickArg, el.checked);
+    const fn = window[el.dataset.onchange];
+    if (typeof fn !== 'function') return;
+    if ('onchangeChecked' in el.dataset) { fn(el.dataset.onchangeArg, el.checked); return; }
+    if ('onchangeEl' in el.dataset) { fn(el); return; }
+    if ('onchangeVal' in el.dataset) { fn(e.target.value); return; }
+    // Support data-onchange-arg (passes value as second arg with the index)
+    if (el.dataset.onchangeArg !== undefined) {
+      const a = el.dataset.onchangeArg;
+      const v = (!isNaN(a) && a !== '' ? Number(a) : a);
+      fn(v, e.target.value);
       return;
     }
-    else arg = _parseArg(el.dataset.onchangeArg);
-    _call(el.dataset.onchange, arg);
+    fn();
   });
 
   // Keydown delegation
   document.addEventListener('keydown', function(e) {
     const el = e.target;
     if (el.dataset.onkeydownEnter && e.key === 'Enter') {
-      _call(el.dataset.onkeydownEnter, undefined);
+      const fn = window[el.dataset.onkeydownEnter];
+      if (typeof fn === 'function') fn();
     }
     if (el.dataset.onkeydown) {
-      _call(el.dataset.onkeydown, e);
+      const fn = window[el.dataset.onkeydown];
+      if (typeof fn === 'function') fn(e);
     }
   });
 
-  // File input trigger delegation (data-trigger-click="elementId")
+  // Space/Enter for role=button elements with data-onclick (accessibility)
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const el = e.target.closest('[data-onclick][role="button"]');
+    if (!el) return;
+    e.preventDefault();
+    _dispatch(el);
+  });
+
+  // File input trigger delegation
   document.addEventListener('click', function(e) {
     const btn = e.target.closest('[data-trigger-click]');
     if (!btn) return;
-    const target = document.getElementById(btn.dataset.triggerClick);
-    if (target) target.click();
+    document.getElementById(btn.dataset.triggerClick)?.click();
   });
 
   function _parseArg(v) {
@@ -10076,6 +10111,51 @@ function _fcImgFrontFile(el) { loadFcImgFile(el, 'front'); }
 function _fcImgBackFile(el) { loadFcImgFile(el, 'back'); }
 function _onchangeCompGoals(val) { updateCompetenceGoals(); syncAiSubjectFromSelect(val); }
 
+// Wrappers for dynamic HTML (JS-generated innerHTML) event handlers
+function _removeById(id) { document.getElementById(id)?.remove(); }
+function _removeByIdThenTab(id, tab) { document.getElementById(id)?.remove(); trTab(tab); }
+function _removeClosestModal(el) { el.closest('.modal-overlay, [style*="position:fixed"]')?.remove(); }
+function _removeClosestTemplateRow(el, ti) {
+  if (!confirm('Slette malen?')) return;
+  const ts = _lsGet('os_module_templates', []);
+  ts.splice(ti, 1);
+  localStorage.setItem('os_module_templates', JSON.stringify(ts));
+  el.closest('.template-row')?.remove();
+}
+function _deleteTemplate(el, ti) {
+  if(confirm('Slette malen?')){
+    const ts=_lsGet('os_module_templates',[]);
+    ts.splice(ti,1);
+    localStorage.setItem('os_module_templates',JSON.stringify(ts));
+    el.closest('.template-row')?.remove();
+  }
+}
+function _applyTemplateThenClose(el, ti) {
+  _applyModuleTemplate(ti);
+  el.closest('[style*="position:fixed"]')?.remove();
+}
+function _pvStudentSwitchTab(key, el) { pvStudentSwitchTab(key, el, pvStudentMod); }
+function _toggleFC() { document.getElementById('currentFC')?.classList.toggle('flipped'); }
+function _markTextToggle(el, mi) { _markClickMenu(el, mi, 'tasks-text-body'); }
+function _switchTaskTabEl(key, el) { switchTaskTab(key, el); }
+function _countWordsEl(el, wi, min) { countWords(wi, min); }
+function _toggleVideoEmbedEl(embedId, ytId) { toggleVideoEmbed(embedId, ytId); }
+function _ttsSpeakSelf(el, text) { ttsSpeak(text, el); }
+function _arbDiscCountEl(el, di) { arbDiscCount(di, el.value); }
+function _arbWriteCountEl(el, wi, minWords) { arbWriteCount(wi, minWords); arbAutoSave(wi, minWords); }
+function _callWindowFn(fnName) { const fn = window[fnName]; if (typeof fn === 'function') fn(); }
+function _applyWriteTemplateEl(wi, val) { applyWriteTemplate(wi, val); }
+function _setScheduledEl(i, val) { setScheduled(i, val); }
+function _dismissFeedback(id, key) { const el = document.getElementById(id); if (el) el.style.display = 'none'; DB.deleteFeedback(key); }
+function _openNextModule(nextIdx) { document.querySelector('[style*="position:fixed"]')?.remove(); openModule(nextIdx); }
+function _arbShowAllQuiz() { _quizOneAtATime=false; arbRenderQuiz(state.modules[arbState.moduleIdx]); }
+function _arbShowCardMode() { _quizOneAtATime=true; _quizCurrentIdx=0; arbRenderQuiz(state.modules[arbState.moduleIdx]); }
+function _arbResetQuizAll() { arbResetQuiz(arbState.moduleIdx); _quizCurrentIdx=0; }
+function _crSwitchTabHsSetup() { crSwitchTab('hs'); loadHighscoreView(); crShow('setup'); }
+function _hideArbDashboard() { const d=document.getElementById('arbDashboard'); if(d) d.style.display='none'; }
+function _hideWordPopup() { const p=document.getElementById('wordPopup'); if(p) p.style.display='none'; }
+function _toggleArbFC() { document.getElementById('arbFcInner')?.classList.toggle('flipped'); }
+
 // Autocomplete blur handlers (replaced inline onblur with data-onblur-autocomplete)
 document.addEventListener('focusout', function(e) {
   const id = e.target.dataset.onblurAutocomplete;
@@ -10096,6 +10176,14 @@ document.addEventListener('focusout', function(e) {
   if (e.target.classList.contains('focus-accent-h')) {
     e.target.style.borderColor = '';
   }
+});
+
+// Worldle/Whoami autocomplete hover delegation
+document.addEventListener('mouseover', function(e) {
+  const el = e.target.closest('[data-ac-hover]');
+  if (el) { worldleAcHover(Number(el.dataset.acHover)); return; }
+  const el2 = e.target.closest('[data-whoami-hover]');
+  if (el2) { whoamiAcHover(Number(el2.dataset.whoamiHover)); }
 });
 
 // Drag-and-drop zone delegation (data-drop-zone="file|img")
