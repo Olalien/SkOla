@@ -196,7 +196,7 @@ function showView(name) {
     if (oc.includes("'"+name+"'") || oc.includes('"'+name+'"')) tab.classList.add('active');
   });
   if (name === 'home') { renderHomeModules(); _heroGreeting(); }
-  if (name === 'tasks') { DB.loadModules().then(m => { state.modules = m; renderTaskModules(); }); }
+  if (name === 'tasks') { DB.loadModules().then(m => { if(m.length){state.modules=m; _invalidateGridCache();} renderTaskModules(); }).catch(e => { console.warn('[showView:tasks] DB.loadModules failed', e); renderTaskModules(); }); }
   if (name === 'teacher') {
     if (!state.isTeacher) { showToast('⛔ Logg inn som lærer for å få tilgang'); return; }
     renderResults(); renderManageModules(); teacherUpdateActivity();
@@ -569,7 +569,8 @@ async function loadState() {
   _initOfflineIndicator();
   initMsToken();
   initTeacherActivityTracking();
-  const dbMods = await DB.loadModules();
+  let dbMods = [];
+  try { dbMods = await DB.loadModules(); } catch(e) { console.warn('[loadState] DB.loadModules failed:', e); }
   if (dbMods.length > 0) {
     state.modules = dbMods;
   }
@@ -630,6 +631,7 @@ async function loadState() {
 
 async function saveModulesToStorage() {
   const ok = await DB.saveModules(state.modules);
+  _invalidateGridCache();
   renderHomeModules();
   renderTaskModules();
   updateContinueCard();
@@ -1389,10 +1391,22 @@ function updateContinueCard() {
   </div>`;
 }
 
+// Simple version tracker to skip redundant grid renders
+const _gridVersions = {};
+function _moduleGridHash() {
+  // Include length, isTeacher, and a few ids so changes are detected
+  const ids = state.modules.slice(0,5).map(m=>m.id||m._id||'').join(',');
+  return state.modules.length + '|' + (state.isTeacher?'t':'s') + '|' + ids;
+}
+function _invalidateGridCache() { Object.keys(_gridVersions).forEach(k => delete _gridVersions[k]); }
 function _renderModuleGrid(gridId, emptyId, opts={}) {
   const grid = document.getElementById(gridId);
   const empty = document.getElementById(emptyId);
   if (!grid) return;
+  // Skip re-render if nothing changed and grid has content
+  const hash = _moduleGridHash();
+  if (!opts.force && _gridVersions[gridId] === hash && grid.children.length > 0) return;
+  _gridVersions[gridId] = hash;
   const colors = ['color-1','color-2','color-3','color-4','color-5'];
   const visible = state.modules.filter(m => !m.locked);
   if (visible.length === 0) {
@@ -2084,7 +2098,7 @@ function loadQuizImgFile(input) {
 function previewQuizImg() {
   const url = document.getElementById('quizImg')?.value;
   const prev = document.getElementById('quizImgPreview');
-  if (prev) prev.innerHTML = url ? `<img src="${escHtml(url)}" class="img-preview-thumb" onerror="this.style.display='none'">` : '';
+  if (prev) prev.innerHTML = url ? `<img src="${escHtml(url)}" class="img-preview-thumb img-safe">` : '';
 }
 function loadFcImgFile(input, side) {
   const file = input.files[0]; if (!file) return;
@@ -2096,7 +2110,7 @@ function previewFcImg(side) {
   const cap = side.charAt(0).toUpperCase()+side.slice(1);
   const url = document.getElementById('fcImg'+cap)?.value;
   const prev = document.getElementById('fcImg'+cap+'Preview');
-  if (prev) prev.innerHTML = url ? `<img src="${escHtml(url)}" class="img-preview-thumb" onerror="this.style.display='none'">` : '';
+  if (prev) prev.innerHTML = url ? `<img src="${escHtml(url)}" class="img-preview-thumb img-safe">` : '';
 }
 function addGlossary() {
   const term = document.getElementById('glossTerm')?.value.trim();
@@ -3373,6 +3387,11 @@ function _buildQuizStatsHtml(answers) {
 }
 
 // ====== CLASS ROSTER ======
+async function _refreshRoster() {
+  try { await loadRosterCached(); } catch(e) { showToast('❌ Kunne ikke hente elevliste'); return; }
+  renderClassRoster();
+  showToast('✅ Elevliste oppdatert');
+}
 function renderClassRoster() {
   const container=document.getElementById('classRosterContainer');
   if(!container)return;
@@ -3515,8 +3534,10 @@ async function removeStudent(name){
 function _loadGroups() { try { return JSON.parse(localStorage.getItem('os_groups')||'[]'); } catch(e) { return []; } }
 function _saveGroups(groups) { localStorage.setItem('os_groups', JSON.stringify(groups)); }
 
-function openGroupModal(editId) {
+async function openGroupModal(editId) {
   if (!state.isTeacher) { showToast('⛔ Kun for lærere'); return; }
+  // Always refresh roster before opening so the member list is up-to-date
+  try { await loadRosterCached(); } catch(e) {}
   const modal = document.getElementById('groupModal');
   const titleEl = document.getElementById('groupModalTitle');
   const nameInput = document.getElementById('groupNameInput');
@@ -3620,8 +3641,8 @@ function openAnswerFeedback(answerKey, rowId) {
   const existing = localStorage.getItem(storageKey) || '';
   slot.innerHTML = `<textarea class="af-inline-editor" id="afta-${slotId}" placeholder="Skriv en kommentar til dette svaret...">${escHtml(existing)}</textarea>
     <div style="display:flex;gap:0.5rem;align-items:center;">
-      <button class="af-inline-save" data-hid="${_reg(function(){_saveAnswerFeedback('${escHtml(answerKey)}','${slotId}')})}">💾 Lagre kommentar</button>
-      ${existing?`<button data-hid="${_reg(function(){_deleteAnswerFeedback('${escHtml(answerKey)}','${slotId}')})}" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:0.78rem;font-weight:700;">🗑 Slett</button>`:''}
+      <button class="af-inline-save" data-onclick="_saveAnswerFeedback" data-onclick-args="${escHtml(JSON.stringify([answerKey,slotId]))}">💾 Lagre kommentar</button>
+      ${existing?`<button data-onclick="_deleteAnswerFeedback" data-onclick-args="${escHtml(JSON.stringify([answerKey,slotId]))}" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:0.78rem;font-weight:700;">🗑 Slett</button>`:''}
     </div>`;
 }
 async function _saveAnswerFeedback(answerKey, slotId) {
@@ -8495,7 +8516,7 @@ function arbRenderQuiz(m) {
       ...(q.d ? [{ text: q.d, correct: false }] : [])
     ]);
     const answerClass = answered ? (savedAns === 'correct' ? 'answered' : 'answered-wrong') : '';
-    const qImgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+    const qImgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img img-safe" alt="" loading="lazy">` : '';
     html += `<div class="arb-quiz-card ${answerClass}" id="arb-qcard-${qi}">
       ${qImgHtml}
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem;">
@@ -8578,7 +8599,7 @@ function _arbRenderQuizCard(m, qi) {
     ...(q.c ? [{ text: q.c, correct: false }] : []),
     ...(q.d ? [{ text: q.d, correct: false }] : [])
   ]);
-  const qImgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img" alt="" onerror="this.style.display='none'">` : '';
+  const qImgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img img-safe" alt="">` : '';
   container.innerHTML = `<div class="arb-content-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
       <div style="font-size:0.82rem;font-weight:800;color:var(--text-2);">Spørsmål ${qi+1} av ${totalQ}</div>
@@ -8684,7 +8705,7 @@ function _arbExamShowQuestion(m) {
     ...(q.d?[{text:q.d,correct:false}]:[])
   ]);
   _examState.currentOpts = opts;
-  const imgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img" loading="lazy" onerror="this.style.display='none'">` : '';
+  const imgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img img-safe" loading="lazy">` : '';
   const isLast = _examState.qi + 1 >= total;
   container.innerHTML = `<div class="arb-content-card">
     <div class="exam-q-counter">Spørsmål ${_examState.qi+1} av ${total}</div>
@@ -8882,8 +8903,8 @@ function arbRenderFcCard(m) {
   const card = cards[i];
   const qLen = arbState.fcQueue.length;
   const pos = cards.length - qLen + 1;
-  const fcFrontContent = (card.imgFront ? `<img src="${escHtml(card.imgFront)}" style="max-height:80px;border-radius:6px;margin-bottom:6px;display:block;" loading="lazy" onerror="this.style.display='none'">` : '') + escHtml(card.front);
-  const fcBackContent = (card.imgBack ? `<img src="${escHtml(card.imgBack)}" style="max-height:80px;border-radius:6px;margin-bottom:6px;display:block;" loading="lazy" onerror="this.style.display='none'">` : '') + escHtml(card.back);
+  const fcFrontContent = (card.imgFront ? `<img src="${escHtml(card.imgFront)}" style="max-height:80px;border-radius:6px;margin-bottom:6px;display:block;" loading="lazy" class="img-safe">` : '') + escHtml(card.front);
+  const fcBackContent = (card.imgBack ? `<img src="${escHtml(card.imgBack)}" style="max-height:80px;border-radius:6px;margin-bottom:6px;display:block;" loading="lazy" class="img-safe">` : '') + escHtml(card.back);
   container.innerHTML = `<div class="arb-content-card">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem;">
       <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin:0;">🃏 Flashcards</h2>
@@ -10185,6 +10206,13 @@ document.addEventListener('mouseover', function(e) {
   const el2 = e.target.closest('[data-whoami-hover]');
   if (el2) { whoamiAcHover(Number(el2.dataset.whoamiHover)); }
 });
+
+// CSP-safe image error handler (replaces class="img-safe")
+document.addEventListener('error', function(e) {
+  if (e.target.tagName === 'IMG' && e.target.classList.contains('img-safe')) {
+    e.target.style.display = 'none';
+  }
+}, true); // capture phase — error doesn't bubble
 
 // Drag-and-drop zone delegation (data-drop-zone="file|img")
 document.addEventListener('dragover', function(e) {
