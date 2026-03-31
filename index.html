@@ -31,7 +31,7 @@
   }
 </script>
 <!-- Preload file-parsing libraries -->
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+<script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
@@ -2135,21 +2135,6 @@
       </div>
     </div>
 
-    <!-- PASSORD -->
-    <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-bottom:0.875rem;">
-      <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:0.9rem;color:var(--text);margin-bottom:0.2rem;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Endre lærerpassord
-      </div>
-      <div style="font-size:0.8rem;color:var(--text-2);margin-bottom:0.875rem;line-height:1.55;">Passord lagres sikkert med hashing og brukes for å låse opp krypterte nøkler.</div>
-      <input type="password" id="newPassInput" placeholder="Nytt passord" style="width:100%;padding:10px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;margin-bottom:0.75rem;background:var(--s3);color:var(--text);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
-      <button class="btn-success" style="display:flex;align-items:center;gap:6px;padding:9px 18px;" onclick="changePassword()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 11 4 4"/></svg>
-        Lagre nytt passord
-      </button>
-      <div id="passFeedback" style="display:none;margin-top:0.6rem;padding:9px 12px;border-radius:9px;font-weight:700;font-size:0.85rem;"></div>
-    </div>
-
     <!-- MICROSOFT -->
     <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-bottom:0.875rem;">
       <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:0.9rem;color:var(--text);margin-bottom:0.2rem;">
@@ -2321,20 +2306,6 @@
         <button onclick="exportModulesJSON()" style="background:var(--s3);border:1px solid var(--border-2);border-radius:8px;padding:8px 16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;color:var(--text);display:flex;align-items:center;gap:6px;">⬇️ Last ned backup</button>
         <label style="background:var(--s3);border:1px solid var(--border-2);border-radius:8px;padding:8px 16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;color:var(--text);display:flex;align-items:center;gap:6px;">⬆️ Importer backup<input type="file" accept=".json" style="display:none;" onchange="importModulesJSON(this)"></label>
       </div>
-    </div>
-
-    <!-- Change password (only visible when logged in as teacher) -->
-    <div id="changePassSection" style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:0.875rem;display:none;">
-      <div style="font-weight:800;font-size:0.88rem;color:var(--text);margin-bottom:0.5rem;">🔑 Endre lærerpassord</div>
-      <div style="font-size:0.78rem;color:var(--text-2);margin-bottom:0.75rem;">Passordet lagres kun lokalt i denne nettleseren.</div>
-      <input type="password" id="changePassCurrent" placeholder="Nåværende passord" autocomplete="current-password"
-        style="width:100%;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;background:var(--s3);color:var(--text);box-sizing:border-box;margin-bottom:0.5rem;"
-        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
-      <input type="password" id="changePassNew" placeholder="Nytt passord (min. 8 tegn)" autocomplete="new-password"
-        style="width:100%;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;background:var(--s3);color:var(--text);box-sizing:border-box;margin-bottom:0.75rem;"
-        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
-      <div id="changePassError" style="display:none;color:var(--c1);font-weight:700;font-size:0.82rem;margin-bottom:0.5rem;"></div>
-      <button onclick="changeTeacherPass()" style="background:linear-gradient(135deg,var(--accent),var(--accent-h));border:none;border-radius:9px;padding:9px 20px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;color:#fff;">Lagre nytt passord</button>
     </div>
 
     <button class="btn-primary" style="width:100%;justify-content:center;" onclick="closeModal('settingsModal')">Lukk</button>
@@ -4024,9 +3995,9 @@ function updateStudentProgress() {
 }
 
 // ====== TEACHER ======
+const TEACHER_PASS = 'Olala1234';
 function getTeacherPass() {
-  // Allow stored override (set from settings while logged in)
-  return localStorage.getItem('os_teacher_pass') || TEACHER_PASS;
+  return TEACHER_PASS;
 }
 function openTeacherModal() {
   const tp = document.getElementById('teacherPass');
@@ -4218,6 +4189,7 @@ function loginTeacherAuto() {
   renderTaskModules();
 }
 function logoutTeacher() {
+  if (window._teacherAutosaveInterval) { clearInterval(window._teacherAutosaveInterval); window._teacherAutosaveInterval = null; }
   state.isTeacher = false;
   localStorage.removeItem('os_teacher_session');
   _sessionEncKey = null;
@@ -4331,33 +4303,6 @@ function openSettings() {
   const err = document.getElementById('changePassError'); if (err) err.style.display = 'none';
 }
 
-async function changeTeacherPass() {
-  const currentEl = document.getElementById('changePassCurrent');
-  const newEl = document.getElementById('changePassNew');
-  const errEl = document.getElementById('changePassError');
-  const current = currentEl?.value || '';
-  const newPass = newEl?.value || '';
-  const showErr = msg => { if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; } };
-  if (errEl) errEl.style.display = 'none';
-  // Verify current password against stored hash
-  const rawAuth = localStorage.getItem('os_teacher_auth');
-  if (!rawAuth) { showErr('❌ Ingen lagringsdata. Logg ut og inn igjen.'); return; }
-  let auth;
-  try { auth = JSON.parse(rawAuth); } catch { showErr('❌ Korrupt data. Logg ut og inn igjen.'); return; }
-  const ok = await SecurityUtils.verifyPassword(current, auth.hash, auth.salt);
-  if (!ok) { showErr('❌ Nåværende passord er feil'); return; }
-  if (newPass.length < 8) { showErr('❌ Nytt passord må være minst 8 tegn'); return; }
-  // Hash and store new password
-  const salt = SecurityUtils.generateSalt();
-  const hash = await SecurityUtils.hashPassword(newPass, salt);
-  localStorage.setItem('os_teacher_auth', JSON.stringify({ salt, hash }));
-  _teacherSessionPassword = newPass;
-  _sessionEncKey = await SecurityUtils.deriveEncryptionKey(newPass);
-  localStorage.removeItem('os_teacher_pass'); // remove legacy plain-text store
-  if (currentEl) currentEl.value = '';
-  if (newEl) newEl.value = '';
-  showToast('✅ Passord oppdatert!');
-}
 function initSettingsFields() {
   const apiEl = document.getElementById('settingsApiInput');
   if (apiEl) {
@@ -4788,7 +4733,7 @@ function openModule(idx) {
   // Track module opens per student
   if (state.student) {
     const trackKey = 'os_open_' + (state.modules[idx]?._id||'mod_'+idx);
-    const opened = JSON.parse(localStorage.getItem(trackKey)||'{}');
+    const opened = _lsGet(trackKey, {});
     opened[state.student.name] = new Date().toISOString();
     localStorage.setItem(trackKey, JSON.stringify(opened));
     DB.saveFeedback(trackKey, JSON.stringify(opened)).catch(()=>{});
@@ -5607,14 +5552,14 @@ function _saveModuleTemplate() {
     flashcards: [...(state.tempFlashcards||[])],
     savedAt: new Date().toLocaleString('no')
   };
-  const templates = JSON.parse(localStorage.getItem('os_module_templates')||'[]');
+  const templates = _lsGet('os_module_templates', []);
   templates.unshift(template);
   if (templates.length > 20) templates.splice(20);
   localStorage.setItem('os_module_templates', JSON.stringify(templates));
   showToast('📋 Mal lagret: ' + name);
 }
 function _loadModuleTemplateModal() {
-  const templates = JSON.parse(localStorage.getItem('os_module_templates')||'[]');
+  const templates = _lsGet('os_module_templates', []);
   if (!templates.length) { showToast('Ingen lagrede maler ennå. Lagre en mal først!'); return; }
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
@@ -5638,7 +5583,7 @@ function _loadModuleTemplateModal() {
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 function _applyModuleTemplate(ti) {
-  const templates = JSON.parse(localStorage.getItem('os_module_templates')||'[]');
+  const templates = _lsGet('os_module_templates', []);
   const t = templates[ti];
   if (!t) return;
   const nameEl = document.getElementById('moduleName'); if (nameEl) nameEl.value = t.name;
@@ -5906,7 +5851,7 @@ async function loadAnnouncementEditor() {
   const rows = await DB.loadFeedback(ANNOUNCE_KEY);
   let obj = null;
   if (rows) { try { obj = JSON.parse(rows); } catch {} }
-  if (!obj) { obj = JSON.parse(localStorage.getItem(ANNOUNCE_KEY)||'null'); }
+  if (!obj) { obj = _lsGet(ANNOUNCE_KEY, null); }
   if (obj && ta) {
     ta.value = obj.text || '';
     const sel = document.getElementById('announcementType');
@@ -5933,7 +5878,7 @@ async function checkAndShowAnnouncement() {
   const rows = await DB.loadFeedback(ANNOUNCE_KEY);
   let obj = null;
   if (rows) { try { obj = JSON.parse(rows); } catch {} }
-  if (!obj) { obj = JSON.parse(localStorage.getItem(ANNOUNCE_KEY)||'null'); }
+  if (!obj) { obj = _lsGet(ANNOUNCE_KEY, null); }
   const banner = document.getElementById('announcementBanner');
   if (!banner) return;
   if (obj && obj.text) {
@@ -6056,6 +6001,7 @@ function renderPreviewPanel() {
 }
 
 function escHtml(str){return sanitizeHTML(str);}
+function _lsGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key) ?? JSON.stringify(fallback)); } catch { return fallback; } }
 function _updateCharCount(inputId, maxLen) {
   const el = document.getElementById(inputId);
   const cc = document.getElementById(inputId + '-cc');
@@ -7371,7 +7317,7 @@ Svar KUN med JSON: {"videos":[{"title":"...","ytId":"11-tegns-ID eller null","se
       const finalUrl=ytId?`https://www.youtube.com/watch?v=${ytId}`:(v.searchUrl||'');
       const safeV=JSON.stringify({title:v.title,url:finalUrl,task:v.task||''}).replace(/'/g,"&#39;").replace(/"/g,"&quot;");
       return `<div style="background:var(--s1);border-radius:14px;padding:0.875rem;border:1px solid var(--border);">
-        ${ytId?`<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" style="width:100%;border-radius:10px;margin-bottom:0.5rem;cursor:pointer;" onclick="svToggleEmbed('svembed-${i}','${ytId}')" /><div id="svembed-${i}" style="display:none;margin-bottom:0.5rem;"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe></div>`
+        ${ytId?`<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" style="width:100%;border-radius:10px;margin-bottom:0.5rem;cursor:pointer;" loading="lazy" onclick="svToggleEmbed('svembed-${i}','${ytId}')" /><div id="svembed-${i}" style="display:none;margin-bottom:0.5rem;"><iframe width="100%" height="200" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe></div>`
         :`<div style="background:var(--s2);border-radius:10px;padding:1rem;text-align:center;margin-bottom:0.5rem;"><a href="${escHtml(v.searchUrl||'')}" target="_blank" style="color:var(--c4);font-weight:800;">🔍 Søk på YouTube</a></div>`}
         <div style="font-weight:800;font-size:0.92rem;margin-bottom:0.2rem;">🎬 ${escHtml(v.title)}</div>
         ${v.channel?`<div style="font-size:0.75rem;color:var(--text-3);margin-bottom:0.3rem;">📺 ${escHtml(v.channel)}</div>`:''}
@@ -7929,7 +7875,7 @@ const DB = {
   },
 
   async saveAnswer(studentName, studentClass, answerKey, val, correct) {
-    const local = JSON.parse(localStorage.getItem('lh_answers') || '{}');
+    const local = _lsGet('lh_answers', {});
     local[answerKey] = { val, correct: !!correct };
     localStorage.setItem('lh_answers', JSON.stringify(local));
     if (!studentName) return;
@@ -8332,10 +8278,10 @@ async function migrateToDb() {
   // DB er alltid klar (nøkkel er hardkodet)
   showDbFeedback('⏳ Migrerer lokale data til Supabase…', true);
 
-  const localMods = JSON.parse(localStorage.getItem('lh_modules') || '[]');
+  const localMods = _lsGet('lh_modules', []);
   if (localMods.length) { await DB.saveModules(localMods); state.modules = localMods; }
 
-  const localAns = JSON.parse(localStorage.getItem('lh_answers') || '{}');
+  const localAns = _lsGet('lh_answers', {});
   for (const [k, v] of Object.entries(localAns)) {
     const studentName = k.split('_m')[0];
     await DB.saveAnswer(studentName, '', k, v.val || '', v.correct || false);
@@ -8349,7 +8295,7 @@ async function migrateToDb() {
     }
   }
 
-  const localRoster = JSON.parse(localStorage.getItem('olaskole_roster') || '[]');
+  const localRoster = _lsGet('olaskole_roster', []);
   if (localRoster.length) await DB.saveRoster(localRoster);
 
   const modsN = localMods.length;
@@ -8887,7 +8833,7 @@ function wcSubmitWords(code) {
     if (found.length) { showToast('Ugyldig ord – prøv igjen'); return; }
   }
   const key = 'os_wc_responses_' + code;
-  const existing = JSON.parse(localStorage.getItem(key)||'[]');
+  const existing = _lsGet(key, []);
   existing.push({name: state.student||'Anonym', words:[word], ts:Date.now()});
   localStorage.setItem(key, JSON.stringify(existing));
   if (input) input.value = '';
@@ -8910,7 +8856,7 @@ function wcSubmitWords(code) {
 
 function wcSubmitPoll(vote, code) {
   const key = 'os_wc_responses_' + code;
-  const existing = JSON.parse(localStorage.getItem(key)||'[]');
+  const existing = _lsGet(key, []);
   existing.push({name: state.student||'Anonym', vote, ts:Date.now()});
   localStorage.setItem(key, JSON.stringify(existing));
   document.getElementById('wc-student-result-msg').style.display='block';
@@ -11030,7 +10976,7 @@ function _arbAnnounce(msg) {
   });
 
   // Autosave for lærer – lagre emne-skjema hvert 30 sek
-  setInterval(() => {
+  window._teacherAutosaveInterval = setInterval(() => {
     if (!state.isTeacher) return;
     const name = document.getElementById('moduleName')?.value.trim();
     if (!name) return;
@@ -11528,7 +11474,7 @@ function arbOpenModule(idx) {
   // Track module opens per student
   if (state.student) {
     const trackKey = 'os_open_' + (m?._id||'mod_'+idx);
-    const opened = JSON.parse(localStorage.getItem(trackKey)||'{}');
+    const opened = _lsGet(trackKey, {});
     opened[state.student.name] = new Date().toISOString();
     localStorage.setItem(trackKey, JSON.stringify(opened));
     DB.saveFeedback(trackKey, JSON.stringify(opened)).catch(()=>{});
@@ -11594,12 +11540,12 @@ function _applyGlossary(html, glossary) {
 function _markSKey() { return arbSKey ? arbSKey() : (state.currentStudent || ''); }
 function _markSave(moduleIdx, markObj) {
   const key = `os_marks_${_markSKey()}_m${moduleIdx}`;
-  const marks = JSON.parse(localStorage.getItem(key)||'[]');
+  const marks = _lsGet(key, []);
   marks.push({...markObj, id: Date.now()});
   localStorage.setItem(key, JSON.stringify(marks));
 }
 function _markLoad(moduleIdx) {
-  return JSON.parse(localStorage.getItem(`os_marks_${_markSKey()}_m${moduleIdx}`)||'[]');
+  return _lsGet(`os_marks_${_markSKey()}_m${moduleIdx}`, []);
 }
 function _markDelete(moduleIdx, id) {
   const key = `os_marks_${_markSKey()}_m${moduleIdx}`;
@@ -11766,7 +11712,7 @@ function arbRenderQuiz(m) {
       ...(q.d ? [{ text: q.d, correct: false }] : [])
     ]);
     const answerClass = answered ? (savedAns === 'correct' ? 'answered' : 'answered-wrong') : '';
-    const qImgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img" alt="" onerror="this.style.display='none'">` : '';
+    const qImgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
     html += `<div class="arb-quiz-card ${answerClass}" id="arb-qcard-${qi}">
       ${qImgHtml}
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem;">
@@ -11955,7 +11901,7 @@ function _arbExamShowQuestion(m) {
     ...(q.d?[{text:q.d,correct:false}]:[])
   ]);
   _examState.currentOpts = opts;
-  const imgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img" onerror="this.style.display='none'">` : '';
+  const imgHtml = q.img ? `<img src="${escHtml(q.img)}" class="task-img" loading="lazy" onerror="this.style.display='none'">` : '';
   const isLast = _examState.qi + 1 >= total;
   container.innerHTML = `<div class="arb-content-card">
     <div class="exam-q-counter">Spørsmål ${_examState.qi+1} av ${total}</div>
@@ -12153,8 +12099,8 @@ function arbRenderFcCard(m) {
   const card = cards[i];
   const qLen = arbState.fcQueue.length;
   const pos = cards.length - qLen + 1;
-  const fcFrontContent = (card.imgFront ? `<img src="${escHtml(card.imgFront)}" style="max-height:80px;border-radius:6px;margin-bottom:6px;display:block;" onerror="this.style.display='none'">` : '') + escHtml(card.front);
-  const fcBackContent = (card.imgBack ? `<img src="${escHtml(card.imgBack)}" style="max-height:80px;border-radius:6px;margin-bottom:6px;display:block;" onerror="this.style.display='none'">` : '') + escHtml(card.back);
+  const fcFrontContent = (card.imgFront ? `<img src="${escHtml(card.imgFront)}" style="max-height:80px;border-radius:6px;margin-bottom:6px;display:block;" loading="lazy" onerror="this.style.display='none'">` : '') + escHtml(card.front);
+  const fcBackContent = (card.imgBack ? `<img src="${escHtml(card.imgBack)}" style="max-height:80px;border-radius:6px;margin-bottom:6px;display:block;" loading="lazy" onerror="this.style.display='none'">` : '') + escHtml(card.back);
   container.innerHTML = `<div class="arb-content-card">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:0.5rem;">
       <h2 style="font-family:'Fredoka One',cursive;font-size:1.4rem;color:var(--text);margin:0;">🃏 Flashcards</h2>
@@ -12760,7 +12706,7 @@ async function sjAnswer(idx) {
   document.querySelectorAll('.cr-answer-btn').forEach(b => b.disabled = true);
 
   // Save answer to cloud - store as idx so scoring works
-  const gameData = await GAME.load(sjGame.code) || JSON.parse(localStorage.getItem('cr_game') || '{}');
+  const gameData = await GAME.load(sjGame.code) || _lsGet('cr_game', {});
   if (!gameData.players) gameData.players = {};
   if (!gameData.players[sjGame.username]) {
     gameData.players[sjGame.username] = { username: sjGame.username, avatar: sjGame.avatar, score: 0, answers: {} };
