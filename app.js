@@ -617,14 +617,22 @@ async function loadState() {
     } catch(e) { localStorage.removeItem('os_teacher_session'); }
   }
 
-  // Restore student session
+  // Restore student session (7-day TTL if "Husk meg" was checked)
   const savedStudent = localStorage.getItem('lh_student');
   if (savedStudent) {
-    try { state.student = JSON.parse(savedStudent); } catch(e) { localStorage.removeItem('lh_student'); }
-    if (state.student) {
-      state.studentAnswers = await DB.loadAnswers(state.student.name);
-      _progressCache = await DB.loadProgress(state.student.name);
-      showStudentWelcome();
+    let parsed = null;
+    try { parsed = JSON.parse(savedStudent); } catch(e) { localStorage.removeItem('lh_student'); }
+    if (parsed) {
+      const ageMs = Date.now() - (parsed.savedAt || 0);
+      const expired = parsed.remember ? ageMs > 7 * 24 * 60 * 60 * 1000 : false;
+      if (expired) {
+        localStorage.removeItem('lh_student');
+      } else {
+        state.student = parsed;
+        state.studentAnswers = await DB.loadAnswers(state.student.name);
+        _progressCache = await DB.loadProgress(state.student.name);
+        showStudentWelcome();
+      }
     }
   }
 }
@@ -650,9 +658,10 @@ async function studentLogin() {
   const name = document.getElementById('studentName').value.trim();
   const cls  = document.getElementById('studentClass').value.trim();
   if (!name) { showToast('⚠️ Skriv inn navnet ditt!'); return; }
-  state.student = { name, cls, joinedAt: new Date().toLocaleString('no') };
+  const rememberMe = document.getElementById('rememberMe')?.checked;
+  state.student = { name, cls, joinedAt: new Date().toLocaleString('no'), savedAt: Date.now(), remember: !!rememberMe };
   localStorage.setItem('lh_student', JSON.stringify(state.student));
-  const btn = document.querySelector('#studentLoginBox button');
+  const btn = document.querySelector('#studentLoginBox button[data-onclick="studentLogin"]');
   if (btn) { btn._orig = btn.textContent; btn.textContent = '⏳ Logger inn...'; btn.disabled = true; }
   state.studentAnswers = await DB.loadAnswers(name);
   _progressCache = await DB.loadProgress(name);
@@ -1688,8 +1697,8 @@ function renderQuizHTML(m) {
         <div class="quiz-q" style="margin-bottom:0;">${qi+1}. ${escHtml(q.question)}</div>
         ${timerSec>0?`<div id="qtimer-${qi}" style="font-size:0.85rem;font-weight:800;color:var(--c2);background:var(--dark);padding:4px 10px;border-radius:50px;min-width:44px;text-align:center;">${timerSec}s</div>`:''}
       </div>
-      <div class="quiz-opts">
-        ${opts.map((o,oi)=>`<button class="quiz-opt" id="qopt-${qi}-${oi}" data-onclick="checkAnswer" data-onclick-args="${JSON.stringify([qi,o.correct,oi,correctMap])}">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
+      <div class="quiz-opts" role="group" aria-label="Svaralternativer">
+        ${opts.map((o,oi)=>`<button class="quiz-opt" id="qopt-${qi}-${oi}" aria-pressed="false" data-onclick="checkAnswer" data-onclick-args="${JSON.stringify([qi,o.correct,oi,correctMap])}">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
       </div>
       <div class="quiz-feedback" id="qfb-${qi}"></div>
     </div>`;
@@ -1733,6 +1742,7 @@ function checkAnswer(qi, isCorrect, optIdx, correctMap) {
   const opts = card.querySelectorAll('.quiz-opt');
   opts.forEach((o,i) => {
     o.disabled = true;
+    o.setAttribute('aria-pressed', String(i === optIdx));
     if (correctMap[i]) o.classList.add('correct');
     else if (i===optIdx && !isCorrect) o.classList.add('wrong');
   });
@@ -2811,6 +2821,20 @@ function renderPreviewPanel() {
 
 function escHtml(str){return sanitizeHTML(str);}
 function _lsGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key) ?? JSON.stringify(fallback)); } catch { return fallback; } }
+
+// Lazy-load a UMD library on first use
+function _loadScript(url) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector('script[src="' + url + '"]')) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = url; s.onload = resolve; s.onerror = () => reject(new Error('Kunne ikke laste bibliotek: ' + url));
+    document.head.appendChild(s);
+  });
+}
+const _CDN_MAMMOTH   = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+const _CDN_JSZIP     = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+const _CDN_HTML2CANV = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+const _CDN_PDFJS     = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
 function _updateCharCount(inputId, maxLen) {
   const el = document.getElementById(inputId);
   const cc = document.getElementById(inputId + '-cc');
@@ -4244,12 +4268,14 @@ async function processFile(file){
       uploadedFileText='[PDF-dokument lastet opp: '+file.name+']';
     }else if(file.name.endsWith('.docx')||file.name.endsWith('.doc')){
       const ab=await file.arrayBuffer();
+      await _loadScript(_CDN_MAMMOTH);
       const htmlResult=await mammoth.convertToHtml({arrayBuffer:ab});
       const rawResult=await mammoth.extractRawText({arrayBuffer:ab});
       uploadedFileText=rawResult.value;
       if(previewText){previewText.innerHTML=sanitizeHTML(htmlResult.value.substring(0,1200)+(htmlResult.value.length>1200?'…':''));previewText._isHtml=true;}
     }else if(file.name.endsWith('.pptx')){
       const ab=await file.arrayBuffer();
+      await _loadScript(_CDN_JSZIP);
       const zip=await JSZip.loadAsync(ab);
       let text='';
       const slideFiles=Object.keys(zip.files).filter(f=>f.match(/ppt\/slides\/slide\d+\.xml/)).sort();
@@ -5189,6 +5215,7 @@ async function arbExportAnswers() {
 
 // ====== DOCX GENERATOR ======
 async function generateDocx(title, bodyText) {
+  await _loadScript(_CDN_JSZIP);
   const zip = new JSZip();
   // Strip non-BMP characters (emoji etc.) that are invalid in XML 1.0
   const escXml = s => s
@@ -5692,16 +5719,14 @@ function wcExport(fmt) {
     a.click();
     return;
   }
-  if (typeof html2canvas !== 'undefined') {
+  _loadScript(_CDN_HTML2CANV).then(() => {
     html2canvas(canvas, {backgroundColor:'#08090e'}).then(c => {
       const a = document.createElement('a');
       a.href = c.toDataURL(fmt==='jpg'?'image/jpeg':'image/png');
       a.download = 'ordsky.'+(fmt==='jpg'?'jpg':'png');
       a.click();
     });
-  } else {
-    showToast('Eksport krever html2canvas – åpne siden i nettleser');
-  }
+  }).catch(() => showToast('Eksport krever html2canvas – åpne siden i nettleser'));
 }
 // ====== END WORDCLOUD ENGINE ======
 
@@ -7754,6 +7779,25 @@ function _arbAnnounce(msg) {
   try {
     showDbStatus();
   } catch(e) {}
+
+  // Skjul splash-skjerm etter at appen er klar
+  const splash = document.getElementById('appSplash');
+  if (splash) { splash.classList.add('hidden'); setTimeout(() => { splash.style.display = 'none'; }, 450); }
+
+  // Vis GDPR-banner hvis ikke allerede akseptert
+  if (!localStorage.getItem('gdpr_ok')) {
+    const gdprBanner = document.getElementById('gdprBanner');
+    if (gdprBanner) {
+      gdprBanner.style.display = 'flex';
+      document.getElementById('gdprAcceptBtn')?.addEventListener('click', () => {
+        localStorage.setItem('gdpr_ok', '1');
+        gdprBanner.style.opacity = '0';
+        gdprBanner.style.transition = 'opacity 0.3s';
+        setTimeout(() => { gdprBanner.style.display = 'none'; }, 320);
+      });
+    }
+  }
+
   // Vis kunngjøring til elever
   try {
     await checkAndShowAnnouncement();
@@ -7794,9 +7838,13 @@ function _arbAnnounce(msg) {
   }, 30000);
 })();
 
-// Set up PDF.js worker
-if (window.pdfjsLib) {
-  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+// PDF.js is loaded on demand — worker is configured after load
+function _ensurePdfJs() {
+  return _loadScript(_CDN_PDFJS).then(() => {
+    if (window.pdfjsLib && !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  });
 }
 
 // Demo module if empty – vis kun visuelt, lagre IKKE til DB

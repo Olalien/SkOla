@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#7c3aed" id="themeColorMeta">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.cdnfonts.com; font-src 'self' https://fonts.gstatic.com https://fonts.cdnfonts.com data:; img-src 'self' data: blob: https:; connect-src 'self' https:; frame-src 'self' https://www.youtube.com https://youtube.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.cdnfonts.com; font-src 'self' https://fonts.gstatic.com https://fonts.cdnfonts.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://api.anthropic.com https://*.supabase.co https://graph.microsoft.com https://api.dictionaryapi.dev https://ordbokene.no; frame-src 'self' https://www.youtube.com https://youtube.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,6 +17,9 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="nb_NO">
 <meta property="og:url" content="https://olalien.github.io/SkOla/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SkOla – Interaktiv læringsplattform">
+<meta name="twitter:description" content="Digitale læremidler for ungdomsskolen: quiz, flashcards, skriveoppgaver og mer.">
 <link rel="manifest" href="manifest.json">
 <title>SkOla – Interaktiv læringsplattform</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,15 +32,28 @@
     });
   }
 </script>
-<!-- Preload file-parsing libraries -->
 <script src="https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+<style>
+  /* Critical CSS — minimalt nødvendig for initial render */
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{--bg:#04050d;--s1:#0b0d1e;--accent:#7b8ffd;--text:#eceef8;}
+  body{background:var(--bg);color:var(--text);font-family:'Nunito',system-ui,sans-serif;min-height:100vh;}
+  body.dark{background:#04050d;}
+  #appSplash{position:fixed;inset:0;background:#04050d;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;z-index:9998;transition:opacity 0.4s;}
+  #appSplash.hidden{opacity:0;pointer-events:none;}
+  .splash-logo{font-family:'Fredoka One',cursive,system-ui;font-size:2.5rem;color:var(--accent);}
+  .splash-spin{width:36px;height:36px;border:3px solid rgba(123,143,253,0.2);border-top-color:var(--accent);border-radius:50%;animation:splashRot 0.7s linear infinite;}
+  @keyframes splashRot{to{transform:rotate(360deg);}}
+</style>
 <link rel="stylesheet" href="app.css">
 </head>
 <body class="dark">
+
+<!-- Splash-skjerm — vises mens app.js laster -->
+<div id="appSplash" role="status" aria-label="Laster SkOla...">
+  <div class="splash-logo">SkOla</div>
+  <div class="splash-spin"></div>
+</div>
 
 <!-- Skip-to-content for tastatur-navigasjon -->
 <a href="#main-content" class="skip-link">Hopp til innhold</a>
@@ -49,8 +65,6 @@
     <p style="color:#aaa;max-width:360px;">Aktiver JavaScript i nettleserinnstillingene og last siden på nytt.</p>
   </div>
 </noscript>
-
-<a href="#main-content" class="skip-link">Hopp til innhold</a>
 <!-- Dynamisk H1 for screen readers — oppdateres av showView() -->
 <h1 id="pageH1" class="sr-only">SkOla – Hjem</h1>
 <div class="progress-top" role="progressbar" aria-label="Sideinnlastning" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progressFill"></div></div>
@@ -150,7 +164,11 @@
         <optgroup label="9. trinn"><option value="9A">9A</option><option value="9B">9B</option><option value="9C">9C</option></optgroup>
         <optgroup label="10. trinn"><option value="10A">10A</option><option value="10B">10B</option><option value="10C">10C</option></optgroup>
       </select>
-      <button class="btn-primary" style="width:100%;margin-top:0.25rem;" data-onclick="studentLogin">Start læring</button>
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
+        <input type="checkbox" id="rememberMe" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+        <label for="rememberMe" style="font-size:0.85rem;color:var(--text-2);cursor:pointer;font-weight:700;">Husk meg i 7 dager</label>
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:0.5rem;" data-onclick="studentLogin">Start læring</button>
     </div>
 
     <div id="welcomeBack" style="display:none;">
@@ -2311,5 +2329,35 @@
 
 <script src="app.js" defer></script>
 <div id="offlineBanner" class="offline-banner" role="alert" aria-live="assertive">📡 Ingen internettforbindelse — jobber offline. Data synkroniseres automatisk når du er tilkoblet igjen.</div>
+
+<!-- GDPR-personvernvarsel -->
+<div id="gdprBanner" role="dialog" aria-label="Personvernvarsel" aria-modal="false" style="display:none;position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:5000;background:#0f1126;border:1px solid rgba(123,143,253,0.25);border-radius:14px;padding:1rem 1.25rem;max-width:480px;width:calc(100% - 2rem);box-shadow:0 8px 32px rgba(0,0,0,0.6);font-family:'Nunito',sans-serif;font-size:0.85rem;color:#8890b8;display:flex;gap:0.75rem;align-items:flex-start;flex-wrap:wrap;">
+  <div style="flex:1;min-width:180px;line-height:1.5;">
+    🔒 SkOla bruker kun teknisk nødvendige informasjonskapsler – ingen annonsesporing.
+    <a href="#" data-onclick="openModal" data-onclick-arg="privacyModal" style="color:#9aaaff;text-decoration:underline;margin-left:4px;">Les mer</a>
+  </div>
+  <button id="gdprAcceptBtn" style="background:#7b8ffd;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">Forstått</button>
+</div>
+
+<!-- Personvernmodal -->
+<div class="modal-overlay" id="privacyModal" data-onclick="closeModal" data-onclick-arg="privacyModal" data-onclick-overlay>
+  <div class="modal" style="max-width:480px;width:95%;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+      <h2 style="margin:0;font-size:1.3rem;">🔒 Personvern</h2>
+      <button data-onclick="closeModal" data-onclick-arg="privacyModal" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text-3);">✕</button>
+    </div>
+    <div style="line-height:1.7;color:var(--text-2);font-size:0.9rem;">
+      <p style="margin-bottom:0.75rem;"><strong style="color:var(--text);">Hva lagres?</strong><br>
+      Kun elevnavn, klasse og svar på oppgaver som du selv taster inn. Ingen personopplysninger samles inn uten at du aktivt deltar.</p>
+      <p style="margin-bottom:0.75rem;"><strong style="color:var(--text);">Informasjonskapsler</strong><br>
+      SkOla bruker kun teknisk nødvendige informasjonskapsler (localStorage) for å huske innlogging og innstillinger. Ingen annonsesporing eller tredjepartssporere.</p>
+      <p style="margin-bottom:0.75rem;"><strong style="color:var(--text);">Tredjeparter</strong><br>
+      Dersom læreren konfigurerer Supabase-database og Anthropic AI-nøkkel, kan data sendes til disse tjenestene. Se deres personvernerklæringer for detaljer.</p>
+      <p><strong style="color:var(--text);">Dine rettigheter</strong><br>
+      Du kan logge ut og slette data når som helst via innstillinger.</p>
+    </div>
+    <button data-onclick="closeModal" data-onclick-arg="privacyModal" class="btn-primary" style="margin-top:1.25rem;width:100%;">Lukk</button>
+  </div>
+</div>
 </body>
 </html>
