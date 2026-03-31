@@ -79,8 +79,8 @@
   .skip-link:focus{top:0;}
 
   .view{display:none;padding:1.25rem;max-width:1200px;margin:0 auto;}
-  .view.active{display:block;animation:viewEnter 0.22s ease both;will-change:opacity,transform;}
-  .view.leaving{animation:viewExit 0.17s ease forwards;pointer-events:none;will-change:opacity,transform;}
+  .view.active{display:block;animation:viewEnter 0.22s ease both;}
+  .view.leaving{animation:viewExit 0.17s ease forwards;pointer-events:none;}
   @keyframes viewEnter{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
   @keyframes viewExit{to{opacity:0;transform:translateY(-6px);}}
   @media(prefers-reduced-motion:reduce){.view.active{animation:none;}.view.leaving{animation:none;}}
@@ -912,11 +912,7 @@ button, a, [role="button"], input, select, textarea,
   -webkit-tap-highlight-color: transparent;
 }
 
-/* --- View transition: deceleration easing instead of linear --- */
-@keyframes viewEnter {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/* --- View transition: override with deceleration easing --- */
 .view.active { animation: viewEnter 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 /* --- Card stagger entrance (uses existing --i inline var) --- */
@@ -1046,4 +1042,133 @@ body.light .skeleton-card::after {
 }
 .mob-icon svg {
   transition: transform 0.22s ease;
+}
+
+/* ============================================================
+   ITERASJON 7 — Bug fixes & Polish
+   ============================================================ */
+
+/* --- Responsive nav: show mobile nav on tablets too (640–1023px) --- */
+@media (max-width: 1023px) {
+  .nav-tabs { display: none !important; }
+  .mobile-nav { display: block !important; }
+  body { padding-bottom: calc(66px + env(safe-area-inset-bottom)) !important; }
+}
+
+/* --- iOS input zoom fix: 16px on ALL viewports --- */
+input, select, textarea {
+  font-size: 16px;
+}
+/* Override back to design size on desktop */
+@media (min-width: 1024px) {
+  input, select, textarea { font-size: inherit; }
+  .nav-tabs { display: flex !important; }
+  .mobile-nav { display: none !important; }
+  body { padding-bottom: 0 !important; }
+}
+
+/* --- Quiz options: 1 column up to 600px --- */
+@media (max-width: 600px) {
+  .quiz-opts { grid-template-columns: 1fr !important; }
+  .arb-options { grid-template-columns: 1fr !important; }
+}
+
+/* --- Consistent form control styling (datetime, number, select) --- */
+input[type="datetime-local"],
+input[type="date"],
+input[type="time"],
+input[type="number"] {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  background: var(--s2);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.18s;
+}
+input[type="datetime-local"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="number"]:focus {
+  border-color: var(--accent);
+}
+/* Fix color-scheme so browser's date picker matches dark theme */
+input[type="datetime-local"],
+input[type="date"] {
+  color-scheme: dark;
+}
+body.light input[type="datetime-local"],
+body.light input[type="date"] {
+  color-scheme: light;
+}
+
+/* --- Wordcloud/Voting settings grid: uniform boxes --- */
+#wc-setup select,
+#wc-setup input[type="number"],
+#wc-setup input[type="text"],
+#wc-setup textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  background: var(--s2);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.18s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+#wc-setup select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+}
+#wc-setup select:focus,
+#wc-setup input:focus,
+#wc-setup textarea:focus {
+  border-color: var(--accent);
+}
+/* Settings grid responsive */
+#wc-setup .wc-settings-grid,
+[style*="grid-template-columns:1fr 1fr 1fr"] {
+  gap: 0.75rem;
+}
+@media (max-width: 520px) {
+  #wc-setup [style*="grid-template-columns:1fr 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* --- Scheduling panel: uniform input sizing --- */
+#gsStart, #gsEnd,
+#announcementFrom, #announcementUntil {
+  font-size: 0.88rem !important;
+}
+
+/* --- Navigation: reduce paint during transitions --- */
+.view.active, .view.leaving {
+  contain: layout style;
+}
+
+/* --- Module card: promote to GPU layer during hover/animation --- */
+.module-card:hover, .arb-module-card:hover {
+  will-change: transform;
+}
+.module-card, .arb-module-card {
+  contain: layout style paint;
+}
+
+/* --- Reduce animation on low-power devices --- */
+@media (prefers-reduced-motion: reduce) {
+  .module-card, .arb-module-card { animation: none !important; }
+  .view.active { animation: none !important; }
+  * { transition-duration: 0.01ms !important; }
 }
