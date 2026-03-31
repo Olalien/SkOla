@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#7c3aed" id="themeColorMeta">
+<!-- TODO: tighten CSP by removing 'unsafe-inline' when scripts/styles move to external files -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.cdnfonts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.cdnfonts.com; font-src 'self' https://fonts.gstatic.com https://fonts.cdnfonts.com data:; img-src 'self' data: blob: https:; connect-src 'self' https:; frame-src 'self' https://www.youtube.com https://youtube.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SkOla">
@@ -2082,7 +2085,7 @@
         Anthropic API-nøkkel
       </div>
       <div style="font-size:0.8rem;color:var(--text-2);margin-bottom:0.5rem;line-height:1.55;">Nødvendig for AI-generering. Lagres kun lokalt i nettleseren.</div>
-      <div style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);border-radius:9px;padding:0.6rem 0.875rem;margin-bottom:0.875rem;font-size:0.78rem;color:#f59e0b;font-weight:700;line-height:1.5;">⚠️ <strong>Sikkerhetsadvarsel:</strong> API-nøkkelen lagres i nettleserens localStorage og er synlig for alle som bruker denne enheten. Ikke bruk nøkkelen på delte datamaskiner. Vurder å bruke en backend-proxy for produksjon.</div>
+      <div style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);border-radius:9px;padding:0.6rem 0.875rem;margin-bottom:0.875rem;font-size:0.78rem;color:#f59e0b;font-weight:700;line-height:1.5;">🔐 API-nøkkel lagres kryptert i nettleseren og dekrypteres kun i aktiv lærerøkt.</div>
       <div id="settingsApiStatus" style="margin-bottom:0.6rem;font-size:0.83rem;font-weight:700;"></div>
       <div style="position:relative;margin-bottom:0.75rem;">
         <input type="password" id="settingsApiInput" placeholder="sk-ant-api03-..." style="width:100%;padding:10px 42px 10px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:monospace;font-size:0.88rem;outline:none;box-sizing:border-box;background:var(--s3);color:var(--text);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
@@ -2108,6 +2111,21 @@
       <div style="padding:0.6rem 0.875rem;background:var(--s3);border-radius:8px;border-left:2px solid var(--accent);font-size:0.78rem;color:var(--text-2);line-height:1.6;">
         Hent gratis nøkkel på <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent-h);font-weight:800;text-decoration:none;">console.anthropic.com</a> → API Keys → Create Key
       </div>
+    </div>
+
+    <!-- PASSORD -->
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1.1rem;margin-bottom:0.875rem;">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:0.9rem;color:var(--text);margin-bottom:0.2rem;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Endre lærerpassord
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-2);margin-bottom:0.875rem;line-height:1.55;">Passord lagres sikkert med hashing og brukes for å låse opp krypterte nøkler.</div>
+      <input type="password" id="newPassInput" placeholder="Nytt passord" style="width:100%;padding:10px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.95rem;outline:none;margin-bottom:0.75rem;background:var(--s3);color:var(--text);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
+      <button class="btn-success" style="display:flex;align-items:center;gap:6px;padding:9px 18px;" onclick="changePassword()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 11 4 4"/></svg>
+        Lagre nytt passord
+      </button>
+      <div id="passFeedback" style="display:none;margin-top:0.6rem;padding:9px 12px;border-radius:9px;font-weight:700;font-size:0.85rem;"></div>
     </div>
 
     <!-- MICROSOFT -->
@@ -3127,11 +3145,24 @@
     <h2 id="teacherModalTitle">Lærertilgang</h2>
     <input type="password" id="teacherPass" placeholder="Passord" onkeydown="if(event.key==='Enter')loginTeacher()" />
     <div id="teacherError" style="display:none;color:var(--c1);font-weight:800;font-size:0.88rem;margin-bottom:0.5rem;">❌ Feil passord</div>
+    <div id="teacherLockoutInfo" style="display:none;color:var(--c2);font-weight:800;font-size:0.88rem;margin-bottom:0.5rem;"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('teacherModal')">Avbryt</button>
       <button class="btn-primary" id="teacherLoginBtn" onclick="loginTeacher()">Logg inn</button>
     </div>
-    <p style="font-size:0.8rem;color:var(--text-3);text-align:center;margin-top:1rem;">Hint: <strong>...</strong></p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="teacherSetupModal">
+  <div class="modal">
+    <h2>Opprett lærerpassord</h2>
+    <input type="password" id="teacherSetupPass" placeholder="Nytt passord" />
+    <input type="password" id="teacherSetupPassConfirm" placeholder="Gjenta passord" />
+    <div id="teacherSetupError" style="display:none;color:var(--c1);font-weight:800;font-size:0.88rem;margin-bottom:0.5rem;"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('teacherSetupModal')">Avbryt</button>
+      <button class="btn-primary" onclick="setupTeacherPassword()">Lagre passord</button>
+    </div>
   </div>
 </div>
 
@@ -3188,7 +3219,63 @@ let state = {
   fcIndex: 0
 };
 
-const TEACHER_PASS = 'Olala1234';
+const SecurityUtils = {
+  generateSalt() {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    return btoa(String.fromCharCode(...bytes));
+  },
+  async hashPassword(password, salt) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+    const saltBytes = Uint8Array.from(atob(salt), c => c.charCodeAt(0));
+    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: saltBytes, iterations: 100000, hash: 'SHA-256' }, keyMaterial, 256);
+    return btoa(String.fromCharCode(...new Uint8Array(bits)));
+  },
+  async verifyPassword(password, storedHash, salt) {
+    const derived = await this.hashPassword(password, salt);
+    return derived === storedHash;
+  },
+  async deriveEncryptionKey(password) {
+    const enc = new TextEncoder();
+    const saltBytes = enc.encode('olaskole-encryption-salt-v1');
+    const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: saltBytes, iterations: 100000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  },
+  async encrypt(data, key) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const enc = new TextEncoder();
+    const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(String(data || '')));
+    return {
+      iv: btoa(String.fromCharCode(...iv)),
+      ciphertext: btoa(String.fromCharCode(...new Uint8Array(cipher)))
+    };
+  },
+  async decrypt(ciphertext, key, iv) {
+    const ivBytes = Uint8Array.from(atob(iv), c => c.charCodeAt(0));
+    const ctBytes = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ivBytes }, key, ctBytes);
+    return new TextDecoder().decode(plain);
+  }
+};
+
+function sanitizeHTML(input) {
+  return String(input ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function sanitizeForAttribute(input) {
+  return sanitizeHTML(input).replace(/`/g, '&#96;');
+}
+function createSafeElement(tag, text) {
+  const el = document.createElement(tag);
+  el.textContent = String(text ?? '');
+  return el;
+}
 
 
 // ====== COMPETANSE_MAAL ======
@@ -3216,6 +3303,41 @@ let activeSubjectFilter = null;
 let _writeTimers = {};
 let _quizTimers = {}; // Quiz-timer handles per spørsmål
 let _autoSaveTimers = {};
+let _sessionEncKey = null;
+let _teacherSessionPassword = '';
+let _decryptedApiKey = '';
+let _decryptedSbUrl = '';
+let _decryptedSbKey = '';
+let _sessionWarningShown = false;
+let _sessionWarningTimeout = null;
+let _sessionLogoutTimeout = null;
+
+async function hydrateDecryptedSecrets() {
+  if (!_sessionEncKey) return;
+  try {
+    const apiRaw = localStorage.getItem('olaskole_apikey');
+    if (apiRaw) {
+      const p = JSON.parse(apiRaw);
+      _decryptedApiKey = await SecurityUtils.decrypt(p.ciphertext, _sessionEncKey, p.iv);
+    }
+  } catch { _decryptedApiKey = ''; }
+  try {
+    const sbUrlRaw = localStorage.getItem('os_sb_url');
+    if (sbUrlRaw) {
+      const p = JSON.parse(sbUrlRaw);
+      _decryptedSbUrl = await SecurityUtils.decrypt(p.ciphertext, _sessionEncKey, p.iv);
+    }
+  } catch { _decryptedSbUrl = ''; }
+  try {
+    const sbKeyRaw = localStorage.getItem('os_sb_key');
+    if (sbKeyRaw) {
+      const p = JSON.parse(sbKeyRaw);
+      _decryptedSbKey = await SecurityUtils.decrypt(p.ciphertext, _sessionEncKey, p.iv);
+    }
+  } catch { _decryptedSbKey = ''; }
+  SB_URL = _decryptedSbUrl || '';
+  SB_KEY = _decryptedSbKey || '';
+}
 
 // ====== NAVIGATION ======
 function showView(name) {
@@ -3615,6 +3737,7 @@ async function loadState() {
   initUserSettings();
   _initOfflineIndicator();
   initMsToken();
+  initTeacherActivityTracking();
   const dbMods = await DB.loadModules();
   if (dbMods.length > 0) {
     state.modules = dbMods;
@@ -3626,11 +3749,14 @@ async function loadState() {
   const teacherSession = localStorage.getItem('os_teacher_session');
   if (teacherSession) {
     try {
+      if (!localStorage.getItem('os_teacher_auth')) throw new Error('missing auth');
       const ts = JSON.parse(teacherSession);
-      // Session expires after 7 days
-      if (ts.loggedInAt && (Date.now() - ts.loggedInAt) < 7 * 24 * 3600 * 1000) {
+      // Session expires after 30 minutes of inactivity
+      const lastActive = ts.lastActive || ts.loggedInAt || 0;
+      if (lastActive && (Date.now() - lastActive) < 30 * 60 * 1000) {
         state.isTeacher = true;
         teacherUpdateActivity();
+        startTeacherSessionTimer();
         document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'inline-flex');
         const btn = document.getElementById('teacherLoginBtn');
         if (btn) btn.style.display = 'none';
@@ -3825,21 +3951,92 @@ function updateStudentProgress() {
 
 // ====== TEACHER ======
 function openTeacherModal() {
+  const auth = localStorage.getItem('os_teacher_auth');
+  if (!auth) { openModal('teacherSetupModal'); return; }
   const modal = document.getElementById('teacherModal');
   if (modal) modal.classList.add('open');
   const tp = document.getElementById('teacherPass');
   if (tp) { tp.value = ''; setTimeout(() => tp.focus(), 100); }
+  updateLoginLockoutUI();
 }
 function loginTeacher() {
   const pass = document.getElementById('teacherPass').value;
   const correct = TEACHER_PASS;
   if (pass === correct) {
+function _getLoginAttempts() {
+  try { return JSON.parse(sessionStorage.getItem('os_login_attempts') || '{"count":0,"lockUntil":0}'); } catch { return { count: 0, lockUntil: 0 }; }
+}
+function _setLoginAttempts(data) { sessionStorage.setItem('os_login_attempts', JSON.stringify(data)); }
+function updateLoginLockoutUI() {
+  const info = document.getElementById('teacherLockoutInfo');
+  const btn = document.getElementById('teacherLoginBtn');
+  if (!info || !btn) return;
+  const attempts = _getLoginAttempts();
+  const remainingMs = (attempts.lockUntil || 0) - Date.now();
+  if (remainingMs > 0) {
+    const sec = Math.ceil(remainingMs / 1000);
+    info.style.display = 'block';
+    info.textContent = '🔒 For mange forsøk. Prøv igjen om ' + sec + 's';
+    btn.disabled = true;
+  } else {
+    info.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+function _startLockoutCountdown() {
+  updateLoginLockoutUI();
+  const t = setInterval(() => {
+    const attempts = _getLoginAttempts();
+    if ((attempts.lockUntil || 0) <= Date.now()) {
+      clearInterval(t);
+      attempts.lockUntil = 0;
+      attempts.count = 0;
+      _setLoginAttempts(attempts);
+      updateLoginLockoutUI();
+      return;
+    }
+    updateLoginLockoutUI();
+  }, 1000);
+}
+async function setupTeacherPassword() {
+  const p1 = document.getElementById('teacherSetupPass')?.value || '';
+  const p2 = document.getElementById('teacherSetupPassConfirm')?.value || '';
+  const err = document.getElementById('teacherSetupError');
+  if (p1.length < 8) { if (err) { err.style.display = 'block'; err.textContent = 'Passord må være minst 8 tegn.'; } return; }
+  if (p1 !== p2) { if (err) { err.style.display = 'block'; err.textContent = 'Passordene er ikke like.'; } return; }
+  const salt = SecurityUtils.generateSalt();
+  const hash = await SecurityUtils.hashPassword(p1, salt);
+  localStorage.setItem('os_teacher_auth', JSON.stringify({ salt, hash }));
+  closeModal('teacherSetupModal');
+  showToast('✅ Lærerpassord opprettet');
+  openTeacherModal();
+}
+async function loginTeacher() {
+  const pass = document.getElementById('teacherPass')?.value || '';
+  const attempts = _getLoginAttempts();
+  if ((attempts.lockUntil || 0) > Date.now()) {
+    updateLoginLockoutUI();
+    return;
+  }
+  const rawAuth = localStorage.getItem('os_teacher_auth');
+  if (!rawAuth) { openModal('teacherSetupModal'); return; }
+  let auth;
+  try { auth = JSON.parse(rawAuth); } catch { localStorage.removeItem('os_teacher_auth'); openModal('teacherSetupModal'); return; }
+  const ok = await SecurityUtils.verifyPassword(pass, auth.hash, auth.salt);
+  if (ok) {
     state.isTeacher = true;
-    // Persist teacher session
-    localStorage.setItem('os_teacher_session', JSON.stringify({ loggedInAt: Date.now(), lastActive: Date.now(), passHash: btoa(pass).slice(0,8) }));
+    _teacherSessionPassword = pass;
+    _sessionEncKey = await SecurityUtils.deriveEncryptionKey(pass);
+    _decryptedApiKey = '';
+    _decryptedSbUrl = '';
+    _decryptedSbKey = '';
+    await hydrateDecryptedSecrets();
+    localStorage.setItem('os_teacher_session', JSON.stringify({ loggedInAt: Date.now(), lastActive: Date.now() }));
+    _setLoginAttempts({ count: 0, lockUntil: 0 });
     document.getElementById('teacherQuizSection').style.display = 'block';
     document.getElementById('studentQuizSection').style.display = 'none';
     showDbStatus();
+    startTeacherSessionTimer();
     closeTeacherModal();
     document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'inline-flex');
     document.getElementById('teacherLoginBtn').style.display = 'none';
@@ -3864,6 +4061,12 @@ function loginTeacher() {
   } else {
     const err = document.getElementById('teacherError');
     if (err) { err.style.display='block'; setTimeout(()=>err.style.display='none',2500); }
+    const next = _getLoginAttempts();
+    next.count = (next.count || 0) + 1;
+    if (next.count >= 5) next.lockUntil = Date.now() + 30000;
+    _setLoginAttempts(next);
+    if (next.lockUntil) _startLockoutCountdown();
+    updateLoginLockoutUI();
   }
 }
 function closeTeacherModal() {
@@ -3872,16 +4075,6 @@ function closeTeacherModal() {
 }
 function checkTeacher() {
   if (state.isTeacher) { showView('teacher'); return; }
-  // Check if session within 1-hour grace period
-  try {
-    const ts = JSON.parse(localStorage.getItem('os_teacher_session') || '{}');
-    const lastActive = ts.lastActive || ts.loggedInAt || 0;
-    if (lastActive && (Date.now() - lastActive) < 60 * 60 * 1000) {
-      // Within 1 hour - restore without password
-      loginTeacherAuto();
-      return;
-    }
-  } catch(e) {}
   openTeacherModal();
 }
 
@@ -3892,12 +4085,49 @@ function teacherUpdateActivity() {
     const ts = JSON.parse(raw);
     ts.lastActive = Date.now();
     localStorage.setItem('os_teacher_session', JSON.stringify(ts));
+    if (state.isTeacher) startTeacherSessionTimer();
   } catch(e) {}
+}
+
+function startTeacherSessionTimer() {
+  if (!state.isTeacher) return;
+  if (_sessionWarningTimeout) clearTimeout(_sessionWarningTimeout);
+  if (_sessionLogoutTimeout) clearTimeout(_sessionLogoutTimeout);
+  const raw = localStorage.getItem('os_teacher_session');
+  if (!raw) return;
+  let ts;
+  try { ts = JSON.parse(raw); } catch { return; }
+  const last = ts.lastActive || Date.now();
+  const warnIn = Math.max(0, (25 * 60 * 1000) - (Date.now() - last));
+  const outIn = Math.max(0, (30 * 60 * 1000) - (Date.now() - last));
+  _sessionWarningTimeout = setTimeout(() => {
+    if (!state.isTeacher || _sessionWarningShown) return;
+    _sessionWarningShown = true;
+    const extend = confirm('Økten utløper snart på grunn av inaktivitet. Vil du forlenge økten?');
+    if (extend) {
+      _sessionWarningShown = false;
+      teacherUpdateActivity();
+      showToast('✅ Økten er forlenget');
+    }
+  }, warnIn);
+  _sessionLogoutTimeout = setTimeout(() => {
+    if (!state.isTeacher) return;
+    showToast('⏳ Økten utløp etter inaktivitet');
+    logoutTeacher();
+  }, outIn);
+}
+
+function initTeacherActivityTracking() {
+  const bump = () => { if (state.isTeacher) teacherUpdateActivity(); };
+  ['click','keydown','mousemove','touchstart','scroll'].forEach(evt => {
+    window.addEventListener(evt, bump, { passive: true });
+  });
 }
 
 function loginTeacherAuto() {
   state.isTeacher = true;
   teacherUpdateActivity();
+  startTeacherSessionTimer();
   document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'inline-flex');
   const btn = document.getElementById('teacherLoginBtn');
   if (btn) btn.style.display = 'none';
@@ -3921,6 +4151,14 @@ function loginTeacherAuto() {
 function logoutTeacher() {
   state.isTeacher = false;
   localStorage.removeItem('os_teacher_session');
+  _sessionEncKey = null;
+  _teacherSessionPassword = '';
+  _decryptedApiKey = '';
+  _decryptedSbUrl = '';
+  _decryptedSbKey = '';
+  _sessionWarningShown = false;
+  if (_sessionWarningTimeout) clearTimeout(_sessionWarningTimeout);
+  if (_sessionLogoutTimeout) clearTimeout(_sessionLogoutTimeout);
   document.getElementById('teacherQuizSection').style.display = 'none';
   document.getElementById('studentQuizSection').style.display = 'block';
   document.querySelectorAll('.teacher-tab').forEach(t => t.style.display = 'none');
@@ -4020,9 +4258,16 @@ function openSettings() {
 function initSettingsFields() {
   const apiEl = document.getElementById('settingsApiInput');
   if (apiEl) {
-    const key = localStorage.getItem('olaskole_apikey') || '';
-    if (key) { apiEl.value = key; showApiStatus(true); }
+    const enc = localStorage.getItem('olaskole_apikey');
+    apiEl.value = '';
+    if (enc) { showApiStatus(true); }
   }
+  const sbUrlEl = document.getElementById('sbUrlInput');
+  const sbKeyEl = document.getElementById('sbKeyInput');
+  if (sbUrlEl) sbUrlEl.value = '';
+  if (sbKeyEl) sbKeyEl.value = '';
+  if (localStorage.getItem('os_sb_url')) _decryptedSbUrl = '';
+  if (localStorage.getItem('os_sb_key')) _decryptedSbKey = '';
   const msEl = document.getElementById('msClientId');
   if (msEl) {
     const cid = localStorage.getItem('olaskole_ms_clientid') || '';
@@ -4095,13 +4340,17 @@ function toggleSettingsKeyVis() {
 function saveSettingsApiKey() {
   const key = document.getElementById('settingsApiInput')?.value.trim();
   if (!key) return;
-  localStorage.setItem('olaskole_apikey', key);
-  showApiStatus(true);
-  const fb = document.getElementById('settingsApiFeedback');
-  if (fb) { fb.style.display='block'; fb.style.background='#dcfce7'; fb.style.color='#166534'; fb.textContent='✅ API-nøkkel lagret!'; setTimeout(()=>fb.style.display='none',2500); }
+  if (!_sessionEncKey) { showToast('🔐 Logg inn som lærer på nytt for å lagre kryptert nøkkel'); return; }
+  SecurityUtils.encrypt(key, _sessionEncKey).then(payload => {
+    localStorage.setItem('olaskole_apikey', JSON.stringify(payload));
+    _decryptedApiKey = key;
+    showApiStatus(true);
+    const fb = document.getElementById('settingsApiFeedback');
+    if (fb) { fb.style.display='block'; fb.style.background='#dcfce7'; fb.style.color='#166534'; fb.textContent='✅ API-nøkkel lagret kryptert'; setTimeout(()=>fb.style.display='none',2500); }
+  }).catch(() => showToast('❌ Klarte ikke å lagre API-nøkkel'));
 }
 async function testSettingsApiKey() {
-  const key = document.getElementById('settingsApiInput')?.value.trim() || localStorage.getItem('olaskole_apikey');
+  const key = document.getElementById('settingsApiInput')?.value.trim() || getApiKey();
   if (!key) { showToast('⚠️ Lim inn en API-nøkkel først'); return; }
   const fb = document.getElementById('settingsApiFeedback');
   if (fb) { fb.style.display='block'; fb.style.background='#f0f0f0'; fb.style.color='#555'; fb.textContent='⏳ Tester…'; }
@@ -4116,10 +4365,22 @@ async function testSettingsApiKey() {
 }
 function deleteSettingsApiKey() {
   localStorage.removeItem('olaskole_apikey');
+  _decryptedApiKey = '';
   const el = document.getElementById('settingsApiInput'); if (el) el.value = '';
   showApiStatus(false);
 }
 
+async function changePassword() {
+  const np = document.getElementById('newPassInput')?.value.trim();
+  if (!np || np.length < 8) { showToast('⚠️ Passord må være minst 8 tegn'); return; }
+  const salt = SecurityUtils.generateSalt();
+  const hash = await SecurityUtils.hashPassword(np, salt);
+  localStorage.setItem('os_teacher_auth', JSON.stringify({ salt, hash }));
+  _teacherSessionPassword = np;
+  _sessionEncKey = await SecurityUtils.deriveEncryptionKey(np);
+  const fb = document.getElementById('passFeedback');
+  if (fb) { fb.style.display='block'; fb.style.background='#dcfce7'; fb.style.color='#166534'; fb.textContent='✅ Passord endret'; setTimeout(()=>fb.style.display='none',2500); }
+}
 function saveMsClientId() {
   const id = document.getElementById('msClientId')?.value.trim();
   if (id) localStorage.setItem('olaskole_ms_clientid', id);
@@ -4579,7 +4840,7 @@ function renderQuizHTML(m) {
         ${timerSec>0?`<div id="qtimer-${qi}" style="font-size:0.85rem;font-weight:800;color:var(--c2);background:var(--dark);padding:4px 10px;border-radius:50px;min-width:44px;text-align:center;">${timerSec}s</div>`:''}
       </div>
       <div class="quiz-opts">
-        ${opts.map((o,oi)=>`<button class="quiz-opt" id="qopt-${qi}-${oi}" onclick="checkAnswer(${qi},${o.correct},'${escHtml(q.explain||'')}',${oi},${correctMap})">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
+        ${opts.map((o,oi)=>`<button class="quiz-opt" id="qopt-${qi}-${oi}" onclick="checkAnswer(${qi},${o.correct},${oi},${correctMap})">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
       </div>
       <div class="quiz-feedback" id="qfb-${qi}"></div>
     </div>`;
@@ -4615,10 +4876,11 @@ function startQuizTimers(m) {
   });
 }
 
-function checkAnswer(qi, isCorrect, explain, optIdx, correctMap) {
+function checkAnswer(qi, isCorrect, optIdx, correctMap) {
   const card = document.getElementById('qcard-'+qi);
   const fb = document.getElementById('qfb-'+qi);
   if (!card || fb.innerHTML) return;
+  const explain = state.modules[state.currentModule]?.quiz?.[qi]?.explain || '';
   const opts = card.querySelectorAll('.quiz-opt');
   opts.forEach((o,i) => {
     o.disabled = true;
@@ -5698,7 +5960,7 @@ function renderPreviewPanel() {
   panel.innerHTML=html;
 }
 
-function escHtml(str){return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escHtml(str){return sanitizeHTML(str);}
 function _updateCharCount(inputId, maxLen) {
   const el = document.getElementById(inputId);
   const cc = document.getElementById(inputId + '-cc');
@@ -5722,7 +5984,17 @@ function pvEditVideo(i){const v=state.tempVideos[i];document.getElementById('vid
 function pvEditFlash(i){const f=state.tempFlashcards[i];document.getElementById('fcFront').value=f.front;document.getElementById('fcBack').value=f.back;state.tempFlashcards.splice(i,1);tcTab('fc');renderPreviewPanel();}
 
 // ====== VIDEO HELPERS ======
-function getYtId(url){if(!url)return null;const m=url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null;}
+function isValidYoutubeUrl(url) {
+  try {
+    const u = new URL(url);
+    return ['youtube.com', 'www.youtube.com', 'youtu.be'].includes(u.hostname);
+  } catch { return false; }
+}
+function getYtId(url){
+  if(!url || !isValidYoutubeUrl(url)) return null;
+  const m=url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m?m[1]:null;
+}
 function toggleVideoEmbed(divId,ytId){const el=document.getElementById(divId);if(el)el.style.display=el.style.display==='none'?'block':'none';}
 function previewManualVideo(){
   const url=document.getElementById('videoUrl')?.value.trim();
@@ -5763,24 +6035,74 @@ function renderResults() {
       <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:12px;padding:0.875rem 1.25rem;flex:1;min-width:120px;"><div style="font-size:1.6rem;font-weight:800;color:var(--c3);">${state.modules.length}</div><div style="font-size:0.78rem;color:var(--text-2);font-weight:700;">Emner</div></div>
       <div style="background:linear-gradient(135deg,#fdf4ff,#fce7ff);border-radius:12px;padding:0.875rem 1.25rem;flex:1;min-width:120px;"><div style="font-size:1.6rem;font-weight:800;color:var(--c5);">${numAnswers}</div><div style="font-size:0.78rem;color:var(--text-2);font-weight:700;">Totale svar</div></div>`;
   }
-  if(!Object.keys(students).length){container.innerHTML='<p style="color:var(--text-3);">Ingen svar registrert ennå.</p>';return;}
-  const searchHtml=`<input type="text" id="studentResultSearch" placeholder="🔍 Filtrer elev..." oninput="filterStudentResults()" style="width:100%;padding:9px 16px;border:1px solid var(--border-2);border-radius:50px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;background:var(--s2);color:var(--text);box-sizing:border-box;margin-bottom:0.875rem;">`;
-  container.innerHTML=searchHtml+Object.entries(students).map(([name,answers])=>`
-    <div class="student-result-row" data-name="${escHtml(name.toLowerCase())}" style="border:1px solid var(--border);border-radius:14px;margin-bottom:0.75rem;overflow:hidden;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1rem;cursor:pointer;background:var(--s2);" onclick="toggleStudentResults('sr-${escHtml(name)}')">
-        <div>
-          <div style="font-weight:800;color:var(--text);">👤 ${escHtml(name)}</div>
-          <div style="font-size:0.78rem;color:var(--text-3);">${answers.length} svar</div>
-        </div>
-        <div style="display:flex;gap:0.4rem;align-items:center;">
-          <button onclick="event.stopPropagation();exportStudentAnswersTxt('${escHtml(name)}')" style="background:var(--c4);color:white;border:none;padding:5px 10px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;">📋 txt</button>
-          <span style="color:var(--text-3);font-size:1rem;">▼</span>
-        </div>
-      </div>
-      <div id="sr-${escHtml(name)}" style="display:none;padding:0.875rem 1rem;background:var(--s1);border-top:1px solid var(--border);">
-        ${answers.length?answers.map(a=>`<div style="font-size:0.85rem;color:var(--text-2);padding:0.4rem 0;border-bottom:1px solid var(--border);">${escHtml(a.key.split('_').slice(-2).join('_'))}: ${escHtml(String(a.val).substring(0,120))}</div>`).join(''):'<p style="color:var(--text-3);font-size:0.88rem;">Ingen svar ennå.</p>'}
-      </div>
-    </div>`).join('');
+  if(!Object.keys(students).length){
+    container.innerHTML='<p style="color:var(--text-3);">Ingen svar registrert ennå.</p>';
+    return;
+  }
+  container.innerHTML = '';
+  const searchInput = document.createElement('input');
+  searchInput.type = 'text';
+  searchInput.id = 'studentResultSearch';
+  searchInput.placeholder = '🔍 Filtrer elev...';
+  searchInput.style.cssText = "width:100%;padding:9px 16px;border:1px solid var(--border-2);border-radius:50px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;background:var(--s2);color:var(--text);box-sizing:border-box;margin-bottom:0.875rem;";
+  searchInput.addEventListener('input', filterStudentResults);
+  container.appendChild(searchInput);
+  Object.entries(students).forEach(([name,answers], idx) => {
+    const row = document.createElement('div');
+    row.className = 'student-result-row';
+    row.dataset.name = String(name || '').toLowerCase();
+    row.style.cssText = 'border:1px solid var(--border);border-radius:14px;margin-bottom:0.75rem;overflow:hidden;';
+
+    const header = document.createElement('div');
+    const detailId = 'sr-' + idx;
+    header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1rem;cursor:pointer;background:var(--s2);';
+    header.addEventListener('click', () => toggleStudentResults(detailId));
+
+    const left = document.createElement('div');
+    const nameEl = document.createElement('div');
+    nameEl.style.cssText = 'font-weight:800;color:var(--text);';
+    nameEl.textContent = '👤 ' + name;
+    const countEl = document.createElement('div');
+    countEl.style.cssText = 'font-size:0.78rem;color:var(--text-3);';
+    countEl.textContent = answers.length + ' svar';
+    left.appendChild(nameEl);
+    left.appendChild(countEl);
+
+    const right = document.createElement('div');
+    right.style.cssText = 'display:flex;gap:0.4rem;align-items:center;';
+    const exportBtn = document.createElement('button');
+    exportBtn.textContent = '📋 txt';
+    exportBtn.style.cssText = "background:var(--c4);color:white;border:none;padding:5px 10px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;cursor:pointer;";
+    exportBtn.addEventListener('click', (e) => { e.stopPropagation(); exportStudentAnswersTxt(name); });
+    const caret = document.createElement('span');
+    caret.style.cssText = 'color:var(--text-3);font-size:1rem;';
+    caret.textContent = '▼';
+    right.appendChild(exportBtn);
+    right.appendChild(caret);
+
+    header.appendChild(left);
+    header.appendChild(right);
+
+    const detail = document.createElement('div');
+    detail.id = detailId;
+    detail.style.cssText = 'display:none;padding:0.875rem 1rem;background:var(--s1);border-top:1px solid var(--border);';
+    if (!answers.length) {
+      const p = document.createElement('p');
+      p.style.cssText = 'color:var(--text-3);font-size:0.88rem;';
+      p.textContent = 'Ingen svar ennå.';
+      detail.appendChild(p);
+    } else {
+      answers.forEach(a => {
+        const item = document.createElement('div');
+        item.style.cssText = 'font-size:0.85rem;color:var(--text-2);padding:0.4rem 0;border-bottom:1px solid var(--border);';
+        item.textContent = a.key.split('_').slice(-2).join('_') + ': ' + String(a.val).substring(0,120);
+        detail.appendChild(item);
+      });
+    }
+    row.appendChild(header);
+    row.appendChild(detail);
+    container.appendChild(row);
+  });
 }
 
 function toggleStudentResults(id){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none';}
@@ -6541,7 +6863,17 @@ function exportAllAnswersTxt(){
 }
 
 // ====== AI HELPERS ======
-function getApiKey(){return localStorage.getItem('olaskole_apikey')||'';}
+function getApiKey() {
+  if (_decryptedApiKey) return _decryptedApiKey;
+  const raw = localStorage.getItem('olaskole_apikey');
+  if (!raw) return '';
+  if (!_sessionEncKey) { showToast('🔐 Re-autentisering kreves for å bruke AI-nøkkel'); return ''; }
+  try {
+    const payload = JSON.parse(raw);
+    SecurityUtils.decrypt(payload.ciphertext, _sessionEncKey, payload.iv).then(v => { _decryptedApiKey = v; }).catch(() => {});
+  } catch {}
+  return _decryptedApiKey;
+}
 
 function _aiCheckQuota() {
   const today = new Date().toISOString().slice(0,10);
@@ -6604,7 +6936,7 @@ Alt på ${s.language}. Kortfattede svar.`;
   const res=await aiCallJSON(p,'aiSpinner',2000);
   const resultEl=document.getElementById('aiResult');
   if(!resultEl)return;
-  if(!res||res.error){resultEl.innerHTML=`<div style="color:var(--c1);font-weight:800;">❌ ${res?.error||'Feil'}</div>`;resultEl.style.display='block';return;}
+  if(!res||res.error){resultEl.innerHTML=`<div style="color:var(--c1);font-weight:800;">❌ ${escHtml(res?.error||'Feil')}</div>`;resultEl.style.display='block';return;}
   _aiDraft = {
     quiz: res.quiz?.length ? res.quiz : [],
     discussion: res.discussion?.length ? res.discussion : [],
@@ -6762,7 +7094,7 @@ Lag eksakt: ${s.quizCount} quiz-spørsmål, ${s.discCount} drøftingsspørsmål,
   const res=await aiCallJSON(p,'goalGenSpinner',2000);
   const resultEl=document.getElementById('goalGenResult');
   if(!resultEl)return;
-  if(!res||res.error){resultEl.style.display='block';resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
+  if(!res||res.error){resultEl.style.display='block';resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${escHtml(res?.error||'Feil')}</span>`;return;}
   _aiDraft = {
     quiz: res.quiz?.length ? res.quiz : [],
     discussion: res.discussion?.length ? res.discussion : [],
@@ -6781,7 +7113,7 @@ async function aiGenerateSingleQuiz(){
   if(resultEl){resultEl.style.display='block';resultEl.innerHTML='<span style="color:var(--text-2);">⏳ Lager spørsmål...</span>';}
   const p=`Lag ETT flervalg-spørsmål for ${s.klasse} (${s.vanske}) om: "${topic}". Svar KUN med JSON: {"question":"...","a":"riktig","b":"feil","c":"feil","d":"feil","explain":"..."} Alt på ${s.language}.`;
   const res=await aiCallJSON(p,'sqSpinner');
-  if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
+  if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${escHtml(res?.error||'Feil')}</span>`;return;}
   if(resultEl)resultEl.innerHTML=`<div style="background:var(--s1);border-radius:12px;padding:1rem;border:1px solid var(--c3);">
     <div style="font-weight:800;margin-bottom:0.5rem;">❓ ${escHtml(res.question)}</div>
     <div style="font-size:0.88rem;color:var(--text-2);">✅ A: ${escHtml(res.a)}<br>❌ B: ${escHtml(res.b)}<br>❌ C: ${escHtml(res.c)}<br>❌ D: ${escHtml(res.d)}</div>
@@ -6809,7 +7141,7 @@ async function aiImportQuizFromText() {
   const prompt = `Du er norsk lærer. Lag ${count} flervalgsspørsmål på norsk for ungdomsskoleelever basert på følgende tekst:\n"""\n${text.substring(0,3000)}\n"""\nSvar KUN med JSON: {"questions":[{"q":"...","opts":["A","B","C","D"],"correct":0,"explanation":"..."}]}`;
   const res = await aiCallJSON(prompt, 'aiImportSpinner', 2500);
   if (!res || res.error || !res.questions?.length) {
-    if (fb) fb.innerHTML = `<span style="color:var(--c1);">❌ ${res?.error || 'Ingen spørsmål generert'}</span>`;
+    if (fb) fb.innerHTML = `<span style="color:var(--c1);">❌ ${escHtml(res?.error || 'Ingen spørsmål generert')}</span>`;
     return;
   }
   res.questions.forEach(item => {
@@ -6891,7 +7223,7 @@ async function aiGenerateSingleDisc(){
   if(resultEl){resultEl.style.display='block';resultEl.innerHTML='<span style="color:var(--text-2);">⏳ Lager spørsmål...</span>';}
   const p=`Lag 2 drøftingsspørsmål for ${s.klasse} om: "${topic}". Svar KUN med JSON: {"questions":["...","..."]} Alt på ${s.language}.`;
   const res=await aiCallJSON(p,'sdSpinner');
-  if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
+  if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${escHtml(res?.error||'Feil')}</span>`;return;}
   const qs=res.questions||[];
   if(resultEl)resultEl.innerHTML=`<div style="display:flex;flex-direction:column;gap:0.5rem;">`+
     qs.map(q=>`<div style="background:var(--s1);border-radius:10px;padding:0.875rem;border:1px solid var(--c5);">
@@ -6910,7 +7242,7 @@ async function aiGenerateWriteTask(){
   if(resultEl){resultEl.style.display='block';resultEl.innerHTML='<span style="color:var(--text-2);">⏳ Lager skriveoppgave...</span>';}
   const p=`Lag EN skriveoppgave for ${s.klasse} om: "${topic}". Svar KUN med JSON: {"title":"...","desc":"Instruksjon til eleven...","minWords":150} Alt på ${s.language}.`;
   const res=await aiCallJSON(p,'swSpinner');
-  if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
+  if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${escHtml(res?.error||'Feil')}</span>`;return;}
   if(resultEl)resultEl.innerHTML=`<div style="background:var(--s1);border-radius:12px;padding:1rem;border:1px solid var(--c3);">
     <div style="font-weight:800;margin-bottom:0.3rem;">✍️ ${escHtml(res.title)}</div>
     <div style="font-size:0.88rem;color:var(--text-2);margin-bottom:0.5rem;">${escHtml(res.desc)}</div>
@@ -6936,7 +7268,7 @@ async function aiGenerateVideo(){
 Bruk kun kjente kanaler (NRK Skole, Crash Course, Kurzgesagt, Khan Academy osv.). Kun foreslå videoer du er sikker på eksisterer.
 Svar KUN med JSON: {"videos":[{"title":"...","ytId":"11-tegns-ID eller null","searchUrl":"https://www.youtube.com/results?search_query=...","channel":"...","task":"Refleksjonsoppgave...","confident":true}]}`;
   const res=await aiCallJSON(p,'svSpinner',2000);
-  if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
+  if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${escHtml(res?.error||'Feil')}</span>`;return;}
   const vids=res.videos||[];
   if(resultEl)resultEl.innerHTML=`<div style="display:flex;flex-direction:column;gap:0.875rem;">`+
     vids.map((v,i)=>{
@@ -6974,7 +7306,7 @@ async function aiGenerateFlashcards(){
   if(resultEl){resultEl.style.display='block';resultEl.innerHTML='<span style="color:var(--text-2);">⏳ Lager flashcards...</span>';}
   const p=`Lag ${s.fcCount} flashcards for ${s.klasse} (${s.vanske}) om: "${topic}". Svar KUN med JSON: {"cards":[{"front":"Begrep","back":"Definisjon"}]} Alt på ${s.language}.`;
   const res=await aiCallJSON(p,'fcAiSpinner');
-  if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${res?.error}</span>`;return;}
+  if(!res||res.error){if(resultEl)resultEl.innerHTML=`<span style="color:var(--c1);">❌ ${escHtml(res?.error||'Feil')}</span>`;return;}
   const cards=res.cards||[];
   if(resultEl)resultEl.innerHTML=`<div style="font-weight:800;margin-bottom:0.5rem;">📋 ${cards.length} flashcards:</div>
     <div style="display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.75rem;">${cards.map(c=>`<div style="background:var(--s2);border-radius:8px;padding:0.5rem 0.875rem;font-size:0.88rem;border:1px solid var(--border);"><b>${escHtml(c.front)}</b> → ${escHtml(c.back)}</div>`).join('')}</div>
@@ -7058,7 +7390,7 @@ async function processFile(file){
       const htmlResult=await mammoth.convertToHtml({arrayBuffer:ab});
       const rawResult=await mammoth.extractRawText({arrayBuffer:ab});
       uploadedFileText=rawResult.value;
-      if(previewText){previewText.innerHTML=htmlResult.value.substring(0,1200)+(htmlResult.value.length>1200?'…':'');previewText._isHtml=true;}
+      if(previewText){previewText.innerHTML=sanitizeHTML(htmlResult.value.substring(0,1200)+(htmlResult.value.length>1200?'…':''));previewText._isHtml=true;}
     }else if(file.name.endsWith('.pptx')){
       const ab=await file.arrayBuffer();
       const zip=await JSZip.loadAsync(ab);
@@ -7373,15 +7705,19 @@ if(!document.getElementById('confettiStyle')){const s=document.createElement('st
 // ════════════════════════════════════════════════════════════════
 //  OLASKOLE · DATABASE LAYER
 //  Supabase REST API · localStorage fallback
-//  URL og nøkkel er hardkodet – fungerer på alle enheter uten
-//  noe oppsett fra bruker.
+//  URL og nøkkel settes i Innstillinger (kryptert i localStorage).
 // ════════════════════════════════════════════════════════════════
-const SB_URL = 'https://uzufgmhuihvjxlvvspwy.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6dWZnbWh1aWh2anhsdnZzcHd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODUyMDcsImV4cCI6MjA4ODQ2MTIwN30.V-KC9DMPfwzr94IqLinWqcv_qJ2ofIqFSgLMnQj3Tig';
+let SB_URL = '';
+let SB_KEY = '';
+
+function isDbConfigured() {
+  return !!(SB_URL && SB_KEY);
+}
 
 const DB = {
   // ── Intern hjelper: send en REST-forespørsel til Supabase ──────────
   async _q(method, table, params, body) {
+    if (!isDbConfigured()) return null;
     const url = SB_URL + '/rest/v1/' + table + (params ? '?' + params : '');
     const headers = {
       'apikey':        SB_KEY,
@@ -7765,24 +8101,21 @@ async function saveDbConfig() {
   const url = (document.getElementById('sbUrlInput')?.value || '').trim().replace(/\/$/, '');
   const key = (document.getElementById('sbKeyInput')?.value || '').trim();
   if (!url || !key) { showDbFeedback('Fyll inn både Project URL og API-nøkkel', false); return; }
-  localStorage.setItem('os_sb_url', url);
-  localStorage.setItem('os_sb_key', key);
+  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url)) { showDbFeedback('Ugyldig Supabase URL-format', false); return; }
+  if (!_sessionEncKey) { showDbFeedback('🔐 Logg inn på nytt for å lagre krypterte DB-verdier', false); return; }
+  const encUrl = await SecurityUtils.encrypt(url, _sessionEncKey);
+  const encKey = await SecurityUtils.encrypt(key, _sessionEncKey);
+  localStorage.setItem('os_sb_url', JSON.stringify(encUrl));
+  localStorage.setItem('os_sb_key', JSON.stringify(encKey));
+  _decryptedSbUrl = url;
+  _decryptedSbKey = key;
+  SB_URL = url;
+  SB_KEY = key;
   showDbFeedback('⏳ Tester tilkobling…', true);
   const result = await DB.testConnection();
   showDbStatus();
   if (result.ok) {
-    // Patch the embedded key directly into the HTML file source so
-    // it works on ALL devices. Guide the teacher to do this.
-    const isEmbedded = checkKeyEmbedded();
-    if (!isEmbedded) {
-      showDbFeedback(
-        '✅ Tilkoblet! <br><b>⚠️ For at alle enheter skal fungere automatisk:</b> ' +
-        'Last ned HTML-filen på nytt etter at nøkkelen er lagret, eller trykk «Lagre nøkkel i fil» under.',
-        true
-      );
-    } else {
-      showDbFeedback('✅ ' + result.msg, true);
-    }
+    showDbFeedback('✅ ' + result.msg, true);
     showToast('✅ Supabase koblet til! Laster emner…');
     state.modules = await DB.loadModules();
     await loadRosterCached();
@@ -7794,30 +8127,11 @@ async function saveDbConfig() {
 }
 
 function checkKeyEmbedded() {
-  // Check if the embedded key in the source is set
-  // We do this by checking if the page source contains the actual key
-  const key = localStorage.getItem('os_sb_key') || '';
-  return key && document.documentElement.innerHTML.includes(key.substring(0, 20));
+  return false;
 }
 
 async function saveKeyToFile() {
-  // Generate a new version of the HTML with the key embedded
-  const url = localStorage.getItem('os_sb_url') || '';
-  const key = localStorage.getItem('os_sb_key') || '';
-  if (!key || !key.startsWith('eyJ')) {
-    showDbFeedback('❌ Ingen gyldig nøkkel å lagre. Koble til Supabase først.', false); return;
-  }
-  let src = document.documentElement.outerHTML;
-  // Replace the EMBEDDED_KEY placeholder
-  src = src.replace("const EMBEDDED_KEY = '';", "const EMBEDDED_KEY = '" + key + "';");
-  src = src.replace("const EMBEDDED_URL = 'https://uzufgmhuihvjxlvvspwy.supabase.co';", "const EMBEDDED_URL = '" + url + "';" );
-  const blob = new Blob([src], { type: 'text/html' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'laererplattform.html';
-  a.click();
-  showDbFeedback('✅ Fil lastet ned med nøkkel innbakt! Last denne opp til GitHub Pages.', true);
-  showToast('✅ Ny HTML lastet ned – last opp til GitHub Pages!');
+  showDbFeedback('⚠️ Denne funksjonen er deaktivert av sikkerhetshensyn.', false);
 }
 
 async function testDbConnection() {
@@ -7953,7 +8267,11 @@ function clearDbConfig() {
   _showConfirm('Fjerne Supabase-tilkobling? Data i databasen beholdes.', () => {
     localStorage.removeItem('os_sb_url');
     localStorage.removeItem('os_sb_key');
-    showToast('⚠️ URL/nøkkel er hardkodet i filen – kan ikke fjernes herfra');
+    SB_URL = '';
+    SB_KEY = '';
+    _decryptedSbUrl = '';
+    _decryptedSbKey = '';
+    showToast('⚠️ Supabase-tilkobling fjernet');
     showDbStatus();
     showDbFeedback('Tilkobling fjernet. Bruker lokal lagring.', true);
   }, 'Fjern', 'var(--c1)');
@@ -7971,11 +8289,18 @@ function showDbFeedback(msg, ok) {
 function showDbStatus() {
   const el = document.getElementById('dbStatus');
   if (!el) return;
+  if (!isDbConfigured()) {
+    el.style.background = 'rgba(239,68,68,0.1)';
+    el.style.color = '#991b1b';
+    el.textContent = '❌ Supabase ikke konfigurert';
+    const pill0 = document.getElementById('dbNavPill');
+    if (pill0) { pill0.style.display = 'inline-block'; pill0.style.background = '#ef4444'; pill0.title = 'Database: ikke konfigurert'; }
+    return;
+  }
   const short = SB_URL.replace('https://', '').split('.')[0];
   el.style.background = '#dcfce7';
   el.style.color = '#166534';
   el.textContent = '✅ Supabase: ' + short + '.supabase.co – kjør 🔬 Diagnose for å verifisere';
-  // Fyll inn URL/nøkkel i input-feltene for avansert seksjon
   const ui = document.getElementById('sbUrlInput');
   const ki = document.getElementById('sbKeyInput');
   if (ui && !ui.value) ui.value = SB_URL;
@@ -8265,17 +8590,30 @@ function wcRenderCloud(canvas) {
     });
   });
   if (Object.keys(freq).length === 0) {
-    canvas.innerHTML = '<div style="color:var(--text-3);font-size:0.9rem;">Ingen svar ennå</div>';
+    canvas.innerHTML = '';
+    const empty = document.createElement('div');
+    empty.style.cssText = 'color:var(--text-3);font-size:0.9rem;';
+    empty.textContent = 'Ingen svar ennå';
+    canvas.appendChild(empty);
     return;
   }
   const maxF = Math.max(...Object.values(freq));
   const colors = ['var(--accent-h)','var(--green)','var(--yellow)','var(--purple)','#60a5fa','#f472b6'];
   const sorted = Object.entries(freq).sort((a,b)=>b[1]-a[1]);
-  canvas.innerHTML = sorted.map(([word, count]) => {
+  canvas.innerHTML = '';
+  sorted.forEach(([word, count]) => {
     const size = 0.85 + (count/maxF)*2.2;
     const color = colors[Math.abs(word.charCodeAt(0)) % colors.length];
-    return `<span class="wc-word-chip" style="font-size:${size}rem;color:${color};background:${color}22;padding:${0.2+count/maxF*0.4}em ${0.5+count/maxF*0.3}em;">${escHtml(word)}<sup style="font-size:0.55em;opacity:0.7;margin-left:2px;">${count}</sup></span>`;
-  }).join('');
+    const chip = document.createElement('span');
+    chip.className = 'wc-word-chip';
+    chip.style.cssText = `font-size:${size}rem;color:${color};background:${color}22;padding:${0.2+count/maxF*0.4}em ${0.5+count/maxF*0.3}em;`;
+    chip.appendChild(document.createTextNode(word));
+    const sup = document.createElement('sup');
+    sup.style.cssText = 'font-size:0.55em;opacity:0.7;margin-left:2px;';
+    sup.textContent = String(count);
+    chip.appendChild(sup);
+    canvas.appendChild(chip);
+  });
 }
 
 function wcRenderPoll(canvas) {
@@ -8287,35 +8625,70 @@ function wcRenderPoll(canvas) {
   });
   const total = Object.values(freq).reduce((a,b)=>a+b,0);
   if (total === 0) {
-    canvas.innerHTML = '<div style="color:var(--text-3);font-size:0.9rem;">Ingen svar ennå</div>';
+    canvas.innerHTML = '';
+    const empty = document.createElement('div');
+    empty.style.cssText = 'color:var(--text-3);font-size:0.9rem;';
+    empty.textContent = 'Ingen svar ennå';
+    canvas.appendChild(empty);
     return;
   }
-  canvas.innerHTML = `<div style="width:100%;padding:0.5rem;">` +
-    Object.entries(freq).map(([opt, cnt]) => {
-      const pct = total ? Math.round(cnt/total*100) : 0;
-      return `<div class="wc-poll-bar-wrap">
-        <div class="wc-poll-bar-label"><span>${escHtml(opt)}</span><span>${cnt} (${pct}%)</span></div>
-        <div class="wc-poll-bar"><div class="wc-poll-bar-fill" style="width:${pct}%"></div></div>
-      </div>`;
-    }).join('') + `</div>`;
+  canvas.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'width:100%;padding:0.5rem;';
+  Object.entries(freq).forEach(([opt, cnt]) => {
+    const pct = total ? Math.round(cnt/total*100) : 0;
+    const barWrap = document.createElement('div');
+    barWrap.className = 'wc-poll-bar-wrap';
+    const label = document.createElement('div');
+    label.className = 'wc-poll-bar-label';
+    const l = document.createElement('span');
+    l.textContent = opt;
+    const r = document.createElement('span');
+    r.textContent = `${cnt} (${pct}%)`;
+    label.appendChild(l);
+    label.appendChild(r);
+    const bar = document.createElement('div');
+    bar.className = 'wc-poll-bar';
+    const fill = document.createElement('div');
+    fill.className = 'wc-poll-bar-fill';
+    fill.style.width = pct + '%';
+    bar.appendChild(fill);
+    barWrap.appendChild(label);
+    barWrap.appendChild(bar);
+    wrap.appendChild(barWrap);
+  });
+  canvas.appendChild(wrap);
 }
 
 function wcRenderResponsesList() {
   const list = document.getElementById('wc-responses-list');
   if (!list) return;
-  if (!WC.results.length) { list.innerHTML = ''; return; }
-  list.innerHTML = `<div style="font-weight:800;font-size:0.88rem;color:var(--text-2);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Svar (${WC.results.length})</div>` +
-    WC.results.map((r,i) => {
-      const name = WC.session.anonymous ? 'Anonym' : (r.name||'Ukjent');
-      const words = WC.session.mode==='poll' ? [r.vote||''] : (r.words||[]);
-      return `<div class="wc-response-item">
-        <span style="color:var(--text-2);font-size:0.82rem;">${name}</span>
-        <span style="font-weight:700;">${words.map(w=>escHtml(w)).join(', ')}</span>
-        <button onclick="wcRemoveResponse(${i})" style="background:none;border:none;color:var(--text-3);cursor:pointer;padding:2px 6px;font-size:0.8rem;border-radius:4px;min-height:unset;" title="Fjern">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>`;
-    }).join('');
+  list.innerHTML = '';
+  if (!WC.results.length) return;
+  const title = document.createElement('div');
+  title.style.cssText = 'font-weight:800;font-size:0.88rem;color:var(--text-2);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em;';
+  title.textContent = `Svar (${WC.results.length})`;
+  list.appendChild(title);
+  WC.results.forEach((r, i) => {
+    const row = document.createElement('div');
+    row.className = 'wc-response-item';
+    const nameEl = document.createElement('span');
+    nameEl.style.cssText = 'color:var(--text-2);font-size:0.82rem;';
+    nameEl.textContent = WC.session.anonymous ? 'Anonym' : (r.name || 'Ukjent');
+    const wordsEl = document.createElement('span');
+    wordsEl.style.cssText = 'font-weight:700;';
+    const words = WC.session.mode==='poll' ? [r.vote||''] : (r.words||[]);
+    wordsEl.textContent = words.join(', ');
+    const btn = document.createElement('button');
+    btn.style.cssText = 'background:none;border:none;color:var(--text-3);cursor:pointer;padding:2px 6px;font-size:0.8rem;border-radius:4px;min-height:unset;';
+    btn.title = 'Fjern';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    btn.addEventListener('click', () => wcRemoveResponse(i));
+    row.appendChild(nameEl);
+    row.appendChild(wordsEl);
+    row.appendChild(btn);
+    list.appendChild(row);
+  });
 }
 
 function wcRemoveResponse(i) {
@@ -8358,16 +8731,45 @@ function wcAutoJoin(sess) {
   active.style.display = 'block';
   document.getElementById('wc-student-title').textContent = sess.title;
   const inputArea = document.getElementById('wc-student-input-area');
-  const name = state.student || 'Anonym';
+  inputArea.innerHTML = '';
   if (sess.mode === 'poll') {
-    inputArea.innerHTML = `<div style="display:flex;flex-direction:column;gap:0.5rem;">
-      ${(sess.pollOptions||[]).map(opt => `<button onclick="wcSubmitPoll('${escHtml(opt)}','${sess.code}')" style="padding:0.875rem 1rem;background:var(--s2);border:2px solid var(--border-2);border-radius:10px;color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;text-align:left;transition:all 0.18s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-2)'">${escHtml(opt)}</button>`).join('')}
-    </div>`;
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:0.5rem;';
+    (sess.pollOptions||[]).forEach(opt => {
+      const btn = document.createElement('button');
+      btn.style.cssText = "padding:0.875rem 1rem;background:var(--s2);border:2px solid var(--border-2);border-radius:10px;color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;text-align:left;transition:all 0.18s;";
+      btn.textContent = opt;
+      btn.addEventListener('mouseover', function(){ this.style.borderColor='var(--accent)'; });
+      btn.addEventListener('mouseout', function(){ this.style.borderColor='var(--border-2)'; });
+      btn.addEventListener('click', () => wcSubmitPoll(opt, sess.code));
+      wrap.appendChild(btn);
+    });
+    inputArea.appendChild(wrap);
   } else {
-    const allowedHtml = sess.wordMode==='locked' && sess.allowedWords?.length
-      ? `<div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem;">${(sess.allowedWords||[]).map(w=>`<button onclick="wcAddWordChip('${escHtml(w)}')" style="padding:0.4rem 0.875rem;background:var(--s2);border:1px solid var(--border-2);border-radius:50px;color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;">${escHtml(w)}</button>`).join('')}</div>`
-      : `<input type="text" id="wc-word-input" placeholder="Skriv et ord..." /><button class="btn-primary" style="margin-top:0.5rem;width:100%;" onclick="wcSubmitWords('${sess.code}')">Send svar</button>`;
-    inputArea.innerHTML = allowedHtml;
+    if (sess.wordMode==='locked' && sess.allowedWords?.length) {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem;';
+      (sess.allowedWords||[]).forEach(w => {
+        const btn = document.createElement('button');
+        btn.style.cssText = "padding:0.4rem 0.875rem;background:var(--s2);border:1px solid var(--border-2);border-radius:50px;color:var(--text-2);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;";
+        btn.textContent = w;
+        btn.addEventListener('click', () => wcAddWordChip(w));
+        wrap.appendChild(btn);
+      });
+      inputArea.appendChild(wrap);
+    } else {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = 'wc-word-input';
+      input.placeholder = 'Skriv et ord...';
+      const btn = document.createElement('button');
+      btn.className = 'btn-primary';
+      btn.style.cssText = 'margin-top:0.5rem;width:100%;';
+      btn.textContent = 'Send svar';
+      btn.addEventListener('click', () => wcSubmitWords(sess.code));
+      inputArea.appendChild(input);
+      inputArea.appendChild(btn);
+    }
   }
 }
 
@@ -8397,7 +8799,17 @@ function wcSubmitWords(code) {
   const resultMsg = document.getElementById('wc-student-result-msg');
   if (resultMsg) { resultMsg.style.display='block'; resultMsg.textContent='✅ «'+word+'» er sendt!'; }
   const inputArea = document.getElementById('wc-student-input-area');
-  if (inputArea) inputArea.innerHTML = `<div style="text-align:center;padding:1.25rem;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:12px;font-weight:800;color:var(--c3);font-size:1rem;">✅ Svaret ditt er registrert!<div style="font-size:0.8rem;font-weight:600;color:var(--text-3);margin-top:0.3rem;">«${escHtml(word)}»</div></div>`;
+  if (inputArea) {
+    inputArea.innerHTML = '';
+    const ok = document.createElement('div');
+    ok.style.cssText = 'text-align:center;padding:1.25rem;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:12px;font-weight:800;color:var(--c3);font-size:1rem;';
+    ok.textContent = '✅ Svaret ditt er registrert!';
+    const txt = document.createElement('div');
+    txt.style.cssText = 'font-size:0.8rem;font-weight:600;color:var(--text-3);margin-top:0.3rem;';
+    txt.textContent = '«' + word + '»';
+    ok.appendChild(txt);
+    inputArea.appendChild(ok);
+  }
   showToast('✅ Sendt!');
 }
 
