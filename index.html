@@ -2308,7 +2308,7 @@
       <input type="password" id="changePassCurrent" placeholder="Nåværende passord" autocomplete="current-password"
         style="width:100%;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;background:var(--s3);color:var(--text);box-sizing:border-box;margin-bottom:0.5rem;"
         onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
-      <input type="password" id="changePassNew" placeholder="Nytt passord (min. 6 tegn)" autocomplete="new-password"
+      <input type="password" id="changePassNew" placeholder="Nytt passord (min. 8 tegn)" autocomplete="new-password"
         style="width:100%;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;background:var(--s3);color:var(--text);box-sizing:border-box;margin-bottom:0.75rem;"
         onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border-2)'" />
       <div id="changePassError" style="display:none;color:var(--c1);font-weight:700;font-size:0.82rem;margin-bottom:0.5rem;"></div>
@@ -3162,7 +3162,22 @@
     <div id="teacherLockoutInfo" style="display:none;color:var(--c2);font-weight:800;font-size:0.88rem;margin-bottom:0.5rem;"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('teacherModal')">Avbryt</button>
-      <button class="btn-primary" onclick="loginTeacher()">Logg inn</button>
+      <button class="btn-primary" id="teacherLoginBtn" onclick="loginTeacher()">Logg inn</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEACHER SETUP MODAL (first-time or password reset) -->
+<div class="modal-overlay" id="teacherSetupModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="teacherSetupTitle">
+    <h2 id="teacherSetupTitle">Opprett lærerpassord</h2>
+    <p style="font-size:0.85rem;color:var(--text-2);margin-bottom:1rem;text-align:center;">Velg et passord for lærerkontoen. Passordet lagres kryptert lokalt.</p>
+    <input type="password" id="teacherSetupPass" placeholder="Passord (min. 8 tegn)" autocomplete="new-password" onkeydown="if(event.key==='Enter')setupTeacherPassword()" style="margin-bottom:0.5rem;" />
+    <input type="password" id="teacherSetupPassConfirm" placeholder="Gjenta passord" autocomplete="new-password" onkeydown="if(event.key==='Enter')setupTeacherPassword()" />
+    <div id="teacherSetupError" style="display:none;color:var(--c1);font-weight:800;font-size:0.85rem;margin-bottom:0.5rem;"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('teacherSetupModal')">Avbryt</button>
+      <button class="btn-primary" onclick="setupTeacherPassword()">Lagre passord</button>
     </div>
   </div>
 </div>
@@ -3769,6 +3784,15 @@ async function loadState() {
   _runMigrations();
   _checkScheduled();
 
+  // Seed default hashed password on first load so 'Olala1234' works out of the box
+  if (!localStorage.getItem('os_teacher_auth')) {
+    try {
+      const salt = SecurityUtils.generateSalt();
+      const hash = await SecurityUtils.hashPassword(TEACHER_PASS, salt);
+      localStorage.setItem('os_teacher_auth', JSON.stringify({ salt, hash }));
+    } catch(e) { console.warn('Could not seed teacher auth:', e); }
+  }
+
   // Restore teacher session
   const teacherSession = localStorage.getItem('os_teacher_session');
   if (teacherSession) {
@@ -3984,10 +4008,6 @@ function openTeacherModal() {
   openModal('teacherModal');
   setTimeout(() => { const t = document.getElementById('teacherPass'); if (t) t.focus(); }, 150);
 }
-function loginTeacher() {
-  const pass = document.getElementById('teacherPass').value;
-  const correct = getTeacherPass();
-  if (pass === correct) {
 function _getLoginAttempts() {
   try { return JSON.parse(sessionStorage.getItem('os_login_attempts') || '{"count":0,"lockUntil":0}'); } catch { return { count: 0, lockUntil: 0 }; }
 }
@@ -4285,17 +4305,29 @@ function openSettings() {
   const err = document.getElementById('changePassError'); if (err) err.style.display = 'none';
 }
 
-function changeTeacherPass() {
+async function changeTeacherPass() {
   const currentEl = document.getElementById('changePassCurrent');
   const newEl = document.getElementById('changePassNew');
   const errEl = document.getElementById('changePassError');
   const current = currentEl?.value || '';
   const newPass = newEl?.value || '';
   const showErr = msg => { if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; } };
-  if (current !== getTeacherPass()) { showErr('❌ Nåværende passord er feil'); return; }
-  if (newPass.length < 6) { showErr('❌ Nytt passord må være minst 6 tegn'); return; }
   if (errEl) errEl.style.display = 'none';
-  localStorage.setItem('os_teacher_pass', newPass);
+  // Verify current password against stored hash
+  const rawAuth = localStorage.getItem('os_teacher_auth');
+  if (!rawAuth) { showErr('❌ Ingen lagringsdata. Logg ut og inn igjen.'); return; }
+  let auth;
+  try { auth = JSON.parse(rawAuth); } catch { showErr('❌ Korrupt data. Logg ut og inn igjen.'); return; }
+  const ok = await SecurityUtils.verifyPassword(current, auth.hash, auth.salt);
+  if (!ok) { showErr('❌ Nåværende passord er feil'); return; }
+  if (newPass.length < 8) { showErr('❌ Nytt passord må være minst 8 tegn'); return; }
+  // Hash and store new password
+  const salt = SecurityUtils.generateSalt();
+  const hash = await SecurityUtils.hashPassword(newPass, salt);
+  localStorage.setItem('os_teacher_auth', JSON.stringify({ salt, hash }));
+  _teacherSessionPassword = newPass;
+  _sessionEncKey = await SecurityUtils.deriveEncryptionKey(newPass);
+  localStorage.removeItem('os_teacher_pass'); // remove legacy plain-text store
   if (currentEl) currentEl.value = '';
   if (newEl) newEl.value = '';
   showToast('✅ Passord oppdatert!');
@@ -4415,17 +4447,6 @@ function deleteSettingsApiKey() {
   showApiStatus(false);
 }
 
-async function changePassword() {
-  const np = document.getElementById('newPassInput')?.value.trim();
-  if (!np || np.length < 8) { showToast('⚠️ Passord må være minst 8 tegn'); return; }
-  const salt = SecurityUtils.generateSalt();
-  const hash = await SecurityUtils.hashPassword(np, salt);
-  localStorage.setItem('os_teacher_auth', JSON.stringify({ salt, hash }));
-  _teacherSessionPassword = np;
-  _sessionEncKey = await SecurityUtils.deriveEncryptionKey(np);
-  const fb = document.getElementById('passFeedback');
-  if (fb) { fb.style.display='block'; fb.style.background='#dcfce7'; fb.style.color='#166534'; fb.textContent='✅ Passord endret'; setTimeout(()=>fb.style.display='none',2500); }
-}
 function saveMsClientId() {
   const id = document.getElementById('msClientId')?.value.trim();
   if (id) localStorage.setItem('olaskole_ms_clientid', id);
