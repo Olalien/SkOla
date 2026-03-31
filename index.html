@@ -1116,7 +1116,8 @@
       <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:0.875rem;margin-bottom:0.875rem;flex-wrap:wrap;" class="form-grid-3">
         <div class="form-row" style="margin:0">
           <label>Emnenavn</label>
-          <input type="text" id="moduleName" placeholder="f.eks. Andre verdenskrig" oninput="updatePublishBarHint()" />
+          <input type="text" id="moduleName" placeholder="f.eks. Andre verdenskrig" maxlength="80" oninput="updatePublishBarHint();_updateCharCount('moduleName',80)" />
+          <div id="moduleName-cc" style="font-size:0.72rem;color:var(--text-3);text-align:right;margin-top:2px;"></div>
         </div>
         <div class="form-row" style="margin:0">
           <label>Kort beskrivelse</label>
@@ -1425,7 +1426,7 @@
         </div>
         <div class="or-divider">— eller fyll inn manuelt —</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;" class="form-grid-2">
-          <div class="form-row" style="margin:0;grid-column:1/-1"><label>Spørsmål</label><input type="text" id="quizQ" placeholder="Hva er..." /></div>
+          <div class="form-row" style="margin:0;grid-column:1/-1"><label>Spørsmål <span id="quizQ-cc" style="font-size:0.72rem;color:var(--text-3);font-weight:400;float:right;"></span></label><input type="text" id="quizQ" placeholder="Hva er..." maxlength="400" oninput="_updateCharCount('quizQ',400)" /></div>
           <div class="form-row" style="margin:0"><label>Svar A – riktig</label><input type="text" id="quizA" placeholder="Riktig svar" /></div>
           <div class="form-row" style="margin:0"><label>Svar B</label><input type="text" id="quizB" placeholder="Feil svar" /></div>
           <div class="form-row" style="margin:0"><label>Svar C</label><input type="text" id="quizC" placeholder="Feil svar" /></div>
@@ -2257,6 +2258,16 @@
           </div>
         </div>
       </details>
+    </div>
+
+    <!-- Backup / Export -->
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:0.875rem;">
+      <div style="font-weight:800;font-size:0.88rem;color:var(--text);margin-bottom:0.5rem;">💾 Backup og import</div>
+      <div style="font-size:0.78rem;color:var(--text-2);margin-bottom:0.75rem;">Last ned alle emner som JSON-fil, eller importer fra en backup.</div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button onclick="exportModulesJSON()" style="background:var(--s3);border:1px solid var(--border-2);border-radius:8px;padding:8px 16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;color:var(--text);display:flex;align-items:center;gap:6px;">⬇️ Last ned backup</button>
+        <label style="background:var(--s3);border:1px solid var(--border-2);border-radius:8px;padding:8px 16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;color:var(--text);display:flex;align-items:center;gap:6px;">⬆️ Importer backup<input type="file" accept=".json" style="display:none;" onchange="importModulesJSON(this)"></label>
+      </div>
     </div>
 
     <button class="btn-primary" style="width:100%;justify-content:center;" onclick="closeModal('settingsModal')">Lukk</button>
@@ -3805,6 +3816,11 @@ function loginTeacher() {
     renderHomeModules();
     renderTaskModules();
     showToast('✅ Logget inn som lærer');
+    // First-time teacher onboarding
+    if (!localStorage.getItem('os_teacher_welcomed') && !state.modules.length) {
+      localStorage.setItem('os_teacher_welcomed', '1');
+      setTimeout(() => _showTeacherWelcome(), 600);
+    }
   } else {
     const err = document.getElementById('teacherError');
     if (err) { err.style.display='block'; setTimeout(()=>err.style.display='none',2500); }
@@ -3880,6 +3896,78 @@ function logoutTeacher() {
   updateContinueCard();
   showView('home');
   showToast('Logget ut');
+}
+
+// ====== FIRST-TIME ONBOARDING ======
+function _showTeacherWelcome() {
+  const existing = document.getElementById('teacherWelcomeOverlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'teacherWelcomeOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  overlay.innerHTML = `
+    <div style="background:var(--s1);border-radius:22px;padding:2rem;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.35);animation:slideUp 0.3s ease;">
+      <div style="text-align:center;margin-bottom:1.25rem;">
+        <div style="font-size:3rem;margin-bottom:0.5rem;">👋</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--text);margin-bottom:0.4rem;">Velkommen til OlaSkole!</div>
+        <div style="font-size:0.92rem;color:var(--text-2);">Kom raskt i gang med disse stegene:</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.5rem;">
+        <div style="background:var(--s2);border-radius:12px;padding:0.875rem 1rem;display:flex;align-items:flex-start;gap:0.75rem;">
+          <span style="background:var(--accent);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;flex-shrink:0;margin-top:2px;">1</span>
+          <div><div style="font-weight:800;font-size:0.9rem;color:var(--text);">Opprett et emne</div><div style="font-size:0.8rem;color:var(--text-2);">Gå til «Nytt emne», gi emnet et navn og legg til oppgaver.</div></div>
+        </div>
+        <div style="background:var(--s2);border-radius:12px;padding:0.875rem 1rem;display:flex;align-items:flex-start;gap:0.75rem;">
+          <span style="background:var(--c3);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;flex-shrink:0;margin-top:2px;">2</span>
+          <div><div style="font-weight:800;font-size:0.9rem;color:var(--text);">Bruk AI for å spare tid</div><div style="font-size:0.8rem;color:var(--text-2);">Lim inn en fagtekst og la AI generere quiz og flashcards automatisk. Trenger API-nøkkel.</div></div>
+        </div>
+        <div style="background:var(--s2);border-radius:12px;padding:0.875rem 1rem;display:flex;align-items:flex-start;gap:0.75rem;">
+          <span style="background:var(--c4);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;flex-shrink:0;margin-top:2px;">3</span>
+          <div><div style="font-weight:800;font-size:0.9rem;color:var(--text);">Del med elevene</div><div style="font-size:0.8rem;color:var(--text-2);">Elevene besøker samme URL, velger «Arbeidsøkt» og logger inn med navn.</div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <button onclick="document.getElementById('teacherWelcomeOverlay').remove()" style="flex:1;background:var(--s3);border:1px solid var(--border-2);border-radius:12px;padding:11px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;color:var(--text);">Lukk</button>
+        <button onclick="document.getElementById('teacherWelcomeOverlay').remove();trTab('new')" style="flex:2;background:linear-gradient(135deg,var(--accent),var(--accent-h));border:none;border-radius:12px;padding:11px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;color:#fff;box-shadow:0 4px 16px rgba(123,143,253,0.3);">✏️ Opprett første emne →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
+
+// ====== BACKUP / EXPORT ======
+function exportModulesJSON() {
+  if (!state.modules.length) { showToast('⚠️ Ingen emner å eksportere'); return; }
+  const payload = JSON.stringify({ version: 2, exportedAt: new Date().toISOString(), modules: state.modules }, null, 2);
+  const blob = new Blob([payload], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `olaskole_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`✅ ${state.modules.length} emner eksportert!`);
+}
+async function importModulesJSON(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    const imported = data.modules || (Array.isArray(data) ? data : null);
+    if (!imported?.length) { showToast('❌ Ingen emner funnet i filen'); return; }
+    if (!confirm(`Importer ${imported.length} emner? Eksisterende emner med samme ID overskrives.`)) return;
+    // Merge: overwrite by _id, add new
+    const byId = Object.fromEntries(state.modules.map(m => [m._id, m]));
+    imported.forEach(m => { if (m._id) byId[m._id] = m; else state.modules.push(m); });
+    state.modules = Object.values(byId).concat(state.modules.filter(m => !m._id));
+    await saveModulesToStorage();
+    renderHomeModules(); renderTaskModules(); renderManageModules();
+    showToast(`✅ ${imported.length} emner importert!`);
+  } catch(e) {
+    showToast('❌ Ugyldig backup-fil: ' + e.message);
+  }
+  input.value = '';
 }
 
 // ====== SETTINGS ======
@@ -4772,6 +4860,8 @@ function addQuizQuestion() { setTimeout(updatePublishBarHint,50);
   const c=document.getElementById('quizC')?.value.trim();
   const d=document.getElementById('quizD')?.value.trim();
   if (!q||!a||!b||!c||!d) { showToast('Fyll inn spørsmål og alle fire svaralternativer'); return; }
+  if (q.length > 400) { showToast('⚠️ Spørsmålet er for langt (maks 400 tegn)'); return; }
+  if ([a,b,c,d].some(x => x.length > 200)) { showToast('⚠️ Svaralternativ er for langt (maks 200 tegn)'); return; }
   const explain = document.getElementById('quizExplain')?.value.trim()||'';
   const img = document.getElementById('quizImg')?.value.trim()||'';
   state.tempQuiz.push({question:q,a,b,c,d,explain,img});
@@ -5536,6 +5626,15 @@ function renderPreviewPanel() {
 }
 
 function escHtml(str){return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function _updateCharCount(inputId, maxLen) {
+  const el = document.getElementById(inputId);
+  const cc = document.getElementById(inputId + '-cc');
+  if (!el || !cc) return;
+  const len = el.value.length;
+  const pct = len / maxLen;
+  cc.textContent = len + '/' + maxLen;
+  cc.style.color = pct > 0.9 ? '#f87171' : pct > 0.75 ? '#f59e0b' : 'var(--text-3)';
+}
 
 function pvDelQuiz(i){_showConfirm('Slette dette quizspørsmålet?',()=>{state.tempQuiz.splice(i,1);renderPreviewPanel();updatePublishBarHint();});}
 function pvDelDisc(i){_showConfirm('Slette dette drøftingsspørsmålet?',()=>{state.tempDisc.splice(i,1);renderPreviewPanel();updatePublishBarHint();});}
@@ -5896,8 +5995,77 @@ function renderTeacherStats() {
     </div>` : ''}
 
     ${_buildQuizStatsHtml(answers)}
+    ${_buildStudentEngagementHtml(answers, allStudents)}
     ${_buildNotOpenedHtml()}
   `;
+}
+
+function _buildStudentEngagementHtml(answers, allStudents) {
+  if (!allStudents?.size) return '';
+  const allKeys = Object.keys(answers);
+  // Per-student summary
+  const studentData = {};
+  allKeys.forEach(k => {
+    const studentName = k.split('_m')[0];
+    if (!studentName) return;
+    if (!studentData[studentName]) studentData[studentName] = { total: 0, correct: 0, modules: new Set() };
+    const d = studentData[studentName];
+    d.total++;
+    if (typeof answers[k] === 'object' && answers[k].correct) d.correct++;
+    const mMatch = k.match(/_m(\d+)_/);
+    if (mMatch) d.modules.add(mMatch[1]);
+  });
+  const sorted = Object.entries(studentData).sort((a,b) => b[1].total - a[1].total);
+  if (!sorted.length) return '';
+  // Per-quiz difficulty: find questions with < 50% correct rate
+  const quizDifficulty = {};
+  state.modules.forEach((m, mi) => {
+    (m.quiz||[]).forEach((q, qi) => {
+      const key = `quiz_${qi}`;
+      const attempts = allKeys.filter(k => k.includes(`_m${mi}_${key}`));
+      if (!attempts.length) return;
+      const correct = attempts.filter(k => {
+        const v = answers[k]; return typeof v === 'object' ? v.correct : v === 'correct';
+      }).length;
+      const pct = Math.round(correct / attempts.length * 100);
+      if (pct < 50 && attempts.length >= 2) {
+        quizDifficulty[`m${mi}_q${qi}`] = { m, q, mi, qi, pct, attempts: attempts.length };
+      }
+    });
+  });
+  const hardQ = Object.values(quizDifficulty).sort((a,b)=>a.pct-b.pct).slice(0,5);
+  return `
+    <div style="margin-top:1.25rem;">
+      <div style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.6rem;">👥 Elev-engasjement</div>
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem;">
+        <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:0;padding:0.4rem 1rem;background:var(--s3);border-bottom:1px solid var(--border);">
+          <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);">Elev</div>
+          <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-align:center;padding:0 0.5rem;">Emner</div>
+          <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-align:center;padding:0 0.5rem;">Svar</div>
+          <div style="font-size:0.72rem;font-weight:800;color:var(--text-3);text-align:right;">Riktige</div>
+        </div>
+        ${sorted.slice(0,15).map(([name, d], i) => {
+          const pct = d.total ? Math.round(d.correct/d.total*100) : 0;
+          const color = pct>=70?'var(--green)':pct>=40?'var(--yellow)':'var(--c1)';
+          return `<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:0;padding:0.5rem 1rem;border-bottom:1px solid var(--border);background:${i%2?'rgba(255,255,255,0.01)':'transparent'};">
+            <div style="font-size:0.83rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(name)}</div>
+            <div style="font-size:0.82rem;font-weight:800;color:var(--text-2);text-align:center;padding:0 0.5rem;">${d.modules.size}</div>
+            <div style="font-size:0.82rem;font-weight:800;color:var(--text-2);text-align:center;padding:0 0.5rem;">${d.total}</div>
+            <div style="font-size:0.82rem;font-weight:800;color:${color};text-align:right;">${pct}%</div>
+          </div>`;
+        }).join('')}
+        ${sorted.length > 15 ? `<div style="padding:0.5rem 1rem;font-size:0.78rem;color:var(--text-3);border-top:1px solid var(--border);">+ ${sorted.length-15} til</div>` : ''}
+      </div>
+      ${hardQ.length ? `
+      <div style="font-size:0.75rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.6rem;">🔴 Vanskeligste spørsmål</div>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;">
+        ${hardQ.map(r => `<div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:0.6rem 0.875rem;font-size:0.83rem;">
+          <div style="font-weight:800;color:var(--text);">${escHtml(r.m.name)} — Q${r.qi+1}</div>
+          <div style="color:var(--text-2);margin-top:2px;">${escHtml((r.q.question||'').substring(0,80))}</div>
+          <div style="color:#f87171;font-weight:800;margin-top:3px;font-size:0.78rem;">${r.pct}% riktige (${r.attempts} forsøk)</div>
+        </div>`).join('')}
+      </div>` : ''}
+    </div>`;
 }
 
 function _buildNotOpenedHtml() {
@@ -6302,9 +6470,19 @@ function exportAllAnswersTxt(){
 // ====== AI HELPERS ======
 function getApiKey(){return localStorage.getItem('olaskole_apikey')||'';}
 
+function _aiCheckQuota() {
+  const today = new Date().toISOString().slice(0,10);
+  const storKey = 'ai_quota_' + today;
+  const used = parseInt(localStorage.getItem(storKey)||'0', 10);
+  const limit = parseInt(localStorage.getItem('ai_daily_limit')||'20', 10);
+  if (used >= limit) return false;
+  localStorage.setItem(storKey, String(used + 1));
+  return true;
+}
 async function aiCallJSON(prompt, spinnerId, maxTokens=2000) {
   const key=getApiKey();
   if(!key){showToast('⚠️ Ingen API-nøkkel — lagre den under ⚙️ Innstillinger');return{error:'Ingen API-nøkkel'};}
+  if(!_aiCheckQuota()){showToast('⚠️ Daglig AI-kvote nådd (20 kall). Prøv igjen i morgen, eller øk grensen i innstillinger.');return{error:'Kvote nådd'};}
   const spinner=document.getElementById(spinnerId);
   const spinnerBtn=spinner?.closest('button');
   if(spinner)spinner.style.display='inline-block';
@@ -10559,6 +10737,8 @@ function arbRenderModuleGrid() {
   const grid = document.getElementById('arbModuleGrid');
   const empty = document.getElementById('arbEmpty');
   if (!grid) return;
+  _arbInvalidateProgressCache(); // ensure fresh before bulk render
+  _arbBuildProgressCache(); // pre-build once, O(N) instead of O(N²)
   // Show/hide progress button
   const progBtn = document.getElementById('arbProgressBtn');
   if (progBtn) progBtn.style.display = state.student ? 'flex' : 'none';
@@ -10577,8 +10757,17 @@ function arbRenderModuleGrid() {
     searchEl.style.cssText = 'width:100%;padding:10px 16px;border:1px solid var(--border-2);border-radius:50px;font-family:\'Nunito\',sans-serif;font-size:0.92rem;outline:none;background:var(--s2);color:var(--text);margin-bottom:1rem;box-sizing:border-box;';
     grid.parentNode.insertBefore(searchEl, grid);
   }
+  // Restore previous search query
+  const savedQ = sessionStorage.getItem('arb_search_q');
+  if (savedQ && savedQ !== searchEl.value) searchEl.value = savedQ;
   const colors = ['#FF6B6B','#4D96FF','#6BCB77','#FFD93D','#C77DFF'];
+  const today = new Date(); today.setHours(0,0,0,0);
   grid.innerHTML = state.modules.map((m, i) => {
+    // Check if locked or scheduled
+    const isLocked = m.locked === true;
+    const scheduledDate = m.scheduledFor ? new Date(m.scheduledFor) : null;
+    const isScheduledFuture = scheduledDate && scheduledDate > today;
+    const isBlocked = isLocked || isScheduledFuture;
     const tasks = countTasks(m);
     const done = arbGetModuleProgress(i);
     const pct = tasks > 0 ? Math.round((done / tasks) * 100) : 0;
@@ -10588,7 +10777,19 @@ function arbRenderModuleGrid() {
     if (m.discussion?.length) chips.push(`💬 ${m.discussion.length} drøfting`);
     if (m.write?.length) chips.push(`✍️ Skriving`);
     if (m.flashcards?.length) chips.push(`🃏 Flashcards`);
-    if (m.blanks?.length) chips.push(`u270fufe0f Fyll inn`);
+    if (m.blanks?.length) chips.push(`✏️ Fyll inn`);
+    if (isBlocked) {
+      const openMsg = isScheduledFuture
+        ? `Åpner ${scheduledDate.toLocaleDateString('no')}`
+        : '🔒 Låst av lærer';
+      return `<div class="arb-module-card" style="position:relative;opacity:0.55;cursor:default;pointer-events:none;" title="${openMsg}">
+        <div style="position:absolute;top:0;left:0;right:0;height:5px;background:var(--border-2);border-radius:20px 20px 0 0;"></div>
+        <span style="position:absolute;top:10px;right:10px;font-size:1.1rem;">🔒</span>
+        <span class="arb-emoji" style="filter:grayscale(1);">${m.emoji||'📚'}</span>
+        <h3 style="color:var(--text-3);">${escHtml(m.name)}</h3>
+        <p style="color:var(--text-3);font-size:0.8rem;">${openMsg}</p>
+      </div>`;
+    }
     return `<div class="arb-module-card" onclick="arbOpenModule(${i})" style="position:relative;">
       <div style="position:absolute;top:0;left:0;right:0;height:5px;background:${colors[i%5]};border-radius:20px 20px 0 0;"></div>
       ${pct === 100 ? '<span style="position:absolute;top:12px;right:12px;background:rgba(34,197,94,0.2);color:#4ade80;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(34,197,94,0.3);">✅ Fullført</span>' : ''}
@@ -10604,25 +10805,41 @@ function arbRenderModuleGrid() {
 }
 
 function filterArbModules() {
-  const q = (document.getElementById('arbModuleSearch')?.value || '').toLowerCase();
+  const searchEl = document.getElementById('arbModuleSearch');
+  const q = (searchEl?.value || '').toLowerCase();
+  sessionStorage.setItem('arb_search_q', q); // persist across navigations
   document.querySelectorAll('#arbModuleGrid .arb-module-card').forEach(card => {
     const name = card.querySelector('h3')?.textContent.toLowerCase() || '';
     card.style.display = name.includes(q) ? '' : 'none';
   });
 }
 
-function arbGetModuleProgress(moduleIdx) {
-  const m = state.modules[moduleIdx];
-  if (!m) return 0;
-  let done = 0;
+// Module progress cache — built once per grid render, invalidated on arbSave
+let _arbProgressCache = null;
+let _arbProgressCacheUser = null;
+function _arbBuildProgressCache() {
   const sKey = state.student ? state.student.name : '_guest';
-  const prefix = `arb_${sKey}_m${moduleIdx}_`;
-  const keys = Object.keys(localStorage).filter(k => k.startsWith(prefix));
-  // Count unique task types done
-  const types = new Set(keys.map(k => k.replace(prefix,'').split('_')[0]));
-  done = types.size;
-  return done;
+  if (_arbProgressCache && _arbProgressCacheUser === sKey) return;
+  _arbProgressCache = {};
+  _arbProgressCacheUser = sKey;
+  const prefix = `arb_${sKey}_`;
+  Object.keys(localStorage).forEach(k => {
+    if (!k.startsWith(prefix)) return;
+    const rest = k.slice(prefix.length); // m3_quiz_2
+    const mMatch = rest.match(/^m(\d+)_(\w+)/);
+    if (!mMatch) return;
+    const mi = mMatch[1];
+    const taskType = mMatch[2];
+    if (!_arbProgressCache[mi]) _arbProgressCache[mi] = new Set();
+    _arbProgressCache[mi].add(taskType);
+  });
 }
+function arbGetModuleProgress(moduleIdx) {
+  if (!state.modules[moduleIdx]) return 0;
+  _arbBuildProgressCache();
+  return _arbProgressCache[String(moduleIdx)]?.size || 0;
+}
+function _arbInvalidateProgressCache() { _arbProgressCache = null; }
 
 function arbOpenModule(idx) {
   arbState.moduleIdx = idx;
@@ -10830,8 +11047,12 @@ function arbRenderTab(type, m) {
 
 let _quizOneAtATime = false;
 let _quizCurrentIdx = 0;
+function _quizCardStateKey() { return 'qcard_' + arbState.moduleIdx + '_' + (state.student?.name||'guest'); }
+function _quizSaveCardState() { sessionStorage.setItem(_quizCardStateKey(), JSON.stringify({ one: _quizOneAtATime, idx: _quizCurrentIdx })); }
+function _quizRestoreCardState() { try { const s = JSON.parse(sessionStorage.getItem(_quizCardStateKey())||'null'); if (s) { _quizOneAtATime = s.one||false; _quizCurrentIdx = s.idx||0; } } catch(e){} }
 
 function arbRenderQuiz(m) {
+  _quizRestoreCardState();
   _quizAnswered.clear();
   if (m.examMode && m.quiz?.length) { _arbExamRender(m); return; }
   const container = document.getElementById('arbTaskContent');
@@ -10842,6 +11063,7 @@ function arbRenderQuiz(m) {
 
   // One-at-a-time mode
   if (_quizOneAtATime) {
+    _quizSaveCardState();
     _arbRenderQuizCard(m, _quizCurrentIdx);
     return;
   }
@@ -10982,7 +11204,7 @@ function arbCheckAnswerCard(qi, isCorrect, optIdx, explain, correctMap) {
     const nextBtn = document.createElement('button');
     nextBtn.textContent = qi + 1 < state.modules[arbState.moduleIdx].quiz.length ? 'Neste →' : 'Se resultat';
     nextBtn.style.cssText = 'margin-top:0.75rem;background:var(--accent);color:#fff;border:none;padding:10px 24px;border-radius:50px;font-family:\'Nunito\',sans-serif;font-weight:800;font-size:0.92rem;cursor:pointer;display:block;';
-    nextBtn.onclick = () => { _quizCurrentIdx = qi + 1; _arbRenderQuizCard(state.modules[arbState.moduleIdx], _quizCurrentIdx); };
+    nextBtn.onclick = () => { _quizCurrentIdx = qi + 1; _quizSaveCardState(); _arbRenderQuizCard(state.modules[arbState.moduleIdx], _quizCurrentIdx); };
     fb.appendChild(nextBtn);
   }
   arbSave(`quiz_${qi}`, isCorrect ? 'correct' : 'wrong');
@@ -11286,7 +11508,12 @@ function arbFcPrev() {
   if (arbState.fcIndex > 0) { arbState.fcIndex--; arbRenderFcCard(state.modules[arbState.moduleIdx]); }
 }
 // ====== SPACED REPETITION SM-2 ======
-function _sm2Key(mi, ci) { return 'sm2_' + (state.student?.name||'') + '_m' + mi + '_' + ci; }
+function _sm2GuestId() {
+  let id = sessionStorage.getItem('sm2_guest_id');
+  if (!id) { id = 'g_' + Math.random().toString(36).slice(2,10); sessionStorage.setItem('sm2_guest_id', id); }
+  return id;
+}
+function _sm2Key(mi, ci) { return 'sm2_' + (state.student?.name || _sm2GuestId()) + '_m' + mi + '_' + ci; }
 function _sm2Load(mi, ci) {
   try { return JSON.parse(localStorage.getItem(_sm2Key(mi,ci))) || null; } catch { return null; }
 }
@@ -11393,6 +11620,7 @@ function arbSave(taskKey, val) {
   const strVal = typeof val === 'string' ? val : JSON.stringify(val);
   localStorage.setItem(key, strVal);
   _progressCache[key] = strVal;
+  _arbInvalidateProgressCache();
   DB.saveProgress(state.student?.name, state.student?.cls, key, strVal);
 }
 function arbLoad(taskKey) {
