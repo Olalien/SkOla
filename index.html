@@ -10,9 +10,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SkOla">
-<meta name="description" content="Interaktiv læringsplattform for ungdomsskolen">
+<meta name="description" content="Interaktiv læringsplattform for ungdomsskolen – quiz, flashcards, skriveoppgaver og mer.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://olalien.github.io/SkOla/">
+<meta property="og:title" content="SkOla – Interaktiv læringsplattform">
+<meta property="og:description" content="Digitale læremidler for ungdomsskolen: quiz, flashcards, skriveoppgaver og mer.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nb_NO">
+<meta property="og:url" content="https://olalien.github.io/SkOla/">
 <link rel="manifest" href="manifest.json">
 <title>SkOla – Interaktiv læringsplattform</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <script>
   if ('serviceWorker' in navigator) {
@@ -401,9 +410,17 @@
   .toast-bar{position:absolute;bottom:0;left:0;height:3px;width:100%;background:rgba(255,255,255,0.25);transform-origin:left;border-radius:0 0 12px 12px;}
   @keyframes toastShrink{from{width:100%;}to{width:0;}}
 
-  /* Stagger cards */
-  .arb-module-card,.module-card{opacity:0;transform:translateY(10px);transition:opacity 0.25s ease,transform 0.25s ease;will-change:transform,opacity;}
-  .arb-module-card.card-visible,.module-card.card-visible{opacity:1;transform:translateY(0);will-change:auto;}
+  /* Stagger cards — CSS-driven via --i custom property, no JS timers */
+  .arb-module-card,.module-card{
+    opacity:0;transform:translateY(10px);
+    animation:cardEnter 0.28s ease both;
+    animation-delay:calc(var(--i,0) * 45ms);
+    will-change:transform,opacity;
+  }
+  @keyframes cardEnter{to{opacity:1;transform:translateY(0);}}
+  @media(prefers-reduced-motion:reduce){.arb-module-card,.module-card{animation:none;opacity:1;transform:none;}}
+  /* card-visible kept for compat but no longer needed */
+  .arb-module-card.card-visible,.module-card.card-visible{opacity:1;transform:translateY(0);}
 
   /* Skeleton loading */
   .skeleton-card{background:var(--s2);border-radius:18px;height:160px;border:1px solid var(--border);animation:skeletonPulse 1.4s ease-in-out infinite;}
@@ -733,6 +750,9 @@
 
   .welcome-back-card{background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(123,143,253,0.12));border:1px solid rgba(34,197,94,0.25);color:var(--text);border-radius:16px;padding:1.1rem;text-align:center;box-shadow:0 4px 20px rgba(34,197,94,0.08);}
 
+  /* Screen-reader only utility */
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
   /* Toast glow */
   .toast{background:rgba(9,11,24,0.97)!important;border-color:rgba(123,143,253,0.3)!important;box-shadow:0 8px 40px rgba(0,0,0,0.7),0 0 0 1px rgba(123,143,253,0.15),0 1px 0 rgba(255,255,255,0.06) inset!important;}
 
@@ -908,6 +928,8 @@
 </noscript>
 
 <a href="#main-content" class="skip-link">Hopp til innhold</a>
+<!-- Dynamisk H1 for screen readers — oppdateres av showView() -->
+<h1 id="pageH1" class="sr-only">SkOla – Hjem</h1>
 <div class="progress-top" role="progressbar" aria-label="Sideinnlastning" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="progressFill"></div></div>
 
 <nav aria-label="Primærnavigasjon">
@@ -3421,6 +3443,10 @@ function showView(name) {
   if (name === 'spill') gzInit();
   setProgress(name === 'home' ? 20 : name === 'tasks' ? 60 : 90);
   syncMobileNav(name);
+  // Oppdater SR-tilgjengelig H1 og flytt fokus til nytt innhold
+  const _h1Labels = { home:'SkOla – Hjem', arbeid:'Oppgaver', join:'Quiz', wc:'Ordsky', spill:'Spill', teacher:'Lærerrom', tasks:'Emner' };
+  const h1 = document.getElementById('pageH1');
+  if (h1) h1.textContent = _h1Labels[name] || 'SkOla';
   // Lagre siste visning (unntatt teacher-panel)
   if (name !== 'teacher') localStorage.setItem('os_last_view', name);
 }
@@ -4636,13 +4662,15 @@ function _renderModuleGrid(gridId, emptyId, opts={}) {
     return;
   }
   if (empty) empty.style.display = 'none';
+  // O(N) index map — avoids O(N²) indexOf inside map
+  const idxMap = new Map(state.modules.map((m, i) => [m, i]));
   grid.innerHTML = visible.map((m, i) => {
-    const realIdx = state.modules.indexOf(m);
+    const realIdx = idxMap.get(m);
     const pct = getModuleProgress(realIdx);
     const progressBar = (pct >= 0) ? `<div style="margin-top:0.6rem;"><div style="height:4px;background:rgba(255,255,255,0.1);border-radius:50px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${pct===100?'#4ade80':'var(--accent)'};border-radius:50px;transition:width 0.4s;"></div></div><div style="font-size:0.68rem;font-weight:800;color:rgba(255,255,255,0.6);margin-top:3px;">${pct===100?'✓ Fullført':pct+'% gjennomført'}</div></div>` : '';
     const statusBadge = pct===100 ? '<span style="position:absolute;top:8px;left:8px;background:rgba(34,197,94,0.25);color:#4ade80;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(34,197,94,0.4);">✅ Ferdig</span>' : isNewModule(m) ? '<span style="position:absolute;top:8px;left:8px;background:var(--c1);color:white;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;">NY</span>' : '';
     const subjectBadge = m.subject ? `<span style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.25);font-size:0.64rem;font-weight:800;padding:2px 7px;border-radius:50px;color:rgba(255,255,255,0.8);">${escHtml(m.subject)}</span>` : '';
-    return `<div class="module-card ${colors[i%5]}" style="position:relative;" onclick="openModule(${realIdx})" role="button" tabindex="0" aria-label="${escHtml(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${realIdx})}" data-module-name="${escHtml(m.name)}" data-module-subject="${escHtml(m.subject||'')}">
+    return `<div class="module-card ${colors[i%5]}" style="position:relative;--i:${i}" onclick="openModule(${realIdx})" role="button" tabindex="0" aria-label="${escHtml(m.name)}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModule(${realIdx})}" data-module-name="${escHtml(m.name)}" data-module-subject="${escHtml(m.subject||'')}">
       ${state.isTeacher ? `<button class="mc-edit-btn" onclick="event.stopPropagation();quickEditModule(${realIdx})" title="Rediger">✏️</button>` : ''}
       ${statusBadge}${subjectBadge}
       <span class="mc-emoji">${m.emoji||'📚'}</span>
@@ -4806,7 +4834,8 @@ function renderModuleDetail(m) {
   if (m.blanks?.length) available.push({key:'blank', label:'✏️ Fyll inn'});
   if (m.flashcards?.length >= 2 || m.glossary?.length >= 2) available.push({key:'match', label:'🎯 Match'});
   if (!available.length) { content.innerHTML='<p style="color:var(--text-3);padding:2rem;">Ingen innhold i dette emnet ennå.</p>'; tabs.innerHTML=''; return; }
-  tabs.innerHTML = available.map((t,i)=>`<button class="task-tab ${i===0?'active':''}" onclick="switchTaskTab('${t.key}',this)">${t.label}</button>`).join('');
+  // t.key and t.label are hardcoded constants — safe, but escape defensively
+  tabs.innerHTML = available.map((t,i)=>`<button class="task-tab ${i===0?'active':''}" onclick="switchTaskTab('${escHtml(t.key)}',this)">${escHtml(t.label)}</button>`).join('');
   switchTaskType(available[0].key, m);
 }
 
@@ -10053,7 +10082,7 @@ async function gsGeneratePersons() {
     window._gsCustomPersons = persons;
     if (resultEl) {
       resultEl.style.display='block';
-      resultEl.innerHTML=`✅ ${persons.length} personer generert: ${persons.map(p=>p.n).join(', ')}<br><small style="color:var(--text-3)">Disse vil bli brukt i Who Am I for denne økten</small>`;
+      resultEl.innerHTML=`✅ ${persons.length} personer generert: ${escHtml(persons.map(p=>p.n).join(', '))}<br><small style="color:var(--text-3)">Disse vil bli brukt i Who Am I for denne økten</small>`;
     }
     showToast('✅ '+persons.length+' Who Am I-kort generert!');
   } catch(e) {
@@ -11431,7 +11460,7 @@ function arbRenderModuleGrid() {
         <p style="color:var(--text-3);font-size:0.8rem;">${openMsg}</p>
       </div>`;
     }
-    return `<div class="arb-module-card" onclick="arbOpenModule(${i})" style="position:relative;">
+    return `<div class="arb-module-card" onclick="arbOpenModule(${i})" style="position:relative;--i:${i}">
       <div style="position:absolute;top:0;left:0;right:0;height:5px;background:${colors[i%5]};border-radius:20px 20px 0 0;"></div>
       ${pct === 100 ? '<span style="position:absolute;top:12px;right:12px;background:rgba(34,197,94,0.2);color:#4ade80;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:50px;border:1px solid rgba(34,197,94,0.3);">✅ Fullført</span>' : ''}
       <span class="arb-emoji">${m.emoji||'📚'}</span>
@@ -11446,9 +11475,8 @@ function arbRenderModuleGrid() {
   _staggerCards('#arbModuleGrid .arb-module-card');
 }
 
-function _staggerCards(containerSelector) {
-  const cards = document.querySelectorAll(containerSelector);
-  cards.forEach((c, i) => setTimeout(() => c.classList.add('card-visible'), i * 45));
+function _staggerCards(_containerSelector) {
+  // CSS animation-delay via --i custom property handles stagger — no JS timers needed
 }
 
 function _showSkeletons(gridId, count = 6) {
@@ -13020,7 +13048,11 @@ const SND = (() => {
   document.addEventListener('click', function(e) {
     if (!menu.contains(e.target)) menu.style.display = 'none';
   });
-  document.addEventListener('scroll', function() { menu.style.display = 'none'; }, true);
+  let _ctxScrollRaf;
+  document.addEventListener('scroll', function() {
+    if (_ctxScrollRaf) return;
+    _ctxScrollRaf = requestAnimationFrame(() => { menu.style.display = 'none'; _ctxScrollRaf = null; });
+  }, { passive: true, capture: true });
 
   // Klikk på "Hva betyr ordet?"
   document.getElementById('wordLookupBtn').addEventListener('click', async function() {
