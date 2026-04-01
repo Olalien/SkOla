@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /
+
+# SkOla er en lukket læringsplattform.
+# For å indeksere innhold, endre robots-regelen i index.html.
