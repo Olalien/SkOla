@@ -2716,3 +2716,233 @@ body.light .mob-nav-btn { color: var(--text-3); }
 body.light .mob-nav-btn.active { color: var(--accent); }
 body.light .result-row { background: #fff; }
 body.light .badge { background: var(--s2); border-color: var(--border); }
+
+/* ============================================================
+   RESPONSIVE IMPROVEMENTS — mobile-first fixes across all
+   breakpoints. Covers overflow prevention, tablet layout,
+   touch sizing, and wrapping for all major UI sections.
+   ============================================================ */
+
+/* ── Prevent horizontal overflow on all screen sizes ─────── */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+*, *::before, *::after {
+  min-width: 0; /* prevents flex/grid children from overflowing */
+}
+
+/* ── Images and media: always fit their container ─────────── */
+img, video, iframe, embed, object {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Viewport meta units: use svh for mobile browser bars ─── */
+.view {
+  min-height: calc(100svh - var(--nav-h));
+}
+
+/* ── Nav: prevent logo + teacher btn from overlapping tabs ── */
+@media (max-width: 1023px) {
+  nav { gap: var(--sp-3); }
+  .logo { font-size: 1.25rem; }
+}
+@media (max-width: 479px) {
+  .logo { font-size: 1.1rem; }
+  nav { padding: 0 var(--sp-3); }
+  .teacher-btn { padding: 6px 10px; font-size: 0.72rem; }
+  .dark-toggle { padding: 6px 8px; }
+}
+
+/* ── Home hero: stack layout at tablet sizes (≤ 900px) ──── */
+@media (max-width: 900px) {
+  .home-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--sp-6) var(--sp-5);
+    gap: var(--sp-4);
+  }
+  .home-hero-text { min-width: 0; width: 100%; }
+  .home-action-btns {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+  .home-action-btn {
+    flex: 1 1 120px;
+    min-width: 110px;
+  }
+}
+
+/* ── Student login box: full-width and reasonable padding ─── */
+@media (max-width: 639px) {
+  .student-login-box {
+    padding: var(--sp-6) var(--sp-4);
+    border-radius: 14px;
+  }
+  .student-login-box h2 { font-size: 1.2rem; }
+}
+
+/* ── Modules grid: 1-column on very small screens ─────────── */
+@media (max-width: 360px) {
+  .modules-grid { grid-template-columns: 1fr; gap: var(--sp-2); }
+}
+
+/* ── Module card: tighten on small screens ─────────────────── */
+@media (max-width: 479px) {
+  .module-card {
+    padding: var(--sp-3) var(--sp-3);
+    min-height: 110px;
+  }
+  .module-card .mc-emoji { font-size: 1.6rem; margin-bottom: var(--sp-2); }
+}
+
+/* ── Teacher panel: collapse two-column grids on tablets ──── */
+@media (max-width: 768px) {
+  .teacher-panel { padding: var(--sp-5); }
+  .inline-edit-row { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns: 1fr 1fr"],
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  [style*="grid-template-columns: 1fr 1fr 1fr"],
+  [style*="grid-template-columns:1fr 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+@media (max-width: 479px) {
+  .teacher-panel { padding: var(--sp-4); border-radius: 12px; }
+  .teacher-panel h2 { font-size: 1rem; }
+  [style*="grid-template-columns: 1fr 1fr 1fr"],
+  [style*="grid-template-columns:1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Module manage actions: stack on narrow screens ────────── */
+@media (max-width: 479px) {
+  .module-manage-card { flex-wrap: wrap; }
+  .module-manage-actions { width: 100%; justify-content: flex-end; }
+}
+
+/* ── TR / task tabs: scrollable, no wrap ───────────────────── */
+.tr-tabs, .task-tabs, .tc-tabs, #arbTaskTabs {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.tr-tabs::-webkit-scrollbar,
+.task-tabs::-webkit-scrollbar,
+.tc-tabs::-webkit-scrollbar,
+#arbTaskTabs::-webkit-scrollbar { display: none; }
+
+/* ── Classroom mode: 1-column answer buttons on mobile ──────── */
+@media (max-width: 600px) {
+  .cr-options  { grid-template-columns: 1fr !important; }
+  .cr-answer-btns { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 400px) {
+  .cr-answer-btns { grid-template-columns: 1fr; }
+  .cr-answer-btn { padding: 1.2rem 0.5rem; }
+}
+
+/* ── CR scoreboard: full-width on mobile ───────────────────── */
+@media (max-width: 639px) {
+  .cr-scoreboard { max-width: 100%; }
+  .cr-join-box { margin: 1rem var(--sp-2); padding: 1.25rem; }
+  .cr-code-display { font-size: clamp(2rem, 8vw, 3.5rem); }
+}
+
+/* ── Flashcard: smaller on small screens ──────────────────── */
+@media (max-width: 479px) {
+  .flashcard { height: 160px; border-radius: 12px; }
+}
+
+/* ── Word cloud: full-width on mobile ─────────────────────── */
+@media (max-width: 639px) {
+  .wc-setup-card { padding: var(--sp-4); }
+  .wc-mode-btns { flex-direction: column; }
+  .wc-mode-btn { width: 100%; }
+  .wc-export-btns { flex-direction: column; }
+  .wc-export-btns > * { width: 100%; }
+}
+
+/* ── Stat cards: ensure min column width ─────────────────── */
+@media (max-width: 479px) {
+  .stat-cards-row {
+    grid-template-columns: repeat(auto-fill, minmax(min(100px, 100%), 1fr));
+    gap: var(--sp-2);
+  }
+  .stat-card .stat-num { font-size: 1.6rem; }
+}
+
+/* ── Result rows: prevent text overflow ──────────────────── */
+.result-row { overflow: hidden; }
+.result-row .student-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* ── Modal: full-width on very small screens ─────────────── */
+@media (max-width: 479px) {
+  .modal {
+    padding: var(--sp-5) var(--sp-3);
+    border-radius: 16px 16px 0 0;
+    width: 100%;
+  }
+}
+
+/* ── Drag area (matching activities): column on mobile ────── */
+@media (max-width: 639px) {
+  .drag-area { flex-direction: column; gap: var(--sp-3); }
+}
+
+/* ── Buttons row: wrap gracefully on small screens ────────── */
+.btn-row, .action-row, .modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+@media (max-width: 479px) {
+  .btn-primary, .btn-success, .btn-cancel, .btn-save {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Games section: ensure grid doesn't overflow ─────────── */
+@media (max-width: 639px) {
+  .gs-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── Quiz card: tighter on mobile ─────────────────────────── */
+@media (max-width: 479px) {
+  .quiz-card { padding: var(--sp-4); }
+  .quiz-q { font-size: 0.97rem; }
+}
+
+/* ── Discussion/text/video cards: tighter on mobile ─────── */
+@media (max-width: 479px) {
+  .discussion-card, .text-block, .video-card, .write-card {
+    padding: var(--sp-4) var(--sp-3);
+    border-radius: 12px;
+  }
+}
+
+/* ── Continue card: full width on mobile ────────────────── */
+@media (max-width: 639px) {
+  .continue-card {
+    max-width: 100%;
+    padding: var(--sp-3) var(--sp-4);
+  }
+}
+
+/* ── Progress bar top: stays below nav on all screens ────── */
+.progress-top { z-index: 499; }
+
+/* ── View max-width: full-bleed on very small screens ─────── */
+@media (max-width: 360px) {
+  .view { padding: var(--sp-3) var(--sp-2); }
+}
