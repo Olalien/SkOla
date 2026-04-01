@@ -191,9 +191,17 @@ function showView(name) {
     setTimeout(() => { viewEl.style.willChange = 'auto'; }, 300);
   }, delay);
 
+  // Match via data-onclick/data-onclick-arg (the delegation system uses these)
   tabs.forEach(tab => {
-    const oc = tab.getAttribute('onclick') || '';
-    if (oc.includes("'"+name+"'") || oc.includes('"'+name+'"')) tab.classList.add('active');
+    const fn  = tab.dataset.onclick || '';
+    const arg = tab.dataset.onclickArg || '';
+    const isActive =
+      (fn === 'showView'  && arg === name) ||
+      (fn === 'arbOpen'   && (name === 'tasks' || name === 'arbeid')) ||
+      (fn === 'checkTeacher' && name === 'teacher');
+    tab.classList.toggle('active', isActive);
+    if (isActive) tab.setAttribute('aria-current', 'page');
+    else          tab.removeAttribute('aria-current');
   });
   if (name === 'home') { renderHomeModules(); _heroGreeting(); }
   if (name === 'tasks') { DB.loadModules().then(m => { if(m.length){state.modules=m; _invalidateGridCache();} renderTaskModules(); }).catch(e => { console.warn('[showView:tasks] DB.loadModules failed', e); renderTaskModules(); }); }
@@ -218,11 +226,15 @@ function showView(name) {
 }
 
 function syncMobileNav(name) {
-  document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mob-nav-btn').forEach(b => {
+    b.classList.remove('active');
+    b.removeAttribute('aria-current');
+  });
   const map = {home:'mob-home',tasks:'mob-tasks',arbeid:'mob-tasks',join:'mob-join',teacher:'mob-teacher',wc:'mob-wc',spill:'mob-spill'};
   const btn = document.getElementById(map[name]);
   if (btn) {
     btn.classList.add('active');
+    btn.setAttribute('aria-current', 'page');
     // Sliding pill indicator
     let pill = document.querySelector('.mob-active-pill');
     if (!pill) {
@@ -249,6 +261,9 @@ function mobNav(name) { showView(name); }
 function setProgress(pct) {
   const el = document.getElementById('progressFill');
   if (el) el.style.width = pct + '%';
+  // Keep ARIA in sync so screen readers report correct progress
+  const bar = el?.closest('[role="progressbar"]');
+  if (bar) bar.setAttribute('aria-valuenow', pct);
 }
 
 // ====== DARK MODE ======
