@@ -1,10 +1,11 @@
 // SkOla Service Worker — offline-støtte
-const CACHE = 'olaskole-v2';
+const CACHE = 'olaskole-v3';
 const ASSETS = [
   './',
   './index.html',
   './app.js',
   './app.css',
+  './games.js',
   'https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap',
   'https://unpkg.com/lucide@0.263.1/dist/umd/lucide.min.js',
 ];
