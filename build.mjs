@@ -108,13 +108,10 @@ async function build() {
   // If games.js split exists, patch the _CDN_GAMES constant in the hashed app.js
   // (The app.js stub uses window._GAMES_JS_URL set here)
   if (gamesJsName) {
-    html = html.replace(
-      /(<script[^>]*src=["'])([^"']*app\.[a-f0-9]+\.js["'])/,
-      (m) => m  // keep unchanged; the URL is injected via a tiny inline script below
-    );
-    // Inject the games URL so the lazy-loader can find the hashed file
+    // Inject games URL + preload hint for early browser discovery
     html = html.replace(
       '</head>',
+      `<link rel="preload" as="script" href="${gamesJsName}">\n` +
       `<script>window._GAMES_JS_URL="${gamesJsName}";</script>\n</head>`
     );
   }
@@ -122,7 +119,7 @@ async function build() {
   writeFileSync(`${outDir}/index.html`, html);
 
   // Copy static files verbatim
-  for (const f of ['sw.js', 'manifest.json']) {
+  for (const f of ['sw.js', 'manifest.json', 'robots.txt']) {
     try { copyFileSync(f, `${outDir}/${f}`); } catch { /* optional files */ }
   }
 

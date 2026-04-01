@@ -1,4 +1,4 @@
-  @import url('https://fonts.cdnfonts.com/css/opendyslexic');
+  /* OpenDyslexic loaded via <link> in index.html to avoid blocking @import */
   body.dyslexia-font, body.dyslexia-font * {
     font-family: 'OpenDyslexic', sans-serif !important;
     letter-spacing: 0.05em;
@@ -51,7 +51,7 @@
   .nav-tabs::-webkit-scrollbar{display:none;}
   .nav-tab{padding:6px 13px;border-radius:8px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.83rem;transition:all 0.18s;background:transparent;color:var(--text-2);white-space:nowrap;flex-shrink:0;position:relative;}
   .nav-tab:hover{background:rgba(123,143,253,0.1);color:var(--text);}
-  .nav-tab.active{background:rgba(123,143,253,0.15);color:#b0bfff;font-weight:800;border:1px solid rgba(123,143,253,0.25);}
+  .nav-tab.active{background:rgba(123,143,253,0.18);color:#c5d3ff;font-weight:800;border:1px solid rgba(123,143,253,0.3);}
   .nav-tab.active::after{content:'';position:absolute;bottom:-2px;left:25%;right:25%;height:2px;background:linear-gradient(90deg,#7b8ffd,#c084fc);border-radius:99px;box-shadow:0 0 6px rgba(123,143,253,0.6);}
   .nav-right{display:flex;align-items:center;gap:0.5rem;flex-shrink:0;}
   .role-badge{display:none;background:var(--s2);border:1px solid var(--border-2);color:var(--text-2);padding:4px 10px;border-radius:6px;font-size:0.77rem;font-weight:700;}

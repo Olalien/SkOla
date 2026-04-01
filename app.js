@@ -801,6 +801,9 @@ function updateStudentProgress() {
 }
 
 // ====== TEACHER ======
+// ⚠️  SECURITY: Change this default password immediately after first login!
+// Go to Settings → Teacher → Change password to set a unique password.
+// This default is only used to seed the initial hashed credential in localStorage.
 const TEACHER_PASS = 'Olala1234';
 function getTeacherPass() {
   return TEACHER_PASS;
@@ -993,6 +996,10 @@ function loginTeacherAuto() {
   renderResults();
   renderHomeModules();
   renderTaskModules();
+  // Warn if still using the default password
+  if (!localStorage.getItem('os_teacher_pw_changed')) {
+    setTimeout(() => showToast('⚠️ Husk å bytte standardpassordet under Innstillinger!', 5000), 1200);
+  }
 }
 function logoutTeacher() {
   if (window._teacherAutosaveInterval) { clearInterval(window._teacherAutosaveInterval); window._teacherAutosaveInterval = null; }
@@ -1107,6 +1114,30 @@ function openSettings() {
   const c = document.getElementById('changePassCurrent'); if (c) c.value = '';
   const n = document.getElementById('changePassNew'); if (n) n.value = '';
   const err = document.getElementById('changePassError'); if (err) err.style.display = 'none';
+}
+
+async function submitChangePass() {
+  const current = document.getElementById('changePassCurrent')?.value || '';
+  const newPass  = document.getElementById('changePassNew')?.value || '';
+  const err      = document.getElementById('changePassError');
+  const showErr  = (msg) => { if (err) { err.style.display = 'block'; err.textContent = msg; } };
+  if (err) err.style.display = 'none';
+  if (!current || !newPass) { showErr('Fyll inn begge feltene.'); return; }
+  if (newPass.length < 8) { showErr('Nytt passord må være minst 8 tegn.'); return; }
+  const rawAuth = localStorage.getItem('os_teacher_auth');
+  if (!rawAuth) { showErr('Ingen passord lagret.'); return; }
+  try {
+    const auth = JSON.parse(rawAuth);
+    const ok = await SecurityUtils.verifyPassword(current, auth.hash, auth.salt);
+    if (!ok) { showErr('Nåværende passord er feil.'); return; }
+    const salt = SecurityUtils.generateSalt();
+    const hash = await SecurityUtils.hashPassword(newPass, salt);
+    localStorage.setItem('os_teacher_auth', JSON.stringify({ salt, hash }));
+    localStorage.setItem('os_teacher_pw_changed', '1');
+    document.getElementById('changePassCurrent').value = '';
+    document.getElementById('changePassNew').value = '';
+    showToast('✅ Passord endret!');
+  } catch(e) { showErr('Feil: ' + e.message); }
 }
 
 function initSettingsFields() {
@@ -1700,7 +1731,7 @@ function renderQuizHTML(m) {
       <div class="quiz-opts" role="group" aria-label="Svaralternativer">
         ${opts.map((o,oi)=>`<button class="quiz-opt" id="qopt-${qi}-${oi}" aria-pressed="false" data-onclick="checkAnswer" data-onclick-args="${JSON.stringify([qi,o.correct,oi,correctMap])}">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
       </div>
-      <div class="quiz-feedback" id="qfb-${qi}"></div>
+      <div class="quiz-feedback" id="qfb-${qi}" aria-live="polite" aria-atomic="true"></div>
     </div>`;
   }).join('')}</div>`;
 }
@@ -2822,6 +2853,12 @@ function renderPreviewPanel() {
 function escHtml(str){return sanitizeHTML(str);}
 function _lsGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key) ?? JSON.stringify(fallback)); } catch { return fallback; } }
 
+// Debounce utility — prevents excessive re-renders on rapid input
+function _debounce(fn, ms = 200) {
+  let t;
+  return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), ms); };
+}
+
 // Lazy-load a UMD library on first use
 function _loadScript(url) {
   return new Promise((resolve, reject) => {
@@ -2919,7 +2956,7 @@ function renderResults() {
   searchInput.id = 'studentResultSearch';
   searchInput.placeholder = '🔍 Filtrer elev...';
   searchInput.style.cssText = "width:100%;padding:9px 16px;border:1px solid var(--border-2);border-radius:50px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;background:var(--s2);color:var(--text);box-sizing:border-box;margin-bottom:0.875rem;";
-  searchInput.addEventListener('input', filterStudentResults);
+  searchInput.addEventListener('input', _debounce(filterStudentResults, 180));
   container.appendChild(searchInput);
   Object.entries(students).forEach(([name,answers], idx) => {
     const row = document.createElement('div');
@@ -3608,7 +3645,9 @@ function saveGroup() {
     const idx = groups.findIndex(g => g.id === editId);
     if (idx >= 0) { groups[idx].name = name; groups[idx].members = members; }
   } else {
-    groups.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5), name, members });
+    const rnd = crypto.getRandomValues(new Uint8Array(3));
+    const rndStr = Array.from(rnd, b => b.toString(36)).join('');
+    groups.push({ id: Date.now().toString(36) + rndStr, name, members });
   }
   _saveGroups(groups);
   renderGroups();
@@ -4083,7 +4122,7 @@ function _renderQbank() {
   if (!pool.length) { el.innerHTML = '<p style="font-size:0.83rem;color:var(--text-3);">Ingen spørsmål i eksisterende moduler ennå.</p>'; return; }
   const qbSearch = el.querySelector('#qbankSearch')?.value || '';
   const filtered = qbSearch ? pool.filter(p => p.q.toLowerCase().includes(qbSearch.toLowerCase()) || p.module.toLowerCase().includes(qbSearch.toLowerCase())) : pool;
-  el.innerHTML = `<input id="qbankSearch" type="text" placeholder="Søk i spørsmål..." data-oninput="_renderQbank" value="${escHtml(qbSearch)}"
+  el.innerHTML = `<input id="qbankSearch" type="text" placeholder="Søk i spørsmål..." data-oninput="_renderQbankDebounced" value="${escHtml(qbSearch)}"
     style="width:100%;padding:7px 11px;border:1px solid var(--border-2);border-radius:8px;font-family:'Nunito',sans-serif;font-size:0.85rem;outline:none;background:var(--s3);color:var(--text);margin-bottom:0.5rem;box-sizing:border-box;">
     <div style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:0.35rem;">
     ${filtered.slice(0,30).map((p, li) => `<div class="qbank-item">
@@ -4559,7 +4598,7 @@ function _showConfirm(msg, onYes, yesLabel='Slett', yesColor='var(--c1)') {
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.15s ease;';
   ov.innerHTML = `<div style="background:var(--s2);border:1px solid var(--border-2);border-radius:16px;padding:1.5rem 1.75rem;max-width:320px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.8);">
-    <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin:0 0 1.25rem;line-height:1.5;">${msg}</p>
+    <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin:0 0 1.25rem;line-height:1.5;">${escHtml(msg)}</p>
     <div style="display:flex;gap:0.75rem;justify-content:center;">
       <button id="_cfNo" style="padding:9px 22px;border-radius:8px;border:1px solid var(--border-2);background:var(--s3);color:var(--text-2);cursor:pointer;font-weight:600;font-size:0.9rem;">Avbryt</button>
       <button id="_cfYes" style="padding:9px 22px;border-radius:8px;border:none;background:${yesColor};color:white;cursor:pointer;font-weight:700;font-size:0.9rem;">${yesLabel}</button>
@@ -4716,7 +4755,7 @@ const DB = {
     // Filtrer vekk demo-moduler – de skal aldri lagres til Supabase
     const realModules = modules.filter(m => !m._isDemo);
     realModules.forEach((m, i) => {
-      if (!m._id) m._id = 'mod_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 7);
+      if (!m._id) { const b = crypto.getRandomValues(new Uint8Array(4)); m._id = 'mod_' + Date.now() + '_' + i + '_' + Array.from(b, x => x.toString(36)).join(''); }
     });
     localStorage.setItem('lh_modules', JSON.stringify(realModules));
     for (let i = 0; i < realModules.length; i++) {
@@ -5399,8 +5438,9 @@ function wcSetWordMode(wm) {
 
 function wcGenCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const bytes = crypto.getRandomValues(new Uint8Array(4));
   let c = '';
-  for (let i=0;i<4;i++) c += chars[Math.floor(Math.random()*chars.length)];
+  for (let i=0;i<4;i++) c += chars[bytes[i] % chars.length];
   return c;
 }
 
@@ -5449,13 +5489,17 @@ function wcPollResponses() {
   if (!raw) return;
   try {
     const responses = JSON.parse(raw);
+    if (!Array.isArray(responses)) throw new Error('Unexpected format');
     WC.results = responses;
     const cnt = document.getElementById('wc-response-count');
     if (cnt) cnt.textContent = responses.length + ' svar';
     const showingResults = document.getElementById('wc-results-panel')?.style.display !== 'none';
     if (showingResults) wcRenderResults();
     wcRenderResponsesList();
-  } catch(e) {}
+  } catch(e) {
+    console.warn('[WC] wcPollResponses parse error:', e);
+    WC.results = [];
+  }
 }
 
 function wcRenderTeacher() {
@@ -6908,7 +6952,7 @@ function arbFcPrev() {
 // ====== SPACED REPETITION SM-2 ======
 function _sm2GuestId() {
   let id = sessionStorage.getItem('sm2_guest_id');
-  if (!id) { id = 'g_' + Math.random().toString(36).slice(2,10); sessionStorage.setItem('sm2_guest_id', id); }
+  if (!id) { const b = crypto.getRandomValues(new Uint8Array(6)); id = 'g_' + Array.from(b, x => x.toString(36)).join(''); sessionStorage.setItem('sm2_guest_id', id); }
   return id;
 }
 function _sm2Key(mi, ci) { return 'sm2_' + (state.student?.name || _sm2GuestId()) + '_m' + mi + '_' + ci; }
@@ -8088,6 +8132,7 @@ function _pwaHideBanner() {
 // Wrapper functions for multi-call inline handlers
 function _crSwitchTabHs() { crSwitchTab('hs'); loadHighscoreView(); }
 function _renderQbankDeferred() { setTimeout(_renderQbank, 50); }
+const _renderQbankDebounced = _debounce(_renderQbank, 200);
 function _oninputUppercase(el) { el.value = el.value.toUpperCase(); }
 function _oninputUppercaseAlnum(el) { el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); }
 

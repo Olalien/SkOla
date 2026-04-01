@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#7c3aed" id="themeColorMeta">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.cdnfonts.com; font-src 'self' https://fonts.gstatic.com https://fonts.cdnfonts.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://api.anthropic.com https://*.supabase.co https://graph.microsoft.com https://api.dictionaryapi.dev https://ordbokene.no; frame-src 'self' https://www.youtube.com https://youtube.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,11 +25,26 @@
 <title>SkOla – Interaktiv læringsplattform</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.cdnfonts.com/css/opendyslexic" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.cdnfonts.com/css/opendyslexic"></noscript>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+              // New version available — show update banner
+              const banner = document.getElementById('swUpdateBanner');
+              if (banner) banner.style.display = 'flex';
+            }
+          });
+        });
+      }).catch(() => {});
     });
   }
 </script>
@@ -517,7 +533,7 @@
 
       <!-- URL analyse -->
       <div style="margin-bottom:1.1rem;">
-        <div style="font-size:0.78rem;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Analyser nettside / URL</div>
+        <label for="aiUrlInput" style="font-size:0.78rem;font-weight:800;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;display:block;">Analyser nettside / URL</label>
         <div style="display:flex;gap:0.5rem;">
           <input type="url" id="aiUrlInput" placeholder="https://snl.no/Demokrati"
             class="focus-accent-h"
@@ -567,9 +583,9 @@
 
       <!-- Main AI generate button -->
       <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-        <button class="btn-ai" data-onclick="generateWithAI" style="font-size:1rem;padding:13px 28px;">
-          <span>Generer alle oppgaver fra tekst</span>
-          <div class="ai-spinner" id="aiSpinner"></div>
+        <button class="btn-ai" data-onclick="generateWithAI" aria-label="Generer alle oppgaver fra tekst med AI" style="font-size:1rem;padding:13px 28px;">
+          <span aria-hidden="true">Generer alle oppgaver fra tekst</span>
+          <div class="ai-spinner" id="aiSpinner" role="status" aria-label="Genererer..." aria-hidden="true"></div>
         </button>
         <button data-onclick="generateAll" style="background:linear-gradient(135deg,#7b5af5,#a78bfa);color:white;border:none;padding:13px 22px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:flex;align-items:center;gap:8px;">
           <span>🪄 Generer alt</span>
@@ -1438,6 +1454,17 @@
         <button data-onclick="exportModulesJSON" style="background:var(--s3);border:1px solid var(--border-2);border-radius:8px;padding:8px 16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;color:var(--text);display:flex;align-items:center;gap:6px;">⬇️ Last ned backup</button>
         <label style="background:var(--s3);border:1px solid var(--border-2);border-radius:8px;padding:8px 16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;color:var(--text);display:flex;align-items:center;gap:6px;">⬆️ Importer backup<input type="file" accept=".json" style="display:none;" data-onchange="importModulesJSON" data-onchange-el="1"></label>
       </div>
+    </div>
+
+    <!-- Bytt lærerpassord (kun synlig når innlogget som lærer) -->
+    <div id="changePassSection" style="display:none;margin-bottom:1.25rem;">
+      <div class="settings-section-title" style="font-size:0.78rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;">🔐 Bytt lærerpassord</div>
+      <input type="password" id="changePassCurrent" placeholder="Nåværende passord" autocomplete="current-password"
+        style="width:100%;padding:10px 13px;border:1px solid var(--border-2);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;margin-bottom:0.5rem;">
+      <input type="password" id="changePassNew" placeholder="Nytt passord (min. 8 tegn)" autocomplete="new-password"
+        style="width:100%;padding:10px 13px;border:1px solid var(--border-2);border-radius:10px;background:var(--s2);color:var(--text);font-family:'Nunito',sans-serif;font-size:0.9rem;outline:none;margin-bottom:0.5rem;">
+      <div id="changePassError" style="display:none;color:var(--c1);font-size:0.82rem;font-weight:700;margin-bottom:0.5rem;"></div>
+      <button data-onclick="submitChangePass" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;cursor:pointer;">Lagre nytt passord</button>
     </div>
 
     <button class="btn-primary" style="width:100%;justify-content:center;" data-onclick="closeModal" data-onclick-arg="settingsModal">Lukk</button>
@@ -2329,6 +2356,12 @@
 
 <script src="app.js" defer></script>
 <div id="offlineBanner" class="offline-banner" role="alert" aria-live="assertive">📡 Ingen internettforbindelse — jobber offline. Data synkroniseres automatisk når du er tilkoblet igjen.</div>
+
+<!-- SW oppdatering-banner -->
+<div id="swUpdateBanner" role="alert" style="display:none;position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:5001;background:#0f1126;border:1px solid rgba(123,143,253,0.3);border-radius:12px;padding:0.75rem 1rem;max-width:380px;width:calc(100% - 2rem);box-shadow:0 8px 32px rgba(0,0,0,0.6);font-family:'Nunito',sans-serif;font-size:0.85rem;color:#8890b8;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+  <span style="flex:1;">🔄 Ny versjon av SkOla er tilgjengelig!</span>
+  <button onclick="window.location.reload()" style="background:#7b8ffd;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">Oppdater nå</button>
+</div>
 
 <!-- GDPR-personvernvarsel -->
 <div id="gdprBanner" role="dialog" aria-label="Personvernvarsel" aria-modal="false" style="display:none;position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:5000;background:#0f1126;border:1px solid rgba(123,143,253,0.25);border-radius:14px;padding:1rem 1.25rem;max-width:480px;width:calc(100% - 2rem);box-shadow:0 8px 32px rgba(0,0,0,0.6);font-family:'Nunito',sans-serif;font-size:0.85rem;color:#8890b8;display:flex;gap:0.75rem;align-items:flex-start;flex-wrap:wrap;">
