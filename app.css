@@ -1172,3 +1172,708 @@ body.light input[type="date"] {
   .view.active { animation: none !important; }
   * { transition-duration: 0.01ms !important; }
 }
+
+/* ============================================================
+   ITERASJON 8 — UX/UI Design Overhaul
+   Mobile-first, spacing scale, typography scale, component
+   polish, accessibility, and visual hierarchy improvements.
+   ============================================================ */
+
+/* ── Design tokens: spacing & type scale ──────────────────── */
+:root {
+  /* Spacing scale (4-point) */
+  --sp-1:  0.25rem;   /*  4px */
+  --sp-2:  0.5rem;    /*  8px */
+  --sp-3:  0.75rem;   /* 12px */
+  --sp-4:  1rem;      /* 16px */
+  --sp-5:  1.25rem;   /* 20px */
+  --sp-6:  1.5rem;    /* 24px */
+  --sp-8:  2rem;      /* 32px */
+  --sp-10: 2.5rem;    /* 40px */
+  --sp-12: 3rem;      /* 48px */
+
+  /* Type scale */
+  --text-xs:   0.72rem;
+  --text-sm:   0.83rem;
+  --text-base: 0.95rem;
+  --text-md:   1.05rem;
+  --text-lg:   1.2rem;
+  --text-xl:   1.4rem;
+  --text-2xl:  1.7rem;
+  --text-3xl:  2.2rem;
+
+  /* Line heights */
+  --lh-tight:  1.25;
+  --lh-snug:   1.4;
+  --lh-normal: 1.6;
+  --lh-relaxed:1.8;
+  --lh-loose:  2.0;
+
+  /* Transitions */
+  --t-fast:   0.12s ease;
+  --t-base:   0.2s ease;
+  --t-slow:   0.3s ease;
+  --t-spring: 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Border radii scale */
+  --r-sm:  8px;
+  --r-md:  12px;
+  --r-lg:  16px;
+  --r-xl:  20px;
+  --r-2xl: 24px;
+  --r-full: 9999px;
+}
+
+/* ── Base body: better line-height & reading flow ─────────── */
+body {
+  line-height: var(--lh-normal);
+  font-size: var(--text-base);
+}
+
+/* ── View: improved padding and max-width on all breakpoints ─ */
+.view {
+  padding: var(--sp-4);
+  max-width: 1100px;
+}
+@media (min-width: 640px) {
+  .view { padding: var(--sp-6); }
+}
+@media (min-width: 1024px) {
+  .view { padding: var(--sp-8) var(--sp-6); }
+}
+
+/* ── Hero section: better vertical rhythm ─────────────────── */
+.hero {
+  padding: var(--sp-8) var(--sp-4) var(--sp-6);
+}
+.hero h1 {
+  line-height: var(--lh-tight);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--sp-3);
+}
+.hero p {
+  line-height: var(--lh-normal);
+  max-width: 56ch;
+  margin-inline: auto;
+  margin-bottom: var(--sp-6);
+}
+
+/* ── Home hero: breathing room, refined layout ────────────── */
+.home-hero {
+  padding: var(--sp-6);
+  border-radius: var(--r-2xl);
+  gap: var(--sp-5);
+  margin-bottom: var(--sp-6);
+}
+.home-hero-title {
+  line-height: var(--lh-tight);
+  letter-spacing: -0.015em;
+}
+.home-hero-sub {
+  font-size: var(--text-sm);
+  margin-top: var(--sp-1);
+  line-height: var(--lh-snug);
+}
+.home-action-btn {
+  min-height: 76px;
+  padding: var(--sp-4) var(--sp-4);
+  gap: var(--sp-2);
+  border-radius: var(--r-lg);
+  font-size: var(--text-xs);
+  line-height: var(--lh-snug);
+}
+.home-action-btn span:first-child {
+  font-size: 1.4rem;
+}
+
+/* ── Module grid: better column sizing ────────────────────── */
+.modules-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+  gap: var(--sp-4);
+}
+@media (max-width: 639px) {
+  .modules-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-3);
+  }
+}
+@media (max-width: 400px) {
+  .modules-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Module card: improved visual hierarchy ───────────────── */
+.module-card {
+  padding: var(--sp-5);
+  border-radius: var(--r-xl);
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+}
+.module-card .mc-emoji {
+  font-size: 2.2rem;
+  margin-bottom: var(--sp-3);
+  line-height: 1;
+}
+.module-card h3 {
+  font-size: var(--text-sm);
+  font-weight: 800;
+  line-height: var(--lh-snug);
+  margin-bottom: var(--sp-2);
+  flex: 1;
+}
+.module-card p {
+  font-size: var(--text-xs);
+  color: var(--text-2);
+  line-height: var(--lh-snug);
+  margin-bottom: var(--sp-3);
+}
+.module-card .task-count {
+  font-size: var(--text-xs);
+  padding: var(--sp-1) var(--sp-3);
+  align-self: flex-start;
+}
+@media (max-width: 639px) {
+  .module-card {
+    padding: var(--sp-4);
+    min-height: 110px;
+  }
+  .module-card .mc-emoji { font-size: 1.6rem; }
+  .module-card h3 { font-size: var(--text-xs); }
+}
+
+/* ── Section titles: consistent sizing ────────────────────── */
+.section-title {
+  font-size: clamp(1.05rem, 3.5vw, 1.4rem);
+  margin-bottom: var(--sp-4);
+  gap: var(--sp-3);
+  line-height: var(--lh-tight);
+}
+
+/* ── Student login box: improved spacing & feel ───────────── */
+.student-login-box {
+  padding: var(--sp-8) var(--sp-6);
+  border-radius: var(--r-2xl);
+  max-width: 380px;
+}
+.student-login-box h2 {
+  font-size: var(--text-xl);
+  margin-bottom: var(--sp-6);
+  line-height: var(--lh-tight);
+}
+.student-login-box input {
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  font-size: var(--text-base) !important;
+  margin-bottom: var(--sp-4);
+  height: 48px;
+}
+@media (max-width: 639px) {
+  .student-login-box {
+    padding: var(--sp-6) var(--sp-4);
+    margin-bottom: var(--sp-4);
+  }
+  .student-login-box h2 { font-size: var(--text-lg); }
+}
+
+/* ── Buttons: consistent heights and spacing ──────────────── */
+.btn-primary {
+  padding: var(--sp-3) var(--sp-6);
+  height: 44px;
+  border-radius: var(--r-md);
+  font-size: var(--text-sm);
+  letter-spacing: 0.01em;
+}
+.btn-primary:focus-visible {
+  outline: 2.5px solid var(--accent-h);
+  outline-offset: 3px;
+}
+.btn-success {
+  padding: var(--sp-3) var(--sp-5);
+  height: 44px;
+  border-radius: var(--r-md);
+}
+.btn-cancel {
+  height: 44px;
+  border-radius: var(--r-md);
+}
+.btn-save {
+  border-radius: var(--r-md);
+}
+
+/* Button disabled state */
+.btn-primary:disabled,
+.btn-success:disabled,
+.btn-save:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Form elements: better legibility and spacing ─────────── */
+.form-row label {
+  font-size: var(--text-xs);
+  font-weight: 800;
+  margin-bottom: var(--sp-2);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+.form-row input,
+.form-row textarea,
+.form-row select {
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  font-size: var(--text-base) !important;
+  line-height: var(--lh-normal);
+}
+.form-row textarea {
+  min-height: 100px;
+  line-height: var(--lh-relaxed);
+}
+.form-row {
+  margin-bottom: var(--sp-5);
+}
+
+/* ── Teacher panel: better section separation ─────────────── */
+.teacher-panel {
+  padding: var(--sp-6);
+  border-radius: var(--r-xl);
+  margin-bottom: var(--sp-5);
+}
+.teacher-panel h2 {
+  font-size: clamp(1rem, 3.5vw, 1.4rem);
+  margin-bottom: var(--sp-5);
+  gap: var(--sp-3);
+}
+@media (max-width: 639px) {
+  .teacher-panel {
+    padding: var(--sp-4);
+    border-radius: var(--r-lg);
+  }
+}
+
+/* ── Text block: comfortable reading width & spacing ──────── */
+.text-block {
+  padding: var(--sp-6);
+  border-radius: var(--r-xl);
+  line-height: var(--lh-loose);
+  font-size: var(--text-base);
+  margin-bottom: var(--sp-4);
+}
+.text-block h2 {
+  font-size: var(--text-xl);
+  line-height: var(--lh-tight);
+  margin-bottom: var(--sp-4);
+}
+@media (max-width: 639px) {
+  .text-block {
+    padding: var(--sp-4);
+    border-radius: var(--r-lg);
+    line-height: var(--lh-relaxed);
+  }
+}
+
+/* ── Quiz card: clearer question/option hierarchy ─────────── */
+.quiz-card {
+  padding: var(--sp-6);
+  border-radius: var(--r-xl);
+  margin-bottom: var(--sp-4);
+}
+.quiz-q {
+  font-size: var(--text-md);
+  line-height: var(--lh-snug);
+  margin-bottom: var(--sp-5);
+}
+.quiz-opt {
+  padding: var(--sp-4) var(--sp-4);
+  border-radius: var(--r-md);
+  font-size: var(--text-sm);
+  line-height: var(--lh-snug);
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+.quiz-opts {
+  gap: var(--sp-3);
+}
+@media (max-width: 639px) {
+  .quiz-card { padding: var(--sp-4); border-radius: var(--r-lg); }
+  .quiz-opt { min-height: 52px; padding: var(--sp-3); }
+}
+
+/* ── Discussion card ──────────────────────────────────────── */
+.discussion-card {
+  padding: var(--sp-6);
+  border-radius: var(--r-xl);
+  margin-bottom: var(--sp-4);
+}
+.discussion-card .dq-prompt {
+  font-size: var(--text-base);
+  line-height: var(--lh-relaxed);
+  padding-left: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+.discussion-card textarea {
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  line-height: var(--lh-relaxed);
+  font-size: var(--text-base) !important;
+}
+@media (max-width: 639px) {
+  .discussion-card { padding: var(--sp-4); border-radius: var(--r-lg); }
+}
+
+/* ── Arbeid module card ────────────────────────────────────── */
+.arb-module-card {
+  padding: var(--sp-5);
+  border-radius: var(--r-xl);
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+}
+.arb-module-card .arb-emoji {
+  font-size: 2.2rem;
+  margin-bottom: var(--sp-3);
+}
+.arb-module-card h3 {
+  font-size: var(--text-sm);
+  line-height: var(--lh-snug);
+  margin-bottom: var(--sp-2);
+  flex: 1;
+}
+.arb-module-card p {
+  font-size: var(--text-xs);
+  line-height: var(--lh-snug);
+  margin-bottom: var(--sp-3);
+}
+.arb-module-meta {
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+.arb-meta-chip {
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--text-xs);
+  border-radius: var(--r-sm);
+}
+
+/* ── Continue card: more prominent ───────────────────────── */
+.continue-card {
+  border-radius: var(--r-lg);
+  padding: var(--sp-4) var(--sp-5);
+  gap: var(--sp-4);
+  max-width: 480px;
+  margin-bottom: var(--sp-5);
+}
+.continue-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--r-md);
+  font-size: 1.5rem;
+}
+.continue-card-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.05em;
+  margin-bottom: var(--sp-1);
+}
+.continue-card-name {
+  font-size: var(--text-base);
+}
+
+/* ── Stat cards: grid layout ──────────────────────────────── */
+.stat-row-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr));
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
+}
+.stat-card {
+  padding: var(--sp-5) var(--sp-4);
+  border-radius: var(--r-lg);
+}
+.stat-card .stat-num {
+  font-size: var(--text-3xl);
+  line-height: 1;
+}
+.stat-card .stat-label {
+  font-size: var(--text-xs);
+  margin-top: var(--sp-2);
+  letter-spacing: 0.04em;
+}
+
+/* ── Badges: improved readability ─────────────────────────── */
+.badge {
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-md);
+  font-size: var(--text-sm);
+  gap: var(--sp-2);
+}
+.badge .badge-icon { font-size: 1.3rem; }
+
+/* ── Empty states: more visual impact ────────────────────── */
+.empty-state {
+  padding: var(--sp-12) var(--sp-4);
+}
+.empty-state .es-icon {
+  font-size: 4rem;
+  margin-bottom: var(--sp-4);
+  display: block;
+  opacity: 0.4;
+}
+.empty-state h3 {
+  font-size: var(--text-lg);
+  margin-bottom: var(--sp-3);
+  line-height: var(--lh-tight);
+}
+.empty-state p {
+  font-size: var(--text-sm);
+  color: var(--text-3);
+  max-width: 36ch;
+  margin-inline: auto;
+  line-height: var(--lh-normal);
+}
+
+/* ── Modal: better desktop and mobile sizing ──────────────── */
+.modal {
+  padding: var(--sp-8) var(--sp-6);
+  border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+}
+.modal h2 {
+  font-size: var(--text-xl);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--sp-5);
+}
+.modal input {
+  padding: var(--sp-3) var(--sp-4);
+  height: 48px;
+  border-radius: var(--r-md);
+  font-size: var(--text-base) !important;
+  margin-bottom: var(--sp-4);
+}
+.modal-btns {
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+}
+@media (min-width: 640px) {
+  .modal {
+    border-radius: var(--r-2xl);
+    max-width: 460px;
+    padding: var(--sp-8);
+  }
+  .modal-overlay { align-items: center; }
+}
+@media (max-width: 639px) {
+  .modal {
+    padding: var(--sp-6) var(--sp-4);
+    max-height: 94vh;
+  }
+}
+
+/* ── Navigation: bigger touch targets on mobile ───────────── */
+@media (max-width: 1023px) {
+  .mob-nav-btn {
+    font-size: var(--text-xs);
+    gap: var(--sp-1);
+    padding: var(--sp-2) var(--sp-2);
+    min-height: 60px;
+  }
+  .mob-icon { font-size: 1.4rem; }
+}
+
+/* ── Task tabs: uniform height ────────────────────────────── */
+.task-tab, .arb-task-tab {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-xs);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-sm);
+}
+
+/* ── Back button: proper touch target ─────────────────────── */
+.back-btn {
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-sm);
+  font-size: var(--text-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* ── Task header: better vertical alignment ───────────────── */
+.task-header {
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-5);
+  align-items: center;
+}
+.task-title {
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+}
+
+/* ── Result rows: cleaner layout ──────────────────────────── */
+.result-row {
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  gap: var(--sp-3);
+}
+.result-row .student-name {
+  font-size: var(--text-sm);
+}
+.result-row .result-detail {
+  font-size: var(--text-xs);
+}
+
+/* ── Export options: better spacing ───────────────────────── */
+.export-option {
+  padding: var(--sp-4) var(--sp-4);
+  border-radius: var(--r-lg);
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-3);
+}
+.export-title { font-size: var(--text-base); }
+.export-desc {
+  font-size: var(--text-xs);
+  line-height: var(--lh-snug);
+  margin-top: var(--sp-1);
+}
+
+/* ── Light mode: refined palette ─────────────────────────── */
+body.light {
+  --bg:     #f5f6fb;
+  --s1:     #ffffff;
+  --s2:     #eef0f8;
+  --s3:     #e4e6f2;
+  --border: #d1d5e8;
+  --border-2: #b8bdd8;
+  --text:   #0f1020;
+  --text-2: #4a4e6a;
+  --text-3: #5860a0;
+  --accent: #4a5add;
+  --accent-h: #5d6fef;
+  --accent-d: #3a4acc;
+  --accent-g: rgba(74, 90, 221, 0.1);
+  --card:   #ffffff;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
+  --glow-sm: 0 0 0 2px rgba(74,90,221,0.25);
+}
+body.light nav {
+  background: rgba(255,255,255,0.95);
+  border-bottom-color: var(--border);
+  box-shadow: 0 1px 0 var(--border), 0 2px 12px rgba(0,0,0,0.05);
+}
+body.light .module-card,
+body.light .arb-module-card {
+  background: var(--s1);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+body.light .module-card:hover,
+body.light .arb-module-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-2);
+}
+body.light .text-block,
+body.light .quiz-card,
+body.light .discussion-card,
+body.light .video-card,
+body.light .write-card {
+  background: var(--s1);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+body.light .modal {
+  background: var(--s1);
+  border-color: var(--border);
+}
+body.light .teacher-panel {
+  background: var(--s1);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+body.light .home-hero {
+  background: linear-gradient(135deg, #eef0ff 0%, #f5f0ff 50%, #fff0f5 100%);
+  border-color: rgba(74,90,221,0.2);
+}
+body.light .home-hero-title { color: var(--text); }
+body.light .home-hero-sub { color: var(--text-2); }
+body.light .btn-primary {
+  box-shadow: 0 4px 16px rgba(74,90,221,0.3);
+}
+body.light .continue-card {
+  background: var(--s1);
+  border-color: var(--border);
+}
+body.light .toast {
+  background: rgba(255,255,255,0.97) !important;
+  color: var(--text) !important;
+  border-color: var(--border-2) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+}
+body.light .student-login-box {
+  background: linear-gradient(160deg, #fafbff, #f5f6ff);
+  border-color: rgba(74,90,221,0.2);
+}
+body.light .nav-tab.active {
+  background: rgba(74,90,221,0.12);
+  color: #4a5add;
+  border-color: rgba(74,90,221,0.3);
+}
+body.light .score-fill {
+  background: linear-gradient(90deg, #4a5add, #8b5cf6, #22c55e);
+}
+
+/* ── Additional utility: typography helpers ───────────────── */
+.text-muted   { color: var(--text-2); }
+.text-dimmed  { color: var(--text-3); }
+.text-accent  { color: var(--accent-h); }
+.text-success { color: #4ade80; }
+.text-danger  { color: #f87171; }
+.font-display { font-family: 'Fredoka One', cursive; }
+
+/* ── Responsive padding for main content area ─────────────── */
+#main-content {
+  padding-inline: 0;
+}
+@media (min-width: 1024px) {
+  #main-content {
+    padding-inline: var(--sp-4);
+  }
+}
+
+/* ── Toast: improved positioning for mobile nav ───────────── */
+@media (max-width: 1023px) {
+  .toast {
+    bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ── PWA banner: stay above mobile nav ────────────────────── */
+@media (max-width: 1023px) {
+  #pwaBanner {
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    right: var(--sp-4);
+    left: var(--sp-4);
+    max-width: 100%;
+  }
+}
+
+/* ── Focus mode: improved reading view ────────────────────── */
+body.focus-mode .text-block {
+  font-size: calc(var(--text-md) * var(--font-scale)) !important;
+  line-height: var(--lh-loose) !important;
+  max-width: 65ch;
+  margin-inline: auto;
+}
+
+/* ── Smooth scroll for anchor links ──────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* ── Global: remove tap highlight on iOS consistently ───────*/
+* { -webkit-tap-highlight-color: transparent; }
