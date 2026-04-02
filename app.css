@@ -3176,12 +3176,6 @@ img, video, iframe, embed, object {
   transition: transform 0.2s ease;
 }
 
-/* ── Back button: arrow prefix ──────────────────────────────── */
-.back-btn::before {
-  content: '←';
-  margin-right: 0.3rem;
-  display: inline;
-}
 
 /* ── Welcome back card: richer gradient ─────────────────────── */
 .welcome-back-card {
