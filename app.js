@@ -6553,7 +6553,7 @@ function arbRenderQuiz(m) {
         ${opts.map((o,oi) => {
           let cls = '';
           if (answered) { cls = o.correct ? 'reveal-correct' : ''; }
-          return `<button class="arb-opt ${cls}" id="arb-opt-${qi}-${oi}" ${answered?'disabled':''} data-onclick="arbCheckAnswer" data-onclick-args="${escHtml(JSON.stringify([qi,o.correct,oi,q.explain||'',opts.map(x=>x.correct)]))}}">${escHtml(o.text)}</button>`;
+          return `<button class="arb-opt ${cls}" id="arb-opt-${qi}-${oi}" ${answered?'disabled':''} data-onclick="arbCheckAnswer" data-onclick-args="${escHtml(JSON.stringify([qi,o.correct,oi,q.explain||'',opts.map(x=>x.correct)]))}">${escHtml(o.text)}</button>`;
         }).join('')}
       </div>
       ${answered ? `<div class="arb-feedback ${savedAns==='correct'?'ok':'fail'}">${savedAns==='correct' ? '✅ Riktig!' : '❌ Feil'} ${q.explain ? '– '+escHtml(q.explain) : ''}</div>` : ''}
@@ -6637,7 +6637,7 @@ function _arbRenderQuizCard(m, qi) {
     ${qImgHtml}
     <div class="arb-quiz-question" style="font-size:1.1rem;margin-bottom:1.25rem;">${escHtml(q.question)}</div>
     <div class="arb-options" id="cardOpts">
-      ${opts.map((o,oi) => `<button class="arb-opt" data-onclick="arbCheckAnswerCard" data-onclick-args="${escHtml(JSON.stringify([qi,o.correct,oi,q.explain||'',opts.map(x=>x.correct)]))}}">${escHtml(o.text)}</button>`).join('')}
+      ${opts.map((o,oi) => `<button class="arb-opt" data-onclick="arbCheckAnswerCard" data-onclick-args="${escHtml(JSON.stringify([qi,o.correct,oi,q.explain||'',opts.map(x=>x.correct)]))}">${escHtml(o.text)}</button>`).join('')}
     </div>
     <div id="cardFeedback"></div>
   </div>`;
@@ -6739,7 +6739,7 @@ function _arbExamShowQuestion(m) {
     ${imgHtml}
     <div class="arb-quiz-question" style="margin-bottom:1rem;">${escHtml(q.question)}</div>
     <div class="arb-options" id="examOpts">
-      ${opts.map((o,oi)=>`<button class="arb-opt" id="exam-opt-${oi}" data-onclick="_examSelectOpt" data-onclick-args="${escHtml(JSON.stringify([oi,o.correct,q.question,q.a||'',opts.map(x=>x.correct)]))}}">${escHtml(o.text)}</button>`).join('')}
+      ${opts.map((o,oi)=>`<button class="arb-opt" id="exam-opt-${oi}" data-onclick="_examSelectOpt" data-onclick-args="${escHtml(JSON.stringify([oi,o.correct,q.question,q.a||'',opts.map(x=>x.correct)]))}">${escHtml(o.text)}</button>`).join('')}
     </div>
     <div id="examNext" style="display:none;margin-top:1rem;">
       <button id="examNextBtn" style="background:var(--accent);color:white;border:none;padding:11px 28px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;">${isLast?'Se resultat 🎓':'Neste →'}</button>
