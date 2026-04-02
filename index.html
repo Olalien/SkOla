@@ -195,12 +195,8 @@
         <div id="studentProgressWrap" style="margin-top:0.75rem;background:rgba(255,255,255,0.2);border-radius:50px;height:8px;overflow:hidden;"><div id="studentProgressBar" style="height:100%;background:var(--c2);border-radius:50px;width:0%;transition:width 0.6s ease;"></div></div>
         <div id="studentProgressLabel" style="font-size:0.75rem;opacity:0.75;margin-top:0.3rem;font-weight:700;"></div>
         <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.75rem;">
-  <button data-onclick="studentLogout" style="background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);color:white;padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">
-    Bytt bruker
-  </button>
-  <button data-onclick="studentLogout" data-onclick-arg="true" style="background:rgba(239,68,68,0.25);border:2px solid rgba(239,68,68,0.5);color:white;padding:6px 16px;border-radius:50px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;">
-    Logg ut
-  </button>
+  <button class="wb-btn" data-onclick="studentLogout">Bytt bruker</button>
+  <button class="wb-btn wb-btn-danger" data-onclick="studentLogout" data-onclick-arg="true">Logg ut</button>
 </div>
       </div>
     </div>
@@ -563,7 +559,7 @@
         </div>
         <div id="imgPreviewBox" style="display:none;margin-top:0.6rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:0.875rem;">
           <div style="display:flex;align-items:flex-start;gap:0.875rem;">
-            <img id="imgPreviewThumb" style="width:80px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0;" />
+            <img id="imgPreviewThumb" alt="" style="width:80px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0;" />
             <div style="flex:1;">
               <div style="font-weight:800;color:white;font-size:0.88rem;margin-bottom:0.3rem;" id="imgPreviewName"></div>
               <div style="color:rgba(255,255,255,0.5);font-size:0.78rem;" id="imgPreviewDesc">Klar til analyse</div>
@@ -2360,7 +2356,7 @@
 <!-- SW oppdatering-banner -->
 <div id="swUpdateBanner" role="alert" style="display:none;position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:5001;background:#0f1126;border:1px solid rgba(123,143,253,0.3);border-radius:12px;padding:0.75rem 1rem;max-width:380px;width:calc(100% - 2rem);box-shadow:0 8px 32px rgba(0,0,0,0.6);font-family:'Nunito',sans-serif;font-size:0.85rem;color:#8890b8;gap:0.75rem;align-items:center;flex-wrap:wrap;">
   <span style="flex:1;">🔄 Ny versjon av SkOla er tilgjengelig!</span>
-  <button onclick="window.location.reload()" style="background:#7b8ffd;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">Oppdater nå</button>
+  <button class="sw-update-btn" data-onclick="reloadPage">Oppdater nå</button>
 </div>
 
 <!-- GDPR-personvernvarsel -->
@@ -2369,7 +2365,7 @@
     🔒 SkOla bruker kun teknisk nødvendige informasjonskapsler – ingen annonsesporing.
     <a href="#" data-onclick="openModal" data-onclick-arg="privacyModal" style="color:#9aaaff;text-decoration:underline;margin-left:4px;">Les mer</a>
   </div>
-  <button id="gdprAcceptBtn" style="background:#7b8ffd;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">Forstått</button>
+  <button id="gdprAcceptBtn" aria-label="Forstått og lukk personvernvarsel" style="background:#7b8ffd;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">Forstått</button>
 </div>
 
 <!-- Personvernmodal -->
