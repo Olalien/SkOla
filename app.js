@@ -204,7 +204,7 @@ function showView(name) {
     else          tab.removeAttribute('aria-current');
   });
   if (name === 'home') { renderHomeModules(); _heroGreeting(); }
-  if (name === 'tasks') { DB.loadModules().then(m => { if(m.length){state.modules=m; _invalidateGridCache();} renderTaskModules(); }).catch(e => { console.warn('[showView:tasks] DB.loadModules failed', e); renderTaskModules(); }); }
+  if (name === 'tasks') { DB.loadModules().then(m => { if(m.length){state.modules=m; _invalidateGridCache();} renderTaskModules(); }).catch(() => { renderTaskModules(); }); }
   if (name === 'teacher') {
     if (!state.isTeacher) { showToast('⛔ Logg inn som lærer for å få tilgang'); return; }
     renderResults(); renderManageModules(); teacherUpdateActivity();
@@ -536,6 +536,9 @@ function _initOfflineIndicator() {
   update();
 }
 
+// ====== UTILITIES ======
+function reloadPage() { location.reload(); }
+
 // ====== GLOBAL ERROR BOUNDARY ======
 window.addEventListener('unhandledrejection', e => {
   const msg = e.reason?.message || '';
@@ -585,7 +588,7 @@ async function loadState() {
   initMsToken();
   initTeacherActivityTracking();
   let dbMods = [];
-  try { dbMods = await DB.loadModules(); } catch(e) { console.warn('[loadState] DB.loadModules failed:', e); }
+  try { dbMods = await DB.loadModules(); } catch { /* offline or unconfigured — use cached modules */ }
   if (dbMods.length > 0) {
     state.modules = dbMods;
   }
@@ -598,7 +601,7 @@ async function loadState() {
       const salt = SecurityUtils.generateSalt();
       const hash = await SecurityUtils.hashPassword(TEACHER_PASS, salt);
       localStorage.setItem('os_teacher_auth', JSON.stringify({ salt, hash }));
-    } catch(e) { console.warn('Could not seed teacher auth:', e); }
+    } catch { /* crypto unavailable — teacher setup will retry on next load */ }
   }
 
   // Restore teacher session
@@ -727,9 +730,9 @@ function showStudentWelcome() {
   const wn = document.getElementById('welcomeName');
   const wc = document.getElementById('welcomeClass');
   const rb = document.getElementById('roleBadge');
-  if (wn) wn.textContent = 'Hei, ' + state.student.name + '! 👋';
-  if (wc) wc.textContent = state.student.cls || '';
-  if (rb) rb.textContent = '🎓 ' + state.student.name;
+  if (wn && state.student) wn.textContent = 'Hei, ' + state.student.name + '! 👋';
+  if (wc && state.student) wc.textContent = state.student.cls || '';
+  if (rb && state.student) rb.textContent = '🎓 ' + state.student.name;
   const ba = document.getElementById('badgeArea');
   if (ba) ba.style.display = 'flex';
   renderBadges();
@@ -2868,11 +2871,6 @@ function renderPreviewPanel() {
 function escHtml(str){return sanitizeHTML(str);}
 function _lsGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key) ?? JSON.stringify(fallback)); } catch { return fallback; } }
 
-// Debounce utility — prevents excessive re-renders on rapid input
-function _debounce(fn, ms = 200) {
-  let t;
-  return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), ms); };
-}
 
 // Lazy-load a UMD library on first use
 function _loadScript(url) {
@@ -2971,7 +2969,7 @@ function renderResults() {
   searchInput.id = 'studentResultSearch';
   searchInput.placeholder = '🔍 Filtrer elev...';
   searchInput.style.cssText = "width:100%;padding:9px 16px;border:1px solid var(--border-2);border-radius:50px;font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none;background:var(--s2);color:var(--text);box-sizing:border-box;margin-bottom:0.875rem;";
-  searchInput.addEventListener('input', _debounce(filterStudentResults, 180));
+  searchInput.addEventListener('input', debounce(filterStudentResults, 180));
   container.appendChild(searchInput);
   Object.entries(students).forEach(([name,answers], idx) => {
     const row = document.createElement('div');
@@ -8147,7 +8145,7 @@ function _pwaHideBanner() {
 // Wrapper functions for multi-call inline handlers
 function _crSwitchTabHs() { crSwitchTab('hs'); loadHighscoreView(); }
 function _renderQbankDeferred() { setTimeout(_renderQbank, 50); }
-const _renderQbankDebounced = _debounce(_renderQbank, 200);
+const _renderQbankDebounced = debounce(_renderQbank, 200);
 function _oninputUppercase(el) { el.value = el.value.toUpperCase(); }
 function _oninputUppercaseAlnum(el) { el.value = el.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); }
 
