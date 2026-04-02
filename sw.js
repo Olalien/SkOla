@@ -1,5 +1,5 @@
 // SkOla Service Worker — offline-støtte
-const CACHE = 'olaskole-v4';
+const CACHE = 'olaskole-v5';
 const ASSETS = [
   './',
   './index.html',
