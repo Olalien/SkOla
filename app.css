@@ -44,6 +44,10 @@
     --content-w:1080px;
     /* Font scale (used by text-size accessibility controls) */
     --font-scale:1;
+    /* Button height scale — 3 tiers for consistent touch targets */
+    --btn-h-sm:32px;
+    --btn-h-md:38px;
+    --btn-h-lg:44px;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
@@ -2408,7 +2412,7 @@ body { padding-top: var(--nav-h); }
   color: #fff;
   border: none;
   padding: 0 var(--sp-6);
-  height: 44px;
+  height: var(--btn-h-lg);
   border-radius: 11px;
   font-weight: 800;
   font-size: 0.9rem;
@@ -2438,19 +2442,19 @@ body { padding-top: var(--nav-h); }
 }
 
 .btn-success {
-  height: 44px;
+  height: var(--btn-h-lg);
   padding: 0 var(--sp-5);
   border-radius: 11px;
   font-weight: 800;
 }
 .btn-cancel {
-  height: 44px;
+  height: var(--btn-h-lg);
   padding: 0 var(--sp-5);
   border-radius: 11px;
   font-weight: 800;
 }
 .back-btn {
-  height: 40px;
+  height: var(--btn-h-md);
   padding: 0 var(--sp-4);
   border-radius: 9px;
   font-size: 0.85rem;
@@ -2466,7 +2470,7 @@ body { padding-top: var(--nav-h); }
   border-radius: 9px;
   font-size: 0.82rem;
   font-weight: 700;
-  min-height: 40px;
+  min-height: var(--btn-h-md);
   display: inline-flex;
   align-items: center;
   background: var(--s1);
