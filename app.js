@@ -1610,7 +1610,9 @@ function openModule(idx) {
   if (!m) return;
   document.getElementById('moduleDetailTitle').textContent = (m.emoji||'📚')+' '+m.name;
   document.getElementById('moduleList').style.display = 'none';
-  document.getElementById('moduleDetail').style.display = 'block';
+  const _modDetail = document.getElementById('moduleDetail');
+  _modDetail.style.display = 'block';
+  _modDetail.classList.remove('panel-enter'); void _modDetail.offsetWidth; _modDetail.classList.add('panel-enter');
   showView('tasks');
   renderModuleDetail(m);
   resetNotepadUI();
@@ -1665,14 +1667,14 @@ function switchTaskType(type, m) {
   _quizTimers = {};
   _removeQuizKeyboard();
   state.currentTask = type;
-  if (type==='text') { content.innerHTML = renderTextHTML(m); setTimeout(()=>_initTaskTextView(m),50); }
-  else if (type==='quiz') { content.innerHTML = renderQuizHTML(m); setTimeout(()=>{ startQuizTimers(m); _initQuizKeyboard(); }, 100); }
-  else if (type==='disc') content.innerHTML = renderDiscHTML(m);
-  else if (type==='write') { content.innerHTML = renderWriteHTML(m); setTimeout(()=>_loadWriteFeedback(m),100); }
-
-  else if (type==='video') content.innerHTML = renderVideoHTML(m);
-  else if (type==='fc') { content.innerHTML = renderFlashcardHTML(m); initFlashcards(m); }
-  else if (type==='blank') content.innerHTML = renderBlanksHTML(m);
+  const _animTabFade = () => { content.classList.remove('tab-fade'); void content.offsetWidth; content.classList.add('tab-fade'); };
+  if (type==='text') { content.innerHTML = renderTextHTML(m); _animTabFade(); setTimeout(()=>_initTaskTextView(m),50); }
+  else if (type==='quiz') { content.innerHTML = renderQuizHTML(m); _animTabFade(); setTimeout(()=>{ startQuizTimers(m); _initQuizKeyboard(); }, 100); }
+  else if (type==='disc') { content.innerHTML = renderDiscHTML(m); _animTabFade(); }
+  else if (type==='write') { content.innerHTML = renderWriteHTML(m); _animTabFade(); setTimeout(()=>_loadWriteFeedback(m),100); }
+  else if (type==='video') { content.innerHTML = renderVideoHTML(m); _animTabFade(); }
+  else if (type==='fc') { content.innerHTML = renderFlashcardHTML(m); _animTabFade(); initFlashcards(m); }
+  else if (type==='blank') { content.innerHTML = renderBlanksHTML(m); _animTabFade(); }
   else if (type==='match') _renderMatchGame(m, content);
 }
 
@@ -6310,7 +6312,9 @@ function arbOpenModule(idx) {
     DB.saveFeedback(trackKey, JSON.stringify(opened)).catch(()=>{});
   }
   document.getElementById('arb-select').style.display = 'none';
-  document.getElementById('arb-detail').style.display = 'block';
+  const _arbDetail = document.getElementById('arb-detail');
+  _arbDetail.style.display = 'block';
+  _arbDetail.classList.remove('panel-enter'); void _arbDetail.offsetWidth; _arbDetail.classList.add('panel-enter');
   document.getElementById('arbDetailTitle').textContent = (m.emoji||'📚') + ' ' + m.name;
   document.getElementById('arbDetailStudent').textContent = state.student ? ('👤 ' + state.student.name + (state.student.cls ? ' · ' + state.student.cls : '')) : '';
   arbRenderTabs(m);
