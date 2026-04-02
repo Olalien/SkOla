@@ -2987,3 +2987,214 @@ img, video, iframe, embed, object {
 @media (max-width: 360px) {
   .view { padding: var(--sp-3) var(--sp-2); }
 }
+
+/* ================================================================
+   VISUAL IMPROVEMENTS — simple, clean, appealing
+   ================================================================ */
+
+/* ── Hero title: gradient text on the site name ────────────── */
+.home-hero-title span {
+  background: linear-gradient(135deg, #b8c8ff 0%, #c084fc 55%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Hero: slightly richer background gradient ──────────────── */
+.home-hero {
+  background: linear-gradient(140deg, #0c0f2e 0%, #0a0d22 45%, #140b2c 100%);
+}
+.home-hero::before {
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(124,143,255,0.18) 0%, transparent 68%);
+  top: -100px;
+  right: -100px;
+}
+
+/* ── Module card emoji: gentle bounce on hover ──────────────── */
+.module-card .mc-emoji {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+}
+.module-card:hover .mc-emoji {
+  transform: scale(1.2) rotate(-8deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .module-card:hover .mc-emoji { transform: none; }
+}
+
+/* ── Arb module card emoji: same treatment ──────────────────── */
+.arb-module-card .arb-emoji {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+}
+.arb-module-card:hover .arb-emoji {
+  transform: scale(1.18) rotate(-6deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .arb-module-card:hover .arb-emoji { transform: none; }
+}
+
+/* ── Nav active tab: animated underline shimmer ─────────────── */
+.nav-tab.active::after {
+  animation: tabPillShimmer 2.5s linear infinite;
+  background-size: 200% 100%;
+  background-image: linear-gradient(90deg, #7c8fff, #c084fc, #f472b6, #7c8fff);
+}
+@keyframes tabPillShimmer {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-tab.active::after { animation: none; }
+}
+
+/* ── Section titles: subtle accent dot marker ───────────────── */
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  flex-shrink: 0;
+  margin-right: 0.1rem;
+  box-shadow: 0 0 8px rgba(124,143,255,0.5);
+}
+
+/* ── Student login box: glow ring on keyboard focus ─────────── */
+.student-login-box:focus-within {
+  border-color: rgba(124,143,255,0.5);
+  box-shadow: 0 0 0 4px rgba(124,143,255,0.1), 0 8px 40px rgba(0,0,0,0.55);
+}
+
+/* ── Student progress bar: animated gradient ────────────────── */
+#studentProgressBar {
+  background: linear-gradient(90deg, #22c55e, #34d399, #22c55e);
+  background-size: 200% 100%;
+  animation: progressFlow 2s linear infinite;
+}
+@keyframes progressFlow {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #studentProgressBar { animation: none; background: #22c55e; }
+}
+
+/* ── Arb progress fill: accent→purple gradient ──────────────── */
+.arb-progress-fill {
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  box-shadow: 0 0 8px rgba(124,143,255,0.35);
+}
+
+/* ── Flashcard: taller with richer face gradients ───────────── */
+.arb-fc-inner {
+  height: 175px;
+}
+.arb-fc-front {
+  background: linear-gradient(145deg, #5d70f5 0%, #7a5cf0 50%, #a855f7 100%);
+  box-shadow: 0 6px 32px rgba(93,112,245,0.45);
+}
+.arb-fc-back {
+  background: linear-gradient(145deg, #059669 0%, #0891b2 50%, #6366f1 100%);
+  box-shadow: 0 6px 32px rgba(5,150,105,0.35);
+}
+
+/* ── Quiz options: A/B/C/D letter badges ────────────────────── */
+.arb-options .arb-opt {
+  padding-left: 2.4rem;
+  position: relative;
+}
+.arb-options .arb-opt:nth-child(1)::before,
+.arb-options .arb-opt:nth-child(2)::before,
+.arb-options .arb-opt:nth-child(3)::before,
+.arb-options .arb-opt:nth-child(4)::before {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text-3);
+  line-height: 1;
+  font-family: 'Nunito', sans-serif;
+}
+.arb-options .arb-opt:nth-child(1)::before { content: 'A'; }
+.arb-options .arb-opt:nth-child(2)::before { content: 'B'; }
+.arb-options .arb-opt:nth-child(3)::before { content: 'C'; }
+.arb-options .arb-opt:nth-child(4)::before { content: 'D'; }
+.arb-opt.correct::before,
+.arb-opt.wrong::before,
+.arb-opt[disabled]::before { display: none; }
+
+/* ── Quiz option hover: subtle accent glow ──────────────────── */
+.arb-opt:hover:not([disabled]) {
+  box-shadow: 0 0 0 2px rgba(124,143,255,0.3), 0 4px 16px rgba(124,143,255,0.12);
+}
+
+/* ── Empty state icon: gentle float ────────────────────────── */
+.empty-state .es-icon {
+  animation: floatIcon 3.5s ease-in-out infinite;
+  display: inline-block;
+}
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .empty-state .es-icon { animation: none; }
+}
+
+/* ── Toast: slide-up entrance ───────────────────────────────── */
+.toast.show {
+  animation: toastSlideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes toastSlideUp {
+  from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast.show { animation: none; }
+}
+
+/* ── Stat cards: hover lift with number scale ───────────────── */
+.stat-card:hover .stat-num {
+  transform: scale(1.08) translateY(-1px);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.stat-card .stat-num {
+  transition: transform 0.2s ease;
+}
+
+/* ── Back button: arrow prefix ──────────────────────────────── */
+.back-btn::before {
+  content: '←';
+  margin-right: 0.3rem;
+  display: inline;
+}
+
+/* ── Welcome back card: richer gradient ─────────────────────── */
+.welcome-back-card {
+  background: linear-gradient(135deg,
+    rgba(34,197,94,0.12) 0%,
+    rgba(124,143,255,0.1) 50%,
+    rgba(168,85,247,0.08) 100%
+  );
+}
+
+/* ── Text block: subtle left accent on headings ─────────────── */
+.text-block h2 {
+  padding-left: 0.75rem;
+  border-left: 3px solid;
+  border-image: linear-gradient(180deg, var(--accent), var(--purple)) 1;
+}
