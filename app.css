@@ -2722,3 +2722,266 @@ body.light .mob-nav-btn { color: var(--text-3); }
 body.light .mob-nav-btn.active { color: var(--accent); }
 body.light .result-row { background: #fff; }
 body.light .badge { background: var(--s2); border-color: var(--border); }
+
+/* ============================================================
+   VISUAL POLISH — Final pass
+   Micro-improvements for premium feel: richer hero, card
+   animations, animated progress, stronger active indicators.
+   ============================================================ */
+
+/* ── Home hero: richer layered mesh gradient ─────────────── */
+.home-hero {
+  background:
+    radial-gradient(ellipse 70% 80% at 75% 40%, rgba(124,143,255,0.10) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 60% at 10% 90%, rgba(168,85,247,0.07) 0%, transparent 55%),
+    linear-gradient(135deg, #0d1135 0%, #0a0c26 45%, #100c2c 100%);
+  box-shadow: 0 4px 48px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.home-hero::before {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(124,143,255,0.16) 0%, rgba(168,85,247,0.06) 40%, transparent 70%);
+  top: -120px; right: -100px;
+}
+
+/* ── Module cards: emoji bounce + shimmer sweep on hover ─── */
+.module-card .mc-emoji {
+  transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+}
+.module-card:hover .mc-emoji { transform: scale(1.18) rotate(-6deg); }
+
+.module-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    108deg,
+    transparent 30%,
+    rgba(255,255,255,0.035) 50%,
+    transparent 70%
+  );
+  transform: translateX(-110%);
+  transition: transform 0.55s ease;
+  pointer-events: none;
+}
+.module-card:hover::after { transform: translateX(110%); }
+
+/* ── Nav tabs: animated shimmer on active pill ───────────── */
+.nav-tab.active::after {
+  left: 15%;
+  right: 15%;
+  height: 2.5px;
+  background: linear-gradient(90deg, var(--accent), var(--purple), var(--accent-h), var(--accent));
+  background-size: 200% 100%;
+  animation: tabPillShimmer 2.5s linear infinite;
+}
+@keyframes tabPillShimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-tab.active::after { animation: none; }
+}
+
+/* ── Section titles: accent dot ──────────────────────────── */
+.section-title {
+  gap: 0.6rem;
+}
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(124,143,255,0.5);
+}
+
+/* ── Student login box: glowing border on focus-within ───── */
+.student-login-box {
+  transition: box-shadow 0.3s ease;
+}
+.student-login-box:focus-within {
+  box-shadow:
+    0 4px 40px rgba(0,0,0,0.55),
+    0 0 0 1.5px rgba(124,143,255,0.35),
+    0 0 24px rgba(124,143,255,0.12);
+}
+
+/* ── Student progress bar: flowing gradient ──────────────── */
+#studentProgressBar {
+  background: linear-gradient(90deg, #22c55e, #4ade80, #22c55e) !important;
+  background-size: 200% 100% !important;
+  animation: progressFlow 2.4s linear infinite;
+}
+@keyframes progressFlow {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #studentProgressBar { animation: none; }
+}
+
+/* ── Arb progress bar: accent gradient ───────────────────── */
+.arb-progress-fill {
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  box-shadow: 0 0 6px rgba(124,143,255,0.4);
+}
+
+/* ── Top progress bar: slightly thicker on large screens ─── */
+@media (min-width: 1024px) {
+  .progress-top { height: 3.5px; }
+}
+
+/* ── Flashcard: taller, more impressive face gradients ───── */
+.arb-fc-wrapper { max-width: 460px; }
+.arb-fc-inner   { height: 190px; }
+.arb-fc-front {
+  background: linear-gradient(135deg, #5d70f5 0%, #7c6ff0 50%, #a855f7 100%);
+  font-size: 1.25rem;
+  box-shadow: 0 8px 32px rgba(124,143,255,0.45);
+}
+.arb-fc-back {
+  background: linear-gradient(135deg, #0d9488 0%, #0284c7 55%, #6366f1 100%);
+  font-size: 1.05rem;
+  box-shadow: 0 8px 32px rgba(13,148,136,0.35);
+}
+
+/* ── Quiz options: number badge on each option ───────────── */
+.arb-options .arb-opt:nth-child(1)::before,
+.arb-options .arb-opt:nth-child(2)::before,
+.arb-options .arb-opt:nth-child(3)::before,
+.arb-options .arb-opt:nth-child(4)::before {
+  content: attr(data-key);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-size: 0.65rem;
+  font-weight: 800;
+  margin-right: 6px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  color: var(--text-3);
+  font-family: 'Nunito', sans-serif;
+  letter-spacing: 0;
+}
+.arb-opt:nth-child(1)::before { content: 'A'; }
+.arb-opt:nth-child(2)::before { content: 'B'; }
+.arb-opt:nth-child(3)::before { content: 'C'; }
+.arb-opt:nth-child(4)::before { content: 'D'; }
+.arb-opt.correct::before, .arb-opt.wrong::before, .arb-opt[disabled]::before { display: none; }
+
+/* ── Quiz options: hover glow ring ───────────────────────── */
+.arb-opt:hover:not([disabled]) {
+  box-shadow: 0 0 0 2px rgba(124,143,255,0.25), 0 4px 14px rgba(124,143,255,0.1);
+}
+
+/* ── Back button: slightly rounded, cleaner ──────────────── */
+.back-btn {
+  border-radius: var(--r-md);
+}
+
+/* ── Skeleton shimmer: direction matches reading flow ────── */
+@keyframes skeletonPulse {
+  0%   { opacity: 0.35; }
+  50%  { opacity: 0.7; }
+  100% { opacity: 0.35; }
+}
+
+/* ── Arb module card: rainbow top bar on hover ───────────── */
+.arb-module-card::before {
+  transition: opacity 0.25s, height 0.15s;
+  height: 2.5px;
+}
+.arb-module-card:hover::before { opacity: 1; height: 3.5px; }
+
+/* ── Empty state: subtle floating emoji ─────────────────── */
+.empty-state .es-icon {
+  animation: floatIcon 3.5s ease-in-out infinite;
+}
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .empty-state .es-icon { animation: none; }
+}
+
+/* ── Toast: slide-up entry ───────────────────────────────── */
+.toast {
+  animation: toastSlideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes toastSlideUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* ── Stat cards: number pop on hover ─────────────────────── */
+.stat-card {
+  transition: transform var(--t-spring), box-shadow var(--t-base), border-color var(--t-base);
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+  border-color: var(--border-2);
+}
+.stat-card .stat-num {
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.stat-card:hover .stat-num { transform: scale(1.12); }
+
+/* ── Continue card: subtle glow pulse ────────────────────── */
+.continue-card {
+  transition: transform var(--t-spring), box-shadow var(--t-base), border-color var(--t-base), background var(--t-base);
+  cursor: pointer;
+}
+
+/* ── Role badge: gradient accent border ─────────────────── */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.role-badge::before {
+  content: '🎓';
+  font-size: 0.7rem;
+}
+
+/* ── Light mode tweaks to match new effects ──────────────── */
+body.light .home-hero {
+  background:
+    radial-gradient(ellipse 70% 80% at 75% 40%, rgba(74,90,221,0.06) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 60% at 10% 90%, rgba(168,85,247,0.04) 0%, transparent 55%),
+    linear-gradient(135deg, #eef0ff 0%, #f5f0ff 50%, #fff0f8 100%);
+}
+body.light .module-card::after {
+  background: linear-gradient(
+    108deg,
+    transparent 30%,
+    rgba(0,0,0,0.015) 50%,
+    transparent 70%
+  );
+}
+body.light .section-title::before {
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  box-shadow: 0 0 8px rgba(74,90,221,0.35);
+}
+body.light #studentProgressBar {
+  background: linear-gradient(90deg, #16a34a, #22c55e, #16a34a) !important;
+}
+body.light .student-login-box:focus-within {
+  box-shadow:
+    0 4px 32px rgba(74,90,221,0.12),
+    0 0 0 1.5px rgba(74,90,221,0.3),
+    0 0 20px rgba(74,90,221,0.08);
+}
+body.light .arb-opt:hover:not([disabled]) {
+  box-shadow: 0 0 0 2px rgba(74,90,221,0.2), 0 4px 14px rgba(74,90,221,0.08);
+}
