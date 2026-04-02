@@ -5933,11 +5933,11 @@ function _arbAnnounce(msg) {
   } catch(e) { console.error('loadState failed:', e); }
   try {
     await loadRosterCached();
-  } catch(e) { console.error('loadRosterCached failed:', e); }
+  } catch { /* roster unavailable — continue without it */ }
   try {
     renderHomeModules();
     renderTaskModules();
-  } catch(e) { console.error('renderModules failed:', e); }
+  } catch { /* render errors are non-fatal on init */ }
   try {
     showDbStatus();
   } catch(e) {}
@@ -5953,10 +5953,10 @@ function _arbAnnounce(msg) {
       gdprBanner.style.display = 'flex';
       document.getElementById('gdprAcceptBtn')?.addEventListener('click', () => {
         localStorage.setItem('gdpr_ok', '1');
-        gdprBanner.style.opacity = '0';
         gdprBanner.style.transition = 'opacity 0.3s';
+        gdprBanner.style.opacity = '0';
         setTimeout(() => { gdprBanner.style.display = 'none'; }, 320);
-      });
+      }, { once: true });
     }
   }
 
@@ -5985,7 +5985,8 @@ function _arbAnnounce(msg) {
     }
   });
 
-  // Autosave for lærer – lagre emne-skjema hvert 30 sek
+  // Autosave for lærer – lagre emne-skjema hvert 30 sek (clear first to prevent leaks on re-init)
+  if (window._teacherAutosaveInterval) clearInterval(window._teacherAutosaveInterval);
   window._teacherAutosaveInterval = setInterval(() => {
     if (!state.isTeacher) return;
     const name = document.getElementById('moduleName')?.value.trim();

@@ -173,7 +173,9 @@
   <div style="max-width:440px;margin:0 auto 1.75rem;">
     <div class="student-login-box" id="studentLoginBox">
       <h2>Hvem er du?</h2>
+      <label for="studentName" class="sr-only">Ditt navn</label>
       <input type="text" id="studentName" placeholder="Ditt navn" autocomplete="given-name" />
+      <label for="studentClass" class="sr-only">Velg klasse</label>
       <select id="studentClass" class="form-select">
         <option value="">Velg klasse...</option>
         <optgroup label="8. trinn"><option value="8A">8A</option><option value="8B">8B</option><option value="8C">8C</option></optgroup>
@@ -2360,7 +2362,7 @@
 </div>
 
 <!-- GDPR-personvernvarsel -->
-<div id="gdprBanner" role="dialog" aria-label="Personvernvarsel" aria-modal="false" style="display:none;position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:5000;background:#0f1126;border:1px solid rgba(123,143,253,0.25);border-radius:14px;padding:1rem 1.25rem;max-width:480px;width:calc(100% - 2rem);box-shadow:0 8px 32px rgba(0,0,0,0.6);font-family:'Nunito',sans-serif;font-size:0.85rem;color:#8890b8;display:flex;gap:0.75rem;align-items:flex-start;flex-wrap:wrap;">
+<div id="gdprBanner" role="region" aria-label="Personvernvarsel" style="display:none;position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:5000;background:#0f1126;border:1px solid rgba(123,143,253,0.25);border-radius:14px;padding:1rem 1.25rem;max-width:480px;width:calc(100% - 2rem);box-shadow:0 8px 32px rgba(0,0,0,0.6);font-family:'Nunito',sans-serif;font-size:0.85rem;color:#8890b8;display:flex;gap:0.75rem;align-items:flex-start;flex-wrap:wrap;">
   <div style="flex:1;min-width:180px;line-height:1.5;">
     🔒 SkOla bruker kun teknisk nødvendige informasjonskapsler – ingen annonsesporing.
     <a href="#" data-onclick="openModal" data-onclick-arg="privacyModal" style="color:#9aaaff;text-decoration:underline;margin-left:4px;">Les mer</a>
