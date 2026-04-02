@@ -1740,14 +1740,14 @@ function renderQuizHTML(m) {
       {letter:'D', text:q.d, correct:false}
     ];
     const opts = order.map(oi => allOpts[oi]);
-    const correctMap = JSON.stringify(opts.map(o=>o.correct));
+    const correctMap = opts.map(o=>o.correct);
     return `<div class="quiz-card" id="qcard-${qi}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
         <div class="quiz-q" style="margin-bottom:0;">${qi+1}. ${escHtml(q.question)}</div>
         ${timerSec>0?`<div id="qtimer-${qi}" style="font-size:0.85rem;font-weight:800;color:var(--c2);background:var(--dark);padding:4px 10px;border-radius:50px;min-width:44px;text-align:center;">${timerSec}s</div>`:''}
       </div>
       <div class="quiz-opts" role="group" aria-label="Svaralternativer">
-        ${opts.map((o,oi)=>`<button class="quiz-opt" id="qopt-${qi}-${oi}" aria-pressed="false" data-onclick="checkAnswer" data-onclick-args="${JSON.stringify([qi,o.correct,oi,correctMap])}">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
+        ${opts.map((o,oi)=>`<button class="quiz-opt" id="qopt-${qi}-${oi}" aria-pressed="false" data-onclick="checkAnswer" data-onclick-args="${escHtml(JSON.stringify([qi,o.correct,oi,correctMap]))}">${o.letter}. ${escHtml(o.text)}</button>`).join('')}
       </div>
       <div class="quiz-feedback" id="qfb-${qi}" aria-live="polite" aria-atomic="true"></div>
     </div>`;
